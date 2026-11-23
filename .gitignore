@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# Firebase deploy cache
+.firebase/
+
+# Local Claude Code settings
+.claude/settings.local.json
+
+# Agent skills copied from another repo; they stay local.
+.agents/
+.claude/skills/
+design/references/
+docs/skills/
