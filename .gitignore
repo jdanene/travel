@@ -10,5 +10,7 @@
 # Agent skills copied from another repo; they stay local.
 .agents/
 .claude/skills/
-design/references/
 docs/skills/
+
+# Downloaded cover photos (Unsplash); only the finished cover is published.
+design/cover/photos/

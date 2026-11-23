@@ -1,0 +1,4 @@
+interface:
+  display_name: "HCI Design"
+  short_description: "Design clear interactions, then choose UI patterns"
+  default_prompt: "Use $hci-design to review this screen from the user's goal through action and feedback, consulting dashboard guidance only for its quantitative content."
