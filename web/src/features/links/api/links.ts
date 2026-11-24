@@ -1,4 +1,4 @@
-import { activityLine } from "../../../lib/activity";
+import { activityLine, forgetLines } from "../../../lib/activity";
 import { write, type WriteResult } from "../../../lib/db";
 import * as paths from "../../../lib/paths";
 import { siteName } from "../lib/links";
@@ -19,14 +19,16 @@ export function addLink(tripId: string, id: string, item: LinkItem): Promise<Wri
 }
 
 /**
- * Removes a link for everyone. The friend who added it may, and so may an
+ * Removes a link for everyone, and its "added a link" line from the Feed. The friend who added it may, and so may an
  * organizer (case 48).
  * Inputs: the trip and the link id.
  * Output: the write result.
  * Examples (checked on the emulator): "Remove" on your own card → it goes on every phone
  */
-export function removeLink(tripId: string, id: string): Promise<WriteResult> {
-  return write({ [paths.link(tripId, id)]: null });
+export async function removeLink(tripId: string, id: string): Promise<WriteResult> {
+  const result = await write({ [paths.link(tripId, id)]: null });
+  if (result.ok) void forgetLines(tripId, id, ["link-added"]);
+  return result;
 }
 
 /**

@@ -1,4 +1,4 @@
-import { activityLine } from "../../../lib/activity";
+import { activityLine, forgetLines } from "../../../lib/activity";
 import { write, type WriteResult } from "../../../lib/db";
 import { newPlaceId } from "../../../lib/ids";
 import * as paths from "../../../lib/paths";
@@ -23,17 +23,20 @@ export interface PartyDraft {
  * Marks a member in for a show, or takes the mark back. The listener shows
  * the change at once; with no connection the write waits and sends later,
  * and a refusal flips the mark back (Trip 11, case 9). Going in writes an
- * Activity line in the same write; taking the mark back writes none.
+ * Activity line in the same write; taking the mark back removes the
+ * member's "is in for" line of that show (owner, 24 Nov 2026).
  *
  * Inputs: the trip, the show's id and the show (for the line's words), the member, and whether they are in.
  * Output: the write's result; a refusal names no field.
  * Examples (checked on the emulator):
  *   setIn(t, id, peggyGou, "rb", true) by rb's device  → { ok: true }; "RB is in for Peggy Gou at Savaya"
- *   setIn(t, id, peggyGou, "rb", false)                → { ok: true }; no line
+ *   setIn(t, id, peggyGou, "rb", false)                → { ok: true }; RB's "is in for" line goes
  */
-export function setIn(tripId: string, id: string, show: Show | undefined, memberId: MemberId, isIn: boolean): Promise<WriteResult> {
+export async function setIn(tripId: string, id: string, show: Show | undefined, memberId: MemberId, isIn: boolean): Promise<WriteResult> {
   const line = isIn && show ? activityLine(tripId, { kind: "event-in", by: memberId, text: showLine(show), ref: id }) : {};
-  return write({ [paths.inMark(tripId, id, memberId)]: isIn ? true : null, ...line });
+  const result = await write({ [paths.inMark(tripId, id, memberId)]: isIn ? true : null, ...line });
+  if (result.ok && !isIn) void forgetLines(tripId, id, ["event-in"], memberId);
+  return result;
 }
 
 /** The words an Activity line uses for a show: "Peggy Gou at Savaya". */
@@ -121,8 +124,10 @@ function newPin(tripId: string, trip: Trip, draft: PartyDraft, memberId: MemberI
  * Output: the write's result; "refused" as for editShow().
  * Examples (checked on the emulator): ka removes her party → { ok: true }; its marks go with it
  */
-export function removeShow(tripId: string, id: string): Promise<WriteResult> {
-  return write({ [paths.show(tripId, id)]: null, [paths.showIn(tripId, id)]: null, [paths.showTags(tripId, id)]: null });
+export async function removeShow(tripId: string, id: string): Promise<WriteResult> {
+  const result = await write({ [paths.show(tripId, id)]: null, [paths.showIn(tripId, id)]: null, [paths.showTags(tripId, id)]: null });
+  if (result.ok) void forgetLines(tripId, id, ["event-added", "event-in"]);
+  return result;
 }
 
 /** The draft as stored: trimmed, with no about or link field when it is empty. */

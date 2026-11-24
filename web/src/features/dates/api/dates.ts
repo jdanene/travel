@@ -1,4 +1,4 @@
-import { activityLine } from "../../../lib/activity";
+import { activityLine, forgetLines } from "../../../lib/activity";
 import { write, type WriteResult } from "../../../lib/db";
 import { dayRange } from "../../../lib/format";
 import { dateOptionId } from "../../../lib/ids";
@@ -37,7 +37,7 @@ export function addOption(tripId: string, from: string, to: string, memberId: Me
 }
 
 /**
- * Removes a date option and its answers in one write. The page offers it
+ * Removes a date option and its answers in one write, then its "added dates" line from the Feed. The page offers it
  * to the adder and to an organizer only while nobody but the adder has
  * voted on it and it is not the confirmed option; the rules hold the
  * last two (adder or organizer, not confirmed).
@@ -45,8 +45,10 @@ export function addOption(tripId: string, from: string, to: string, memberId: Me
  * Output: the write result.
  * Examples (checked on the emulator): KA removes 18–24 Feb → the option and its "yes" go for everyone
  */
-export function removeOption(tripId: string, optionId: string): Promise<WriteResult> {
-  return write({ [paths.dateOption(tripId, optionId)]: null, [paths.optionAnswers(tripId, optionId)]: null });
+export async function removeOption(tripId: string, optionId: string): Promise<WriteResult> {
+  const result = await write({ [paths.dateOption(tripId, optionId)]: null, [paths.optionAnswers(tripId, optionId)]: null });
+  if (result.ok) void forgetLines(tripId, optionId, ["dates-added"]);
+  return result;
 }
 
 /**

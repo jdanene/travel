@@ -1,4 +1,4 @@
-import { activityLine } from "../../../lib/activity";
+import { activityLine, forgetLines } from "../../../lib/activity";
 import { write, type WriteResult } from "../../../lib/db";
 import * as paths from "../../../lib/paths";
 import type { CustomPlace } from "../../../types/trip";
@@ -23,7 +23,9 @@ export function addPlace(tripId: string, id: string, place: CustomPlace): Promis
  * Output: the write result.
  * Examples (checked on the emulator): "Remove" on your own place → its pin goes on every phone
  */
-export function removePlace(tripId: string, id: string): Promise<WriteResult> {
-  return write({ [paths.customPlace(tripId, id)]: null });
+export async function removePlace(tripId: string, id: string): Promise<WriteResult> {
+  const result = await write({ [paths.customPlace(tripId, id)]: null });
+  if (result.ok) void forgetLines(tripId, id, ["place-added"]);
+  return result;
 }
 
