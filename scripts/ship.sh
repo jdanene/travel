@@ -36,6 +36,7 @@ step() {
 step "install the app's packages" npm --prefix web ci
 step "build the app into public/app" npm --prefix web run build
 step "deploy database rules" firebase deploy --only database --project travel-ca8f9
+step "seed this year's and last year's parties" node scripts/seed-parties.mjs
 step "deploy hosting" firebase deploy --only hosting --project travel-ca8f9
 
 if [ "$with_reader" = yes ]; then

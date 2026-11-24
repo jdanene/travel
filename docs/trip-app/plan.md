@@ -93,7 +93,7 @@ When the dates and every destination that has a stay option have a confirmed sta
 
 ### The last-year rule (`web/src/features/parties/lib/lastYear.ts`)
 
-For each venue, for each weekend (Friday to Sunday) from 1 February to 31 March 2027: if the venue has no show this year on those days, show the last-year shows at that venue on the days 364 days before. 364 days keeps the weekday: Sat 6 Feb 2027 maps to Sat 7 Feb 2026, as on screen 7. If last year has nothing there, show nothing for that weekend.
+For each venue, for each weekend (Saturday and Sunday; a Friday would add rows screen 7 does not show) from 1 February to 31 March 2027: if the venue has no show this year on those days, show the last-year shows at that venue on the days 364 days before. 364 days keeps the weekday: Sat 6 Feb 2027 maps to Sat 7 Feb 2026, as on screen 7. If last year has nothing there, show nothing for that weekend.
 
 ## 4. Data contract
 
@@ -708,7 +708,7 @@ Field map from the files: `place` becomes `destination`; `artist`, `venue`, `are
 2. (24) A show left the file: the seed does not delete it.
 3. (25) `verified` is false: the show keeps `verified: false`.
 4. (26) A venue has a show this year on the weekend: no line. Last year has nothing: no line.
-5. A weekend spans two months (Fri 26 Feb to Sun 28 Feb, Fri 26 Mar to Sun 28 Mar): one weekend.
+5. A weekend spans two months (Sat 27 Feb to Sun 28 Feb is in one month; none in 2027 crosses one): one weekend.
 6. A last-year show fell on a weekday: it belongs to no weekend line and is not shown.
 7. A file is missing, is not JSON, or has a show with no date: stop and name the file and the entry. Write nothing.
 8. A venue name differs by case or spaces between the two files: treat as one venue.
