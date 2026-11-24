@@ -20,7 +20,7 @@ const found = { destination: "bali", venue: "Savaya", area: "Uluwatu", date: "20
 beforeAll(async () => {
   env = await initializeTestEnvironment({
     projectId: "demo-travel-events",
-    database: { rules: readFileSync("../database.rules.json", "utf8"), host: "127.0.0.1", port: 9000 },
+    database: { rules: readFileSync("../database.rules.json", "utf8"), host: "127.0.0.1", port: Number(process.env.RULES_DB_PORT ?? 9000) },
   });
   await env.withSecurityRulesDisabled((ctx) =>
     set(ref(ctx.database()), {

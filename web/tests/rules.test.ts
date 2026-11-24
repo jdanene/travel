@@ -2,7 +2,7 @@
  * The rules tests of Trip 2 (1 to 9), of the admin list (10 to 12, plan
  * D15), of Add dates (13 to 15, plan D16), of Add to map (16 and 17), of
  * weekly shows (18), of the profile photo (19), of a place's photo (20) and
- * of the invite title (21), of organizer keys (22), of trip texts (23 to 25), of the events window (26), of event tags (27) and of the Activity list (28 to 31), against the database emulator. Run with
+ * of the invite title (21), of organizer keys (22), of trip texts (23 to 25), of the events window (26), of event tags (27) and of the Activity list (28 to 32), against the database emulator. Run with
  * `npm run test:rules` in web/; it starts the emulator, runs this file and
  * stops it. Each test names the rule it proves, in the words of plan
  * section 4.
@@ -29,7 +29,7 @@ const show = (extra: object) => ({ destination: "bali", venue: "Savaya", date: "
 beforeAll(async () => {
   env = await initializeTestEnvironment({
     projectId: "demo-travel",
-    database: { rules: readFileSync("../database.rules.json", "utf8"), host: "127.0.0.1", port: 9000 },
+    database: { rules: readFileSync("../database.rules.json", "utf8"), host: "127.0.0.1", port: Number(process.env.RULES_DB_PORT ?? 9000) },
   });
   await env.withSecurityRulesDisabled((ctx) =>
     set(ref(ctx.database()), {
@@ -266,5 +266,19 @@ describe("database rules", () => {
     await assertSucceeds(update(ref(db("uid-a")), { [paths.activityEntry(T, "p1")]: null, [paths.activityReplies(T, "p1")]: null }));
     await assertSucceeds(update(ref(db("uid-o")), { [paths.activityEntry(T, "q1")]: null, [paths.activityVotes(T, "q1")]: null }));
     await assertFails(remove(ref(db("uid-a"), paths.activityEntry(T, "f1"))));
+  });
+
+  it("32. takes a GIF post from KLIPY's host only, and several emoji per member under its own id", async () => {
+    const a = db("uid-a");
+    const b = db("uid-b");
+    const gif = "https://static.klipy.com/ii/935d7ab9d8c6202580a668421940ec81/14/af/JUY.webp";
+    await assertSucceeds(set(ref(a, paths.activityEntry(T, "g1")), { kind: "post", by: "alice", at: 1, gif, gifW: 498, gifH: 498 }));
+    await assertFails(set(ref(a, paths.activityEntry(T, "g2")), { kind: "post", by: "alice", at: 1, gif: "https://evil.example/x.gif" }));
+    await assertSucceeds(set(ref(b, paths.activityReaction(T, "g1", "bob", "1f525")), 1));
+    await assertSucceeds(set(ref(b, paths.activityReaction(T, "g1", "bob", "7tv-01FCY771D800007PQ2DF3GDTN6-RainTime")), 2));
+    await assertFails(set(ref(b, paths.activityReaction(T, "g1", "alice", "1f525")), 1));
+    await assertFails(set(ref(b, paths.activityReaction(T, "g1", "bob", "Not-a-key")), 1));
+    await assertFails(set(ref(b, paths.activityReaction(T, "nope", "bob", "1f525")), 1));
+    await assertSucceeds(update(ref(a), { [paths.activityEntry(T, "g1")]: null, [paths.activityReactions(T, "g1")]: null }));
   });
 });

@@ -56,12 +56,26 @@ export function remove(tripId: string, id: string): Promise<WriteResult> {
 }
 
 /**
- * Puts the member's emoji on a Feed line, or takes it off. One emoji each;
- * a new one replaces the old.
- * Inputs: the trip, the line's id, the member, and the emoji (null takes it off).
- * Output: the write result.
- * Examples (checked on the emulator): KA picks 🔥 on RB's post → "🔥 1" under it on every phone; KA taps it again → gone
+ * Posts a GIF or a sticker from KLIPY as a message of its own, as Discord
+ * does: the picture's address on KLIPY's host (loaded from there, as its
+ * terms ask) and its size, so the feed keeps its place before it loads.
+ *
+ * Inputs: the trip, the new id, the member, and the picture (url, width, height).
+ * Output: the write result; "refused" for an address off KLIPY's host.
+ * Examples (checked on the emulator): RB taps the "hello" GIF → "RB" with the GIF under it on every phone
  */
-export function react(tripId: string, id: string, memberId: MemberId, emoji: string | null): Promise<WriteResult> {
-  return write({ [paths.activityReaction(tripId, id, memberId)]: emoji });
+export function postGif(tripId: string, id: string, memberId: MemberId, gif: { url: string; width: number; height: number }): Promise<WriteResult> {
+  const entry: ActivityEntry = { kind: "post", by: memberId, at: Date.now(), gif: gif.url, gifW: gif.width, gifH: gif.height };
+  return write({ [paths.activityEntry(tripId, id)]: entry });
+}
+
+/**
+ * Adds one emoji to a Feed line, or takes it off. As on Discord a member
+ * may add several different emoji to one line; each is its own key.
+ * Inputs: the trip, the line's id, the member, the emoji's key (reactions.ts), and on or off.
+ * Output: the write result.
+ * Examples (checked on the emulator): KA picks 🔥 on RB's post → "🔥 1" under it on every phone; KA taps the pill again → gone
+ */
+export function react(tripId: string, id: string, memberId: MemberId, key: string, on: boolean): Promise<WriteResult> {
+  return write({ [paths.activityReaction(tripId, id, memberId, key)]: on ? Date.now() : null });
 }

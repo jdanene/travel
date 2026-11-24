@@ -1,0 +1,264 @@
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { GROUPS, loadGroups, recentChoices, searchEmoji, type EmojiItem } from "../lib/emoji";
+import { findEmotes } from "../lib/emotes";
+import { reactionKey, type EmojiChoice, type Emote } from "../lib/reactions";
+import { Glyph } from "./Glyph";
+
+interface EmojiBrowserProps {
+  /** The search field's words: "Find the perfect reaction", or "Find the perfect emoji" in the message bar. */
+  placeholder: string;
+  onPick: (choice: EmojiChoice) => void;
+}
+
+type Load<T> = { state: "loading" } | { state: "ready"; value: T } | { state: "failed" };
+
+/** How long the search waits after the last key before asking 7TV, so a word costs one call. */
+const SEARCH_WAIT_MS = 350;
+
+/**
+ * Discord's emoji grid: a search field, "Frequently Used", 7TV's emotes,
+ * then every emoji by group under small grey headings, with a strip of
+ * group icons along the foot that jumps to each group and lights the one
+ * in view. Search shows the matching emoji, then the matching emotes in
+ * their own section. Arrow keys move through the grid; Enter in the field
+ * picks the first match.
+ *
+ * Inputs: the field's placeholder and what a pick does.
+ * Output: the grid.
+ * Examples (checked on screen at 375 px and 1650 px):
+ *   type "fire"   → 🔥 first under "Emoji", fire emotes under "Emotes · 7TV"
+ *   tap the 🍔 icon → the grid scrolls to "Food & Drink"; the icon lights
+ *   7TV down      → "Emotes didn't load." with "Try again"; the emoji still work
+ */
+export function EmojiBrowser({ placeholder, onPick }: EmojiBrowserProps) {
+  const [query, setQuery] = useState("");
+  const [groups, setGroups] = useState<Load<Map<number, EmojiItem[]>>>({ state: "loading" });
+  const [emotes, setEmotes] = useState<Load<Emote[]>>({ state: "loading" });
+  const [found, setFound] = useState<{ query: string; emoji: EmojiItem[]; emotes: Load<Emote[]> } | null>(null);
+  const [active, setActive] = useState("recent");
+  const [tries, setTries] = useState(0);
+  const scroller = useRef<HTMLDivElement>(null);
+  const recent = useMemo(recentChoices, []);
+  const searching = query.trim() !== "";
+
+  useEffect(() => {
+    let live = true;
+    loadGroups().then(
+      (value) => live && setGroups({ state: "ready", value }),
+      () => live && setGroups({ state: "failed" }),
+    );
+    setEmotes({ state: "loading" });
+    findEmotes("").then(
+      (value) => live && setEmotes({ state: "ready", value }),
+      () => live && setEmotes({ state: "failed" }),
+    );
+    return () => {
+      live = false;
+    };
+  }, [tries]);
+
+  // Emoji search is local and instant; the emote search waits for a pause in typing.
+  useEffect(() => {
+    const words = query.trim();
+    if (!words) {
+      setFound(null);
+      return;
+    }
+    let live = true;
+    // A new search, or "Try again", shows "Loading emotes…" until 7TV answers.
+    setFound((old) => (old?.query === words ? { ...old, emotes: { state: "loading" } } : old));
+    void searchEmoji(words).then((emoji) => live && setFound((old) => ({ query: words, emoji, emotes: old?.query === words ? old.emotes : { state: "loading" } })));
+    const wait = window.setTimeout(() => {
+      findEmotes(words, 30).then(
+        (value) => live && setFound((old) => (old && old.query === words ? { ...old, emotes: { state: "ready", value } } : old)),
+        () => live && setFound((old) => (old && old.query === words ? { ...old, emotes: { state: "failed" } } : old)),
+      );
+    }, SEARCH_WAIT_MS);
+    return () => {
+      live = false;
+      window.clearTimeout(wait);
+    };
+  }, [query, tries]);
+
+  // Light the group whose heading is at or above the top of the grid.
+  const track = () => {
+    const box = scroller.current;
+    if (!box || searching) return;
+    const top = box.getBoundingClientRect().top + 8;
+    let current = "recent";
+    box.querySelectorAll<HTMLElement>("[data-section]").forEach((section) => {
+      if (section.getBoundingClientRect().top <= top) current = section.dataset.section!;
+    });
+    setActive(current);
+  };
+
+  const jump = (section: string) => {
+    setQuery("");
+    requestAnimationFrame(() => {
+      const target = scroller.current?.querySelector<HTMLElement>(`[data-section="${section}"]`);
+      if (!target || !scroller.current) return;
+      scroller.current.scrollTo({ top: target.offsetTop - scroller.current.offsetTop, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      setActive(section);
+    });
+  };
+
+  const firstMatch = (): EmojiChoice | null => {
+    if (found?.emoji[0]) return { kind: "emoji", char: found.emoji[0].char };
+    if (found?.emotes.state === "ready" && found.emotes.value[0]) return { kind: "emote", emote: found.emotes.value[0] };
+    return null;
+  };
+
+  return (
+    <div className="eb">
+      <label className="eb-search">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" className="i">
+          <circle cx="10.5" cy="10.5" r="6.5" />
+          <path d="M15.5 15.5 20 20" />
+        </svg>
+        <input
+          type="search"
+          value={query}
+          placeholder={placeholder}
+          aria-label={placeholder}
+          enterKeyHint="search"
+          autoComplete="off"
+          onChange={(event) => setQuery(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              const choice = firstMatch();
+              if (choice) onPick(choice);
+            } else if (event.key === "ArrowDown") {
+              event.preventDefault();
+              scroller.current?.querySelector<HTMLElement>(".eb-cell")?.focus();
+            }
+          }}
+        />
+      </label>
+      <div className="eb-scroll" ref={scroller} onScroll={track} onKeyDown={(event) => moveInGrid(event, scroller.current)}>
+        {searching ? (
+          <>
+            <Section id="found" title="Emoji">
+              {found && found.emoji.length === 0 && <p className="eb-note">No emoji found</p>}
+              <Cells items={(found?.emoji ?? []).map((emoji) => ({ choice: { kind: "emoji", char: emoji.char }, name: emoji.name }))} onPick={onPick} />
+            </Section>
+            <EmoteSection title="Emotes · 7TV" load={found?.emotes ?? { state: "loading" }} empty="No emotes found" onRetry={() => setTries(tries + 1)} onPick={onPick} />
+          </>
+        ) : (
+          <>
+            <Section id="recent" title="Frequently Used">
+              <Cells items={recent.map((choice) => ({ choice, name: choice.kind === "emoji" ? choice.char : `:${choice.emote.name}:` }))} onPick={onPick} />
+            </Section>
+            <EmoteSection id="emotes" title="Emotes · 7TV" load={emotes} empty="No emotes" onRetry={() => setTries(tries + 1)} onPick={onPick} />
+            {groups.state === "failed" && (
+              <p className="eb-note">
+                Emoji didn't load.{" "}
+                <button type="button" className="eb-retry" onClick={() => setTries(tries + 1)}>
+                  Try again
+                </button>
+              </p>
+            )}
+            {groups.state === "ready" &&
+              GROUPS.map((group) => (
+                <Section key={group.id} id={`g${group.id}`} title={group.label} lazy>
+                  <Cells items={(groups.value.get(group.id) ?? []).map((emoji) => ({ choice: { kind: "emoji", char: emoji.char }, name: emoji.name }))} onPick={onPick} />
+                </Section>
+              ))}
+            <p className="eb-credit">Emoji art: Twemoji, CC-BY 4.0</p>
+          </>
+        )}
+      </div>
+      <nav className="eb-tabs" aria-label="Emoji groups">
+        <button type="button" className={active === "recent" && !searching ? "on" : ""} aria-label="Frequently Used" title="Frequently Used" onClick={() => jump("recent")}>
+          <svg viewBox="0 0 24 24" width="20" height="20" className="i" aria-hidden="true">
+            <circle cx="12" cy="12" r="8.5" />
+            <path d="M12 7.5V12l3 2" />
+          </svg>
+        </button>
+        <button type="button" className={`eb-7tv${active === "emotes" && !searching ? " on" : ""}`} aria-label="Emotes from 7TV" title="Emotes · 7TV" onClick={() => jump("emotes")}>
+          7TV
+        </button>
+        {GROUPS.map((group) => (
+          <button key={group.id} type="button" className={active === `g${group.id}` && !searching ? "on" : ""} aria-label={group.label} title={group.label} onClick={() => jump(`g${group.id}`)}>
+            <Glyph choice={{ kind: "emoji", char: group.icon }} />
+          </button>
+        ))}
+      </nav>
+    </div>
+  );
+}
+
+/** A heading and its grid. Groups far below the fold skip layout until scrolled near (content-visibility). */
+function Section({ id, title, lazy = false, children }: { id: string; title: string; lazy?: boolean; children: React.ReactNode }) {
+  return (
+    <section className={`eb-sec${lazy ? " lazy" : ""}`} data-section={id} aria-label={title}>
+      <h3>{title}</h3>
+      {children}
+    </section>
+  );
+}
+
+/** The emotes row: 7TV's answer, a loading line, or a short failure with "Try again". */
+function EmoteSection({ id, title, load, empty, onRetry, onPick }: { id?: string; title: string; load: Load<Emote[]>; empty: string; onRetry: () => void; onPick: (choice: EmojiChoice) => void }) {
+  return (
+    <Section id={id ?? "found-emotes"} title={title}>
+      {load.state === "loading" && <p className="eb-note">Loading emotes…</p>}
+      {load.state === "failed" && (
+        <p className="eb-note">
+          Emotes didn't load.{" "}
+          <button type="button" className="eb-retry" onClick={onRetry}>
+            Try again
+          </button>
+        </p>
+      )}
+      {load.state === "ready" && load.value.length === 0 && <p className="eb-note">{empty}</p>}
+      {load.state === "ready" && <Cells items={load.value.map((emote) => ({ choice: { kind: "emote", emote }, name: `:${emote.name}:` }))} onPick={onPick} />}
+    </Section>
+  );
+}
+
+/** One grid of emoji buttons. */
+function Cells({ items, onPick }: { items: { choice: EmojiChoice; name: string }[]; onPick: (choice: EmojiChoice) => void }) {
+  if (items.length === 0) return null;
+  return (
+    <div className="eb-grid">
+      {items.map(({ choice, name }) => (
+        <button key={reactionKey(choice)} type="button" className="eb-cell" tabIndex={-1} aria-label={name} title={name} onClick={() => onPick(choice)}>
+          <Glyph choice={choice} />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Arrow keys in the grid: left and right step, up and down go to the
+ * nearest cell in the row above or below, across headings too.
+ * Inputs: the key event and the grid. Output: nothing; focus moves.
+ * Examples (checked on screen): ↓ from the field → the first cell; ↓ again → the cell below it
+ */
+function moveInGrid(event: KeyboardEvent, box: HTMLElement | null) {
+  if (!box || !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
+  const cells = [...box.querySelectorAll<HTMLElement>(".eb-cell")];
+  const at = cells.indexOf(document.activeElement as HTMLElement);
+  if (at < 0) return;
+  event.preventDefault();
+  let next: HTMLElement | undefined;
+  if (event.key === "ArrowLeft") next = cells[at - 1];
+  else if (event.key === "ArrowRight") next = cells[at + 1];
+  else {
+    const here = cells[at].getBoundingClientRect();
+    const down = event.key === "ArrowDown";
+    const rows = cells.filter((cell) => {
+      const box2 = cell.getBoundingClientRect();
+      return down ? box2.top > here.bottom - 2 : box2.bottom < here.top + 2;
+    });
+    if (rows.length) {
+      const rowTop = down ? Math.min(...rows.map((cell) => cell.getBoundingClientRect().top)) : Math.max(...rows.map((cell) => cell.getBoundingClientRect().top));
+      const row = rows.filter((cell) => Math.abs(cell.getBoundingClientRect().top - rowTop) < 2);
+      next = row.reduce((best, cell) => (Math.abs(cell.getBoundingClientRect().left - here.left) < Math.abs(best.getBoundingClientRect().left - here.left) ? cell : best));
+    }
+  }
+  next?.focus();
+  next?.scrollIntoView({ block: "nearest" });
+}

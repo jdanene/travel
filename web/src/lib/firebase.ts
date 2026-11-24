@@ -26,6 +26,9 @@ const PROJECT_ID = "travel-ca8f9";
 const DATABASE_NAME = `${PROJECT_ID}-default-rtdb`;
 
 const onEmulator = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+// The emulators' ports; a second local run (another checkout's emulators already up) sets its own in .env.development.local.
+const DB_PORT = Number(import.meta.env.VITE_EMULATOR_DB_PORT ?? 9000);
+const AUTH_PORT = Number(import.meta.env.VITE_EMULATOR_AUTH_PORT ?? 9099);
 
 const options: FirebaseOptions = onEmulator
   ? {
@@ -33,7 +36,7 @@ const options: FirebaseOptions = onEmulator
       // The Google window needs an auth domain; on the emulator it opens the emulator's own page.
       authDomain: `${PROJECT_ID}.firebaseapp.com`,
       projectId: PROJECT_ID,
-      databaseURL: `http://127.0.0.1:9000?ns=${DATABASE_NAME}`,
+      databaseURL: `http://127.0.0.1:${DB_PORT}?ns=${DATABASE_NAME}`,
     }
   : {
       apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -49,8 +52,8 @@ export const auth = getAuth(app);
 export const database = getDatabase(app);
 
 if (onEmulator) {
-  connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
-  connectDatabaseEmulator(database, "127.0.0.1", 9000);
+  connectAuthEmulator(auth, `http://127.0.0.1:${AUTH_PORT}`, { disableWarnings: true });
+  connectDatabaseEmulator(database, "127.0.0.1", DB_PORT);
 }
 
 export type SignInResult = { ok: true; uid: string } | { ok: false; reason: string };
