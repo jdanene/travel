@@ -1,4 +1,4 @@
-import { ref, update } from "firebase/database";
+import { ref, runTransaction, update } from "firebase/database";
 import { database } from "./firebase";
 
 /** Why a write did not land: the rules said no, or something else broke. */
@@ -29,7 +29,33 @@ export async function write(changes: Record<string, unknown>): Promise<WriteResu
     await update(ref(database), changes);
     return { ok: true };
   } catch (error) {
-    const text = String((error as { code?: string; message?: string }).code ?? (error as Error).message ?? error);
-    return { ok: false, reason: /permission[_ ]denied/i.test(text) ? "refused" : "failed" };
+    return { ok: false, reason: failure(error) };
   }
+}
+
+/**
+ * Writes a value only where nothing is yet, in a transaction, so two
+ * organizers who confirm at once cannot both win (cases 11 and 20). The
+ * SDK retries against fresh data by itself; nothing else retries.
+ *
+ * Inputs: path — from paths.ts; value — what to write there.
+ * Output: { ok: true, won: true } when this write landed;
+ * { ok: true, won: false } when another device got there first (the page
+ * then shows that result); or a failure, as for write().
+ * Examples (checked on the emulator):
+ *   confirm with nothing confirmed  → { ok: true, won: true }
+ *   confirm after another organizer → { ok: true, won: false }
+ */
+export async function writeOnce(path: string, value: unknown): Promise<(WriteResult & { won?: boolean })> {
+  try {
+    const result = await runTransaction(ref(database, path), (current) => (current === null ? value : undefined));
+    return { ok: true, won: result.committed };
+  } catch (error) {
+    return { ok: false, reason: failure(error) };
+  }
+}
+
+function failure(error: unknown): WriteFailure {
+  const text = String((error as { code?: string; message?: string }).code ?? (error as Error).message ?? error);
+  return /permission[_ ]denied/i.test(text) ? "refused" : "failed";
 }

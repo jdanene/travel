@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>TRAVEL</title>
-<link rel="stylesheet" href="/assets/hype.css?v=7">
+<link rel="stylesheet" href="/assets/hype.css?v=9">
 <style>
   .grid { position: fixed; inset: 0; padding: 8px; gap: 8px; display: grid;
     grid-template-columns: 1fr 1.2fr 1fr 1fr 1.1fr; grid-template-rows: 1fr 1fr 1fr;
@@ -29,16 +29,15 @@
     <div class="p" id="a" style="grid-area:a"></div><div class="p" id="b" style="grid-area:b"></div>
     <div class="p" id="c" style="grid-area:c"></div><div class="p" id="d" style="grid-area:d"></div>
     <div class="p" id="e" style="grid-area:e"></div><div class="p" id="f" style="grid-area:f"></div>
-    <div class="p t" id="t" style="grid-area:t"><div class="center"><div><div class="title">TRAVEL</div><div class="dest">Bali · Koh Phangan</div></div></div></div>
+    <div class="p t" id="t" style="grid-area:t"><div class="center"><div><div class="title">TRAVEL</div><div class="dest">Bali · Koh Phangan · Feb 2027</div></div></div></div>
     <div class="p" id="g" style="grid-area:g"></div><div class="p" id="h" style="grid-area:h"></div>
     <div class="p" id="w" style="grid-area:w"></div>
     <div class="p" id="i" style="grid-area:i"></div>
   </main>
-<script src="/assets/hype.js?v=7"></script>
+<script src="/assets/hype.js?v=9"></script>
 <script>
   const H = HYPE;
   // Every panel, the title panel too, cycles through every clip and photo; no two panels show the same one.
-  // The WASTED card only ever lands on the last panel, the bottom corner.
   H.board(["t", "a", "b", "c", "d", "e", "f", "g", "h", "i", "w"].map(id => document.getElementById(id)), H.photos, 4000);
   H.bed(); H.sound(); H.enter();
 </script>

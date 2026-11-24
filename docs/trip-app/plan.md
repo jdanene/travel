@@ -302,7 +302,7 @@ One builder runs the tickets in order on the branch `trip-app`. Trip 8 and Trip 
 | [x] | Trip 4 · Load the trip and pick the stage | 1 | 3 |
 | [x] | Trip 5 · Invitation and who replied | 1 | 4 |
 | [x] | Trip 6 · Reply with a name | 1 | 5 |
-| [ ] | Trip 7 · Dates | 2 | 6 |
+| [x] | Trip 7 · Dates | 2 | 6 |
 | [ ] | Trip 8 · Link reader | 2 | 1 |
 | [ ] | Trip 9 · Stay | 2 | 7, 8 |
 | [ ] | Trip 10 · Party data and the last-year rule | 2 | 3 |

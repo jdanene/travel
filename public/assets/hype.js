@@ -37,7 +37,7 @@ window.HYPE = (() => {
   stills.push(...bali.filter(b => !b.label));
   const photos = [];
   for (let k = 0; k < Math.max(clips.length, stills.length); k++) { if (clips[k]) photos.push(clips[k]); if (stills[k]) photos.push(stills[k]); }
-  photos.push(wasted);   // last in line. On a wall it lives in the last (bottom) tile only: there, never the highlight
+  photos.push(wasted);   // one picture among the rest; on a wall it lands on a random panel, never the title
 
   // Build a filling element for a photo or a clip.
   // opts.sound: the clip whose music the button controls. opts.lazy: load only when wake() is called.
@@ -165,15 +165,18 @@ window.HYPE = (() => {
   function board(tiles, pool, ms) {
     const free = pool.slice(), cur = [];
     // A tile's own scene counts as busy too, or it would swap between two cuts of one clip and look frozen.
-    // The WASTED card only ever goes on the last tile, the bottom corner, and only once per full round of the pool.
-    const last = tiles.length - 1;
-    let since = pool.length;
+    // Order is random on every visit and every round, but every item comes up once per round before any repeats.
+    // The WASTED card moves around like any picture, except onto the title panel (class "t").
+    let shown = new Set();
     const take = k => {
       const busy = new Set(cur.filter(c => c).map(scene));
-      const i = free.findIndex(it => !busy.has(scene(it)) && (!it.wasted || (k === last && since >= pool.length)));
-      if (i < 0) return null;
-      since = free[i].wasted ? 0 : since + 1;
-      return free.splice(i, 1)[0];
+      const ok = it => !busy.has(scene(it)) && !(it.wasted && tiles[k].classList.contains("t"));
+      let options = free.filter(it => ok(it) && !shown.has(it));
+      if (!options.length) { shown = new Set(cur.filter(c => c)); options = free.filter(ok); }   // a new round
+      if (!options.length) return null;
+      const it = options[Math.floor(Math.random() * options.length)];
+      shown.add(it);
+      return free.splice(free.indexOf(it), 1)[0];
     };
     const put = (k, item, wait) => {
       const t = tiles[k], e = el(item, "layer", { small: true });
@@ -191,9 +194,6 @@ window.HYPE = (() => {
       put(k, next);
     };
     // Stagger the first swaps so the tiles do not all change together.
-    // The last tile opens on the WASTED card, so the page starts with it at the bottom.
-    const w = free.findIndex(it => it.wasted);
-    if (w >= 0) { cur[last] = free.splice(w, 1)[0]; since = 0; }
     tiles.forEach((t, k) => { if (!cur[k]) cur[k] = take(k); if (cur[k]) put(k, cur[k], Math.round(k * ms / tiles.length)); });
   }
 
