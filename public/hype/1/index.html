@@ -37,10 +37,10 @@
   </main>
 <script src="/assets/hype.js?v=7"></script>
 <script>
-  const H = HYPE, bg = H.bali.find(b => !b.label);   // the beach club at sunset
-  document.getElementById("t").prepend(H.el(bg));                      // beach club at sunset behind the title
-  // Every other panel cycles through all the clips and photos; no two panels show the same one.
-  H.board(["a", "c", "d", "g", "e", "w"].map(id => document.getElementById(id)), H.photos.filter(p => p !== bg), 4000);
+  const H = HYPE;
+  // Every panel, the title panel too, cycles through every clip and photo; no two panels show the same one.
+  // The WASTED card only ever lands on the last panel, the bottom corner.
+  H.board(["t", "a", "c", "d", "g", "e", "w"].map(id => document.getElementById(id)), H.photos, 4000);
   H.bed(); H.sound();
 </script>
 </body>
