@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>TRAVEL</title>
+<link rel="stylesheet" href="/assets/hype.css?v=7">
+<style>
+  #stage { position: fixed; inset: 0; }
+  .layer { transition: none; }
+  .flash { position: fixed; inset: 0; z-index: 8; background: #fff; opacity: 0; pointer-events: none; }
+  .flash.go { animation: flash .35s ease-out; }
+  @keyframes flash { from { opacity: .9; } to { opacity: 0; } }
+  .vig { position: fixed; inset: 0; z-index: 6; pointer-events: none; background: radial-gradient(ellipse at center, transparent 35%, #000c 100%); }
+  .center { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; text-align: center; pointer-events: none; }
+</style>
+</head>
+<body class="grain">
+  <div id="stage"></div>
+  <div class="vig"></div>
+  <div class="flash" id="flash"></div>
+  <div class="center"><div><div class="title">TRAVEL</div><div class="dest">Bali · Koh Phangan</div></div></div>
+<script src="/assets/hype.js?v=7"></script>
+<script>
+  const H = HYPE, stage = document.getElementById("stage"), flash = document.getElementById("flash");
+  const layers = H.mix(3).map(it => H.el(it, "layer", { lazy: true }));
+  layers.forEach(l => stage.append(l));
+  H.cycle(layers, 2500, () => { flash.classList.remove("go"); void flash.offsetWidth; flash.classList.add("go"); });
+  H.bed(); H.sound(); H.back(3);
+</script>
+</body>
+</html>

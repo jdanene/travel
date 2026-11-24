@@ -1,0 +1,221 @@
+// Shared media list and helpers for the hype pages.
+// Every photo and clip is real: the crew's own trip media plus three licensed stock shots of Bali.
+window.HYPE = (() => {
+  const B = "https://travel-ca8f9-media.s3.us-east-2.amazonaws.com/public/site/";
+  const P = (file, pos, label) => ({ kind: "img", src: B + file, pos: pos || "center", label });
+  // "?v=2": the clips with music replaced silent files at the same names, which browsers had saved for a day.
+  // pos keeps the people in frame when a tall clip is cropped into a wide panel.
+  const V = (file, poster, pos, music = true) => ({ kind: "vid", src: B + file + "?v=2", poster: B + poster, pos: pos || "center 60%", music });
+
+  // Licensed Pexels photos (free to use under the Pexels License), loaded from the Pexels CDN.
+  const X = (id, pos) => ({ kind: "img", pos: pos || "center 30%",
+    src: `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=1600` });
+
+  // The crew's own trip: photos and stills from their videos.
+  const ours = [P("trip-beachclub.jpg", "center 45%"), P("trip-garden.jpg", "center 65%"), P("crew.jpg", "center 55%")];
+  // The owner rejected the stock club and beach photos; only two Bali venue shots remain.
+  const club = [];
+  const beach = [];
+  // Named places carry a label; the crew's own shots never do.
+  const bali = [P("d-uluwatu-cube.jpg", "center", "Savaya"), P("munduk.jpg", "center", "Munduk"), P("kp-beach.jpg", "center", "Koh Phangan"),
+    P("ubud.jpg", "center", "Ubud"), P("phra-nang-cave.jpg", "center 70%", "Phra Nang Beach"), P("bali-monkey.jpg", "center 55%", "Uluwatu"),
+    P("kp-aerial.jpg", "center", "Koh Phangan"), P("phra-nang.jpg?v=2", "center 60%", "Phra Nang Beach"), P("bali-cliff.jpg", "center", "Uluwatu"),
+    P("b-beach-club.jpg")];
+
+  const clips = [
+    V("clip-sunset.mp4", "clip-sunset-1.jpg", "center 42%"), V("clip-party.mp4", "clip-party-1.jpg", "center 60%"),
+    V("clip-stage.mp4", "clip-stage-1.jpg", "center 72%"), V("clip-hands.mp4", "clip-hands-1.jpg", "center 72%"),
+    V("clip-silver.mp4", "clip-silver-1.jpg", "center 42%"), V("clip-boat.mp4", "clip-boat-1.jpg", "center 92%", false),
+    V("clip-silver2.mp4", "clip-silver2-1.jpg", "center 42%"), V("clip-boat2.mp4", "clip-boat2-1.jpg", "center 92%", false),
+  ];
+  const reel = V("reel2.mp4", "", "center 68%");   // every clip, cut together
+  // The friend on the drip. It shows the whole photo so the drip line and the taped arm are always in view.
+  const wasted = { kind: "img", src: B + "wasted.jpg", pos: "center", wasted: true };
+  // Named places lead, with the crew's photos between them, so every slideshow reaches them early.
+  const named = bali.filter(b => b.label), stills = [];
+  for (let k = 0; k < named.length; k++) { stills.push(named[k]); if (ours[k]) stills.push(ours[k]); }
+  stills.push(...bali.filter(b => !b.label));
+  const photos = [];
+  for (let k = 0; k < Math.max(clips.length, stills.length); k++) { if (clips[k]) photos.push(clips[k]); if (stills[k]) photos.push(stills[k]); }
+  photos.push(wasted);   // last in line. On a wall it lives in the last (bottom) tile only: there, never the highlight
+
+  // Build a filling element for a photo or a clip.
+  // opts.sound: the clip whose music the button controls. opts.lazy: load only when wake() is called.
+  function el(item, cls = "", opts = {}) {
+    let e;
+    if (item.kind === "vid") {
+      e = document.createElement("video");
+      e.style.objectPosition = item.pos;
+      e.muted = true; e.loop = true; e.playsInline = true;
+      ["muted", "loop", "playsinline"].forEach(a => e.setAttribute(a, ""));
+      if (opts.lazy) { e.dataset.src = item.src; e.preload = "none"; }
+      else { e.src = item.src; e.autoplay = true; e.setAttribute("autoplay", ""); e.preload = "auto"; }
+      // Phones often ignore autoplay; start the clip ourselves as soon as it can play, and keep it looping.
+      e.setAttribute("webkit-playsinline", ""); e.disableRemotePlayback = true; e.controls = false;
+      const kick = () => { if (!e.closest(".layer:not(.on)")) e.play().catch(() => {}); };
+      e.addEventListener("loadeddata", kick); e.addEventListener("canplay", kick);
+      e.addEventListener("ended", () => { e.currentTime = 0; kick(); });
+      if (opts.sound && item.music) e.dataset.sound = "1";
+    } else if (item.wasted) {
+      e = document.createElement("div");
+      e.className = "wst";
+      e.innerHTML = '<div class="fill wst-bg"></div><div class="fill wst-ph"></div>' +
+        '<div class="wst-t"><div class="wasted">WASTED</div><div class="water">DRINK WATER THIS TIME</div></div>';
+      e.querySelectorAll(".fill").forEach(n => { if (opts.lazy) n.dataset.bg = item.src; else n.style.backgroundImage = `url(${item.src})`; });
+      e.dataset.long = "1";
+    } else {
+      e = document.createElement("div");
+      const src = opts.small ? item.src.replace("w=1600", "w=700") : item.src;
+      if (opts.lazy) e.dataset.bg = src; else e.style.backgroundImage = `url(${src})`;
+      e.style.backgroundPosition = item.pos;
+      if (item.label) { const t = document.createElement("span"); t.className = "place"; t.textContent = item.label; e.append(t); }
+    }
+    e.className = ((e.className ? e.className + " " : "") + "fill pop " + cls).trim();
+    return e;
+  }
+
+  // Start loading a lazy element (and any lazy children).
+  function wake(e) {
+    if (!e) return;
+    [e, ...e.querySelectorAll("[data-bg],[data-src]")].forEach(n => {
+      if (n.dataset.bg) { n.style.backgroundImage = `url(${n.dataset.bg})`; delete n.dataset.bg; }
+      if (n.dataset.src) { n.src = n.dataset.src; delete n.dataset.src; }
+    });
+  }
+
+  const clipOf = e => e.tagName === "VIDEO" ? e : e.querySelector("video");
+
+  // Keep e on screen, then call next. A photo stays ms (the WASTED card half as long again, so the joke reads).
+  // A clip plays from its start to its end once; if it stalls or the phone blocks it, it gives way after its length.
+  function hold(e, ms, next) {
+    const v = clipOf(e);
+    if (!v) return setTimeout(next, e.dataset.long ? ms * 1.5 : ms);
+    let done = false, t = setTimeout(go, 15000);
+    function go() { if (done) return; done = true; clearTimeout(t); v.removeEventListener("ended", go); next(); }
+    const cap = () => { if (isFinite(v.duration)) { clearTimeout(t); t = setTimeout(go, v.duration * 1000 + 1500); } };
+    v.loop = false;
+    try { v.currentTime = 0; } catch (err) {}
+    v.play().catch(() => {});
+    v.addEventListener("ended", go);
+    if (v.readyState >= 1) cap(); else v.addEventListener("loadedmetadata", cap, { once: true });
+  }
+
+  // Stop a clip and free its decoder before removing it; phones run out of video players otherwise.
+  function drop(x) {
+    const v = clipOf(x);
+    if (v) { v.pause(); v.removeAttribute("src"); v.load(); }
+    x.remove();
+  }
+
+  // Show one element at a time; onStep(i) runs on each switch.
+  // Only the shown element and the next one are loaded; clips play only while shown.
+  function cycle(els, ms, onStep) {
+    let i = 0;
+    const show = () => {
+      const k = i;
+      wake(els[k]); wake(els[(k + 1) % els.length]);
+      els.forEach((e, j) => {
+        e.classList.toggle("on", j === k);
+        const v = clipOf(e);
+        if (v && j !== k) v.pause();
+      });
+      if (onStep) onStep(k);
+      i = (k + 1) % els.length;
+      hold(els[k], ms, show);
+    };
+    show();
+  }
+
+  // The full run of clips and photos, for slideshows.
+  function mix() { return photos.slice(); }
+
+  // Add the music button when the page has a clip marked for sound.
+  function sound() {
+    const vids = () => [...document.querySelectorAll("video[data-sound]")];
+    if (!vids().length) return;
+    const off = '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+    const on = '<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>';
+    const b = document.createElement("button");
+    b.className = "snd"; b.setAttribute("aria-label", "Turn sound on"); b.innerHTML = off;
+    document.body.appendChild(b);
+    let live = false;
+    b.onclick = () => {
+      live = !live;
+      vids().forEach(v => { v.muted = !live; if (live) v.play().catch(() => {}); });
+      b.classList.toggle("on", live);
+      b.innerHTML = live ? on : off;
+      b.setAttribute("aria-label", live ? "Turn sound off" : "Turn sound on");
+    };
+    // The page has nothing else to tap, so the first tap anywhere turns the music on.
+    document.addEventListener("pointerdown", e => { if (!live && !b.contains(e.target)) b.click(); }, { once: true });
+  }
+
+  // Two cuts of the same footage count as one scene, so they never show side by side.
+  function scene(it) {
+    if (it.label) return it.label;   // two shots of one place count as the same picture
+    const f = it.src.split("/").pop().split("?")[0];
+    if (f.startsWith("clip-silver")) return "silver";
+    if (f.startsWith("clip-boat")) return "boat";
+    if (f === "clip-stage.mp4" || f === "clip-hands.mp4") return "stage";
+    return f;
+  }
+
+  // A wall of tiles. Each tile runs on its own clock: a photo stays ms, a clip plays to its end.
+  // No scene is ever on two tiles at once: a tile only takes an item whose scene no other tile is showing.
+  function board(tiles, pool, ms) {
+    const free = pool.slice(), cur = [];
+    // A tile's own scene counts as busy too, or it would swap between two cuts of one clip and look frozen.
+    // The WASTED card only ever goes on the last tile, the bottom corner, and only once per full round of the pool.
+    const last = tiles.length - 1;
+    let since = pool.length;
+    const take = k => {
+      const busy = new Set(cur.filter(c => c).map(scene));
+      const i = free.findIndex(it => !busy.has(scene(it)) && (!it.wasted || (k === last && since >= pool.length)));
+      if (i < 0) return null;
+      since = free[i].wasted ? 0 : since + 1;
+      return free.splice(i, 1)[0];
+    };
+    const put = (k, item, wait) => {
+      const t = tiles[k], e = el(item, "layer", { small: true });
+      t.append(e);
+      requestAnimationFrame(() => requestAnimationFrame(() => e.classList.add("on")));
+      setTimeout(() => [...t.children].filter(x => x.classList.contains("layer")).slice(0, -1).forEach(drop), 700);
+      setTimeout(() => hold(e, ms, () => swap(k)), wait || 0);
+    };
+    // If every free item is already on another tile, try again shortly instead of freezing.
+    const swap = k => {
+      const next = take(k);
+      if (!next) return setTimeout(() => swap(k), 300);
+      if (cur[k]) free.push(cur[k]);
+      cur[k] = next;
+      put(k, next);
+    };
+    // Stagger the first swaps so the tiles do not all change together.
+    // The last tile opens on the WASTED card, so the page starts with it at the bottom.
+    const w = free.findIndex(it => it.wasted);
+    if (w >= 0) { cur[last] = free.splice(w, 1)[0]; since = 0; }
+    tiles.forEach((t, k) => { if (!cur[k]) cur[k] = take(k); if (cur[k]) put(k, cur[k], Math.round(k * ms / tiles.length)); });
+  }
+
+  // A hidden copy of the reel that only supplies music for pages that show stills.
+  function bed() {
+    const v = el(reel, "", { sound: true });
+    v.style.cssText = "position:fixed;width:2px;height:2px;opacity:0;pointer-events:none;left:0;top:0";
+    document.body.appendChild(v);
+    return v;
+  }
+
+  // Small link back to the list of options.
+  function back(n) {
+    const d = document.createElement("div");
+    d.className = "opt"; d.innerHTML = `${n} · <a href="/hype/">all options</a>`;
+    document.body.appendChild(d);
+  }
+
+  // If the phone still blocked a clip (Low Power Mode does this), the first touch starts every visible one.
+  const kickAll = () => document.querySelectorAll("video").forEach(v => { if (v.paused && !v.closest(".layer:not(.on)")) v.play().catch(() => {}); });
+  ["touchstart", "pointerdown", "scroll"].forEach(ev => document.addEventListener(ev, kickAll, { passive: true }));
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) kickAll(); });
+
+  return { B, ours, club, beach, bali, photos, clips, reel, wasted, el, wake, cycle, mix, board, bed, sound, back };
+})();

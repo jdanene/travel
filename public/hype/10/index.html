@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>TRAVEL</title>
+<link rel="stylesheet" href="/assets/hype.css?v=7">
+<style>
+  .wall { position: fixed; inset: 0; padding: 6px; gap: 6px; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(3, 1fr); }
+  .tile { position: relative; overflow: hidden; border: 3px solid #000; }
+  .tile .fill { filter: saturate(1.2) brightness(.55); }
+  .tile .layer { transition: opacity .6s; }
+  .tile .layer.on { animation: none; }
+  .center { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; text-align: center; pointer-events: none; }
+  .state { grid-area: 1 / 1; opacity: 0; transform: scale(1.35); transition: opacity .25s, transform .35s cubic-bezier(.2, 1.4, .4, 1); }
+  .state.on { opacity: 1; transform: scale(1); }
+  .state .title { transform: none; }
+  @media (max-width: 760px) { .wall { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(5, 1fr); } }
+</style>
+</head>
+<body class="grain">
+  <main class="wall" id="wall"></main>
+  <div class="center">
+    <div class="state"><div class="passed">PASSED</div></div>
+    <div class="state"><div class="title">TRAVEL</div><div class="dest">Bali · Koh Phangan</div></div>
+  </div>
+<script src="/assets/hype.js?v=7"></script>
+<script>
+  const H = HYPE, wall = document.getElementById("wall"), tiles = [];
+  for (let k = 0; k < 15; k++) { const t = document.createElement("div"); t.className = "tile"; wall.append(t); tiles.push(t); }
+  H.board(tiles, H.photos, 4000);
+  H.cycle([...document.querySelectorAll(".state")], 3500);
+  H.bed(); H.sound(); H.back(10);
+</script>
+</body>
+</html>

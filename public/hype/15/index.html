@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>TRAVEL</title>
+<link rel="stylesheet" href="/assets/hype.css?v=7">
+<style>
+  .wrap { position: fixed; inset: 0; display: grid; grid-template-columns: minmax(260px, 32vw) 1fr; }
+  .left { display: grid; grid-template-rows: 1fr 1.25fr; border-right: 8px solid #000; }
+  .left > div { position: relative; overflow: hidden; }
+  .left > div:first-child { border-bottom: 8px solid #000; }
+  .right { display: grid; align-content: center; gap: 22px; padding: 28px clamp(20px, 3.5vw, 56px); background: #0b0b0b; }
+  .right .title { transform-origin: left; font-size: clamp(70px, 9vw, 150px); }
+  .mosaic { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .mosaic .m { position: relative; aspect-ratio: 1; overflow: hidden; border: 3px solid #000; outline: 2px solid #ffffff22; }
+  .mosaic .layer { transition: opacity .6s; }
+  .mosaic .layer.on { animation: none; }
+  @media (max-width: 760px) {
+    html, body { overflow: auto; }
+    .wrap { position: static; grid-template-columns: 1fr; }
+    .left { grid-template-rows: 50vh 60vh; border-right: 0; border-bottom: 8px solid #000; }
+  }
+</style>
+</head>
+<body class="grain">
+  <div class="wrap">
+    <div class="left"><div id="crew"></div><div id="vid"></div></div>
+    <div class="right"><div><div class="title">TRAVEL</div><div class="dest">Bali · Koh Phangan</div></div><div class="mosaic" id="mosaic"></div></div>
+  </div>
+<script src="/assets/hype.js?v=7"></script>
+<script>
+  const H = HYPE, main = H.clips[0];
+  document.getElementById("crew").append(H.el(H.ours[2]));
+  document.getElementById("vid").append(H.el(main, "", { sound: true }));
+  const mosaic = document.getElementById("mosaic"), tiles = [];
+  for (let k = 0; k < 12; k++) { const m = document.createElement("div"); m.className = "m"; mosaic.append(m); tiles.push(m); }
+  H.board(tiles, H.photos.filter(p => p !== main && p !== H.ours[2]), 4000);
+  H.sound(); H.back(15);
+</script>
+</body>
+</html>

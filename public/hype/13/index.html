@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>TRAVEL</title>
+<link rel="stylesheet" href="/assets/hype.css?v=7">
+<style>
+  .grid { position: fixed; inset: 0; padding: 8px; gap: 8px; display: grid;
+    grid-template-columns: 1fr 1.2fr 1fr 1fr 1.1fr; grid-template-rows: 1fr 1fr 1fr;
+    grid-template-areas: "a b c d e" "a f t t e" "g f h w i"; }
+  .p { position: relative; overflow: hidden; border: 3px solid #000; background: #111; }
+  .p .layer { transition: opacity .6s; }
+  .p .layer.on { animation: none; }
+  .center { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; text-align: center; padding: 12px; }
+  .t .fill { filter: brightness(.55) saturate(1.3); }
+  .t .title { font-size: clamp(56px, 8vw, 140px); }
+  .t .dest { font-size: clamp(22px, 2.4vw, 38px); }
+  @media (max-width: 760px) {
+    html, body { overflow: auto; }
+    .grid { position: static; grid-template-columns: 1fr 1fr; grid-template-rows: 230px repeat(5, 260px);
+      grid-template-areas: "t t" "a e" "b c" "f d" "g h" "w i"; }
+  }
+</style>
+</head>
+<body class="grain">
+  <main class="grid">
+    <div class="p" id="a" style="grid-area:a"></div><div class="p" id="b" style="grid-area:b"></div>
+    <div class="p" id="c" style="grid-area:c"></div><div class="p" id="d" style="grid-area:d"></div>
+    <div class="p" id="e" style="grid-area:e"></div><div class="p" id="f" style="grid-area:f"></div>
+    <div class="p t" id="t" style="grid-area:t"><div class="center"><div><div class="title">TRAVEL</div><div class="dest">Bali · Koh Phangan</div></div></div></div>
+    <div class="p" id="g" style="grid-area:g"></div><div class="p" id="h" style="grid-area:h"></div>
+    <div class="p" id="w" style="grid-area:w"></div>
+    <div class="p" id="i" style="grid-area:i"></div>
+  </main>
+<script src="/assets/hype.js?v=7"></script>
+<script>
+  const H = HYPE, bg = H.bali.find(b => !b.label);   // the beach club at sunset
+  document.getElementById("t").prepend(H.el(bg));                      // beach club at sunset behind the title
+  // Every other panel cycles through all the clips and photos; no two panels show the same one.
+  H.board(["a", "b", "c", "d", "e", "f", "g", "h", "i", "w"].map(id => document.getElementById(id)), H.photos.filter(p => p !== bg), 4000);
+  H.bed(); H.sound();
+</script>
+</body>
+</html>
