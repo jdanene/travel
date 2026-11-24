@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Trip photos</title>
+<link rel="stylesheet" href="/assets/hype.css?v=12">
+<style>
+  /* Cover mode of option 5, the collage: the trip app shows this page in a frame as its cover
+     (web/src/components/FlyerHead.tsx). No title, no button, no sound, no links; nothing takes a tap.
+     The page is transparent, so the app's cliff photo shows until the cards land. */
+  html, body { background: transparent; pointer-events: none; }
+  .card { position: absolute; border: 3px solid #000; outline: 3px solid #fff; overflow: hidden; box-shadow: 0 8px 18px #0009;
+    opacity: 0; animation: drop .5s cubic-bezier(.2, 1.3, .4, 1) both; }
+  .still .card { animation: none; opacity: 1; transform: rotate(var(--r)); }
+  @keyframes drop { from { opacity: 0; transform: translateY(-40px) rotate(var(--r)) scale(1.2); } to { opacity: 1; transform: rotate(var(--r)); } }
+  /* Place names stay small on a cover. */
+  .place { font-size: clamp(11px, 2.4vw, 15px); left: 6px; bottom: 4px; -webkit-text-stroke-width: 1px; text-shadow: 2px 2px 0 #000; }
+  /* A lighter halftone than the full-screen options: the cover is small and the dots would crowd it. */
+  .grain::after { background: radial-gradient(#0002 1px, transparent 1.4px) 0 0 / 4px 4px; }
+</style>
+</head>
+<body class="grain">
+  <div id="board"></div>
+<script src="/assets/hype.js?v=15"></script>
+<script>
+  // Lays option 5's cards over the whole box: fewer, larger cards on a phone-size box, more when wide.
+  // Photos lead; two clips at most, so the app stays smooth. The cards are still once they land.
+  const H = HYPE, board = document.getElementById("board");
+  const all = H.mix(), stills = all.filter(it => it.kind !== "vid");
+  const clips = all.filter(it => it.kind === "vid").sort(() => Math.random() - .5).slice(0, 2);
+  let shape = "";
+  function lay(animate) {
+    const w = innerWidth, h = innerHeight;
+    const cols = w < 520 ? 3 : w < 800 ? 4 : 5, rows = h < 300 ? 2 : h < 560 ? 3 : 4;
+    if (`${cols}x${rows}` === shape) return;
+    shape = `${cols}x${rows}`;
+    board.querySelectorAll("video").forEach(v => { v.pause(); v.removeAttribute("src"); v.load(); });
+    board.replaceChildren();
+    document.body.classList.toggle("still", !animate);
+    const count = cols * rows + 2, items = stills.slice(0, count - clips.length);
+    clips.forEach((clip, n) => items.splice(1 + n * Math.max(2, Math.floor(count / 2)), 0, clip));
+    items.forEach((it, k) => {
+      const c = document.createElement("div");
+      c.className = "card";
+      const cw = 100 / cols, rh = 100 / rows, col = k % cols, row = Math.floor(k / cols) % rows;
+      const jitter = n => (Math.sin(k * 9.7 + n) * 0.5) * 6;
+      c.style.cssText = `left:${col * cw - 3 + jitter(1)}vw; top:${row * rh - 4 + jitter(2)}vh; width:${cw + 7}vw; height:${rh + 10}vh;` +
+        `--r:${(Math.sin(k * 3.1) * 7).toFixed(1)}deg; animation-delay:${(k * 0.12).toFixed(2)}s; z-index:${k}`;
+      c.append(H.el(it, "", { small: true }));
+      board.append(c);
+    });
+  }
+  lay(true);
+  let wait;
+  addEventListener("resize", () => { clearTimeout(wait); wait = setTimeout(() => lay(false), 250); });
+</script>
+</body>
+</html>

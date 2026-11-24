@@ -1,7 +1,7 @@
 /**
  * The rules tests of Trip 2 (1 to 9), of the admin list (10 to 12, plan
- * D15), of Add dates (13 to 15, plan D16), of Add to map (16 and 17) and
- * of weekly shows (18),
+ * D15), of Add dates (13 to 15, plan D16), of Add to map (16 and 17), of
+ * weekly shows (18) and of the profile photo (19),
  * against the database emulator. Run with
  * `npm run test:rules` in web/; it starts the emulator, runs this file and
  * stops it. Each test names the rule it proves, in the words of plan
@@ -150,5 +150,13 @@ describe("database rules", () => {
     const a = db("uid-a");
     await assertSucceeds(set(ref(a, paths.show(T, "w1")), show({ source: "friend", addedBy: "alice", artist: "Sunday Session", date: "2027-02-07", weekly: "sun" })));
     await assertFails(set(ref(a, paths.show(T, "w2")), show({ source: "friend", addedBy: "alice", artist: "Funday", date: "2027-02-07", weekly: "sunday" })));
+  });
+
+  it("19. keeps a member's photo, and refuses one that is too long or not a JPEG data URL", async () => {
+    const a = db("uid-a");
+    await set(ref(a, paths.member(T, "alice")), { name: "Alice", reply: "in", at: 1 });
+    await assertSucceeds(set(ref(a, paths.memberField(T, "alice", "photo")), "data:image/jpeg;base64,/9j/4AAQ"));
+    await assertFails(set(ref(a, paths.memberField(T, "alice", "photo")), "data:image/jpeg;base64," + "A".repeat(30000)));
+    await assertFails(set(ref(a, paths.memberField(T, "alice", "photo")), "data:image/png;base64,iVBOR"));
   });
 });

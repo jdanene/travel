@@ -15,8 +15,10 @@ export interface CrewView {
   byId: Record<MemberId, Member>;
   /** Whether this device holds the organizer mark. */
   isOrganizer: boolean;
-  /** The organizer's name for the flyer: the first organizer who replied, else the note's signature. */
-  organizer: string | undefined;
+  /** The organizer for the flyer: the first organizer who replied, else the note's signature (with no id, so no photo). */
+  organizer: Person | undefined;
+  /** Every member's photo, by member id, for the circles (components/Avatars.tsx). */
+  photos: Record<MemberId, string | undefined>;
 }
 
 /**
@@ -30,6 +32,7 @@ export interface CrewView {
  * Examples (checked on the emulator):
  *   a new device      → memberId null, member null
  *   after a reply     → memberId "rb", member { name: "RB", reply: "in", … }
+ *   JD organizes      → organizer { id: "jd", name: "JD" }; photos { jd: "data:image/jpeg;base64,…" } once JD adds one
  */
 export function crewOf(trip: Trip, uid: string): CrewView {
   const all = trip.crew?.members ?? {};
@@ -45,7 +48,10 @@ export function crewOf(trip: Trip, uid: string): CrewView {
     expected: trip.crew?.expected ?? {},
     byId: all,
     isOrganizer: trip.crew?.organizers?.[uid] === true,
-    organizer: organizerUid ? all[devices[organizerUid]].name : trip.info?.noteBy,
+    organizer: organizerUid
+      ? { id: devices[organizerUid], name: all[devices[organizerUid]].name }
+      : trip.info?.noteBy !== undefined ? { id: "", name: trip.info.noteBy } : undefined,
+    photos: Object.fromEntries(Object.entries(all).map(([id, member]) => [id, member.photo])),
   };
 }
 
@@ -77,13 +83,15 @@ export async function join(tripId: string, uid: string, person: Person, existing
 }
 
 /**
- * Saves a member's reply; a new reply replaces the old one (case 7).
+ * Saves a member's reply; a new reply replaces the old one (case 7). It
+ * writes the three fields one by one, so the member's photo stays.
  * Inputs: the trip, the member, the member's name, the reply.
  * Output: the write result.
- * Examples (checked on the emulator): RB taps "Maybe" after "I'm in" → members/rb.reply = "maybe"
+ * Examples (checked on the emulator): RB taps "Maybe" after "I'm in" → members/rb.reply = "maybe"; RB's photo stays
  */
 export function saveReply(tripId: string, memberId: MemberId, name: string, reply: Reply): Promise<WriteResult> {
-  return write({ [paths.member(tripId, memberId)]: { name, reply, at: Date.now() } });
+  const field = (key: "name" | "reply" | "at") => paths.memberField(tripId, memberId, key);
+  return write({ [field("name")]: name, [field("reply")]: reply, [field("at")]: Date.now() });
 }
 
 const KEY_STORE = "organizerKey";

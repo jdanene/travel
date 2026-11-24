@@ -1,7 +1,9 @@
+import { PhotosProvider } from "../components/Avatars";
 import { Notice } from "../components/Notice";
 import { crewOf, useOrganizerLink, type CrewView } from "../features/crew/api/crew";
 import { Invitation } from "../features/crew/components/Invitation";
 import { OrganizerSignIn } from "../features/crew/components/OrganizerSignIn";
+import { PhotoSheet } from "../features/crew/components/PhotoSheet";
 import { repliedLine } from "../features/crew/lib/crew";
 import { DatesModule } from "../features/dates/components/DatesModule";
 import { StayModule } from "../features/stay/components/StayModule";
@@ -60,9 +62,11 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
   const [mapFocus, setMapFocus] = useState<string | null>(null);
   // The events check runs once a friend has joined; a friend who can't make it still sees the list.
   const eventCheck = useEventCheck(tripId, trip, crew.member ? crew.memberId : null);
+  const [photoOpen, setPhotoOpen] = useState(false);
+  const you = crew.memberId && crew.member ? { id: crew.memberId, name: crew.member.name } : undefined;
 
   return (
-    <>
+    <PhotosProvider photos={crew.photos}>
       {offline && <Notice>No connection</Notice>}
       {organizerLink === "invalid" && <Notice>This organizer link is not valid.</Notice>}
       {/* Before a reply the friend sees the invitation (12/1). A friend who
@@ -74,6 +78,8 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
             trip={trip}
             memberId={crew.memberId}
             organizer={crew.organizer}
+            you={you}
+            onYou={() => setPhotoOpen(true)}
             replied={repliedLine(crew.expected, crew.byId)}
             content={(openModule) =>
               moduleSlots(tripId, trip, crew, eventCheck, openModule, { pin: mapFocus, clear: () => setMapFocus(null) }, (place) => {
@@ -86,7 +92,10 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
       )}
       {/* The organizer signs in with Google from any phone (D15); an organizer no longer needs it. */}
       {!crew.isOrganizer && <OrganizerSignIn tripId={tripId} />}
-    </>
+      {crew.memberId && crew.member && (
+        <PhotoSheet open={photoOpen} tripId={tripId} memberId={crew.memberId} member={crew.member} onClose={() => setPhotoOpen(false)} />
+      )}
+    </PhotosProvider>
   );
 }
 

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import type { Person } from "../components/Avatars";
 import { FlyerHead } from "../components/FlyerHead";
 import { Icon, type IconName } from "../components/Icon";
 import type { Trip } from "../types/trip";
@@ -17,7 +18,10 @@ const LOOK: Record<ModuleId, { name: string; icon: IconName }> = {
 interface HomeProps {
   trip: Trip;
   memberId: string | null;
-  organizer: string | undefined;
+  organizer: Person | undefined;
+  /** This device's member; a tap on their face on the flyer calls onYou. */
+  you?: Person;
+  onYou?: () => void;
   /** "6 of 8 replied", for the flyer's column on a desktop. */
   replied?: string;
   /**
@@ -33,8 +37,8 @@ interface HomeProps {
  * module in place (12/3); one is open at a time, and all start closed.
  * A closed button shows its state on the right.
  *
- * Inputs: the trip, this device's member, the organizer's name, and each
- * module's open content.
+ * Inputs: the trip, this device's member, the organizer, what a tap on
+ * your own face does, and each module's open content.
  * Output: the home page. "All set" shows under the date line once the
  * dates and every stay are confirmed. From 900 px up the flyer sits in a
  * sticky left column and the modules in the right one. An opened module
@@ -44,7 +48,7 @@ interface HomeProps {
  *   tap "Dates"     → Dates opens with the accent ring at the top of the window; tap again, or another module, and it closes
  *   1650 px         → the flyer on the left, the module buttons on the right
  */
-export function Home({ trip, memberId, organizer, replied, content }: HomeProps) {
+export function Home({ trip, memberId, organizer, you, onYou, replied, content }: HomeProps) {
   const [open, setOpen] = useState<ModuleId | null>(null);
   const shown = modules(trip, memberId);
   const openId = shown.some((module) => module.id === open) ? open : null;
@@ -70,7 +74,7 @@ export function Home({ trip, memberId, organizer, replied, content }: HomeProps)
 
   return (
     <div className="split">
-      <FlyerHead organizer={organizer} info={trip.info} photo="short" replied={replied}>
+      <FlyerHead organizer={organizer} you={you} onYou={onYou} info={trip.info} photo="short" replied={replied}>
         {allSet(trip) && <p className="cap all-set">All set</p>}
       </FlyerHead>
       <div className="modules" ref={list}>

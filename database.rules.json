@@ -28,6 +28,8 @@
               "name": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
               "reply": { ".validate": "newData.isString() && newData.val().matches(/^(in|maybe|out)$/)" },
               "at": { ".validate": "newData.isNumber()" },
+              /* Optional: the member's own photo, a small JPEG data URL (no Firebase Storage on the free plan). */
+              "photo": { ".validate": "newData.isString() && newData.val().beginsWith('data:image/jpeg;base64,') && newData.val().length <= 30000" },
               "$other": { ".validate": false }
             }
           },
