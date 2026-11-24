@@ -1,6 +1,7 @@
 import { Notice } from "../components/Notice";
 import { crewOf, useOrganizerLink } from "../features/crew/api/crew";
 import { Invitation } from "../features/crew/components/Invitation";
+import { PartiesBlock } from "../features/parties/components/PartiesBlock";
 import { useTrip } from "../lib/useTrip";
 import type { Trip } from "../types/trip";
 import type { ReactNode } from "react";
@@ -81,7 +82,7 @@ function moduleSlots(tripId: string, trip: Trip, uid: string): Record<ModuleId, 
   return {
     dates: null, // Trip 7: the Dates module.
     stay: null, // Trip 9: the Stay module.
-    parties: null, // Trip 11: the Parties module.
+    parties: <PartiesBlock tripId={tripId} trip={trip} uid={uid} />, // Trip 11: the Parties module.
     links: null, // Trip 16: the Links module.
     map: null, // Trip 12: the Map module.
   };
