@@ -1,7 +1,7 @@
 /**
  * The rules tests of Trip 2 (1 to 9), of the admin list (10 to 12, plan
  * D15), of Add dates (13 to 15, plan D16), of Add to map (16 and 17), of
- * weekly shows (18) and of the profile photo (19),
+ * weekly shows (18), of the profile photo (19) and of a place's photo (20),
  * against the database emulator. Run with
  * `npm run test:rules` in web/; it starts the emulator, runs this file and
  * stops it. Each test names the rule it proves, in the words of plan
@@ -158,5 +158,11 @@ describe("database rules", () => {
     await assertSucceeds(set(ref(a, paths.memberField(T, "alice", "photo")), "data:image/jpeg;base64,/9j/4AAQ"));
     await assertFails(set(ref(a, paths.memberField(T, "alice", "photo")), "data:image/jpeg;base64," + "A".repeat(30000)));
     await assertFails(set(ref(a, paths.memberField(T, "alice", "photo")), "data:image/png;base64,iVBOR"));
+  });
+
+  it("20. keeps a place's photo and description, and refuses a photo over 80 000 characters", async () => {
+    const a = db("uid-a");
+    await assertSucceeds(set(ref(a, paths.customPlace(T, "ph1")), place({ addedBy: "alice", description: "Sunset drinks", photo: "data:image/jpeg;base64,/9j/4AAQ" })));
+    await assertFails(set(ref(a, paths.customPlace(T, "ph2")), place({ addedBy: "alice", photo: "data:image/jpeg;base64," + "A".repeat(80000) })));
   });
 });

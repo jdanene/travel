@@ -167,6 +167,10 @@ export interface CustomPlace {
   lat: number;
   lng: number;
   link?: string;
+  /** At most 200 characters (Add to map, owner, 24 Nov 2026). */
+  description?: string;
+  /** A 640 px landscape JPEG as a data URL, at most 80 000 characters. */
+  photo?: string;
   addedBy: MemberId;
   at: number;
 }

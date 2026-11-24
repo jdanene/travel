@@ -4,7 +4,7 @@ import { idFromName } from "../../../lib/ids";
 import type { Reply } from "../../../types/trip";
 import type { CrewView, Person } from "../api/crew";
 import { notReplied, REPLIES } from "../lib/crew";
-import { PhotoField } from "./PhotoField";
+import { PhotoField } from "../../../components/PhotoField";
 
 /** The longest name the rules accept. */
 const MAX_NAME = 24;

@@ -19,6 +19,9 @@ export interface Pin {
   icon?: PlaceKind;
   /** A friend's place only: its optional https link. */
   link?: string;
+  /** A friend's place only: its optional description and photo. */
+  description?: string;
+  photo?: string;
   /** A friend's place only: the member who added it, who may remove it. */
   addedBy?: MemberId;
 }

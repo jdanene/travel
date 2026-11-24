@@ -76,6 +76,8 @@ export function pins(trip: Trip): Pin[] {
     line: `${placeWord(place.kind)} · added by ${initials(members[place.addedBy]?.name ?? place.addedBy)}`,
     icon: place.kind,
     link: place.link,
+    description: place.description,
+    photo: place.photo,
     addedBy: place.addedBy,
   }));
 

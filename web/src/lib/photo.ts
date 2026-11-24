@@ -1,13 +1,14 @@
 /**
- * The profile photo's pure rules: where to crop and whether the result may
- * be saved. The browser work (decoding, drawing, encoding) is in
- * ../api/photo.ts; these two functions are what it decides with.
+ * The photos' pure rules, shared by the profile photo and a place's photo:
+ * where to crop and whether the result may be saved. The browser work
+ * (decoding, drawing, encoding) is in makePhoto.ts; these functions are
+ * what it decides with.
  */
 
 /** The side of the saved photo, in pixels. */
 export const PHOTO_SIDE = 160;
 
-/** The longest photo the rules accept: database.rules.json, crew/members/$memberId/photo. */
+/** The longest profile photo the rules accept: database.rules.json, crew/members/$memberId/photo. */
 export const PHOTO_MAX_CHARS = 30000;
 
 /** The size the page aims for, about 15 KB of JPEG; past it the page tries a lower quality once. */
@@ -44,8 +45,31 @@ export function squareCrop(width: number, height: number): { x: number; y: numbe
  *   photoSize("data:image/png;base64,iVBOR")            → "not-jpeg"
  *   a JPEG data URL of 30001 characters                → "too-big"
  */
-export function photoSize(url: string): "ok" | "big" | "too-big" | "not-jpeg" {
+export function photoSize(url: string, max = PHOTO_MAX_CHARS, target = PHOTO_TARGET_CHARS): "ok" | "big" | "too-big" | "not-jpeg" {
   if (!url.startsWith(PREFIX)) return "not-jpeg";
-  if (url.length > PHOTO_MAX_CHARS) return "too-big";
-  return url.length > PHOTO_TARGET_CHARS ? "big" : "ok";
+  if (url.length > max) return "too-big";
+  return url.length > target ? "big" : "ok";
+}
+
+/** A place's photo: 640 px on its long side, landscape (database.rules.json, places/custom/$placeId/photo). */
+export const PLACE_PHOTO_LONG = 640;
+export const PLACE_PHOTO_MAX_CHARS = 80000;
+
+/**
+ * The landscape crop of a place's photo and the size it is drawn at: a
+ * picture taller than 4:3 loses its top and bottom equally down to 4:3; a
+ * wider one keeps its shape. The long side becomes 640 px, never larger
+ * than the picture.
+ *
+ * Inputs: width and height of the decoded picture (both above 0), and the long side.
+ * Output: { x, y, w, h } of the crop in the picture, and { width, height } to draw.
+ * Examples (each one is a test in photo.test.ts):
+ *   landscapeCrop(4032, 3024) → crop the whole picture, draw 640 x 480
+ *   landscapeCrop(3000, 4000) → crop 3000 x 2250 from y 875, draw 640 x 480
+ */
+export function landscapeCrop(width: number, height: number, long = PLACE_PHOTO_LONG) {
+  const h = Math.min(height, Math.floor((width * 3) / 4));
+  const y = Math.floor((height - h) / 2);
+  const scale = Math.min(1, long / width);
+  return { x: 0, y, w: width, h, width: Math.round(width * scale), height: Math.round(h * scale) };
 }

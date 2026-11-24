@@ -5,7 +5,7 @@ import { initials } from "../../../lib/initials";
 import type { WriteResult } from "../../../lib/db";
 import type { Member, MemberId } from "../../../types/trip";
 import { savePhoto } from "../api/photo";
-import { PhotoField } from "./PhotoField";
+import { PhotoField } from "../../../components/PhotoField";
 
 interface PhotoSheetProps {
   open: boolean;

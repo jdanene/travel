@@ -372,7 +372,7 @@ export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onO
   const report = (result: WriteResult) => setFailure(result.ok ? null : result);
 
   /** Saves the friend's place at the spot tapped and opens its card; the pin shows at once. */
-  const add = (place: { name: string; kind: PlaceKind; link?: string }) => {
+  const add = (place: { name: string; kind: PlaceKind; link?: string; description?: string; photo?: string }) => {
     if (!spot || !memberId) return;
     const id = newPlaceId();
     void addPlace(tripId, id, { ...place, destination, lat: spot.lat, lng: spot.lng, addedBy: memberId, at: Date.now() }).then(report);

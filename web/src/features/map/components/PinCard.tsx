@@ -11,15 +11,17 @@ import type { Pin } from "../../../types/pin";
  * Output: one card.
  * Examples (checked at 375 px against 20/10):
  *   Savaya       → "Savaya" / "Club on the cliffs · next show Sat 13 Feb", a tap opens Parties
- *   "Sunset bar" → "Sunset bar" / "Food · added by KA", "Open link", "Remove" for KA
+ *   "Sunset bar" → its photo on top, "Sunset bar", its description, "Food · added by KA", "Open link", "Remove" for KA
  */
 export function PinCard({ pin, onOpen, onRemove }: { pin: Pin; onOpen: (pin: Pin) => void; onRemove?: () => void }) {
   if (pin.kind === "place") {
     return (
       <article className="pin-card" aria-label={pin.name}>
+        {pin.photo && <img className="pin-photo" src={pin.photo} alt="" />}
         <span className="h2" style={{ display: "block" }}>
           {pin.name}
         </span>
+        {pin.description && <span className="pin-about">{pin.description}</span>}
         <span className="sub">{pin.line}</span>
         {(pin.link || onRemove) && (
           <span className="pin-acts">
