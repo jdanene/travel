@@ -194,6 +194,10 @@ window.HYPE = (() => {
       put(k, next);
     };
     // Stagger the first swaps so the tiles do not all change together.
+    // The page always opens with the WASTED card on one panel, picked at random (never the title).
+    const w = free.findIndex(it => it.wasted);
+    const spots = tiles.map((t, k) => k).filter(k => !tiles[k].classList.contains("t"));
+    if (w >= 0 && spots.length) { const k = spots[Math.floor(Math.random() * spots.length)]; cur[k] = free.splice(w, 1)[0]; shown.add(cur[k]); }
     tiles.forEach((t, k) => { if (!cur[k]) cur[k] = take(k); if (cur[k]) put(k, cur[k], Math.round(k * ms / tiles.length)); });
   }
 
