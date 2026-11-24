@@ -231,6 +231,11 @@ export interface ActivityEntry {
   ref?: string;
   /** A poll's 2 to 4 options. */
   options?: string[];
+  /** A GIF or sticker post: the picture's https address on KLIPY's media host (a post with a GIF needs no text). */
+  gif?: string;
+  /** The GIF's size in px, so the feed keeps its place before it loads. */
+  gifW?: number;
+  gifH?: number;
 }
 
 export interface Trip {
@@ -246,9 +251,15 @@ export interface Trip {
   activityVotes?: Record<string, Record<MemberId, number>>;
   /** Replies under a post or a poll: { entryId: { replyId: reply } }. */
   activityReplies?: Record<string, Record<string, ActivityReply>>;
-  /** Emoji on a Feed line: { entryId: { memberId: emoji } }; one each, and it can change. */
-  activityReactions?: Record<string, Record<MemberId, string>>;
+  /**
+   * Emoji on a Feed line: { entryId: { memberId: { key: time added } } }, many per member, as on Discord.
+   * The key is features/activity/lib/reactions.ts's. The first version stored { memberId: emoji }; it still reads.
+   */
+  activityReactions?: Record<string, ActivityReactions>;
 }
+
+/** The emoji on one Feed line, per member: { key: time added }, or one emoji string in the first version's shape. */
+export type ActivityReactions = Record<MemberId, Record<string, number> | string>;
 
 export interface ActivityReply {
   by: MemberId;

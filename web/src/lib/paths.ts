@@ -115,5 +115,5 @@ export const activityReply = (tripId: string, id: string, replyId: string) => `t
 /** Every emoji on one Feed line; removed with a deleted post. */
 export const activityReactions = (tripId: string, id: string) => `trips/${tripId}/activityReactions/${id}`;
 
-/** A member's emoji on one Feed line: one each, and it can change. */
-export const activityReaction = (tripId: string, id: string, memberId: string) => `trips/${tripId}/activityReactions/${id}/${memberId}`;
+/** One emoji a member put on a Feed line; a member may put several. The key is reactions.ts's reactionKey(). */
+export const activityReaction = (tripId: string, id: string, memberId: string, key: string) => `trips/${tripId}/activityReactions/${id}/${memberId}/${key}`;

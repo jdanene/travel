@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Face, tone, type Person } from "../../../components/Avatars";
 import { Icon } from "../../../components/Icon";
 import type { WriteResult } from "../../../lib/db";
 import type { ActivityEntry, ActivityReply, MemberId } from "../../../types/trip";
 import { lineWords, tally, whenLabels } from "../lib/lines";
 import { Composer } from "./Composer";
+import { RichText } from "./Glyph";
 
 /** What every entry needs to draw its people and its time. */
 export interface Viewer {
@@ -31,34 +32,54 @@ function Who({ viewer, id }: { viewer: Viewer; id: MemberId | undefined }) {
   return <Face person={person(viewer, id)} className={faceClass(viewer, id)} />;
 }
 
+/** The name and the time on one line, as Discord's message header. */
+function Head({ name, at, viewer, sending = false, children }: { name: string; at: number; viewer: Viewer; sending?: boolean; children?: ReactNode }) {
+  return (
+    <div className="row-head">
+      <b>{name}</b>
+      {sending ? <span className="row-time">Sending…</span> : <time className="row-time" dateTime={new Date(at).toISOString()}>{whenLabels(at, viewer.now).time}</time>}
+      {children}
+    </div>
+  );
+}
+
 /**
- * One automatic line, as mock 5 draws it: a face, one line with the name in
- * bold and the time under it, and a small picture on the right when the
- * thing has one. A line that refers to a module is a button that opens it.
+ * One automatic line, in the same shape as a message: the face, the name
+ * with the time beside it, and what happened under it ("added a place:
+ * Cliffside villa"), with the thing's small picture on the right when it
+ * has one. A line about a module is a button that opens it. The reactions
+ * row comes under, in the same text column.
  *
- * Inputs: the entry, the viewer, its thumbnail (or undefined), and what a
- * tap does (or undefined when the line opens nothing).
+ * Inputs: the entry, the viewer, its thumbnail (or undefined), what a tap
+ * does (or undefined), and the reactions row.
  * Output: the row.
- * Examples (checked on screen): KA's stay-added line → "KA added a place: Cliffside villa", "2 h ago", the villa's photo; a tap opens Stay
+ * Examples (checked on screen): KA's stay line → "KA  2 h ago", "added a place: Cliffside villa" under it, the villa's photo; a tap opens Stay
  */
-export function LineRow({ entry, viewer, thumb, onOpen }: { entry: ActivityEntry; viewer: Viewer; thumb?: string; onOpen?: () => void }) {
+export function LineRow({ entry, viewer, thumb, onOpen, footer }: { entry: ActivityEntry; viewer: Viewer; thumb?: string; onOpen?: () => void; footer: ReactNode }) {
   const { lead, rest } = lineWords(entry, entry.by ? person(viewer, entry.by).name : "");
-  const inner = (
+  const main = (
     <>
-      <Who viewer={viewer} id={entry.by} />
-      <p>
-        <b>{lead}</b> {rest}
-        <time dateTime={new Date(entry.at).toISOString()}>{whenLabels(entry.at, viewer.now).time}</time>
-      </p>
+      <span className="row-text">
+        <Head name={lead.replace(/:$/, "")} at={entry.at} viewer={viewer} />
+        <span className="row-auto">{rest}</span>
+      </span>
       {thumb && <span className="th" style={{ backgroundImage: `url("${thumb}")` }} aria-hidden="true" />}
     </>
   );
-  return onOpen ? (
-    <button type="button" className="fl" onClick={onOpen}>
-      {inner}
-    </button>
-  ) : (
-    <div className="fl">{inner}</div>
+  return (
+    <div className="row">
+      <Who viewer={viewer} id={entry.by} />
+      <div className="row-body">
+        {onOpen ? (
+          <button type="button" className="row-main" onClick={onOpen}>
+            {main}
+          </button>
+        ) : (
+          <div className="row-main">{main}</div>
+        )}
+        {footer}
+      </div>
+    </div>
   );
 }
 
@@ -73,70 +94,103 @@ interface WrittenProps {
   onVote: (index: number) => void;
   onReply: (text: string) => Promise<WriteResult>;
   onDelete: () => void;
+  /** The reactions row; it takes the "Reply" control on its own line. */
+  reactions: (after: ReactNode) => ReactNode;
 }
 
 /**
- * A friend's post or poll, a little more prominent than the automatic
- * lines: "TO asked · 3 h ago" over a bordered box. A poll lists its options
- * with a bar for each share, the voters' faces and the count; a tap votes,
- * and a tap on another option changes the vote. Under the box the replies
- * sit folded ("3 replies") and open in place, with a small reply bar. The
- * author and an organizer see "Delete", which asks once more.
+ * A friend's message or poll, as on Discord: the face, the name with the
+ * time beside it, and the words under it as plain text (no box, so only
+ * the message bar looks like a field). A GIF shows as a rounded picture
+ * that keeps its shape while it loads. A poll keeps a quiet box in the
+ * card's thin grey, with a bar for each share, the voters' faces and the
+ * count; a tap votes or changes the vote. Under it, on the reactions row,
+ * "Reply" (or "3 replies") opens the thread in place; a tap or click
+ * outside the post, or Escape, folds it, and an unsent reply waits for
+ * the next opening. The author and an organizer get a quiet "…" (shown on
+ * hover with a mouse, always on a touch screen) that opens "Delete for
+ * everyone?".
  *
  * Inputs: the entry and its id, the viewer, its votes and replies, whether
- * it is still sending, and what voting, replying and deleting do.
+ * it is still sending, what voting, replying and deleting do, and the reactions row.
  * Output: the block.
  * Examples (checked on the emulator with two profiles):
- *   TO's poll, 4 Yes and 1 No, you voted Yes → "Yes" pressed with a check, its bar at 80 %, "5 of 8 voted · tap to change your vote"
- *   "2 replies" tapped                       → the two replies, then a "Reply" bar with focus
+ *   TO's poll, 4 Yes and 1 No, you voted Yes → "Yes" with a check, its bar at 80 %, "5 of 8 voted · tap to change your vote"
+ *   "2 replies" tapped, then a tap on the map  → the thread folds; "Reply" again shows the half-written reply
  */
-export function Written({ id, entry, viewer, votes, replies, sending, onVote, onReply, onDelete }: WrittenProps) {
+export function Written({ id, entry, viewer, votes, replies, sending, onVote, onReply, onDelete, reactions }: WrittenProps) {
   const [open, setOpen] = useState(false);
   const [asking, setAsking] = useState(false);
+  const block = useRef<HTMLElement>(null);
   const author = entry.by ? person(viewer, entry.by).name : "";
-  const { lead, rest } = lineWords(entry, author);
   const mayDelete = entry.by === viewer.memberId || viewer.isOrganizer;
   const thread = Object.entries(replies ?? {}).sort(([, a], [, b]) => a.at - b.at);
   const repliers = [...new Set(thread.map(([, reply]) => reply.by))];
   const mine = votes?.[viewer.memberId];
   const poll = entry.kind === "poll" && entry.options ? tally(entry.options, votes) : null;
 
-  return (
-    <article className={`fp${sending ? " sending" : ""}`} aria-labelledby={`fp-${id}`}>
-      <div className="fpw">
-        <Who viewer={viewer} id={entry.by} />
-        <span id={`fp-${id}`}>
-          <b>{lead}</b> {rest} · {sending ? "Sending…" : whenLabels(entry.at, viewer.now).time}
-        </span>
-        {mayDelete && !sending && !asking && (
-          <button type="button" className="fp-del" onClick={() => setAsking(true)}>
-            Delete
-          </button>
-        )}
-      </div>
-      {asking && (
-        <div className="fp-ask" role="group" aria-label="Delete for everyone?">
-          <span>Delete for everyone?</span>
-          <button type="button" className="fp-yes" onClick={onDelete}>
-            Delete
-          </button>
-          <button type="button" onClick={() => setAsking(false)}>
-            Keep
-          </button>
-        </div>
+  useFoldOutside(open || asking, block, () => {
+    setOpen(false);
+    setAsking(false);
+  });
+
+  const replyControl = (
+    <button type="button" className="reps" aria-expanded={open} onClick={() => setOpen(!open)}>
+      {thread.length > 0 ? (
+        <>
+          <span className="avs" aria-hidden="true">
+            {repliers.slice(0, 3).map((who) => (
+              <Face key={who} person={person(viewer, who)} className={faceClass(viewer, who)} />
+            ))}
+          </span>
+          {open ? "Hide replies" : `${thread.length} ${thread.length === 1 ? "reply" : "replies"}`}
+        </>
+      ) : (
+        <>
+          <Icon name="chat" size={14} />
+          {open ? "Close" : "Reply"}
+        </>
       )}
-      <div className="box">
-        <p className={poll ? "q" : "t"}>{entry.text}</p>
+    </button>
+  );
+
+  return (
+    <article ref={block} className={`row fp${sending ? " sending" : ""}`} aria-labelledby={`fp-${id}`}>
+      <Who viewer={viewer} id={entry.by} />
+      <div className="row-body">
+        <span id={`fp-${id}`} className="row-label">
+          <Head name={author} at={entry.at} viewer={viewer} sending={sending}>
+            {mayDelete && !sending && !asking && (
+              <button type="button" className="fp-more" aria-label="More for this message" title="More" onClick={() => setAsking(true)}>
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                  <circle cx="6" cy="12" r="1.5" fill="currentColor" />
+                  <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+                  <circle cx="18" cy="12" r="1.5" fill="currentColor" />
+                </svg>
+              </button>
+            )}
+          </Head>
+        </span>
+        {asking && (
+          <div className="fp-ask" role="group" aria-label="Delete for everyone?">
+            <span>Delete for everyone?</span>
+            <button type="button" className="fp-yes" onClick={onDelete}>
+              Delete
+            </button>
+            <button type="button" onClick={() => setAsking(false)}>
+              Keep
+            </button>
+          </div>
+        )}
+        {entry.gif && (
+          <img className="fp-gif" src={entry.gif} alt="GIF" width={entry.gifW} height={entry.gifH} style={entry.gifW && entry.gifH ? { aspectRatio: `${entry.gifW} / ${entry.gifH}` } : undefined} loading="lazy" decoding="async" />
+        )}
+        {entry.text && !poll && <RichText className="fp-t" text={entry.text} />}
         {poll && (
-          <>
+          <div className="fp-poll">
+            <RichText className="fp-q" text={entry.text ?? ""} />
             {poll.options.map((option, index) => (
-              <button
-                key={index}
-                type="button"
-                className={`po${mine === index ? " mine" : ""}`}
-                aria-pressed={mine === index}
-                onClick={() => mine !== index && onVote(index)}
-              >
+              <button key={index} type="button" className={`po${mine === index ? " mine" : ""}`} aria-pressed={mine === index} onClick={() => mine !== index && onVote(index)}>
                 <span className="bar" style={{ transform: `scaleX(${option.share})` }} />
                 <span className="lb">
                   {mine === index && <Icon name="check" size={16} />}
@@ -153,44 +207,57 @@ export function Written({ id, entry, viewer, votes, replies, sending, onVote, on
             <p className="pm">
               {poll.voted} of {Math.max(viewer.crewSize, poll.voted)} voted · {mine === undefined ? "tap to vote" : "tap to change your vote"}
             </p>
-          </>
+          </div>
+        )}
+        {!sending && reactions(replyControl)}
+        {!sending && open && (
+          <div className="fp-replies">
+            {thread.map(([replyId, reply]) => (
+              <div key={replyId} className="rp">
+                <Who viewer={viewer} id={reply.by} />
+                <div className="rp-body">
+                  <Head name={person(viewer, reply.by).name} at={reply.at} viewer={viewer} />
+                  <RichText className="rp-t" text={reply.text} />
+                </div>
+              </div>
+            ))}
+            <Composer placeholder="Reply" small autoFocus draftKey={id} onSend={(draft) => onReply(draft.text)} />
+          </div>
         )}
       </div>
-      {!sending && (
-        <div className="fp-thread">
-          <button type="button" className="reps" aria-expanded={open} onClick={() => setOpen(!open)}>
-            {thread.length > 0 ? (
-              <>
-                <span className="avs" aria-hidden="true">
-                  {repliers.slice(0, 3).map((who) => (
-                    <Face key={who} person={person(viewer, who)} className={faceClass(viewer, who)} />
-                  ))}
-                </span>
-                {open ? "Hide replies" : `${thread.length} ${thread.length === 1 ? "reply" : "replies"}`}
-              </>
-            ) : (
-              <>
-                <Icon name="chat" size={16} />
-                {open ? "Close" : "Reply"}
-              </>
-            )}
-          </button>
-          {open && (
-            <div className="fp-replies">
-              {thread.map(([replyId, reply]) => (
-                <div key={replyId} className="rp">
-                  <Who viewer={viewer} id={reply.by} />
-                  <p>
-                    <b>{person(viewer, reply.by).name}</b> {reply.text}
-                    <time dateTime={new Date(reply.at).toISOString()}>{whenLabels(reply.at, viewer.now).time}</time>
-                  </p>
-                </div>
-              ))}
-              <Composer placeholder="Reply" small autoFocus onSend={(draft) => onReply(draft.text)} />
-            </div>
-          )}
-        </div>
-      )}
     </article>
   );
+}
+
+/**
+ * Folds something open (a thread, the delete question) when the friend
+ * taps or clicks outside it, or presses Escape. A tap inside, including in
+ * a panel opened from inside it, keeps it open.
+ * Inputs: whether it is open, the block, and what folding does.
+ * Output: nothing.
+ * Examples (checked on screen): thread open, tap the map → it folds; tap a reaction pill on the same post → it stays
+ */
+function useFoldOutside(open: boolean, block: React.RefObject<HTMLElement>, fold: () => void) {
+  const latest = useRef(fold);
+  latest.current = fold;
+  useEffect(() => {
+    if (!open) return;
+    const away = (event: Event) => {
+      // Escape folds it, unless a panel is open above the page: that Escape closes the panel.
+      if (event.type === "keydown") {
+        if ((event as KeyboardEvent).key === "Escape" && !document.querySelector("dialog[open]")) latest.current();
+        return;
+      }
+      const target = event.target as Node;
+      // A panel opened from inside the post (the reply bar's emoji) belongs to it; so does any open dialog above the page.
+      if (block.current?.contains(target) || (target instanceof Element && target.closest("dialog[open]"))) return;
+      latest.current();
+    };
+    document.addEventListener("pointerdown", away);
+    document.addEventListener("keydown", away);
+    return () => {
+      document.removeEventListener("pointerdown", away);
+      document.removeEventListener("keydown", away);
+    };
+  }, [open, block]);
 }

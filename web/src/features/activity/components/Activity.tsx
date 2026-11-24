@@ -1,25 +1,32 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { newActivityId } from "../../../lib/activity";
-import type { ActivityEntry, ActivityReply, MemberId } from "../../../types/trip";
-import { post, react, remove, reply, vote } from "../api/activity";
+import type { ActivityEntry, ActivityReactions, ActivityReply, MemberId } from "../../../types/trip";
+import { post, postGif, react, remove, reply, vote } from "../api/activity";
+import type { KlipyItem } from "../lib/klipy";
 import type { Draft } from "../lib/lines";
 import { whenLabels } from "../lib/lines";
+import { reactionKey } from "../lib/reactions";
 import { Composer } from "./Composer";
 import { LineRow, Written, type Viewer } from "./Entries";
-import { EmojiSheet, Reactions } from "./Reactions";
+import { ReactionPicker } from "./Pickers";
+import { ReactionRow } from "./ReactionRow";
 import "./Activity.css";
 
-/** Lines drawn before "Show more", and how many more each tap adds (mock 5 draws six). */
-const FIRST = 6;
-const MORE = 10;
+/** Lines drawn at first, and how many earlier ones each step up adds. */
+const FIRST = 30;
+const EARLIER = 20;
+/** Within this many px of the foot, the list counts as "at the latest" and follows new lines. */
+const NEAR_FOOT = 48;
+/** Within this many px of the top, earlier lines load. */
+const NEAR_TOP = 160;
 
 interface ActivityProps {
   tripId: string;
   entries: Record<string, ActivityEntry> | undefined;
   votes: Record<string, Record<MemberId, number>> | undefined;
   replies: Record<string, Record<string, ActivityReply>> | undefined;
-  /** Emoji on each line: { entryId: { memberId: emoji } }. */
-  reactions: Record<string, Record<MemberId, string>> | undefined;
+  /** Emoji on each line, as stored (types/trip.ts, ActivityReactions). */
+  reactions: Record<string, ActivityReactions> | undefined;
   memberId: MemberId;
   isOrganizer: boolean;
   /** Member id to name, for every member who replied. */
@@ -33,20 +40,27 @@ interface ActivityProps {
 }
 
 /**
- * The Activity card of mock 5, the last card on the home page: one list, newest first, with day dividers ("TODAY",
- * "YESTERDAY", "SAT 21 NOV") and "Show more" after six. Automatic lines
- * are a face and one line; posts and polls sit in a light box. A friend's
- * own post shows at once, marked "Sending…" until the server has it, and
- * new lines ease in at the top. With just you on the trip, the card says
- * "Just you so far" in place of the list. No "new" badges or counts.
+ * The Feed, as a chat reads (Discord): oldest at the top, newest at the
+ * foot just above the message bar, with day dividers ("TODAY",
+ * "YESTERDAY", "SAT 21 NOV") in the same order. It opens at the latest
+ * line, follows new ones while the friend is at the foot, and when they
+ * have scrolled up it leaves them there and shows a small "New messages"
+ * pill instead. Earlier lines load as the friend nears the top (or with
+ * "Show earlier"). The list keeps one height and fades at an edge that
+ * has more beyond it; the bar sits under it and never covers a line.
  *
- * Inputs: the trip id, the activity branch with its votes and replies,
- * this device's member and organizer mark, the names, the crew's size,
- * and from the shell each line's thumbnail and what tapping it opens.
+ * Every line has one shape: the face, the name with the time beside it,
+ * what happened or what was said under it, then its emoji pills. A
+ * friend's own post shows at once, marked "Sending…" until the server
+ * has it. With just you on the trip, the card says "Just you so far".
+ *
+ * Inputs: the trip id, the activity branch with its votes, replies and
+ * emoji, this device's member and organizer mark, the names, the crew's
+ * size, and from the shell each line's thumbnail and what tapping it opens.
  * Output: the card.
  * Examples (checked on the emulator with two profiles at 375 px and 1650 px):
- *   RB posts "Anyone flying from London?" → on top at once, "Sending…" for a moment; on KA's phone it eases in
- *   KA adds an event                      → "KA added an event: …" tops RB's list; a tap opens Events
+ *   RB sends "Anyone flying from London?" → it lands at the foot at once, "Sending…" for a moment; KA, at the foot, sees it slide in
+ *   KA has scrolled up when RB posts      → KA stays put; "New messages" shows; a tap goes to the foot
  *   only you                              → "Just you so far" and the bar
  */
 export function Activity({ tripId, entries, votes, replies, reactions, memberId, isOrganizer, names, crewSize, thumbOf, openerOf }: ActivityProps) {
@@ -54,12 +68,25 @@ export function Activity({ tripId, entries, votes, replies, reactions, memberId,
   const [sending, setSending] = useState<ReadonlySet<string>>(new Set());
   const [problem, setProblem] = useState<string | null>(null);
   const [picking, setPicking] = useState<string | null>(null);
+  const [unseen, setUnseen] = useState(false);
+  const [edges, setEdges] = useState({ top: false, foot: false });
+  const pickAnchor = useRef<HTMLElement | null>(null);
+  const scroller = useRef<HTMLDivElement>(null);
+  const atFoot = useRef(true);
+  const lastTop = useRef(0);
+  const keepFrom = useRef<{ height: number; top: number } | null>(null);
   const now = useMinuteClock();
+
+  // Oldest first, as a chat reads.
+  const ids = Object.entries(entries ?? {})
+    .sort(([a, x], [b, y]) => x.at - y.at || (a < b ? -1 : 1))
+    .map(([id]) => id);
+  const visible = ids.slice(-shown);
+  const earlier = ids.length > visible.length;
+  const newest = ids[ids.length - 1];
+
   // Ids drawn on the first render do not ease in; every later one does, once.
   const seen = useRef<Set<string> | null>(null);
-  const ids = Object.entries(entries ?? {})
-    .sort(([a, x], [b, y]) => y.at - x.at || (a < b ? 1 : -1))
-    .map(([id]) => id);
   if (seen.current === null) seen.current = new Set(ids);
   useEffect(() => {
     ids.forEach((id) => seen.current!.add(id));
@@ -68,10 +95,76 @@ export function Activity({ tripId, entries, votes, replies, reactions, memberId,
   const viewer: Viewer = { memberId, isOrganizer, names, crewSize, now };
   const alone = crewSize <= 1 && ids.every((id) => entries![id].kind === "joined");
 
-  const send = (draft: Draft) => {
+  const toFoot = useCallback((smooth: boolean) => {
+    const box = scroller.current;
+    if (!box) return;
+    box.scrollTo({ top: box.scrollHeight, behavior: smooth && !matchMedia("(prefers-reduced-motion: reduce)").matches ? "smooth" : "auto" });
+    atFoot.current = true;
+    setUnseen(false);
+  }, []);
+
+  const measure = () => {
+    const box = scroller.current;
+    if (!box) return;
+    const gap = box.scrollHeight - box.scrollTop - box.clientHeight;
+    // Only the friend scrolling up leaves the foot; a scroll on its way down (ours, smooth) does not.
+    const goingUp = box.scrollTop < lastTop.current - 1;
+    lastTop.current = box.scrollTop;
+    if (gap < NEAR_FOOT) atFoot.current = true;
+    else if (goingUp) atFoot.current = false;
+    if (atFoot.current) setUnseen(false);
+    setEdges({ top: box.scrollTop > 2, foot: gap > 2 });
+    if (box.scrollTop < NEAR_TOP && earlier && !keepFrom.current) showEarlier();
+  };
+
+  const showEarlier = () => {
+    const box = scroller.current;
+    if (box) keepFrom.current = { height: box.scrollHeight, top: box.scrollTop };
+    setShown((old) => old + EARLIER);
+  };
+
+  // Opens at the latest line.
+  useLayoutEffect(() => {
+    toFoot(false);
+    measure();
+  }, []);
+
+  // Earlier lines go in above without moving what the friend is reading.
+  useLayoutEffect(() => {
+    const box = scroller.current;
+    const from = keepFrom.current;
+    if (!box || !from) return;
+    box.scrollTop = from.top + (box.scrollHeight - from.height);
+    keepFrom.current = null;
+  }, [shown]);
+
+  // A new line: follow it at the foot (always for your own), else say there is something below.
+  const lastNewest = useRef(newest);
+  useLayoutEffect(() => {
+    if (newest === lastNewest.current) return;
+    lastNewest.current = newest;
+    if (!newest) return;
+    if (atFoot.current || entries?.[newest]?.by === memberId) toFoot(true);
+    else setUnseen(true);
+  }, [newest, entries, memberId, toFoot]);
+
+  // While at the foot, growth (a reaction row, an opened thread, a GIF) keeps the foot in view.
+  useEffect(() => {
+    const box = scroller.current;
+    const list = box?.firstElementChild;
+    if (!box || !list) return;
+    const watch = new ResizeObserver(() => {
+      if (atFoot.current) box.scrollTop = box.scrollHeight;
+      setEdges({ top: box.scrollTop > 2, foot: box.scrollHeight - box.scrollTop - box.clientHeight > 2 });
+    });
+    watch.observe(list);
+    return () => watch.disconnect();
+  }, [alone, ids.length === 0]);
+
+  const send = <T,>(write: (id: string) => Promise<T>): Promise<T> => {
     const id = newActivityId(tripId);
     setSending((old) => new Set(old).add(id));
-    return post(tripId, id, memberId, draft).then((result) => {
+    return write(id).then((result) => {
       setSending((old) => {
         const next = new Set(old);
         next.delete(id);
@@ -81,6 +174,20 @@ export function Activity({ tripId, entries, votes, replies, reactions, memberId,
     });
   };
   const report = (result: { ok: boolean }) => setProblem(result.ok ? null : "That did not save. Try again.");
+
+  const reactionsOf = (id: string) => (after?: ReactNode) => (
+    <ReactionRow
+      raw={reactions?.[id]}
+      memberId={memberId}
+      names={names}
+      onToggle={(key, on) => void react(tripId, id, memberId, key, on).then(report)}
+      onAdd={(button) => {
+        pickAnchor.current = button;
+        setPicking(id);
+      }}
+      after={after}
+    />
+  );
 
   let lastDay = "";
   return (
@@ -93,65 +200,77 @@ export function Activity({ tripId, entries, votes, replies, reactions, memberId,
       ) : ids.length === 0 ? (
         <p className="empty">When friends join, set dates or add a place, a line shows up here.</p>
       ) : (
-        <div className="feed">
-          {ids.slice(0, shown).map((id) => {
-            const entry = entries![id];
-            const { day } = whenLabels(entry.at, now);
-            const divider = day !== lastDay;
-            lastDay = day;
-            const arrive = !seen.current!.has(id);
-            const written = entry.kind === "post" || entry.kind === "poll";
-            return (
-              <Fragment key={id}>
-                {divider && <p className="dv">{day}</p>}
-                <div className={`fi${arrive ? " arrive" : ""}`}>
-                  {written ? (
-                    <Written
-                      id={id}
-                      entry={entry}
-                      viewer={viewer}
-                      votes={votes?.[id]}
-                      replies={replies?.[id]}
-                      sending={sending.has(id)}
-                      onVote={(index) => void vote(tripId, id, memberId, index).then(report)}
-                      onReply={(text) => reply(tripId, id, memberId, text)}
-                      onDelete={() => void remove(tripId, id).then(report)}
-                    />
-                  ) : (
-                    <LineRow entry={entry} viewer={viewer} thumb={thumbOf(entry)} onOpen={openerOf(entry)} />
-                  )}
-                  {!sending.has(id) && (
-                    <Reactions
-                      marks={reactions?.[id]}
-                      memberId={memberId}
-                      names={names}
-                      onReact={(emoji) => void react(tripId, id, memberId, emoji).then(report)}
-                      onPick={() => setPicking(id)}
-                    />
-                  )}
-                </div>
-              </Fragment>
-            );
-          })}
-          {ids.length > shown && (
-            <button type="button" className="more" onClick={() => setShown(shown + MORE)}>
-              <span>Show more</span>
+        <div className="feed-wrap">
+          <div ref={scroller} className={`feed${edges.top ? " fade-top" : ""}${edges.foot ? " fade-foot" : ""}`} onScroll={measure} role="log" aria-label="Feed lines">
+            <div className="feed-list">
+              {earlier && (
+                <button type="button" className="earlier" onClick={showEarlier}>
+                  Show earlier
+                </button>
+              )}
+              {visible.map((id) => {
+                const entry = entries![id];
+                const { day } = whenLabels(entry.at, now);
+                const divider = day !== lastDay;
+                lastDay = day;
+                const arrive = !seen.current!.has(id);
+                const written = entry.kind === "post" || entry.kind === "poll";
+                return (
+                  <Fragment key={id}>
+                    {divider && (
+                      <p className="dv">
+                        <span>{day}</span>
+                      </p>
+                    )}
+                    <div className={`fi${arrive ? " arrive" : ""}`}>
+                      {written ? (
+                        <Written
+                          id={id}
+                          entry={entry}
+                          viewer={viewer}
+                          votes={votes?.[id]}
+                          replies={replies?.[id]}
+                          sending={sending.has(id)}
+                          onVote={(index) => void vote(tripId, id, memberId, index).then(report)}
+                          onReply={(text) => reply(tripId, id, memberId, text)}
+                          onDelete={() => void remove(tripId, id).then(report)}
+                          reactions={reactionsOf(id)}
+                        />
+                      ) : (
+                        <LineRow entry={entry} viewer={viewer} thumb={thumbOf(entry)} onOpen={openerOf(entry)} footer={reactionsOf(id)()} />
+                      )}
+                    </div>
+                  </Fragment>
+                );
+              })}
+            </div>
+          </div>
+          {unseen && (
+            <button type="button" className="unseen" onClick={() => toFoot(true)}>
+              New messages
+              <svg viewBox="0 0 24 24" width="14" height="14" className="i" aria-hidden="true">
+                <path d="M12 5v14M6 13l6 6 6-6" />
+              </svg>
             </button>
           )}
         </div>
       )}
-      {/* The message bar sits at the foot of the feed (owner, 24 Nov 2026). */}
       {problem && (
         <p className="msg-error" role="alert">
           {problem}
         </p>
       )}
-      <Composer placeholder="Message" onSend={send} />
-      <EmojiSheet
+      <Composer
+        placeholder="Message"
+        onSend={(draft: Draft) => send((id) => post(tripId, id, memberId, draft))}
+        onGif={(item: KlipyItem) => send((id) => postGif(tripId, id, memberId, item.full))}
+      />
+      <ReactionPicker
         open={picking !== null}
+        anchor={pickAnchor as React.RefObject<HTMLElement>}
         onClose={() => setPicking(null)}
-        onPick={(emoji) => {
-          if (picking) void react(tripId, picking, memberId, emoji).then(report);
+        onPick={(choice) => {
+          if (picking) void react(tripId, picking, memberId, reactionKey(choice), true).then(report);
           setPicking(null);
         }}
       />

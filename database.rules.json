@@ -184,7 +184,7 @@
                no edits. The daily events check writes "event-found" with no member. The author or an organizer
                deletes a post or a poll (its votes and replies go in the same write); automatic lines stay. */
             ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() !== null && ((!data.exists() && (newData.child('by').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || (newData.child('kind').val() === 'event-found' && !newData.child('by').exists()))) || (data.exists() && !newData.exists() && (data.child('kind').val() === 'post' || data.child('kind').val() === 'poll') && (data.child('by').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true)))",
-            ".validate": "$id.length <= 40 && newData.hasChildren(['kind', 'at']) && ((newData.child('kind').val() !== 'post' && newData.child('kind').val() !== 'poll') || newData.hasChild('text')) && ((newData.child('kind').val() === 'poll') === newData.child('options').exists()) && (newData.child('kind').val() !== 'poll' || newData.child('options').hasChildren(['0', '1']))",
+            ".validate": "$id.length <= 40 && newData.hasChildren(['kind', 'at']) && ((newData.child('kind').val() !== 'post' && newData.child('kind').val() !== 'poll') || newData.hasChild('text') || (newData.child('kind').val() === 'post' && newData.hasChild('gif'))) && ((newData.child('kind').val() === 'poll') === newData.child('options').exists()) && (newData.child('kind').val() !== 'poll' || newData.child('options').hasChildren(['0', '1']))",
             "kind": { ".validate": "newData.isString() && newData.val().matches(/^(joined|reply-changed|dates-added|dates-confirmed|dates-changed|stay-added|stay-confirmed|event-added|event-in|link-added|place-added|event-found|post|poll)$/)" },
             "by": { ".validate": "newData.isString() && newData.val().length <= 40" },
             "at": { ".validate": "newData.isNumber()" },
@@ -193,6 +193,10 @@
             "options": {
               "$i": { ".validate": "$i.matches(/^[0-3]$/) && newData.isString() && newData.val().length >= 1 && newData.val().length <= 60" }
             },
+            /* A GIF or sticker post: the picture stays on KLIPY's media host, as its terms ask; the size keeps its place. */
+            "gif": { ".validate": "newData.isString() && newData.val().length <= 400 && newData.val().matches(/^https:\\/\\/static\\.klipy\\.com\\/[A-Za-z0-9_.\\/-]+$/) && newData.parent().child('kind').val() === 'post'" },
+            "gifW": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 4000" },
+            "gifH": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 4000" },
             "$other": { ".validate": false }
           }
         },
@@ -212,9 +216,12 @@
             /* Deleting a post or a poll takes its emoji with it, by whoever may delete it. */
             ".write": "auth != null && !newData.exists() && !newData.parent().parent().child('activity').child($id).exists() && (root.child('trips').child($tripId).child('activity').child($id).child('by').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true)",
             "$memberId": {
-              /* A member's emoji on a Feed line: one each; it can change or be taken off. */
+              /* A member's emoji on a Feed line, as on Discord: several, each added or taken off on its own, under the
+                 member's own id, on a line that exists. The key is the emoji's Twemoji code points or a 7TV emote
+                 (features/activity/lib/reactions.ts, REACTION_KEY); the value is the time it was added. */
               ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() === $memberId",
-              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24 && root.child('trips').child($tripId).child('activity').child($id).exists()"
+              ".validate": "newData.hasChildren() && root.child('trips').child($tripId).child('activity').child($id).exists()",
+              "$key": { ".validate": "$key.matches(/^([0-9a-f]{1,6}(-[0-9a-f]{1,6}){0,9}|7tv-[0-9A-HJKMNP-TV-Z]{26}-[A-Za-z0-9_():-]{1,40})$/) && newData.isNumber()" }
             }
           }
         },

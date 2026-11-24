@@ -1,156 +1,285 @@
-/* The Activity card of mock 5 (public/mockups/crew/5: .feedcard, .fl, .fp, .po, .dv, .more), in the app's tokens. */
-.feedcard { background: #fff; color: var(--ink); border: 2px solid var(--edge); border-radius: 1.125rem; padding: 0.75rem 1rem 0.75rem; margin-bottom: 0.75rem; }
-.feedcard h2 { font-size: 1.0625rem; font-weight: 800; padding: 0.25rem 0 0.5rem; }
+/* The Feed, as a chat on the charcoal page (owner, 24 Nov 2026: "literally we want discord"), in the app's warm
+   charcoal, not Discord's blue-grey. Flat: surfaces step lighter or darker; nothing is raised with a shadow. */
+.feedcard {
+  --ink: var(--on-page); --ink2: var(--on-page); --mut: var(--on-page-mut);
+  --line: rgba(244, 241, 234, 0.12); --soft: rgba(244, 241, 234, 0.08); --edge: rgba(244, 241, 234, 0.6);
+  --acc: #f4f1ea; --on-acc: #111;
+  /* The message bar and the panels: a step lighter than the page; fields inside a panel: a step darker. */
+  --bar: #302d2a; --sheet: #2b2926; --well: #1c1a18; --rim: #45413c; --outline: #57534d;
+  --pill: rgba(244, 241, 234, 0.07); --pill-hover: rgba(244, 241, 234, 0.12);
+  --mine: rgba(244, 241, 234, 0.16); --mine-rim: rgba(244, 241, 234, 0.55);
+  background: transparent; color: var(--on-page); border: 1px solid var(--outline); border-radius: 1.125rem;
+  padding: 0.75rem 1rem 0.875rem; margin-bottom: 0.75rem;
+}
+.feedcard h2 { font-size: 1.0625rem; font-weight: 800; padding: 0.25rem 0 0.375rem; }
 .feedcard button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.feedcard :focus-visible, .drawer :focus-visible { outline: 2px solid var(--on-page); outline-offset: 2px; }
+.feedcard ::selection { background: rgba(244, 241, 234, 0.3); color: var(--on-page); }
 
-/* Day dividers and the automatic lines: a face, one line, the time under it, a small picture on the right. */
-.dv { font-size: 0.75rem; font-weight: 800; color: var(--mut); letter-spacing: .04em; margin: 0.75rem 0 0; }
-.feed > .dv:first-child { margin-top: 0.5rem; }
-.fi { border-top: 1px solid var(--line); }
-.dv + .fi { border-top: 0; }
-.fl { display: flex; gap: 0.625rem; align-items: center; width: 100%; padding: 0.5625rem 0; text-align: left; border-radius: 0.5rem; }
-button.fl:active { background: var(--soft); }
-.fl .av, .fpw .av, .rp .av { width: 1.875rem; height: 1.875rem; font-size: 0.625rem; flex: none; }
-.av.sys { background: #111; color: #fff; }
-.fl p { flex: 1; min-width: 0; font-size: 0.9062rem; line-height: 1.35; }
-.fl time, .rp time { display: block; font-size: 0.7812rem; color: var(--mut); }
-.fl .th { flex: none; width: 2.5rem; height: 2.5rem; border-radius: 0.5625rem; border: 2px solid var(--edge); background: #ddd center / cover; }
+/* The list keeps one height and scrolls inside the card; an edge with more beyond it fades, so a cut line reads as "more". */
+.feed-wrap { position: relative; }
+.feed {
+  --fade-top: 0px; --fade-foot: 0px;
+  max-height: min(30rem, 62vh); max-height: min(30rem, 62dvh); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin; scrollbar-color: var(--outline) transparent; margin-right: -0.5rem; padding-right: 0.5rem;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade-top), #000 calc(100% - var(--fade-foot)), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 var(--fade-top), #000 calc(100% - var(--fade-foot)), transparent 100%);
+}
+.feed.fade-top { --fade-top: 1.75rem; }
+.feed.fade-foot { --fade-foot: 1.75rem; }
+.feed-list { display: flow-root; padding-bottom: 0.25rem; }
+.earlier { display: block; margin: 0.25rem auto 0.5rem; min-height: 2rem; padding: 0 0.75rem; font-size: 0.8125rem; font-weight: 700; color: var(--mut); border-radius: 999px; }
+.earlier:hover { color: var(--on-page); background: var(--pill); }
 
-/* A friend's post or poll: a little more prominent, in a bordered box under "TO asked · 3 h ago". */
-.fp { padding: 0.625rem 0; }
-.fpw { display: flex; align-items: center; gap: 0.625rem; font-size: 0.8438rem; color: var(--mut); }
-.fpw b { color: var(--ink); }
-.fpw > span:not(.av) { flex: 1; min-width: 0; }
-.fp-del { font-size: 0.8125rem; font-weight: 700; color: var(--mut); padding: 0.25rem 0.25rem; min-height: 2rem; }
-.fp-ask { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0.375rem 0 0 2.5rem; font-size: 0.875rem; }
-.fp-ask span { flex: 1 1 auto; font-weight: 700; }
-.fp-ask button { min-height: 2.25rem; padding: 0 0.875rem; border-radius: 999px; border: 1.5px solid var(--edge); font-weight: 800; font-size: 0.875rem; }
-.fp-ask .fp-yes { background: var(--acc); color: var(--on-acc); }
-.fp .box { margin: 0.375rem 0 0 2.5rem; border: 2px solid var(--edge); border-radius: 0.875rem; padding: 0.625rem 0.75rem; background: #fff; }
-.fp .t { font-size: 0.9375rem; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
-.fp .q { font-size: 0.9375rem; font-weight: 700; line-height: 1.35; margin-bottom: 0.375rem; white-space: pre-wrap; overflow-wrap: anywhere; }
-.fp.sending .box { opacity: .65; }
+/* Day dividers: a hairline with the day in the middle, as Discord draws them. */
+.dv { display: flex; align-items: center; gap: 0.625rem; margin: 0.75rem 0 0.25rem; font-size: 0.6875rem; font-weight: 800; color: var(--mut); letter-spacing: 0.05em; }
+.dv::before, .dv::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 
-/* A poll's options: the bar shows each share; it grows with transform, so the count moves at 60 fps. */
-.po { position: relative; display: flex; align-items: center; gap: 0.5rem; width: 100%; min-height: 2.5rem; border: 1.5px solid var(--edge); border-radius: 0.625rem; padding: 0.4375rem 0.625rem; margin-top: 0.375rem; overflow: hidden; text-align: left; font-size: 0.875rem; }
-.po .bar { position: absolute; inset: 0; background: #ece9e2; transform-origin: left; transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1); }
-.po.mine .bar { background: #dcd8cf; }
+/* Every line has one shape: face | name and time on one line, then the content, then the emoji row. */
+.row { display: grid; grid-template-columns: 2.25rem minmax(0, 1fr); column-gap: 0.75rem; padding: 0.375rem 0; }
+.row > .av { width: 2.25rem; height: 2.25rem; font-size: 0.6875rem; margin-top: 0.125rem; }
+.feedcard .av { color: #3a3a3c; border-color: var(--page); } /* the card remaps --ink2 to light; initials stay dark on their light circle */
+.row > .av { border-width: 0; }
+.av.sys { background: var(--on-page); color: #111; }
+.row-body { min-width: 0; }
+.row-head { display: flex; align-items: baseline; gap: 0.5rem; min-height: 1.375rem; line-height: 1.375rem; }
+.row-head b { font-size: 0.9375rem; font-weight: 700; color: var(--on-page); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row-time { font-size: 0.75rem; color: var(--mut); white-space: nowrap; }
+.row-label { display: block; }
+.row-main { display: flex; gap: 0.75rem; align-items: flex-start; width: 100%; text-align: left; border-radius: 0.5rem; }
+.row-text { flex: 1; min-width: 0; display: block; }
+.row-auto { display: block; font-size: 0.9375rem; line-height: 1.4; color: var(--mut); overflow-wrap: anywhere; }
+button.row-main:hover .row-auto { color: var(--on-page); }
+button.row-main:active { background: var(--soft); }
+.row-main .th { flex: none; width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; background: var(--well) center / cover; margin-top: 0.125rem; }
+
+/* A message reads as plain text under the name: only the message bar is shaped like a field. */
+.fp-t, .rp-t { font-size: 0.9375rem; line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; }
+.fp.sending .fp-t, .fp.sending .fp-gif, .fp.sending .fp-poll { opacity: 0.6; }
+.glyph { display: inline-block; width: 1.3em; height: 1.3em; vertical-align: -0.3em; margin: 0 0.05em; object-fit: contain; }
+.jumbo .glyph { width: 3rem; height: 3rem; vertical-align: middle; margin: 0.125rem 0.0625rem; }
+.fp-gif { display: block; width: auto; height: auto; max-width: min(17.5rem, 100%); max-height: 20rem; border-radius: 0.5rem; margin-top: 0.25rem; background: var(--pill); }
+
+/* The author's "…": quiet, shown on hover with a mouse and always (dim) on a touch screen. */
+.fp-more { margin-left: auto; align-self: center; width: 1.75rem; height: 1.75rem; display: grid; place-items: center; border-radius: 0.375rem; color: var(--mut); opacity: 0; transition: opacity 120ms ease-out; }
+.row:hover .fp-more, .row:focus-within .fp-more, .fp-more:focus-visible { opacity: 1; }
+.fp-more:hover { background: var(--pill); color: var(--on-page); }
+@media (hover: none) { .fp-more { opacity: 0.6; } }
+.fp-ask { display: flex; flex-wrap: wrap; align-items: center; gap: 0.375rem; margin: 0.125rem 0 0.25rem; font-size: 0.8125rem; color: var(--mut); }
+.fp-ask span { margin-right: 0.25rem; }
+.fp-ask button { min-height: 1.875rem; padding: 0 0.75rem; border-radius: 999px; font-weight: 700; font-size: 0.8125rem; background: var(--pill); color: var(--on-page); }
+.fp-ask .fp-yes { background: #f4f1ea; color: #111; }
+
+/* A poll keeps a quiet box, in the card's own thin grey. */
+.fp-poll { margin-top: 0.25rem; max-width: 32rem; border: 1px solid var(--outline); border-radius: 0.75rem; padding: 0.5rem 0.625rem 0.375rem; }
+.fp-q { font-size: 0.9375rem; font-weight: 700; line-height: 1.35; margin-bottom: 0.25rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.po { position: relative; display: flex; align-items: center; gap: 0.5rem; width: 100%; min-height: 2.5rem; border: 1px solid var(--outline); border-radius: 0.5rem; padding: 0.375rem 0.625rem; margin-top: 0.375rem; overflow: hidden; text-align: left; font-size: 0.875rem; }
+.po .bar { position: absolute; inset: 0; background: rgba(244, 241, 234, 0.1); transform-origin: left; transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1); }
+.po.mine { border-color: var(--mine-rim); }
+.po.mine .bar { background: rgba(244, 241, 234, 0.2); }
 .po > *:not(.bar) { position: relative; }
 .po .lb { flex: 1; min-width: 0; font-weight: 700; display: inline-flex; gap: 0.3125rem; align-items: center; overflow-wrap: anywhere; }
 .po .lb svg.i { stroke-width: 2.4; }
 .po .avs .av { width: 1.375rem; height: 1.375rem; font-size: 0.5rem; }
 .po b { min-width: 0.875rem; text-align: right; }
 .po:active { transform: scale(0.99); }
-.pm { font-size: 0.7812rem; color: var(--mut); margin-top: 0.375rem; }
+.pm { font-size: 0.75rem; color: var(--mut); margin-top: 0.375rem; }
 
-/* Replies, folded under the box and opened in place. */
-.fp-thread { margin: 0.375rem 0 0 2.5rem; }
-.reps { display: inline-flex; align-items: center; gap: 0.375rem; min-height: 2rem; font-size: 0.8438rem; font-weight: 700; color: var(--ink2); }
-.reps .avs .av { width: 1.375rem; height: 1.375rem; font-size: 0.5rem; }
-.fp-replies { display: grid; gap: 0.25rem; padding-top: 0.25rem; animation: fi-in 180ms ease-out both; }
-.rp { display: flex; gap: 0.5rem; align-items: flex-start; padding: 0.3125rem 0; }
-.rp .av { width: 1.5rem; height: 1.5rem; font-size: 0.5rem; }
-.rp p { flex: 1; min-width: 0; font-size: 0.875rem; line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; }
+/* Emoji under a line: Discord's pills, then the add pill. With no emoji only a small, dim add pill stays. */
+.rx { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem; margin-top: 0.125rem; }
+.rx.has { margin-top: 0.25rem; }
+.rx-pill, .rx.has .rx-add { display: inline-flex; align-items: center; gap: 0.375rem; height: 1.625rem; padding: 0 0.5rem; border-radius: 0.5rem; background: var(--pill); border: 1px solid transparent; font-size: 0.8125rem; font-weight: 700; color: var(--on-page); transition: background-color 120ms ease-out, border-color 120ms ease-out, transform 120ms ease-out; }
+.rx-pill:hover, .rx.has .rx-add:hover { background: var(--pill-hover); }
+.rx-pill.mine { background: var(--mine); border-color: var(--mine-rim); }
+.rx-pill .glyph { width: 1rem; height: 1rem; margin: 0; vertical-align: middle; }
+.rx-pill:active, .rx-add:active { transform: scale(0.92); }
+.rx-n { display: inline-grid; overflow: hidden; height: 1.25em; line-height: 1.25em; min-width: 0.5em; font-variant-numeric: tabular-nums; }
+.rx-n .up { animation: rx-up 220ms cubic-bezier(0.16, 1, 0.3, 1); }
+.rx-n .down { animation: rx-down 220ms cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes rx-up { from { transform: translateY(100%); opacity: 0; } }
+@keyframes rx-down { from { transform: translateY(-100%); opacity: 0; } }
+.rx-add { position: relative; display: inline-grid; place-items: center; height: 1.25rem; padding: 0 0.3125rem; border-radius: 0.4375rem; color: var(--mut); opacity: 0.7; }
+.rx-add::before { content: ""; position: absolute; inset: -0.375rem -0.25rem; } /* a finger-sized target around the small pill */
+.rx-add:hover { opacity: 1; color: var(--on-page); background: var(--pill); }
+.rx.has .rx-add { opacity: 1; color: var(--mut); padding: 0 0.4375rem; }
+.rx-add svg.i { width: 1rem; height: 1rem; }
 
-.more { display: block; width: 100%; text-align: center; font-weight: 800; font-size: 0.875rem; padding: 0.625rem 0 0.125rem; border-top: 1px solid var(--line); min-height: 2.75rem; }
-.more span { border-bottom: 1.5px solid var(--edge); }
-.empty { color: var(--ink2); font-size: 0.9062rem; padding: 0.625rem 0 0.25rem; }
-.empty b { display: block; color: var(--ink); font-size: 0.9688rem; margin-bottom: 0.125rem; }
+/* "Reply" sits on the emoji row, so a post costs no extra line. */
+.reps { position: relative; display: inline-flex; align-items: center; gap: 0.3125rem; height: 1.375rem; padding: 0 0.375rem; margin-left: 0.125rem; border-radius: 0.4375rem; font-size: 0.8125rem; font-weight: 700; color: var(--mut); }
+.reps::before { content: ""; position: absolute; inset: -0.375rem -0.125rem; }
+.reps:hover { color: var(--on-page); background: var(--pill); }
+.reps svg.i { width: 0.875rem; height: 0.875rem; }
+.reps .avs .av { width: 1.125rem; height: 1.125rem; font-size: 0.4375rem; }
+.fp-replies { display: grid; gap: 0.125rem; margin-top: 0.375rem; padding-left: 0.75rem; border-left: 1px solid var(--line); animation: fi-in 180ms ease-out both; }
+.rp { display: grid; grid-template-columns: 1.5rem minmax(0, 1fr); column-gap: 0.5rem; padding: 0.25rem 0; }
+.rp .av { width: 1.5rem; height: 1.5rem; font-size: 0.5rem; margin-top: 0.125rem; }
+.rp-body { min-width: 0; }
+.rp .row-head { min-height: 1.25rem; line-height: 1.25rem; }
+.rp .row-head b { font-size: 0.875rem; }
+.rp-t { font-size: 0.875rem; }
 
-/* A new line eases into the top of the list. */
+.empty { color: var(--mut); font-size: 0.9062rem; padding: 0.625rem 0 0.25rem; }
+.empty b { display: block; color: var(--on-page); font-size: 0.9688rem; margin-bottom: 0.125rem; }
+
+/* A new line slides up into place at the foot. */
 .fi.arrive { animation: fi-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both; }
-@keyframes fi-in { from { opacity: 0; transform: translateY(-0.375rem); } }
+@keyframes fi-in { from { opacity: 0; transform: translateY(0.5rem); } }
 
-/* The message bar, as on an iPhone: "+", a pill field that grows to four lines, and the round send arrow. */
+/* "New messages": a small pill over the foot of the list while the friend reads further up. */
+.unseen { position: absolute; left: 50%; bottom: 0.5rem; z-index: 2; display: inline-flex; align-items: center; gap: 0.3125rem; height: 1.875rem; padding: 0 0.75rem; border-radius: 999px; background: #f4f1ea; color: #111; font-size: 0.8125rem; font-weight: 800; transform: translateX(-50%); animation: unseen-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.unseen svg.i { width: 0.875rem; height: 0.875rem; stroke-width: 2.4; }
+@keyframes unseen-in { from { opacity: 0; transform: translate(-50%, 0.5rem); } }
+
+/* The message bar, as on Discord: one floating rounded bar a step lighter than the page, no outline. */
+.feedcard > .msg { margin-top: 0.5rem; }
 .msg { display: grid; }
-.msg-bar { display: flex; align-items: flex-end; gap: 0.5rem; }
-.msg-round { flex: none; width: 2.25rem; height: 2.25rem; border-radius: 50%; display: grid; place-items: center; margin-bottom: 0.1875rem; }
+.msg-bar { display: flex; align-items: flex-end; gap: 0.125rem; min-height: 2.75rem; padding: 0.25rem; border-radius: 1.375rem; background: var(--bar); transition: box-shadow 150ms ease-out; }
+.msg-bar:focus-within { box-shadow: inset 0 0 0 1px rgba(244, 241, 234, 0.16); }
+.msg-icon { flex: none; width: 2.25rem; height: 2.25rem; border-radius: 50%; display: grid; place-items: center; color: var(--mut); transition: color 120ms ease-out, background-color 120ms ease-out, transform 200ms cubic-bezier(0.16, 1, 0.3, 1); }
+.msg-icon:hover, .msg-icon.open { color: var(--on-page); background: var(--pill); }
+.msg-icon:active { transform: scale(0.9); }
+.msg-plus.open { transform: rotate(45deg); }
+.msg-plus.open:active { transform: rotate(45deg) scale(0.9); }
 .msg-plus-wrap { position: relative; flex: none; }
-.msg-plus { background: var(--soft); color: var(--ink2); transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), background-color 150ms ease-out; }
-.msg-plus.open { transform: rotate(45deg); background: var(--acc); color: var(--on-acc); }
-.msg-menu { position: absolute; left: 0; top: calc(100% + 0.375rem); z-index: 5; min-width: 9rem; background: #fff; border: 2px solid var(--edge); border-radius: 0.875rem; padding: 0.25rem;
-  box-shadow: 0 0.75rem 1.5rem -1rem #0008; transform-origin: 1.125rem 0; transform: scale(0.6); opacity: 0; visibility: hidden;
+.msg-menu { position: absolute; left: 0; bottom: calc(100% + 0.5rem); z-index: 5; min-width: 9rem; background: var(--sheet); border: 1px solid var(--rim); border-radius: 0.75rem; padding: 0.25rem; color: var(--on-page);
+  transform-origin: 1.125rem 100%; transform: scale(0.6); opacity: 0; visibility: hidden;
   transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), opacity 140ms ease-out, visibility 0s 220ms; }
-.msg-menu.open { transform: none; opacity: 1; visibility: visible; transition: transform 220ms cubic-bezier(0.3, 1.15, 0.5, 1), opacity 140ms ease-out, visibility 0s; }
-.msg-menu button { display: flex; align-items: center; gap: 0.5rem; width: 100%; min-height: 2.75rem; padding: 0 0.75rem; border-radius: 0.625rem; font-weight: 700; font-size: 0.9375rem; }
-.msg-menu button:hover, .msg-menu button:focus-visible { background: var(--soft); }
+.msg-menu.open { transform: none; opacity: 1; visibility: visible; transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), opacity 140ms ease-out, visibility 0s; }
+.msg-menu button { display: flex; align-items: center; gap: 0.5rem; width: 100%; min-height: 2.75rem; padding: 0 0.75rem; border-radius: 0.5rem; font-weight: 700; font-size: 0.9375rem; }
+.msg-menu button:hover, .msg-menu button:focus-visible { background: var(--pill-hover); }
 .msg-menu button:disabled { color: var(--mut); }
 
 /* The field grows line by line: a hidden copy of the text sets the height, so nothing is measured and nothing jumps. */
-.msg-field { flex: 1; min-width: 0; display: grid; border: 1.5px solid #c9c6bf; border-radius: 1.3125rem; background: #fff; transition: border-color 150ms ease-out; }
-.msg-field:focus-within { border-color: var(--edge); }
+.msg-field { flex: 1; min-width: 0; display: grid; }
 .msg-field::after { content: attr(data-value) " "; visibility: hidden; white-space: pre-wrap; overflow-wrap: anywhere; }
-.msg-field::after, .msg-field textarea { grid-area: 1 / 1; font: inherit; font-size: max(16px, 1rem); line-height: 1.375; padding: 0.4375rem 0.875rem; max-height: calc(4 * 1.375em + 0.875rem); }
+.msg-field::after, .msg-field textarea { grid-area: 1 / 1; font: inherit; font-size: max(16px, 1rem); line-height: 1.375; padding: 0.5rem 0.375rem; max-height: calc(5 * 1.375em + 1rem); }
 .msg-field::after { overflow: hidden; }
-.msg-field textarea { resize: none; border: 0; outline: 0; background: transparent; color: var(--ink); overflow-y: auto; min-height: 0; }
-.msg-field textarea::placeholder { color: #76767b; }
-.msg-send { background: #e4e1da; color: #fff; transform: scale(0.82); opacity: 0.55; transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1), opacity 150ms ease-out, background-color 150ms ease-out; }
-.msg-send.ready { background: var(--acc); transform: none; opacity: 1; }
-.msg-send:disabled { cursor: default; }
-.msg-send.ready:active, .msg-plus:active { transform: scale(0.9); }
-.msg-plus.open:active { transform: rotate(45deg) scale(0.9); }
-.msg-error { font-size: 0.8125rem; color: #a3271c; font-weight: 600; margin: 0.375rem 0 0 2.75rem; }
-.msg.small .msg-error { margin-left: 0; }
+.msg-field textarea { resize: none; border: 0; outline: 0; background: transparent; color: var(--on-page); overflow-y: auto; min-height: 0; caret-color: var(--on-page); }
+.msg-field textarea::placeholder { color: var(--mut); opacity: 0.85; }
+.msg-field textarea:focus-visible { outline: none; }
+/* Send appears only when there is something to send. */
+.msg-send { display: none; flex: none; width: 2.25rem; height: 2.25rem; border-radius: 50%; place-items: center; background: #f4f1ea; color: #111; }
+.msg-bar.ready .msg-send { display: grid; animation: send-in 180ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.msg-send:active { transform: scale(0.9); }
+.msg-send svg.i { stroke-width: 2.4; }
+@keyframes send-in { from { opacity: 0; transform: scale(0.6); } }
+.msg-error { font-size: 0.8125rem; color: #ff9c8f; font-weight: 600; margin: 0.375rem 0 0 0.75rem; }
 
-/* The reply bar is smaller. */
+/* The reply bar: the same bar, smaller. */
 .msg.small { margin-top: 0.25rem; }
-.msg.small .msg-round { width: 2rem; height: 2rem; margin-bottom: 0.1875rem; }
+.msg.small .msg-bar { min-height: 2.25rem; padding: 0.125rem; border-radius: 1.125rem; }
+.msg.small .msg-icon, .msg.small .msg-send { width: 2rem; height: 2rem; }
+.msg.small .msg-field::after, .msg.small .msg-field textarea { padding: 0.3125rem 0.5rem; }
+.msg.small .msg-error { margin-left: 0.5rem; }
 
-/* Poll: the option fields slide in above the field (a 0fr to 1fr row, as the module folds do). */
+/* Poll: the option fields slide in above the bar (a 0fr to 1fr row, as the module folds do). */
 .msg-poll { display: grid; grid-template-rows: 0fr; opacity: 0; transform: translateY(0.375rem); transition: grid-template-rows 240ms cubic-bezier(0.16, 1, 0.3, 1), opacity 180ms ease-out, transform 240ms cubic-bezier(0.16, 1, 0.3, 1); }
 .msg-poll.open { grid-template-rows: 1fr; opacity: 1; transform: none; }
 .msg-poll-in { min-height: 0; overflow: hidden; }
-.msg-poll-box { position: relative; padding: 0 0 0.5rem 2.75rem; }
+.msg-poll-box { position: relative; padding: 0 0 0.5rem; }
 .msg-poll-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.375rem; font-size: 0.8125rem; color: var(--mut); padding: 0.125rem 2.5rem 0.25rem 0; }
-.msg-poll-head b { color: var(--ink); font-size: 0.875rem; }
-.msg-poll-head svg.i { color: var(--ink); }
+.msg-poll-head b { color: var(--on-page); font-size: 0.875rem; }
+.msg-poll-head svg.i { color: var(--on-page); }
 .msg-poll-off { position: absolute; top: -0.5rem; right: -0.25rem; width: 2.25rem; height: 2.25rem; display: grid; place-items: center; color: var(--mut); }
-.msg-opt { display: block; width: 100%; border: 1.5px solid #c9c6bf; border-radius: 0.75rem; padding: 0.4375rem 0.75rem; font-size: max(16px, 1rem); background: #fff; margin-top: 0.375rem; outline: 0; }
-.msg-opt:focus { border-color: var(--edge); outline: none; }
-.msg-opt::placeholder { color: #76767b; }
+.msg-opt { display: block; width: 100%; border: 0; border-radius: 0.625rem; padding: 0.5rem 0.75rem; font-size: max(16px, 1rem); background: var(--bar); color: var(--on-page); margin-top: 0.375rem; outline: 0; }
+.msg-opt:focus { box-shadow: inset 0 0 0 1px rgba(244, 241, 234, 0.4); }
+.msg-opt::placeholder { color: var(--mut); }
 .msg-addo { font-size: 0.875rem; font-weight: 800; border-bottom: 1.5px solid var(--edge); margin-top: 0.5rem; min-height: 1.75rem; }
+
+/* The pickers' panel: a dark sheet with a grab handle on a phone, a popover beside its button on a desktop. */
+.drawer {
+  --bar: #302d2a; --sheet: #2b2926; --well: #1c1a18; --rim: #45413c; --mut: var(--on-page-mut);
+  --pill: rgba(244, 241, 234, 0.07); --pill-hover: rgba(244, 241, 234, 0.12);
+  position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; overflow: hidden;
+  background: rgba(0, 0, 0, 0); color: var(--on-page); transition: background-color 320ms ease-out;
+}
+.drawer::backdrop { background: transparent; }
+.drawer.shown { background: rgba(0, 0, 0, 0.45); }
+.drawer-panel {
+  position: absolute; left: 0; right: 0; bottom: 0; max-width: 40rem; margin: 0 auto; height: min(72vh, 36rem); height: min(72dvh, 36rem);
+  display: flex; flex-direction: column; background: var(--sheet); border-radius: 1rem 1rem 0 0; outline: none;
+  padding-bottom: env(safe-area-inset-bottom); transform: translate3d(0, 100%, 0); will-change: transform;
+  transition: transform 440ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+.drawer.shown .drawer-panel { transform: translate3d(0, 0, 0); }
+.drawer-panel.dragging { transition: none; }
+.drawer-grab { flex: none; height: 1.375rem; display: grid; place-items: center; touch-action: none; cursor: grab; }
+.drawer-grab span { width: 2.25rem; height: 0.3125rem; border-radius: 999px; background: rgba(244, 241, 234, 0.28); }
+@media (min-width: 900px) and (hover: hover) {
+  .drawer, .drawer.shown { background: transparent; }
+  .drawer-panel {
+    right: auto; bottom: auto; margin: 0; width: 26rem; height: min(30rem, 70vh); border: 1px solid var(--rim); border-radius: 0.75rem; padding-top: 0.625rem;
+    transform: translate3d(0, 0.375rem, 0) scale(0.97); opacity: 0; transform-origin: 90% 100%;
+    transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), opacity 160ms ease-out;
+  }
+  .drawer.shown .drawer-panel { transform: none; opacity: 1; }
+  .drawer-grab { display: none; }
+}
+
+/* Emoji | GIFs | Stickers */
+.seg { flex: none; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 0.125rem; margin: 0 0.75rem 0.5rem; padding: 0.1875rem; border-radius: 0.625rem; background: var(--well); }
+.seg button { height: 2rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 700; color: var(--mut); transition: background-color 150ms ease-out, color 150ms ease-out; }
+.seg button[aria-selected="true"] { background: #3a3733; color: var(--on-page); }
+
+/* The emoji grid: search, sections with small grey headings, the group strip along the foot. */
+.eb, .gb { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.eb-search { flex: none; display: flex; align-items: center; gap: 0.5rem; height: 2.5rem; margin: 0 0.75rem 0.375rem; padding: 0 0.75rem; border-radius: 0.5rem; background: var(--well); border: 1px solid transparent; color: var(--mut); transition: border-color 120ms ease-out; }
+.eb-search:focus-within { border-color: var(--on-page); }
+.eb-search svg.i { width: 1.125rem; height: 1.125rem; }
+.eb-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--on-page); font-size: max(16px, 1rem); caret-color: var(--on-page); }
+.eb-search input::placeholder { color: var(--mut); }
+.eb-search input:focus-visible { outline: none; } /* the field's own border shows focus */
+.eb-search input::-webkit-search-cancel-button { filter: invert(0.85); }
+.eb-scroll, .gb-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 0.75rem 0.5rem; scrollbar-width: thin; scrollbar-color: var(--rim) transparent; }
+.eb-sec h3 { position: sticky; top: 0; z-index: 1; background: var(--sheet); font-size: 0.75rem; font-weight: 700; color: var(--mut); padding: 0.5rem 0.125rem 0.25rem; }
+.eb-sec.lazy { content-visibility: auto; contain-intrinsic-size: auto 20rem; }
+.eb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(2.125rem, 1fr)); gap: 0.125rem; }
+.eb-cell { aspect-ratio: 1; display: grid; place-items: center; border-radius: 0.375rem; transition: background-color 80ms ease-out; }
+.eb-cell:hover, .eb-cell:focus-visible { background: var(--pill-hover); }
+.eb-cell:active { transform: scale(0.9); }
+.eb-cell .glyph { width: 1.875rem; height: 1.875rem; margin: 0; vertical-align: middle; }
+.eb-note { font-size: 0.8125rem; color: var(--mut); padding: 0.375rem 0.125rem; }
+.eb-retry { font-weight: 800; color: var(--on-page); text-decoration: underline; text-underline-offset: 0.15em; }
+.eb-credit { font-size: 0.6875rem; color: var(--mut); text-align: center; padding: 0.75rem 0 0.25rem; }
+.eb-tabs { flex: none; display: flex; gap: 0.125rem; padding: 0.375rem 0.5rem; border-top: 1px solid var(--rim); overflow-x: auto; scrollbar-width: none; }
+.eb-tabs button { flex: 1 0 2rem; height: 2.25rem; display: grid; place-items: center; border-radius: 0.5rem; color: var(--mut); }
+.eb-tabs button .glyph { width: 1.25rem; height: 1.25rem; margin: 0; filter: grayscale(1); opacity: 0.6; transition: filter 150ms ease-out, opacity 150ms ease-out; }
+.eb-tabs button:hover .glyph, .eb-tabs button.on .glyph { filter: none; opacity: 1; }
+.eb-tabs button.on { background: var(--pill-hover); color: var(--on-page); }
+.eb-tabs .eb-7tv { font-size: 0.6875rem; font-weight: 800; letter-spacing: 0.02em; }
+
+/* KLIPY: category tiles, then a two-column masonry. */
+.gb-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; padding-top: 0.125rem; }
+.gb-tile { position: relative; aspect-ratio: 16 / 9; border-radius: 0.5rem; overflow: hidden; background: var(--well); }
+.gb-tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.gb-tile::after { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); transition: background-color 150ms ease-out; }
+.gb-tile:hover::after { background: rgba(0, 0, 0, 0.3); }
+.gb-tile > span { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 0.375rem; padding: 0 0.5rem; color: #fff; font-weight: 800; font-size: 0.9375rem; text-align: center; text-transform: capitalize; }
+.gb-tile.trending { background: #3a3733; }
+.gb-tile.ghost { pointer-events: none; }
+.gb-head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 0.25rem; padding: 0.125rem 0 0.375rem; background: var(--sheet); }
+.gb-head h3 { font-size: 0.9375rem; font-weight: 800; text-transform: capitalize; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gb-back { width: 2rem; height: 2rem; display: grid; place-items: center; border-radius: 0.5rem; color: var(--mut); }
+.gb-back:hover { background: var(--pill-hover); color: var(--on-page); }
+.gb-masonry { display: grid; grid-template-columns: 1fr 1fr; gap: 0.375rem; align-items: start; }
+.gb-col { display: grid; gap: 0.375rem; }
+.gb-item { display: block; width: 100%; border-radius: 0.5rem; overflow: hidden; background: var(--well); }
+.gb-item img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.gb-masonry.stickers .gb-item { background: transparent; }
+.gb-masonry.stickers .gb-item img { object-fit: contain; }
+.gb-item:hover, .gb-item:focus-visible { box-shadow: 0 0 0 2px var(--on-page); }
+.gb-note { text-align: center; padding: 1.25rem 0.5rem; }
+.gb-credit { flex: none; font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.02em; color: var(--mut); text-align: center; padding: 0.375rem 0; border-top: 1px solid var(--rim); }
 
 @media (min-width: 900px) {
   .feedcard { padding: 0.875rem 1.375rem 1rem; margin-bottom: 1rem; }
-  .fl p { font-size: 0.9688rem; }
-  .fp .q { font-size: 1rem; }
+  .eb-grid { grid-template-columns: repeat(auto-fill, minmax(2.25rem, 1fr)); }
+  .eb-cell .glyph { width: 1.75rem; height: 1.75rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fi.arrive, .fp-replies { animation: none; }
-  .po .bar, .msg-plus, .msg-menu, .msg-menu.open, .msg-send, .msg-poll, .msg-field { transition: none; }
+  .fi.arrive, .fp-replies, .unseen, .rx-n .up, .rx-n .down, .msg-bar.ready .msg-send { animation: none; }
+  .po .bar, .msg-icon, .msg-menu, .msg-menu.open, .msg-poll, .rx-pill, .seg button, .fp-more { transition: none; }
+  .drawer-panel, .drawer.shown .drawer-panel { transform: none; opacity: 0; transition: opacity 150ms linear; }
+  .drawer.shown .drawer-panel { opacity: 1; }
 }
-
-/* Activity is an outline on the charcoal page, not a white card (owner, 24 Nov 2026).
-   The card remaps the ink tokens to the page's light ones, so every line inside follows. */
-.feedcard {
-  background: transparent; border-width: 1px; border-color: #57534d; color: var(--on-page);
-  --ink: var(--on-page); --ink2: var(--on-page); --mut: var(--on-page-mut);
-  --line: rgba(244, 241, 234, 0.14); --soft: rgba(244, 241, 234, 0.1); --edge: rgba(244, 241, 234, 0.6);
-  --acc: #f4f1ea; --on-acc: #111;
-}
-.feedcard .fp .box, .feedcard .msg-field, .feedcard .msg-opt { background: transparent; }
-.feedcard .msg-field, .feedcard .msg-opt { border-color: rgba(244, 241, 234, 0.4); color: var(--on-page); }
-.feedcard .msg-field textarea::placeholder, .feedcard .msg-opt::placeholder { color: var(--on-page-mut); }
-.feedcard .po .bar { background: rgba(244, 241, 234, 0.14); }
-.feedcard .po.mine .bar { background: rgba(244, 241, 234, 0.26); }
-.feedcard .msg-send { background: rgba(244, 241, 234, 0.25); color: #111; }
-.feedcard .msg-send.ready { background: #f4f1ea; }
-.feedcard .msg-error { color: #ff9c8f; }
-.feedcard .av.sys { background: #f4f1ea; color: #111; }
-/* The "+" menu is a white popover; it keeps the dark ink. */
-.feedcard .msg-menu { --ink: #1c1c1e; --ink2: #3a3a3c; --mut: #6e6e73; --soft: #f5f5f4; --edge: #000; color: #1c1c1e; }
-
-/* Emoji under a Feed line: count chips and the add button. */
-.rx { display: flex; flex-wrap: wrap; gap: 0.375rem; align-items: center; padding: 0 0 0.5rem 2.75rem; }
-.rx-chip { display: inline-flex; align-items: center; gap: 0.3125rem; min-height: 1.875rem; padding: 0 0.5625rem; border-radius: 999px; border: 1px solid rgba(244, 241, 234, 0.3); font-size: 0.8125rem; font-weight: 700; color: var(--on-page); transition: transform 0.12s ease, background 0.12s ease; }
-.rx-chip span { font-size: 1rem; line-height: 1; }
-.rx-chip[aria-pressed="true"] { background: rgba(244, 241, 234, 0.2); border-color: rgba(244, 241, 234, 0.7); }
-.rx-chip:active, .rx-add:active { transform: scale(0.92); }
-.rx-add { display: grid; place-items: center; width: 1.875rem; height: 1.875rem; border-radius: 999px; color: var(--on-page-mut); transition: transform 0.12s ease; }
-.rx-add:hover { color: var(--on-page); }
-.rx-picker { width: 100%; height: min(24rem, 60vh); --border-size: 0; --input-font-size: 16px; --emoji-size: 1.5rem; --num-columns: 8; }
-.feedcard > .msg { margin-top: 0.5rem; }
-
-/* The feed never ends, so it keeps one height and scrolls inside the card (owner, 24 Nov 2026). */
-.feedcard .feed { max-height: min(28rem, 62vh); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: #57534d transparent; margin-right: -0.375rem; padding-right: 0.375rem; }
