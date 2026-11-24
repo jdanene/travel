@@ -127,6 +127,7 @@ Paths live in one file, `web/src/lib/paths.ts`. The rules file repeats them; the
   places
     areas     { {areaId}: { name, destination, lat, lng } }
     venues    { {venueId}: { name, destination, areaId?, lat, lng, line?, onMap? } }
+    custom    { {placeId}: { name, kind: "event"|"food"|"beach"|"activity"|"other", destination, lat, lng, link?, addedBy, at } }   a friend's place ("Add to map"); inside the destination's box; the adder or an organizer removes it; no edits
 /tripSecrets/{tripId}            no phone can read this branch
   organizerKey { {key}: true }
   claims       { {uid}: key }    a device writes its own claim; the rules test the key exists
@@ -134,7 +135,7 @@ Paths live in one file, `web/src/lib/paths.ts`. The rules file repeats them; the
                                      with every "." as "," (web/src/lib/ids.ts); replaced whole on each run
 ```
 
-Ids that must not repeat are made from their content: a member, area or venue id from its name (`web/src/lib/ids.ts`, which the scripts import too); a date option id from its two days; a `linkId` from the link address without its query string; `stayId` from the listing address without its query string; a seeded `showId` from destination, venue, date and artist. Two friends who add the same thing write the same record.
+Ids that must not repeat are made from their content: a member, area or venue id from its name (`web/src/lib/ids.ts`, which the scripts import too); a date option id from its two days; a `linkId` from the link address without its query string; `stayId` from the listing address without its query string; a seeded `showId` from destination, venue, date and artist. Two friends who add the same thing write the same record. The one exception is a friend's place on the map: its `placeId` is the time and a random tail, so two friends who add the same name at once get two pins.
 
 Rules, in words:
 
@@ -168,7 +169,7 @@ There is no app code yet, so there is nothing to move. The rules for the build:
 - One avatar row (`Avatars.tsx`) serves every "who" list: replies, said yes, hearts, in.
 - One notice component (`Notice.tsx`) shows every failure and the organizer line.
 - One write helper (`web/src/lib/db.ts`) wraps every database write and turns a refusal or a lost connection into a message. No feature calls the Firebase SDK directly.
-- The map uses Leaflet with OpenStreetMap tiles, as the mock does (lines 7 to 8 of the mock load it).
+- The map uses MapLibre with OpenFreeMap's Positron vector tiles (OpenStreetMap data), in the app's colours. The mock loaded Leaflet with OpenStreetMap tiles; the owner asked for a sleeker map (design/app/README.md, exception 13).
 - Trip 14 changes `public/assets/hype.js`: the button is one function there, called by options 1 and 13. It is not copied into each page.
 
 A third copy of a fetch, a path or a date format is a finding in review.
@@ -462,7 +463,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 1. (8) The crew list is empty: allowed.
 2. The file is missing, is not JSON, or lacks a field: stop and name the file and the field.
 3. A date option ends before it starts, lies outside the season, or leaves out 22 February 2027: refuse and say which. Screen 2 says "Each includes the Full Moon Party, Mon 22 Feb."
-4. A second run keeps the id and the key, replaces `info`, `crew/expected`, `dates/options` and `places`, and touches nothing else.
+4. A second run keeps the id and the key, replaces `info`, `crew/expected`, `places/areas`, `places/venues` and `tripSecrets/{tripId}/admins`, writes each starting date option by its own path, and touches nothing else (friends' date options and `places/custom`, the friends' places, stay).
 5. (13) A date option that has answers is removed from the file: the option goes; the page ignores the answers left behind.
 6. Two crew names are equal: refuse and name them.
 7. The Firebase CLI is not signed in: stop with its message and the sign-in command.

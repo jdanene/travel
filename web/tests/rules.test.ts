@@ -1,6 +1,7 @@
 /**
  * The rules tests of Trip 2 (1 to 9), of the admin list (10 to 12, plan
- * D15) and of Add dates (13 to 15, plan D16), against the database emulator. Run with
+ * D15), of Add dates (13 to 15, plan D16) and of Add to map (16 and 17),
+ * against the database emulator. Run with
  * `npm run test:rules` in web/; it starts the emulator, runs this file and
  * stops it. Each test names the rule it proves, in the words of plan
  * section 4.
@@ -21,6 +22,7 @@ const ADMIN = "Owner@Example.com";
 /** A device signed in with Google: its email, verified or not. */
 const google = (uid: string, email: string, verified: boolean) =>
   env.authenticatedContext(uid, { email, email_verified: verified }).database();
+const place = (extra: object) => ({ name: "Sunset bar", kind: "food", destination: "bali", lat: -8.64, lng: 115.14, at: 1, ...extra });
 const show = (extra: object) => ({ destination: "bali", venue: "Savaya", date: "2027-02-13", artist: "Peggy Gou", verified: true, at: 1, ...extra });
 
 beforeAll(async () => {
@@ -134,4 +136,12 @@ describe("database rules", () => {
     await assertFails(set(ref(a, paths.dateOption(T, "2027-03-28_2027-04-02")), { from: "2027-03-28", to: "2027-04-02", addedBy: "alice", at: 1 }));
     await assertFails(set(ref(a, paths.dateOption(T, "2027-02-20_2027-02-10")), { from: "2027-02-20", to: "2027-02-10", addedBy: "alice", at: 1 }));
   });
+
+  it("16. lets a member put a place on the map under its member, and refuses it under another", async () => {
+    await assertSucceeds(set(ref(db("uid-a"), paths.customPlace(T, "p1")), place({ addedBy: "alice" })));
+    await assertFails(set(ref(db("uid-a"), paths.customPlace(T, "p2")), place({ addedBy: "bob" })));
+  });
+
+  it("17. refuses a place outside the box around its destination", () =>
+    assertFails(set(ref(db("uid-a"), paths.customPlace(T, "p3")), place({ addedBy: "alice", lat: 9.7, lng: 100.0 }))));
 });

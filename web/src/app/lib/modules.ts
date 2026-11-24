@@ -66,7 +66,7 @@ export function modules(trip: Trip, memberId: MemberId | null): Module[] {
   const shows = Object.keys(trip.parties?.shows ?? {}).length;
   shown.push({ id: "parties", lines: [shows ? `${count(shows, "show")} · I'm in` : "Nothing announced yet."] });
   const links = Object.keys(trip.links?.items ?? {}).length;
-  shown.push({ id: "links", lines: [links ? count(links, "link") : "No links yet."] });
+  shown.push({ id: "links", lines: [links ? count(links, "link") : "TikToks & Instas"] });
   shown.push({ id: "map", lines: [] });
   return shown;
 }

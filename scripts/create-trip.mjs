@@ -9,15 +9,15 @@
  * The first run makes the trip id (20 random characters) and the organizer
  * key, and saves both in local/trip.state.json (local/trip.state.emulator.json
  * with --emulator). Every later run keeps them.
- * Each run replaces info, crew/expected, places and the admin list
- * (tripSecrets/{tripId}/admins, from the file's `admins`), writes each
- * starting date option by its own path, and touches nothing else: the
- * options friends added with "Add dates", answers, hearts, stays and shows
- * stay. A starting option taken out of the trip file stays in the database;
- * the organizer removes it on the page. Removing an email from `admins`
- * stops it making new organizers; a device that is already an organizer
- * stays one until its crew/organizers/{uid} entry is deleted by hand
- * (plan, D15). Everything
+ * Each run replaces info, crew/expected, places/areas, places/venues and
+ * the admin list (tripSecrets/{tripId}/admins, from the file's `admins`),
+ * writes each starting date option by its own path, and touches nothing
+ * else: the options friends added with "Add dates", answers, hearts, stays,
+ * shows and the friends' places (places/custom) stay. A starting option
+ * taken out of the trip file stays in the database; the organizer removes
+ * it on the page. Removing an email from `admins` stops it making new
+ * organizers; a device that is already an organizer stays one until its
+ * crew/organizers/{uid} entry is deleted by hand (plan, D15). Everything
  * goes in one update, so nothing is half written. No step retries.
  */
 import { execFileSync } from "node:child_process";
@@ -81,7 +81,9 @@ const update = {
   [`trips/${tripId}/crew/expected`]: Object.fromEntries(file.crew.map((name) => [idFromName(name), name])),
   // One path per option, so the options friends added stay.
   ...Object.fromEntries(file.dateOptions.map(({ from, to }) => [`trips/${tripId}/dates/options/${dateOptionId(from, to)}`, { from, to }])),
-  [`trips/${tripId}/places`]: { areas: places.areas, venues: places.venues },
+  // Areas and venues only: places/custom holds the friends' own places, which a run must keep.
+  [`trips/${tripId}/places/areas`]: places.areas,
+  [`trips/${tripId}/places/venues`]: places.venues,
   [`tripSecrets/${tripId}/organizerKey`]: { [organizerKey]: true },
   // The whole node, so an email taken out of the file is taken out here; null when there are none.
   [`tripSecrets/${tripId}/admins`]: (file.admins ?? []).length

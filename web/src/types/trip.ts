@@ -143,9 +143,26 @@ export interface Venue {
   onMap?: boolean;
 }
 
+/** What a friend's place on the map is; each has its own pin icon. */
+export type PlaceKind = "event" | "food" | "beach" | "activity" | "other";
+
+/** A place a friend put on the map ("Add to map"); everyone sees it. No edits. */
+export interface CustomPlace {
+  name: string;
+  kind: PlaceKind;
+  destination: DestinationId;
+  lat: number;
+  lng: number;
+  link?: string;
+  addedBy: MemberId;
+  at: number;
+}
+
 export interface Places {
   areas?: Record<string, Area>;
   venues?: Record<string, Venue>;
+  /** Friends' places, written from phones (places/custom). */
+  custom?: Record<string, CustomPlace>;
 }
 
 export interface Trip {

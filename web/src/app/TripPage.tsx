@@ -128,8 +128,11 @@ function moduleSlots(tripId: string, trip: Trip, crew: CrewView, openModule: (id
     map: (
       <Suspense fallback={<div className="map-wait" aria-busy="true" />}>
         <TripMap
+          tripId={tripId}
           destinations={mapDestinations(trip)}
           pins={pins(trip)}
+          memberId={crew.memberId}
+          isOrganizer={crew.isOrganizer}
           onOpen={(pin) => openModule(pin.kind === "stay" ? "stay" : "parties")}
         />
       </Suspense>

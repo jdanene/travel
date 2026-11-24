@@ -19,7 +19,7 @@ describe("modules", () => {
       ["dates", ["13–23 Feb · confirmed"]],
       ["stay", ["1 option · heart one"]],
       ["parties", ["Nothing announced yet."]],
-      ["links", ["No links yet."]],
+      ["links", ["TikToks & Instas"]],
       ["map", []],
     ]);
   });
