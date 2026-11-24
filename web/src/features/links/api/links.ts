@@ -1,9 +1,11 @@
+import { activityLine } from "../../../lib/activity";
 import { write, type WriteResult } from "../../../lib/db";
 import * as paths from "../../../lib/paths";
+import { siteName } from "../lib/links";
 import type { LinkItem } from "../../../types/trip";
 
 /**
- * Saves a link. The rules refuse a second write to the same id, so when
+ * Saves a link, with its Activity line in the same write. The rules refuse a second write to the same id, so when
  * two friends save one link at once there is one card and the first keeps
  * "added by" (case 45).
  * Inputs: the trip, the link id (linkId()), and the item.
@@ -11,7 +13,9 @@ import type { LinkItem } from "../../../types/trip";
  * Examples (checked on the emulator): RB saves a TikTok for Bali → a card "added by RB" on every phone
  */
 export function addLink(tripId: string, id: string, item: LinkItem): Promise<WriteResult> {
-  return write({ [paths.link(tripId, id)]: item });
+  const words = item.title?.trim() || siteName(item);
+  const line = activityLine(tripId, { kind: "link-added", by: item.addedBy, text: words.slice(0, 500), ref: id });
+  return write({ [paths.link(tripId, id)]: item, ...line });
 }
 
 /**

@@ -6,7 +6,7 @@ import { Invite } from "../features/crew/components/Invite";
 import { OrganizerSignIn } from "../features/crew/components/OrganizerSignIn";
 import { PhotoSheet } from "../features/crew/components/PhotoSheet";
 import { TextCrew } from "../features/crew/components/TextCrew";
-import { repliedLine } from "../features/crew/lib/crew";
+import { Activity } from "../features/activity/components/Activity";
 import { DatesModule } from "../features/dates/components/DatesModule";
 import { StayModule } from "../features/stay/components/StayModule";
 import { LinksModule } from "../features/links/components/LinksModule";
@@ -17,10 +17,12 @@ import { tagChips, tripTags, type EventsFilter } from "../features/parties/lib/t
 import type { MapPlace } from "../features/parties/lib/detail";
 import { pins } from "./lib/pins";
 import { useTrip } from "../lib/useTrip";
-import type { Trip } from "../types/trip";
+import type { ActivityEntry, Trip } from "../types/trip";
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { useEventCheck } from "./CheckEvents";
+import { CrewSheet, CrewTitle } from "./CrewBlock";
 import { Home } from "./Home";
+import { crewList } from "./lib/crewList";
 import type { ModuleId } from "./lib/modules";
 
 /**
@@ -69,6 +71,8 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
   useEventCheck(tripId, trip, crew.member ? crew.memberId : null);
   useWarmMap(trip);
   const [photoOpen, setPhotoOpen] = useState(false);
+  const [crewOpen, setCrewOpen] = useState(false);
+  const list = crewList(trip);
   // The Events filter is the map's too: the map draws the venues the list keeps (owner, 24 Nov 2026).
   const events = useEventsFilter(tagChips(tripTags(trip)));
   const you = crew.memberId && crew.member ? { id: crew.memberId, name: crew.member.name } : undefined;
@@ -85,10 +89,27 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
           <Home
             trip={trip}
             memberId={crew.memberId}
-            organizer={crew.organizer}
-            you={you}
-            onYou={() => setPhotoOpen(true)}
-            replied={repliedLine(crew.expected, crew.byId)}
+            crew={you && <CrewTitle list={list} you={you} onYou={() => setPhotoOpen(true)} onSee={() => setCrewOpen(true)} />}
+            lead={(openModule) =>
+              crew.memberId && (
+                <Activity
+                  tripId={tripId}
+                  entries={trip.activity}
+                  votes={trip.activityVotes}
+                  replies={trip.activityReplies}
+                  memberId={crew.memberId}
+                  isOrganizer={crew.isOrganizer}
+                  names={Object.fromEntries(crew.members.map((member) => [member.id, member.name]))}
+                  crewSize={crew.members.length}
+                  thumbOf={(entry) => thumbOf(trip, entry)}
+                  openerOf={(entry) => {
+                    const target = moduleOf(entry);
+                    if (target === "crew") return () => setCrewOpen(true);
+                    return target ? () => openModule(target) : undefined;
+                  }}
+                />
+              )
+            }
             content={(openModule) =>
               moduleSlots(tripId, trip, crew, openModule, events, { pin: mapFocus, clear: () => setMapFocus(null) }, (place) => {
                 setMapFocus(place ? `${place.kind}:${place.id}` : null);
@@ -108,6 +129,7 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
       ) : (
         <OrganizerSignIn tripId={tripId} />
       )}
+      {crew.memberId && <CrewSheet open={crewOpen} list={list} youId={crew.memberId} onClose={() => setCrewOpen(false)} />}
       {crew.memberId && crew.member && (
         <PhotoSheet open={photoOpen} tripId={tripId} memberId={crew.memberId} member={crew.member} onClose={() => setPhotoOpen(false)} />
       )}
@@ -250,4 +272,51 @@ function mapDestinations(trip: Trip): MapDestination[] {
 /** The trip's destinations as { id, name }, in the trip file's order. */
 function destinationList(trip: Trip): Array<{ id: string; name: string }> {
   return Object.entries(trip.info?.destinations ?? {}).map(([id, place]) => ({ id, name: place.name }));
+}
+
+/**
+ * Where a tap on an automatic Activity line goes: the module its thing
+ * lives in, or the crew sheet for a join or a reply. Posts and polls open
+ * nothing; they act in place.
+ * Inputs: the line. Output: a module id, "crew", or null.
+ * Examples (checked on the emulator): "KA added a place: Cliffside villa" → "stay"; "RJ joined" → "crew"
+ */
+function moduleOf(entry: ActivityEntry): ModuleId | "crew" | null {
+  switch (entry.kind) {
+    case "joined":
+    case "reply-changed":
+      return "crew";
+    case "dates-added":
+    case "dates-confirmed":
+    case "dates-changed":
+      return "dates";
+    case "stay-added":
+    case "stay-confirmed":
+      return "stay";
+    case "event-added":
+    case "event-in":
+    case "event-found":
+      return "parties";
+    case "link-added":
+      return "links";
+    case "place-added":
+      return "map";
+    default:
+      return null;
+  }
+}
+
+/**
+ * The small picture beside an Activity line, where its thing has one: a
+ * stay's photo, a link's thumbnail, a friend's place's photo. A thing
+ * removed since has none.
+ * Inputs: the trip and the line. Output: an image address, or undefined.
+ * Examples (checked on screen): "KA added a place: Cliffside villa" → the villa's listing photo
+ */
+function thumbOf(trip: Trip, entry: ActivityEntry): string | undefined {
+  if (!entry.ref) return undefined;
+  if (entry.kind === "stay-added" || entry.kind === "stay-confirmed") return trip.stay?.options?.[entry.ref]?.photoUrl;
+  if (entry.kind === "link-added") return trip.links?.items?.[entry.ref]?.thumbUrl;
+  if (entry.kind === "place-added") return trip.places?.custom?.[entry.ref]?.photo;
+  return undefined;
 }

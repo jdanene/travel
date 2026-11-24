@@ -1,0 +1,29 @@
+/* Mock 5's crew in the title block (.tcrew) and its crew sheet (.grp, .pr). */
+.tcrew { display: flex; flex-direction: column; align-items: center; gap: 0.375rem; margin-top: 0.75rem; width: 100%; }
+.tcrew .stk { display: inline-flex; align-items: center; }
+.tcrew .stk > * + * { margin-left: -0.4375rem; }
+.flyer-name .tcrew .av { width: 2.5rem; height: 2.5rem; font-size: 0.75rem; border: 2px solid var(--page); box-shadow: 0 0 0 2px #000; }
+.tcrew .t { font-size: 0.9062rem; color: var(--on-page); }
+.tcrew .t b { color: #fff; }
+.tcrew .see { display: inline-flex; align-items: center; gap: 0.25rem; min-height: 2.25rem; font-weight: 800; font-size: 0.875rem; color: #fff; touch-action: manipulation; }
+.tcrew .see { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 0.25rem; }
+.tcrew .see svg.i { stroke-width: 2.2; }
+/* Your own face is the button to your photo; a small camera says so. */
+.tcrew-you { position: relative; display: inline-grid; border-radius: 50%; touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: transform 120ms ease-out; }
+.tcrew-you:active { transform: scale(0.94); }
+.tcrew-cam { position: absolute; right: -0.25rem; bottom: -0.25rem; width: 1.125rem; height: 1.125rem; border-radius: 50%; display: grid; place-items: center; background: #111; border: 2px solid #fff; }
+.tcrew-cam svg { width: 0.6875rem; height: 0.6875rem; fill: none; stroke: #fff; stroke-width: 2; stroke-linejoin: round; }
+.flyer :focus-visible.tcrew-you { outline-offset: 2px; }
+@media (min-width: 900px) {
+  .tcrew { margin-top: 1rem; }
+  .flyer-name .tcrew .av { width: 3rem; height: 3rem; font-size: 0.875rem; }
+  .tcrew .t { font-size: 1rem; }
+}
+@media (prefers-reduced-motion: reduce) { .tcrew-you { transition: none; } }
+
+.crew-sheet .grp { font-size: 0.75rem; font-weight: 800; color: var(--mut); letter-spacing: .04em; margin: 0.75rem 0 0.125rem; }
+.crew-sheet section:first-child .grp { margin-top: 0.25rem; }
+.crew-sheet .pr { display: flex; align-items: center; gap: 0.625rem; padding: 0.375rem 0; font-size: 0.9062rem; }
+.crew-sheet .pr .av { width: 2.125rem; height: 2.125rem; font-size: 0.6875rem; flex: none; }
+.crew-sheet .pr small { display: block; font-size: 0.7812rem; color: var(--mut); }
+.crew-sheet .nob { color: var(--mut); font-size: 0.8438rem; }

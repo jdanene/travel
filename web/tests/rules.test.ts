@@ -2,7 +2,7 @@
  * The rules tests of Trip 2 (1 to 9), of the admin list (10 to 12, plan
  * D15), of Add dates (13 to 15, plan D16), of Add to map (16 and 17), of
  * weekly shows (18), of the profile photo (19), of a place's photo (20) and
- * of the invite title (21), of organizer keys (22), of trip texts (23 to 25), of the events window (26) and of event tags (27), against the database emulator. Run with
+ * of the invite title (21), of organizer keys (22), of trip texts (23 to 25), of the events window (26), of event tags (27) and of the Activity list (28 to 31), against the database emulator. Run with
  * `npm run test:rules` in web/; it starts the emulator, runs this file and
  * stops it. Each test names the rule it proves, in the words of plan
  * section 4.
@@ -231,5 +231,40 @@ describe("database rules", () => {
     await assertFails(set(ref(a, paths.showTag(T, "j1", "big")), false));
     await assertFails(set(ref(a, paths.showTag(T, "nope", "big")), true));
     await assertFails(set(ref(a, paths.tagName(T, "long")), "x".repeat(25)));
+  });
+  it("28. lets a member post as itself, and refuses a post as another member or with no text", async () => {
+    const a = db("uid-a");
+    await assertSucceeds(set(ref(a, paths.activityEntry(T, "p1")), { kind: "post", by: "alice", at: 1, text: "Anyone flying from London?" }));
+    await assertFails(set(ref(a, paths.activityEntry(T, "p2")), { kind: "post", by: "bob", at: 1, text: "Hi" }));
+    await assertFails(set(ref(a, paths.activityEntry(T, "p3")), { kind: "post", by: "alice", at: 1 }));
+    await assertFails(set(ref(a, paths.activityEntry(T, "p4")), { kind: "post", by: "alice", at: 1, text: "x".repeat(501) }));
+    await assertFails(set(ref(db("uid-x"), paths.activityEntry(T, "p5")), { kind: "event-found", at: 1, text: "Zamna" }));
+    await assertSucceeds(set(ref(a, paths.activityEntry(T, "f1")), { kind: "event-found", at: 1, text: "Zamna at Phuket, 29 Jan" }));
+  });
+
+  it("29. refuses an edit to a line, even by its author, and a poll with one option or a long one", async () => {
+    const a = db("uid-a");
+    await assertFails(set(ref(a, paths.activityEntry(T, "p1")), { kind: "post", by: "alice", at: 2, text: "Edited" }));
+    await assertFails(set(ref(a, `${paths.activityEntry(T, "p1")}/text`), "Edited"));
+    await assertFails(set(ref(a, paths.activityEntry(T, "q2")), { kind: "poll", by: "alice", at: 1, text: "Villa?", options: ["Yes"] }));
+    await assertFails(set(ref(a, paths.activityEntry(T, "q3")), { kind: "poll", by: "alice", at: 1, text: "Villa?", options: ["Yes", "x".repeat(61)] }));
+    await assertSucceeds(set(ref(a, paths.activityEntry(T, "q1")), { kind: "poll", by: "alice", at: 1, text: "Villa or hotel?", options: ["Villa", "Hotel"] }));
+  });
+
+  it("30. lets a member vote and reply under its own member, change its vote, and refuses under another", async () => {
+    const b = db("uid-b");
+    await assertSucceeds(set(ref(b, paths.activityVote(T, "q1", "bob")), 0));
+    await assertSucceeds(set(ref(b, paths.activityVote(T, "q1", "bob")), 1));
+    await assertFails(set(ref(b, paths.activityVote(T, "q1", "alice")), 0));
+    await assertFails(set(ref(b, paths.activityVote(T, "q1", "bob")), 2));
+    await assertSucceeds(set(ref(b, paths.activityReply(T, "p1", "r1")), { by: "bob", at: 1, text: "Me!" }));
+    await assertFails(set(ref(b, paths.activityReply(T, "p1", "r2")), { by: "alice", at: 1, text: "Me!" }));
+  });
+
+  it("31. lets the author delete its post with its replies and votes, and refuses another friend", async () => {
+    await assertFails(update(ref(db("uid-c")), { [paths.activityEntry(T, "p1")]: null, [paths.activityReplies(T, "p1")]: null }));
+    await assertSucceeds(update(ref(db("uid-a")), { [paths.activityEntry(T, "p1")]: null, [paths.activityReplies(T, "p1")]: null }));
+    await assertSucceeds(update(ref(db("uid-o")), { [paths.activityEntry(T, "q1")]: null, [paths.activityVotes(T, "q1")]: null }));
+    await assertFails(remove(ref(db("uid-a"), paths.activityEntry(T, "f1"))));
   });
 });

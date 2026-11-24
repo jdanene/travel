@@ -190,6 +190,49 @@ export interface Places {
   tagNames?: Record<string, string>;
 }
 
+/**
+ * What an activity line says. The automatic kinds are written by the action
+ * they describe, in the same write; post and poll are written by a friend.
+ * Hearts, date votes, tags and photos write no line (too noisy).
+ */
+export type ActivityKind =
+  | "joined"
+  | "reply-changed"
+  | "dates-added"
+  | "dates-confirmed"
+  | "dates-changed"
+  | "stay-added"
+  | "stay-confirmed"
+  | "event-added"
+  | "event-in"
+  | "link-added"
+  | "place-added"
+  | "event-found"
+  | "post"
+  | "poll";
+
+/**
+ * One line in the Activity list: trips/{tripId}/activity/{id}, id from
+ * push(), so ids sort by time. Lines are never edited; a post or a poll
+ * may be deleted by its author or an organizer.
+ */
+export interface ActivityEntry {
+  kind: ActivityKind;
+  /** The member who did it; absent only on "event-found" (the daily check). */
+  by?: MemberId;
+  at: number;
+  /**
+   * The words of the line, saved when it is written, so a line still reads
+   * after its thing is removed: the post, the poll's question, the place's
+   * name, "Peggy Gou at Savaya", or the new reply ("in", "maybe", "out").
+   */
+  text?: string;
+  /** The id of the thing the line is about (a stay, a show, a date option…), for its thumbnail. */
+  ref?: string;
+  /** A poll's 2 to 4 options. */
+  options?: string[];
+}
+
 export interface Trip {
   info?: TripInfo;
   crew?: Crew;
@@ -198,4 +241,15 @@ export interface Trip {
   parties?: Parties;
   links?: Links;
   places?: Places;
+  activity?: Record<string, ActivityEntry>;
+  /** Each poll's votes: { entryId: { memberId: option index } }; a vote can change. */
+  activityVotes?: Record<string, Record<MemberId, number>>;
+  /** Replies under a post or a poll: { entryId: { replyId: reply } }. */
+  activityReplies?: Record<string, Record<string, ActivityReply>>;
+}
+
+export interface ActivityReply {
+  by: MemberId;
+  at: number;
+  text: string;
 }

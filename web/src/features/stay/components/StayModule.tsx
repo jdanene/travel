@@ -86,7 +86,7 @@ export function StayModule({ tripId, stay, destinations, areas, names, memberId,
                   hearted={Object.keys(hearts[id] ?? {}).map((who) => ({ id: who, name: names[who] ?? who }))}
                   you={memberId}
                   onHeart={(on) => void setHeart(tripId, id, memberId, on).then(report)}
-                  onConfirm={isOrganizer && !chosen ? () => void confirmStay(tripId, place.id, id, memberId).then(report) : undefined}
+                  onConfirm={isOrganizer && !chosen ? () => void confirmStay(tripId, place.id, id, options[id].name, memberId).then(report) : undefined}
                 />
               ))}
             </div>

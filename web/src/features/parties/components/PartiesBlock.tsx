@@ -119,7 +119,7 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
       .sort((a, b) => (members[a]?.at ?? 0) - (members[b]?.at ?? 0))
       .map((member) => ({ id: member, name: members[member]?.name ?? member }));
   const adderOf = (show: ListedShow) => (show.addedBy ? (members[show.addedBy]?.name ?? show.addedBy) : undefined);
-  const setInFor = (id: string) => (isIn: boolean) => viewer.memberId && run(setIn(tripId, id, viewer.memberId, isIn));
+  const setInFor = (id: string) => (isIn: boolean) => viewer.memberId && run(setIn(tripId, id, trip.parties?.shows?.[id], viewer.memberId, isIn));
   const areaOf = (show: ListedShow) => show.area ?? areas[placeOf(show, trip.places)?.areaId ?? ""]?.name;
 
   // After the render that draws the row: under "Big nights" a listed show at another venue first needs "All".

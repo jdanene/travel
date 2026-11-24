@@ -93,3 +93,21 @@ export const showTags = (tripId: string, showId: string) => `trips/${tripId}/par
 
 /** A tag's name; any member makes a new one, and it never changes. */
 export const tagName = (tripId: string, tag: string) => `trips/${tripId}/places/tagNames/${tag}`;
+
+/** Every activity line, for the push() that makes a new id. */
+export const activity = (tripId: string) => `trips/${tripId}/activity`;
+
+/** One activity line: an automatic line, a post or a poll. */
+export const activityEntry = (tripId: string, id: string) => `trips/${tripId}/activity/${id}`;
+
+/** Every vote on one poll; removed with the poll. */
+export const activityVotes = (tripId: string, id: string) => `trips/${tripId}/activityVotes/${id}`;
+
+/** A member's vote on one poll: the option's index. */
+export const activityVote = (tripId: string, id: string, memberId: string) => `trips/${tripId}/activityVotes/${id}/${memberId}`;
+
+/** Every reply under one post or poll; removed with it. */
+export const activityReplies = (tripId: string, id: string) => `trips/${tripId}/activityReplies/${id}`;
+
+/** One reply under a post or a poll. */
+export const activityReply = (tripId: string, id: string, replyId: string) => `trips/${tripId}/activityReplies/${id}/${replyId}`;

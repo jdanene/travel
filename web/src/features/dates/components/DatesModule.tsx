@@ -133,7 +133,7 @@ export function DatesModule({ tripId, info, dates, expected, members, memberId, 
             {(isOrganizer && !confirmedId) || removable ? (
               <div className="opt-actions">
                 {isOrganizer && !confirmedId && (
-                  <button type="button" className={`btn sm${id === lead ? "" : " sec"}`} onClick={() => void confirmDates(tripId, id, memberId).then(report)}>
+                  <button type="button" className={`btn sm${id === lead ? "" : " sec"}`} onClick={() => void confirmDates(tripId, id, option, memberId).then(report)}>
                     Confirm these dates
                   </button>
                 )}
@@ -160,7 +160,7 @@ export function DatesModule({ tripId, info, dates, expected, members, memberId, 
         </div>
       )}
       {isOrganizer && confirmedId && (
-        <button type="button" className="btn sm sec" onClick={() => void undoDates(tripId).then(report)}>
+        <button type="button" className="btn sm sec" onClick={() => void undoDates(tripId, memberId).then(report)}>
           Change the dates
         </button>
       )}

@@ -59,7 +59,7 @@ export function Invitation({ tripId, uid, info, crew }: InvitationProps) {
   };
 
   const onReply = (reply: Reply) => {
-    if (crew.memberId && crew.member) void saveReply(tripId, crew.memberId, crew.member.name, reply).then(report(reply));
+    if (crew.memberId && crew.member) void saveReply(tripId, crew.memberId, crew.member.name, reply, crew.member).then(report(reply));
     else setJoining(reply);
   };
 

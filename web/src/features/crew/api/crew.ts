@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { activityLine } from "../../../lib/activity";
 import { write, type WriteFailure, type WriteResult } from "../../../lib/db";
 import { signInWithGoogle, type GoogleFailure } from "../../../lib/firebase";
 import * as paths from "../../../lib/paths";
@@ -79,7 +80,7 @@ export interface Person {
 export async function join(tripId: string, uid: string, person: Person, existing: Member | null, reply: Reply): Promise<WriteResult> {
   const pointed = await write({ [paths.device(tripId, uid)]: person.id });
   if (!pointed.ok) return pointed;
-  return saveReply(tripId, person.id, existing?.name ?? person.name, reply);
+  return saveReply(tripId, person.id, existing?.name ?? person.name, reply, existing);
 }
 
 /**
@@ -97,14 +98,25 @@ export function comeBack(tripId: string, uid: string, memberId: MemberId): Promi
 
 /**
  * Saves a member's reply; a new reply replaces the old one (case 7). It
- * writes the three fields one by one, so the member's photo stays.
- * Inputs: the trip, the member, the member's name, the reply.
+ * writes the three fields one by one, so the member's photo stays. The
+ * Activity line goes in the same write: "joined" for a first reply,
+ * "reply-changed" for a different one, none for the same reply again.
+ * Inputs: the trip, the member, the member's name, the reply, and the
+ * member's record before this reply (null for a first reply).
  * Output: the write result.
- * Examples (checked on the emulator): RB taps "Maybe" after "I'm in" → members/rb.reply = "maybe"; RB's photo stays
+ * Examples (checked on the emulator):
+ *   RB taps "Maybe" after "I'm in" → members/rb.reply = "maybe"; RB's photo stays; a "reply-changed" line, text "maybe"
+ *   RJ replies for the first time  → members/rj and a "joined" line by rj
  */
-export function saveReply(tripId: string, memberId: MemberId, name: string, reply: Reply): Promise<WriteResult> {
+export function saveReply(tripId: string, memberId: MemberId, name: string, reply: Reply, previous: Member | null): Promise<WriteResult> {
   const field = (key: "name" | "reply" | "at") => paths.memberField(tripId, memberId, key);
-  return write({ [field("name")]: name, [field("reply")]: reply, [field("at")]: Date.now() });
+  const line =
+    previous === null
+      ? activityLine(tripId, { kind: "joined", by: memberId })
+      : previous.reply !== reply
+        ? activityLine(tripId, { kind: "reply-changed", by: memberId, text: reply })
+        : {};
+  return write({ [field("name")]: name, [field("reply")]: reply, [field("at")]: Date.now(), ...line });
 }
 
 const KEY_STORE = "organizerKey";

@@ -86,7 +86,8 @@
             }
           },
           "confirmed": {
-            ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true",
+            /* An organizer confirms where nothing is confirmed, or undoes the confirm; so of two organizers the first wins (case 11). */
+            ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true && (!data.exists() || !newData.exists())",
             ".validate": "newData.hasChildren(['optionId', 'by', 'at']) && root.child('trips').child($tripId).child('dates').child('options').child(newData.child('optionId').val()).exists()",
             "optionId": { ".validate": "newData.isString()" },
             "by": { ".validate": "newData.isString() && newData.val().length <= 40" },
@@ -121,7 +122,8 @@
           },
           "confirmed": {
             "$destination": {
-              ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true",
+              /* As for the dates: a confirm only where none stands, or an undo (case 20). */
+              ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true && (!data.exists() || !newData.exists())",
               ".validate": "newData.hasChildren(['stayId', 'by', 'at']) && root.child('trips').child($tripId).child('stay').child('options').child(newData.child('stayId').val()).child('destination').val() === $destination",
               "stayId": { ".validate": "newData.isString()" },
               "by": { ".validate": "newData.isString() && newData.val().length <= 40" },
@@ -172,6 +174,50 @@
               "photo": { ".validate": "newData.isString() && newData.val().length <= 80000 && newData.val().beginsWith('data:image/jpeg;base64,')" },
               "addedBy": { ".validate": "newData.isString()" },
               "at": { ".validate": "newData.isNumber()" },
+              "$other": { ".validate": false }
+            }
+          }
+        },
+        "activity": {
+          "$id": {
+            /* One line of the Activity list (design: mockups/crew/5). A member writes a line under its own member, once:
+               no edits. The daily events check writes "event-found" with no member. The author or an organizer
+               deletes a post or a poll (its votes and replies go in the same write); automatic lines stay. */
+            ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() !== null && ((!data.exists() && (newData.child('by').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || (newData.child('kind').val() === 'event-found' && !newData.child('by').exists()))) || (data.exists() && !newData.exists() && (data.child('kind').val() === 'post' || data.child('kind').val() === 'poll') && (data.child('by').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true)))",
+            ".validate": "$id.length <= 40 && newData.hasChildren(['kind', 'at']) && ((newData.child('kind').val() !== 'post' && newData.child('kind').val() !== 'poll') || newData.hasChild('text')) && ((newData.child('kind').val() === 'poll') === newData.child('options').exists()) && (newData.child('kind').val() !== 'poll' || newData.child('options').hasChildren(['0', '1']))",
+            "kind": { ".validate": "newData.isString() && newData.val().matches(/^(joined|reply-changed|dates-added|dates-confirmed|dates-changed|stay-added|stay-confirmed|event-added|event-in|link-added|place-added|event-found|post|poll)$/)" },
+            "by": { ".validate": "newData.isString() && newData.val().length <= 40" },
+            "at": { ".validate": "newData.isNumber()" },
+            "text": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 500" },
+            "ref": { ".validate": "newData.isString() && newData.val().length <= 200" },
+            "options": {
+              "$i": { ".validate": "$i.matches(/^[0-3]$/) && newData.isString() && newData.val().length >= 1 && newData.val().length <= 60" }
+            },
+            "$other": { ".validate": false }
+          }
+        },
+        "activityVotes": {
+          "$id": {
+            /* Deleting a poll takes its votes with it, by whoever may delete the poll. */
+            ".write": "auth != null && !newData.exists() && !newData.parent().parent().child('activity').child($id).exists() && (root.child('trips').child($tripId).child('activity').child($id).child('by').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true)",
+            "$memberId": {
+              /* A member's vote on a poll: the option's index. It can change, or be taken back. */
+              ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() === $memberId",
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 3 && newData.parent().parent().parent().child('activity').child($id).child('options').child('' + newData.val()).exists()"
+            }
+          }
+        },
+        "activityReplies": {
+          "$id": {
+            /* Deleting a post or a poll takes its replies with it, by whoever may delete it. */
+            ".write": "auth != null && !newData.exists() && !newData.parent().parent().child('activity').child($id).exists() && (root.child('trips').child($tripId).child('activity').child($id).child('by').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true)",
+            "$replyId": {
+              /* A reply under a post or a poll, under the member's own name, once: no edits. */
+              ".write": "auth != null && !data.exists() && newData.child('by').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val()",
+              ".validate": "$replyId.length <= 40 && newData.hasChildren(['by', 'at', 'text']) && (root.child('trips').child($tripId).child('activity').child($id).child('kind').val() === 'post' || root.child('trips').child($tripId).child('activity').child($id).child('kind').val() === 'poll')",
+              "by": { ".validate": "newData.isString()" },
+              "at": { ".validate": "newData.isNumber()" },
+              "text": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 500" },
               "$other": { ".validate": false }
             }
           }

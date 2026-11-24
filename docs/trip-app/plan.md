@@ -137,6 +137,12 @@ Paths live in one file, `web/src/lib/paths.ts`. The rules file repeats them; the
     venues    { {venueId}: { name, destination, areaId?, lat, lng, line?, onMap?, big? } }   big: true for the owner's big nights (D18); seed-parties gives their events the "big" tag once (D19)
     tagNames  { {tag}: name }                  any member makes one; never changes; 1 to 24 characters (D19)
     custom    { {placeId}: { name, kind: "event"|"food"|"beach"|"activity"|"other", destination, lat, lng, link?, addedBy, at } }   a friend's place ("Add to map"); inside the destination's box; the adder or an organizer removes it; no edits
+  activity    { {id}: { kind, by?, at, text?, ref?, options? } }   the Activity list (design exception 24); id from push(); create-only.
+              kind: joined, reply-changed, dates-added, dates-confirmed, dates-changed, stay-added, stay-confirmed, event-added,
+              event-in, link-added, place-added, event-found (the events check; no by), post (text 1-500), poll (text and 2-4 options of 1-60).
+              Each action writes its line in its own multi-path write (web/src/lib/activity.ts). The author or an organizer deletes a post or a poll.
+  activityVotes   { {id}: { {memberId}: optionIndex } }      a member's vote on a poll; it can change
+  activityReplies { {id}: { {replyId}: { by, at, text } } }  replies under a post or a poll; create-only
 /tripSecrets/{tripId}            no phone can read this branch, except the two nodes below that say so
   organizerKey { {key}: true }
   claims       { {uid}: key }    a device writes its own claim; the rules test the key exists
@@ -157,6 +163,8 @@ Rules, in words:
 - A device writes an answer, a heart, an "in" mark or a reply only under the member its uid points to.
 - A device adds a date option with `addedBy` equal to its member, never over one that exists, with both days inside 1 Feb to 31 Mar 2027 and from not after to. The adder or an organizer removes an option that is not confirmed, with its answers in the same write. The page offers Remove only while nobody but the adder has voted; the rules cannot count votes.
 - A device adds a link and removes its own; an organizer removes any link.
+- A device writes an Activity line once, with `by` equal to its member (an `event-found` line has no `by`); nobody edits a line. The author or an organizer deletes a post or a poll, with its votes and replies in the same write. Votes and replies only under the device's own member.
+- An organizer confirms dates or a stay only where none is confirmed, or undoes the confirm; so the first of two organizers wins.
 - A device adds a stay option or a show with `addedBy` equal to its member. It edits or removes a show only when it added it, or when it is an organizer.
 - Only an organizer writes `dates/confirmed`, `stay/confirmed` and `crew/organizers`. A device becomes an organizer when its claim holds a key that exists, or when it is signed in with a verified email that is on `tripSecrets/{tripId}/admins`.
 - Every write is checked for shape and length. A value outside the shape is refused.

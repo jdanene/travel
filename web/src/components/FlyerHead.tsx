@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { seasonLine } from "../lib/format";
 import type { TripInfo } from "../types/trip";
-import { Face, usePhoto, type Person } from "./Avatars";
+import { Face, type Person } from "./Avatars";
 import "./Avatars.css";
 import "./FlyerHead.css";
 
@@ -15,19 +15,13 @@ const COLLAGE = "/hype/cover/";
 const COUNTRIES = { shown: "(Indonesia, Thailand)", spoken: "Indonesia and Thailand" };
 
 interface FlyerHeadProps {
-  /** The organizer, drawn as the big avatar; absent before anyone organizes. */
+  /** The organizer, drawn as the big avatar on the invitation; absent on the home page, where the crew sits in the title block. */
   organizer?: Person;
-  /** This device's member once joined; their own face is a button that opens onYou. */
-  you?: Person;
-  /** What a tap on your own face does: the photo sheet. */
-  onYou?: () => void;
   /** The trip's info; a half-written trip without it shows the photo alone. */
   info: TripInfo | undefined;
   /** The photo's height: tall on the invitation (12/1); short on the home page once a friend has joined. */
   photo?: "tall" | "short";
-  /** "6 of 8 replied"; shown in the desktop layout only (exception 9). */
-  replied?: string;
-  /** Lines under the title block: the note, or "All set". */
+  /** Lines under the title block: the note, the crew (mock 5), or "All set". */
   children?: ReactNode;
 }
 
@@ -40,46 +34,29 @@ interface FlyerHeadProps {
  * reduced motion or Save-Data it is the cliff photo alone. The title block
  * is the trip's name in the hype title's face, then the countries and the
  * months in the hype script; it is the page's one h1, and screen readers
- * hear it as one sentence.
+ * hear it as one sentence. With no organizer the title itself overlaps
+ * the photo's foot.
  *
- * Inputs: the organizer, this device's member and what tapping their face
- * does, the trip's info, the photo height, the replied line, and any lines
- * below.
+ * Inputs: the organizer, the trip's info, the photo height, and any lines below.
  * Output: the head of the page. From 900 px up the cover is a rounded
  * picture in the left column.
  * Examples (checked at 375 px and at 1650 px on the emulator):
- *   organizer JD, a friend RB → the collage, the "JD" circle with RB's small circle beside it,
- *                               "Bali · Koh Phangan", "(Indonesia, Thailand) · Feb 2027" (the anchor's month)
- *   JD on JD's own phone      → the "JD" circle is the button; no second circle
- *   reduced motion            → the cliff photo, no collage
+ *   invitation, organizer JD → the collage, the "JD" circle, "Bali · Koh Phangan", "(Indonesia, Thailand) · Feb 2027"
+ *   home page, no organizer  → the title over the photo's foot, the crew under it
+ *   reduced motion           → the cliff photo, no collage
  */
-export function FlyerHead({ organizer, you, onYou, info, photo, replied, children }: FlyerHeadProps) {
+export function FlyerHead({ organizer, info, photo, children }: FlyerHeadProps) {
   const [still] = useState(prefersStill);
-  const youAreOrganizer = organizer !== undefined && you !== undefined && organizer.id === you.id;
-  // Your own face says what it does: a camera badge, and "Add photo" or "Change photo" under it.
-  const yourPhoto = usePhoto(you?.id ?? "");
-  const yourFace = (person: Person, className: string) => (
-    <button type="button" className="flyer-you" onClick={onYou} aria-label={yourPhoto ? "Change photo" : "Add photo"}>
-      <span className="flyer-you-face">
-        <Face person={person} className={className} />
-        <span className="flyer-cam" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.5-2h6l1.5 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z" /><circle cx="12" cy="12.5" r="3.2" /></svg>
-        </span>
-      </span>
-      <span className="flyer-you-cap" aria-hidden="true">{yourPhoto ? "Change photo" : "Add photo"}</span>
-    </button>
-  );
 
   return (
     <header className="flyer">
       <div className={`flyer-hero${photo ? ` ${photo}` : ""}`} style={{ backgroundImage: `url(${COVER})` }} role="img" aria-label={still ? "Cliffs over the sea in Uluwatu, Bali" : "Photos from the trip"}>
         {!still && <iframe className="flyer-collage" src={COLLAGE} title="Trip photos" aria-hidden="true" tabIndex={-1} loading="lazy" scrolling="no" />}
       </div>
-      <div className="flyer-name">
-        {(organizer || you) && (
+      <div className={`flyer-name${organizer ? "" : " bare"}`}>
+        {organizer && (
           <span className="avs flyer-faces">
-            {organizer && (youAreOrganizer && onYou ? yourFace(organizer, "d") : <Face person={organizer} className="d" />)}
-            {you && onYou && !youAreOrganizer && yourFace(you, "you flyer-small")}
+            <Face person={organizer} className="d" />
           </span>
         )}
         {info && (
@@ -92,7 +69,6 @@ export function FlyerHead({ organizer, you, onYou, info, photo, replied, childre
             </span>
           </h1>
         )}
-        {replied && <p className="cap flyer-replied">{replied}</p>}
         {children}
       </div>
     </header>

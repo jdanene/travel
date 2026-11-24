@@ -1,3 +1,4 @@
+import { activityLine } from "../../../lib/activity";
 import { write, type WriteResult } from "../../../lib/db";
 import { newPlaceId } from "../../../lib/ids";
 import * as paths from "../../../lib/paths";
@@ -21,14 +22,23 @@ export interface PartyDraft {
 /**
  * Marks a member in for a show, or takes the mark back. The listener shows
  * the change at once; with no connection the write waits and sends later,
- * and a refusal flips the mark back (Trip 11, case 9).
+ * and a refusal flips the mark back (Trip 11, case 9). Going in writes an
+ * Activity line in the same write; taking the mark back writes none.
  *
- * Inputs: the trip, the show, the member, and whether they are in.
+ * Inputs: the trip, the show's id and the show (for the line's words), the member, and whether they are in.
  * Output: the write's result; a refusal names no field.
- * Examples (checked on the emulator): setIn(t, show, "rb", true) by rb's device → { ok: true }
+ * Examples (checked on the emulator):
+ *   setIn(t, id, peggyGou, "rb", true) by rb's device  → { ok: true }; "RB is in for Peggy Gou at Savaya"
+ *   setIn(t, id, peggyGou, "rb", false)                → { ok: true }; no line
  */
-export function setIn(tripId: string, id: string, memberId: MemberId, isIn: boolean): Promise<WriteResult> {
-  return write({ [paths.inMark(tripId, id, memberId)]: isIn ? true : null });
+export function setIn(tripId: string, id: string, show: Show | undefined, memberId: MemberId, isIn: boolean): Promise<WriteResult> {
+  const line = isIn && show ? activityLine(tripId, { kind: "event-in", by: memberId, text: showLine(show), ref: id }) : {};
+  return write({ [paths.inMark(tripId, id, memberId)]: isIn ? true : null, ...line });
+}
+
+/** The words an Activity line uses for a show: "Peggy Gou at Savaya". */
+export function showLine(show: Pick<Show, "artist" | "venue">): string {
+  return `${show.artist} at ${show.venue}`.slice(0, 500);
 }
 
 export type AddResult = WriteResult | { ok: false; reason: "listed"; id: string };
@@ -46,8 +56,9 @@ export type AddResult = WriteResult | { ok: false; reason: "listed"; id: string 
  * and the row says who added it instead of "not confirmed".
  * A venue picked from the place search also goes on the map, in the
  * same write (newPin).
+ * Its Activity line goes in the same write.
  * Examples (checked on the emulator):
- *   a new boat party by ka   → { ok: true }; the row reads "added by KA"
+ *   a new boat party by ka   → { ok: true }; the row reads "added by KA"; "KA added an event: Boat party at Bottle Beach"
  *   " savaya", Sat 13 Feb, "peggy gou" → { ok: false, reason: "listed", id: "bali_2027-02-13_savaya_peggy-gou" }
  *   Koh Phangan, picked "Bottle Beach 1 · Haad Khuat, Thailand" → the event and its pin, at once
  */
@@ -56,7 +67,8 @@ export function addShow(tripId: string, trip: Trip, draft: PartyDraft, memberId:
   const listed = Object.entries(trip.parties?.shows ?? {}).find(([key, show]) => key === id || showId(show) === id);
   if (listed) return Promise.resolve({ ok: false, reason: "listed", id: listed[0] });
   const show: Show = { ...fields(draft), verified: true, source: "friend", addedBy: memberId, at: Date.now() };
-  return write({ [paths.show(tripId, id)]: show, ...newPin(tripId, trip, draft, memberId) });
+  const line = activityLine(tripId, { kind: "event-added", by: memberId, text: showLine(show), ref: id });
+  return write({ [paths.show(tripId, id)]: show, ...newPin(tripId, trip, draft, memberId), ...line });
 }
 
 /**

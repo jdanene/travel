@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { activityLine } from "../lib/activity";
 import { write, writeIf } from "../lib/db";
+import { dayMonth } from "../lib/format";
+import { showLine } from "../features/parties/api/parties";
 import { ago } from "../lib/format";
 import * as paths from "../lib/paths";
 import { checkClubs } from "../lib/reader";
@@ -86,8 +89,13 @@ async function runCheck(tripId: string, tripNow: () => Trip, memberId: MemberId,
   for (const { venue, reason } of found.failed) console.warn(`Events check: could not read ${venue} (${reason}).`);
 
   const shows = Object.entries(newShows(found.events, tripNow(), now));
-  // One write per show, so a show another phone just added (refused) does not hold back the rest.
-  const results = await Promise.all(shows.map(([id, show]) => write({ [paths.show(tripId, id)]: show })));
+  // One write per show, so a show another phone just added (refused) does not hold back the rest. Each show's
+  // "New event found" line goes in its write; the line has no `by`, since nobody added the show.
+  const results = await Promise.all(
+    shows.map(([id, show]) =>
+      write({ [paths.show(tripId, id)]: show, ...activityLine(tripId, { kind: "event-found", text: `${showLine(show)}, ${dayMonth(show.date)}`, ref: id }) }),
+    ),
+  );
   const refused = results.filter((r) => !r.ok).length;
   if (refused) console.warn(`Events check: ${refused} of ${shows.length} new shows were not saved.`);
   return { status: "ran", added: shows.length - refused };

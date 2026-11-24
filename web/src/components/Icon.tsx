@@ -10,6 +10,10 @@ const PATHS = {
   heart: <path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.6 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z" />,
   plus: <path d="M12 5v14M5 12h14" />,
   chev: <path d="M9 5l7 7-7 7" />,
+  spark: <><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" /><path d="M19 16l.7 1.8 1.8.7-1.8.7L19 21l-.7-1.8-1.8-.7 1.8-.7z" /></>,
+  poll: <path d="M5 20V10M12 20V4M19 20v-7" />,
+  up: <path d="M12 19V5M6 11l6-6 6 6" />,
+  chat: <path d="M20 12a7.5 7.5 0 0 1-11 6.6L4 20l1.4-4.6A7.5 7.5 0 1 1 20 12z" />,
 };
 
 export type IconName = keyof typeof PATHS;

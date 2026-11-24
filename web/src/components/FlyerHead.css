@@ -7,19 +7,10 @@
 .flyer-collage { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; pointer-events: none; background: transparent; }
 .flyer-name { text-align: center; margin-top: -2.5rem; position: relative; }
 .flyer-name .av { width: 4.5rem; height: 4.5rem; font-size: 1.25rem; border-width: 4px; }
-.flyer-replied { display: none; }
+/* With no faces above it (the home page, mock 5), the title itself overlaps the photo's foot. */
+.flyer-name.bare { margin-top: -1.75rem; }
 
-/* Your own face, beside the organizer's: a button that opens your photo. */
 .flyer-faces { align-items: flex-end; }
-.flyer-faces > .flyer-you:not(:first-child) { margin-left: 0.25rem; }
-.flyer-you { display: inline-flex; flex-direction: column; align-items: center; gap: 0.25rem; border-radius: 0.75rem; -webkit-tap-highlight-color: transparent; }
-/* A camera badge on your own face and a caption under it, so the photo is easy to find. */
-.flyer-you-face { position: relative; display: inline-grid; }
-.flyer-cam { position: absolute; right: -0.125rem; bottom: -0.125rem; width: 1.375rem; height: 1.375rem; border-radius: 50%; display: grid; place-items: center; background: #111; border: 2px solid #fff; }
-.flyer-cam svg { width: 0.875rem; height: 0.875rem; fill: none; stroke: #fff; stroke-width: 2; stroke-linejoin: round; }
-.flyer-you-cap { font-size: 0.75rem; font-weight: 600; color: var(--on-page); white-space: nowrap; }
-.flyer-you:focus-visible { outline-offset: 0; }
-.flyer-name .flyer-small { width: 2.75rem; height: 2.75rem; font-size: 0.875rem; border-width: 3px; }
 .flyer-faces > * + * { margin-left: -0.875rem; }
 
 /* The title block, in the hype page's type (public/assets/hype.css, .title and .dest): the trip's name in
@@ -37,5 +28,4 @@
   .flyer-hero, .flyer-hero.short { height: clamp(20rem, 46vh, 30rem); margin: 0; border-radius: 1.75rem; }
   .flyer-trip { font-size: clamp(2.5rem, 1.6rem + 1.4vw, 3.25rem); }
   .flyer-where { font-size: clamp(1.5rem, 1.1rem + 0.6vw, 1.875rem); }
-  .flyer-replied { display: block; margin-top: 0.75rem; }
 }

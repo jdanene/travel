@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import type { Person } from "../components/Avatars";
 import { FlyerHead } from "../components/FlyerHead";
 import { Icon, type IconName } from "../components/Icon";
 import type { Trip } from "../types/trip";
@@ -21,12 +20,10 @@ const LOOK: Record<ModuleId, { name: string; icon: IconName }> = {
 interface HomeProps {
   trip: Trip;
   memberId: string | null;
-  organizer: Person | undefined;
-  /** This device's member; a tap on their face on the flyer calls onYou. */
-  you?: Person;
-  onYou?: () => void;
-  /** "6 of 8 replied", for the flyer's column on a desktop. */
-  replied?: string;
+  /** The crew in the title block (mock 5): faces, counts and "See the crew". */
+  crew?: ReactNode;
+  /** The first card, above the module buttons: the Activity list. It gets openModule, so a line can open its module. */
+  lead?: (openModule: (id: ModuleId) => void) => ReactNode;
   /**
    * What each module shows when open; each module's ticket fills it in.
    * It gets openModule, so one module can open another (the map card opens Events).
@@ -35,13 +32,14 @@ interface HomeProps {
 }
 
 /**
- * Screen 12/2, the home page: the flyer head, then one button per module,
+ * Screen 12/2, the home page: the flyer head with the crew in its title
+ * block (mock 5), then the Activity card, then one button per module,
  * equal in size, in a fixed order that means nothing. A button opens its
  * module in place (12/3); one is open at a time, and all start closed.
  * A closed button shows its state on the right.
  *
- * Inputs: the trip, this device's member, the organizer, what a tap on
- * your own face does, and each module's open content.
+ * Inputs: the trip, this device's member, the crew block, the first card,
+ * and each module's open content.
  * Output: the home page. "All set" shows under the date line once the
  * dates and every stay are confirmed. From 900 px up the flyer sits in a
  * sticky left column and the modules in the right one. An opened module
@@ -56,7 +54,7 @@ interface HomeProps {
  *   Dates open, tap "Map" → Dates folds as Map unfolds; Map ends at the top of the window, the warm map already drawn
  *   1650 px         → the flyer on the left, the module buttons on the right
  */
-export function Home({ trip, memberId, organizer, you, onYou, replied, content }: HomeProps) {
+export function Home({ trip, memberId, crew, lead, content }: HomeProps) {
   const [open, setOpen] = useState<ModuleId | null>(null);
   // The fold that stands open (one frame behind `open`, so the browser draws it shut first), and the one still closing.
   const [shownId, setShownId] = useState<ModuleId | null>(null);
@@ -121,10 +119,12 @@ export function Home({ trip, memberId, organizer, you, onYou, replied, content }
 
   return (
     <div className="split">
-      <FlyerHead organizer={organizer} you={you} onYou={onYou} info={trip.info} photo="short" replied={replied}>
+      <FlyerHead info={trip.info} photo="short">
+        {crew}
         {allSet(trip) && <p className="cap all-set">All set</p>}
       </FlyerHead>
       <div className="modules" ref={list}>
+        {lead?.(toggle)}
         {shown.map(({ id, lines }) => {
           const isOpen = id === openId;
           const drawn = isOpen || id === leaving;
