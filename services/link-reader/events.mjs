@@ -1,5 +1,5 @@
 // The events check: reads the clubs' own event pages (event-sources.mjs)
-// and returns the events dated inside the trip's season. It reads a page's
+// and returns the events dated inside the events window. It reads a page's
 // schema.org Event data, and, for a club that lists its nights as text or in
 // a feed, that club's reader (event-lists.mjs). It calls no AI model. It
 // stores nothing: the app writes what it returns (the function has no
@@ -9,13 +9,14 @@ import { fetchPage } from "./fetch-page.mjs";
 import { SOURCES, onSourceSite } from "./event-sources.mjs";
 import { clean, dayOf, decodeEntities } from "./parse.mjs";
 
-/** The trip's season; database.rules.json allows show dates in it and no others. */
-const SEASON = { from: "2027-02-01", to: "2027-03-31" };
+/** The events window, 25 Jan to 31 Mar 2027; database.rules.json allows show dates in it and no others
+ * (web/src/features/parties/lib/window.ts holds the same days). */
+const SEASON = { from: "2027-01-25", to: "2027-03-31" };
 const MAX_EVENTS = 100;
 /** Pages fetched at the same time, across all sources. */
 const AT_ONCE = 6;
-/** One page a night for two months, and a little room. */
-const MAX_PAGES_PER_SOURCE = 62;
+/** One page a night for the window (66 nights); a club with more pages is cut here. */
+const MAX_PAGES_PER_SOURCE = 66;
 /** No new page is opened after this; each open page has its own 6 seconds. */
 const START_PAGES_FOR_MS = 10_000;
 /** A name a club gives a night before it names the act. */
@@ -25,8 +26,8 @@ const SERIES_NIGHTS = 3;
 
 
 /**
- * Checks every source once and returns the acts it announces for February
- * and March 2027, so the app can add the ones it does not list yet. A
+ * Checks every source once and returns the acts it announces from 25 January
+ * to 31 March 2027, so the app can add the ones it does not list yet. A
  * source that fails does not stop the others.
  *
  * Inputs: sources, the clubs to read (SOURCES unless a test passes its own).

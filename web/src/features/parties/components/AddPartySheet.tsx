@@ -5,6 +5,7 @@ import { idFromName } from "../../../lib/ids";
 import { initials } from "../../../lib/initials";
 import type { Show } from "../../../types/trip";
 import type { PartyDraft } from "../api/parties";
+import { EVENTS_WINDOW, inEventsWindow } from "../lib/window";
 
 type Field = "venue" | "date" | "artist" | "about" | "link";
 
@@ -19,7 +20,6 @@ interface AddPartySheetProps {
   destinations: Array<{ id: string; name: string }>;
   /** The venues the picker offers per destination: the trip's venues, friends' venues and friends' places on the map. */
   venues: Record<string, string[]>;
-  season: { from: string; to: string };
   /** This device's member name, for "added by KA". */
   yourName: string;
   onClose: () => void;
@@ -36,14 +36,14 @@ interface AddPartySheetProps {
  * at its foot.
  *
  * Inputs: whether it is open, the show being edited (if any), the
- * destinations and known venues, the season, this member's name, and what
+ * destinations and known venues, this member's name, and what
  * saving, removing and closing do.
  * Output: the sheet. Save checks every field first and puts the reason
  * under the field (case 27); the typed values stay.
  * Examples (checked at 390 px against screen 8):
  *   add, Koh Phangan, Somewhere else, "Haad Rin pier", Sat 20 Feb, "Boat party" → Save; the row reads "added by KA"
  *   add, Bali, pick "Single Fin" → the event lists under Single Fin and opens the Map on its pin
- *   date 2027-04-02 → "Pick a day from 1 Feb to 31 Mar." under Date
+ *   date 2027-01-24 → "Pick a day from 25 Jan to 31 Mar." under Date (lib/window.ts)
  */
 export function AddPartySheet(props: AddPartySheetProps) {
   return (
@@ -53,7 +53,7 @@ export function AddPartySheet(props: AddPartySheetProps) {
   );
 }
 
-function PartyForm({ editing, destinations, venues, season, yourName, onSave, onRemove }: AddPartySheetProps) {
+function PartyForm({ editing, destinations, venues, yourName, onSave, onRemove }: AddPartySheetProps) {
   const [draft, setDraft] = useState<PartyDraft>({
     destination: editing?.destination ?? destinations[0]?.id ?? "",
     venue: editing?.venue ?? "",
@@ -82,7 +82,7 @@ function PartyForm({ editing, destinations, venues, season, yourName, onSave, on
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const found = problems(draft, season);
+    const found = problems(draft);
     setErrors(found);
     const first = (["venue", "date", "artist", "about", "link"] as Field[]).find((field) => found[field]);
     if (first) return event.currentTarget.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
@@ -124,7 +124,7 @@ function PartyForm({ editing, destinations, venues, season, yourName, onSave, on
         field("venue", "Venue", <VenuePicker {...described("venue")} value={pick} offered={offered} onChange={choose} />)
       )}
       {elsewhere && field("venue", "Venue name", <input {...described("venue")} value={draft.venue} maxLength={60} autoComplete="off" onChange={(e) => set("venue", e.target.value)} />)}
-      {field("date", "Date", <input {...described("date")} type="date" value={draft.date} min={season.from} max={season.to} onChange={(e) => set("date", e.target.value)} />)}
+      {field("date", "Date", <input {...described("date")} type="date" value={draft.date} min={EVENTS_WINDOW.from} max={EVENTS_WINDOW.to} onChange={(e) => set("date", e.target.value)} />)}
       {field("artist", "Who is playing", <input {...described("artist")} value={draft.artist} maxLength={200} autoComplete="off" onChange={(e) => set("artist", e.target.value)} />)}
       {field("about", "What is it? (optional)", <input {...described("about")} value={draft.about} maxLength={120} autoComplete="off" onChange={(e) => set("about", e.target.value)} />)}
       {field(
@@ -165,15 +165,15 @@ function VenuePicker({ value, offered, onChange, ...rest }: { value: string; off
 
 /**
  * Checks a draft before it is saved, so a refusal never reaches the rules.
- * Inputs: the draft and the trip's season. Output: a reason per wrong field;
+ * Inputs: the draft; its date must lie in EVENTS_WINDOW. Output: a reason per wrong field;
  * none when the draft can be saved.
  * Examples (checked on screen): empty venue → { venue: "Add the venue." }
  */
-function problems(draft: PartyDraft, season: { from: string; to: string }): Partial<Record<Field, string>> {
+function problems(draft: PartyDraft): Partial<Record<Field, string>> {
   const found: Partial<Record<Field, string>> = {};
   if (!draft.venue.trim()) found.venue = "Add the venue.";
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(draft.date) || draft.date < season.from || draft.date > season.to) {
-    found.date = `Pick a day from ${dayMonth(season.from)} to ${dayMonth(season.to)}.`;
+  if (!inEventsWindow(draft.date)) {
+    found.date = `Pick a day from ${dayMonth(EVENTS_WINDOW.from)} to ${dayMonth(EVENTS_WINDOW.to)}.`;
   }
   if (!draft.artist.trim()) found.artist = "Add who is playing.";
   const link = draft.link.trim();

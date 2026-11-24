@@ -98,7 +98,7 @@ When the dates and every destination that has a stay option have a confirmed sta
 
 ### The last-year rule (`web/src/features/parties/lib/lastYear.ts`)
 
-For each venue, for each weekend (Saturday and Sunday; a Friday would add rows screen 7 does not show) from 1 February to 31 March 2027: if the venue has no show this year on those days, show the last-year shows at that venue on the days 364 days before. 364 days keeps the weekday: Sat 6 Feb 2027 maps to Sat 7 Feb 2026, as on screen 7. If last year has nothing there, show nothing for that weekend.
+For each venue, for each weekend (Saturday and Sunday; a Friday would add rows screen 7 does not show) from 25 January to 31 March 2027 (the events window, `lib/window.ts`; owner, 24 Nov 2026: the last week of January has Zamna): if the venue has no show this year on those days, show the last-year shows at that venue on the days 364 days before. 364 days keeps the weekday: Sat 6 Feb 2027 maps to Sat 7 Feb 2026, as on screen 7. If last year has nothing there, show nothing for that weekend.
 
 ## 4. Data contract
 
@@ -108,7 +108,7 @@ Paths live in one file, `web/src/lib/paths.ts`. The rules file repeats them; the
 /trips/{tripId}
   info        { name, summary?, note?, noteBy?, season: {from, to}, anchor: {name, date},
                 destinations: {bali:{name, lat, lng}, kohPhangan:{name, lat, lng}}, inviteTitle? }
-              inviteTitle: the name in the link preview, 1 to 60 characters; only an organizer writes it ("Edit invite");
+              inviteTitle: the name in the link preview, 1 to 60 characters; only an organizer writes it (the "Invite" sheet);
               create-trip writes the other fields one by one and leaves it; scripts/stamp-preview.mjs puts it in the page files
   crew
     expected  { {memberId}: name }                    from the trip file
@@ -234,7 +234,7 @@ The number is the case's id. Each ticket lists its own.
 24. A show leaves the lineup file: the seed does not delete it. The organizer removes it on the page.
 25. A show has `verified: false`: it carries "not confirmed".
 26. A venue has shows this year on a weekend: no last-year line for that weekend. Last year has nothing: no line.
-27. A friend adds a party with a field missing, a date outside 1 Feb to 31 Mar 2027, or a link that is not an address: refuse with the reason next to the field.
+27. A friend adds a party with a field missing, a date outside 25 Jan to 31 Mar 2027, or a link that is not an address: refuse with the reason next to the field.
 28. A friend adds a party that matches a show (same venue, date and artist, ignoring case and spaces): open that row; add nothing.
 29. A friend removes their party: its "in" marks go with it.
 30. The artist text is long (the seed has lines of 100 characters): two lines, then cut.
@@ -731,7 +731,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 **Do.**
 1. `scripts/seed-parties.mjs` (new): reads `data/lineups/2027-feb-mar.json` into `parties/shows` and `data/lineups/2026-feb-mar.json` into `parties/lastYear`, for the trip in `local/trip.state.json`. `--emulator` as in Trip 3. `scripts/ship.sh` runs it after the rules.
 2. `web/src/features/parties/lib/shows.ts` (new): `showId(show)` and `byPlaceVenueDate(shows)` (destination, then venue, then date), with headers.
-3. `web/src/features/parties/lib/lastYear.ts` (new): `lastYearLines(shows, lastYear, season)`, the rule in section 3, with the header.
+3. `web/src/features/parties/lib/lastYear.ts` (new): `lastYearLines(shows, lastYear, window)`, the rule in section 3, with the header.
 
 Field map from the files: `place` becomes `destination`; `artist`, `venue`, `area`, `date` and `verified` keep their names; `source` becomes `link` when it is an address.
 
@@ -776,7 +776,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 **Reuse and refactor.** Uses `Sheet`, `Avatars`, `showId`, `byPlaceVenueDate`, `lastYearLines`.
 
 **Edge cases.**
-1. (27) A field is missing, the date is outside 1 Feb to 31 Mar 2027, or the link is not an address: refuse with the reason next to the field.
+1. (27) A field is missing, the date is outside 25 Jan to 31 Mar 2027, or the link is not an address: refuse with the reason next to the field.
 2. (28) The party matches a show (same venue, date and artist, ignoring case and spaces): close the sheet and bring that row into view. Add nothing.
 3. (29) A friend removes their party: its "in" marks go in the same write.
 4. (30) The artist text is long: two lines, then cut.

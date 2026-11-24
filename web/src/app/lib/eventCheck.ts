@@ -1,4 +1,5 @@
 import { showId } from "../../features/parties/lib/shows";
+import { inEventsWindow } from "../../features/parties/lib/window";
 import type { FoundEvent } from "../../lib/reader";
 import type { Show, Trip } from "../../types/trip";
 
@@ -38,7 +39,7 @@ export function checkIsDue(lastAt: number | undefined, now: number): boolean {
  * now — the time to stamp on each show.
  * Output: showId → the show to write, with source "check", verified false
  * and no addedBy. An event is dropped when its destination is not the
- * trip's, its date is not a day from 1 Feb to 31 Mar 2027, its venue or
+ * trip's, its date is not a day from 25 Jan to 31 Mar 2027 (EVENTS_WINDOW), its venue or
  * artist is empty or too long, its link is not https, or its id is listed.
  * Examples (each is a test in eventCheck.test.ts):
  *   BEN BÖHMER at Savaya on 28 Feb, not listed → { "bali_2027-02-28_savaya_ben-bohmer": { …, source: "check", verified: false } }
@@ -53,8 +54,7 @@ export function newShows(events: FoundEvent[], trip: Trip, now: number): Record<
     const area = event.area?.trim();
     const fits =
       trip.info?.destinations?.[event.destination] !== undefined &&
-      /^2027-0[23]-(0[1-9]|[12]\d|3[01])$/.test(event.date) &&
-      new Date(`${event.date}T00:00:00Z`).getUTCDate() === Number(event.date.slice(8)) &&
+      inEventsWindow(event.date) &&
       venue.length >= 1 && venue.length <= 60 &&
       artist.length >= 1 && artist.length <= 200 &&
       (!area || area.length <= 60) &&

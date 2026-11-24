@@ -1,20 +1,21 @@
 import { describe, expect, it } from "vitest";
 import { lastSeason, lastYearLines } from "./lastYear";
-
-const season = { from: "2027-02-01", to: "2027-03-31" };
+import { EVENTS_WINDOW as season } from "./window";
 const savaya = (date: string, artist: string) => ({ destination: "bali", venue: "Savaya", date, artist });
 
 // The header examples of lastYearLines(), one test each.
 describe("lastYearLines", () => {
-  it("gives screen 7's Savaya line for the empty weekend of Sat 6 – Sun 7 Feb", () => {
+  it("gives screen 7's Savaya line for the empty weekend of Sat 6 – Sun 7 Feb, and one for the last weekend of January", () => {
     const shows = [savaya("2027-02-13", "Peggy Gou"), savaya("2027-02-14", "Baby J")];
     const lastYear = [
+      savaya("2026-01-31", "Black Coffee"),
       savaya("2026-02-06", "Peggy Gou"), // a Friday: no weekend line holds it
       savaya("2026-02-07", "Nic Fanciulli"),
       savaya("2026-02-08", "Francis Mercier"),
       savaya("2026-02-14", "Argy"), // this year has Sat 13 Feb: no line
     ];
     expect(lastYearLines(shows, lastYear, season)).toEqual([
+      { destination: "bali", venue: "Savaya", from: "2027-01-30", to: "2027-01-31", shows: [{ date: "2026-01-31", artist: "Black Coffee" }] },
       {
         destination: "bali",
         venue: "Savaya",

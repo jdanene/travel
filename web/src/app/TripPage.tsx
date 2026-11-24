@@ -1,9 +1,8 @@
 import { PhotosProvider } from "../components/Avatars";
 import { Notice } from "../components/Notice";
 import { crewOf, useOrganizerLink, type CrewView } from "../features/crew/api/crew";
-import { EditInvite } from "../features/crew/components/EditInvite";
 import { Invitation } from "../features/crew/components/Invitation";
-import { InviteFriends } from "../features/crew/components/InviteFriends";
+import { Invite } from "../features/crew/components/Invite";
 import { OrganizerSignIn } from "../features/crew/components/OrganizerSignIn";
 import { PhotoSheet } from "../features/crew/components/PhotoSheet";
 import { TextCrew } from "../features/crew/components/TextCrew";
@@ -28,7 +27,7 @@ import type { ModuleId } from "./lib/modules";
  * The trip page, kept a thin composition so its layout changes in one
  * place: a failure notice, or the invitation (12/1) before a reply, or the
  * home page (12/2) after it, and at the foot "Organizer sign-in" for a
- * device that is not an organizer, or "Invite friends", "Edit invite" and "Text the crew"
+ * device that is not an organizer, or "Invite" and "Text the crew"
  * for one that is.
  *
  * Inputs: tripId — from the address bar.
@@ -100,11 +99,10 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
         </>
       )}
       {/* The organizer signs in with Google from any phone (D15); an organizer no longer needs it,
-          and finds "Invite friends", "Edit invite" and "Text the crew" in its place. */}
+          and finds "Invite" and "Text the crew" in its place. */}
       {crew.isOrganizer ? (
         <div className="organizer-foot">
-          <InviteFriends tripId={tripId} info={trip.info} />
-          <EditInvite tripId={tripId} info={trip.info} />
+          <Invite tripId={tripId} info={trip.info} />
           <TextCrew tripId={tripId} tripName={trip.info?.name ?? ""} members={crew.byId} />
         </div>
       ) : (

@@ -10,7 +10,7 @@
  * key, and saves both in local/trip.state.json (local/trip.state.emulator.json
  * with --emulator). Every later run keeps them.
  * Each run replaces info (each field by its own path, so info/inviteTitle,
- * which an organizer sets with "Edit invite", stays; absent, the page and
+ * which an organizer sets in the "Invite" sheet, stays; absent, the page and
  * the link preview use the default), crew/expected, places/areas,
  * places/venues (each with its `big` tag from data/places.json, plan D18),
  * its own organizer key (the keys organizers add on the page stay)

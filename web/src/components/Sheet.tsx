@@ -7,6 +7,8 @@ interface SheetProps {
   title: string;
   /** Called when the friend closes the sheet: the close button, Escape, or a tap outside. */
   onClose: () => void;
+  /** False keeps focus on Close, for a sheet whose first field is not what most openings are for. Default true. */
+  focusFirst?: boolean;
   children: ReactNode;
 }
 
@@ -21,13 +23,14 @@ interface SheetProps {
  * under an open sheet; the sheet stays (case 36). From 900 px up it is a
  * centred dialog instead of a bottom sheet.
  *
- * Inputs: whether it is open, its title, what closing does, and its content.
+ * Inputs: whether it is open, its title, what closing does, whether the
+ * first field takes focus (default yes), and its content.
  * Output: the sheet over a dimmed page, or nothing while closed.
  * Examples (checked on the emulator at 375 px and 1650 px):
  *   open, title "Who are you?" → a bottom sheet on a phone, a centred dialog on a desktop; "Your name" has focus; Escape closes it
  *   open "Add a place"         → the link field has focus
  */
-export function Sheet({ open, title, onClose, children }: SheetProps) {
+export function Sheet({ open, title, onClose, focusFirst = true, children }: SheetProps) {
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -36,10 +39,10 @@ export function Sheet({ open, title, onClose, children }: SheetProps) {
     if (open && !dialog.open) {
       dialog.showModal();
       // The browser focuses the first button (Close); the friend came to type, so the first field takes focus.
-      dialog.querySelector<HTMLElement>("input:not([type=hidden]):not([disabled]), textarea, select")?.focus();
+      if (focusFirst) dialog.querySelector<HTMLElement>("input:not([type=hidden]):not([disabled]), textarea, select")?.focus();
     }
     if (!open && dialog.open) dialog.close();
-  }, [open]);
+  }, [open, focusFirst]);
 
   return (
     <dialog

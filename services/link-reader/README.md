@@ -25,7 +25,7 @@ A small AWS Lambda that reads a pasted link for the trip app (plan D8), and chec
 
 `GET <function URL>?check=events` answers `{ ok: true, checkedAt, events, failed }`:
 
-- `events`: at most 100, by date, each `{ destination, venue, area, date, artist, link }`, dated 1 Feb to 31 Mar 2027. `link` is the https page the event came from.
+- `events`: at most 100, by date, each `{ destination, venue, area, date, artist, link }`, dated 25 Jan to 31 Mar 2027. `link` is the https page the event came from.
 - `failed`: `[{ venue, reason }]`, one per club that failed, with the reasons above. The other clubs still run.
 
 It reads a club's schema.org Event data (JSON-LD) where the club publishes it. Where a club lists its nights only as page text, or in a JSON feed its page loads, a reader for that one layout (`event-lists.mjs`) reads them; it breaks when the club redesigns, and the check then reports the club as `unreadable`. No AI model, no key, no browser. A night named "Special guest" or "TBA", or a name the club gives three or more nights in the season (a house night, a sunset session), is left out. Acts keep the club's own spelling, capitals included. It opens only the clubs' own hosts (`event-sources.mjs`), six pages at a time, 6 seconds and 512 KB each, with the same redirect rule as a read; it opens no new page after 10 seconds. A second call within 10 minutes gets the first call's answer, so the public URL cannot make the function hammer a club.

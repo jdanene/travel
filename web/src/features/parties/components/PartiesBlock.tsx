@@ -9,6 +9,7 @@ import { addShow, editShow, removeShow, setIn, setVenueTag, type PartyDraft } fr
 import { eventsList, shownUnder, tagChips, tripTags, type EventsFilter } from "../lib/tags";
 import { areaShown, placeLine, placeOf, type MapPlace } from "../lib/detail";
 import { lastSeason, lastYearLines } from "../lib/lastYear";
+import { EVENTS_WINDOW } from "../lib/window";
 import { byPlaceVenueDate, venueKey, type KnownVenue, type ListedShow } from "../lib/shows";
 import { AddPartySheet } from "./AddPartySheet";
 import { EventsFilterChips } from "./EventsFilter";
@@ -17,9 +18,6 @@ import { ShowRow } from "./ShowRow";
 import { ShowSheet } from "./ShowSheet";
 import { TagsSheet } from "./TagsSheet";
 import "./Parties.css";
-
-/** The rules' range, used when the trip has no season yet (case 9). */
-const DEFAULT_SEASON = { from: "2027-02-01", to: "2027-03-31" };
 
 type SheetState = { mode: "add" } | { mode: "edit"; id: string } | null;
 
@@ -73,7 +71,6 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
   const shows = trip.parties?.shows ?? {};
   const marks = trip.parties?.in ?? {};
   const members = trip.crew?.members ?? {};
-  const season = trip.info?.season ?? DEFAULT_SEASON;
   const destinationNames = trip.info?.destinations ?? {};
   const nameOf = (id: string) => destinationNames[id]?.name ?? id;
   const areas = trip.places?.areas ?? {};
@@ -87,7 +84,7 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
   const tags = tripTags(trip.places);
   const chips = tagChips(tags);
   const groups = eventsList(shows, known, filter, tags);
-  const lines = lastYearLines(Object.values(shows), lastYear, season).filter((line) => shownUnder(filter, line, tags));
+  const lines = lastYearLines(Object.values(shows), lastYear, EVENTS_WINDOW).filter((line) => shownUnder(filter, line, tags));
   // The trip's own venues by venueKey(), the ones an organizer can tag.
   const venueIds = new Map(Object.entries(trip.places?.venues ?? {}).map(([id, venue]) => [venueKey(venue.destination, venue.name), id]));
   const taggingVenue = tagging ? trip.places?.venues?.[tagging] : undefined;
@@ -263,7 +260,6 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
         editing={editing}
         destinations={destinations}
         venues={venuesByDestination(trip, byPlaceVenueDate(shows, known))}
-        season={season}
         yourName={viewer.memberId ? (members[viewer.memberId]?.name ?? viewer.memberId) : ""}
         onClose={() => setSheet(null)}
         onSave={save}

@@ -14,7 +14,7 @@ const ORIGINS = /^(https:\/\/travel-ca8f9\.web\.app|http:\/\/localhost(:\d{1,5})
 /**
  * Answers GET ?url=<address> with what the page says, for the Add a place
  * sheet (a listing) and the Add a link sheet (a post), and GET ?check=events
- * with the clubs' events in February and March 2027, for the app's events
+ * with the clubs' events from 25 January to 31 March 2027, for the app's events
  * check.
  *
  * Inputs: event, a Lambda function URL event. Its query holds url, or check

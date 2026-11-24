@@ -1,7 +1,7 @@
 /**
  * Writes the organizer's invite title into the link preview. Messages and
  * WhatsApp read the page file, not the app, so the title the organizer set
- * with "Edit invite" (trips/{tripId}/info/inviteTitle) reaches previews
+ * in the "Invite" sheet (trips/{tripId}/info/inviteTitle) reaches previews
  * only when it is in the files the deploy serves.
  *
  * Usage, from the repo root, after the app is built and before the hosting

@@ -1,17 +1,17 @@
 {
  "checked": "2026-11-24",
- "window": "2027-02-01 to 2027-03-31",
+ "window": "2027-01-25 to 2027-03-31",
  "shows": [
   {
-   "date": "2027-02-06",
-   "weekly": "sat",
-   "artist": "Off The Record",
-   "about": "A Saturday pool party at Ulu Cliffhouse with house DJs, from the afternoon to sunset.",
-   "note": "Saturday pool party, afternoon to sunset; resident and guest DJs",
-   "venue": "Ulu Cliffhouse",
+   "date": "2027-02-07",
+   "weekly": "sun",
+   "artist": "Sunday Day Party",
+   "about": "A Sunday afternoon party on the cliff top at El Kabron, Uluwatu, with DJs and live sax and violin from 2 pm.",
+   "note": "The venue's Sunday Day Party page: starts at 2 pm, weekend DJ sets with live saxophone and violin",
+   "venue": "El Kabron",
    "area": "Uluwatu",
    "place": "Bali",
-   "source": "https://www.ulucliffhouse.com/whats-on",
+   "source": "https://www.elkabron.com/sunday-party",
    "verified": false
   },
   {
@@ -27,88 +27,6 @@
    "verified": false
   },
   {
-   "date": "2027-02-06",
-   "weekly": "sat",
-   "artist": "Eden Garden Saturday",
-   "about": "An all-night party above Haad Yuan beach, every Saturday from 9 pm to 9 am; entry is free.",
-   "note": "All night, 9 pm to 9 am, free entry",
-   "venue": "Eden Garden",
-   "area": "Haad Yuan",
-   "place": "Koh Phangan",
-   "source": "https://phangan.events/events/eden-garden-saturday/",
-   "verified": false
-  },
-  {
-   "date": "2027-02-07",
-   "weekly": "sun",
-   "artist": "Sunday Session",
-   "about": "A Sunday night party on the cliff over the Uluwatu surf break; the bar stays open until 2 am.",
-   "note": "The Sunday party on the cliff over the surf break; the venue's site lists Sunday hours to 2 am but no session page",
-   "venue": "Single Fin",
-   "area": "Uluwatu",
-   "place": "Bali",
-   "source": "https://www.singlefinbali.com/",
-   "verified": false
-  },
-  {
-   "date": "2027-02-07",
-   "weekly": "sun",
-   "artist": "Sunday Day Party",
-   "about": "A Sunday afternoon party on the cliff top at El Kabron, Uluwatu, with DJs and live sax and violin from 2 pm.",
-   "note": "The venue's Sunday Day Party page: starts at 2 pm, weekend DJ sets with live saxophone and violin",
-   "venue": "El Kabron",
-   "area": "Uluwatu",
-   "place": "Bali",
-   "source": "https://www.elkabron.com/sunday-party",
-   "verified": false
-  },
-  {
-   "date": "2027-02-03",
-   "weekly": "wed",
-   "artist": "TGIW",
-   "about": "Zouk's Wednesday night of top 40 hits and EDM classics; women and students get in free, subject to capacity.",
-   "note": "On Zouk's calendar every Wednesday through Dec 2026; no 2027 dates posted yet",
-   "venue": "Zouk",
-   "area": "Clarke Quay",
-   "place": "Singapore",
-   "source": "https://zoukgroup.com/singapore/zouk/event/EVE109748600020261202/tgiw/",
-   "verified": false
-  },
-  {
-   "date": "2027-02-06",
-   "weekly": "sat",
-   "artist": "Elevate",
-   "about": "CÉ LA VI's Saturday club night of house and electronic music, 10 pm to 4 am, with guest and resident DJs.",
-   "note": "Listed by the venue as every Saturday, 10 pm to 4 am; no guest DJs named for 2027 yet",
-   "venue": "CÉ LA VI",
-   "area": "Marina Bay",
-   "place": "Singapore",
-   "source": "https://sg.celavi.com/events/elevate",
-   "verified": false
-  },
-  {
-   "date": "2027-02-01",
-   "artist": "Half Moon Festival",
-   "about": "A two-day party in the jungle at Ban Tai, Koh Phangan, held every two weeks.",
-   "note": "Half Moon Festival (1 Feb; no DJs named; dates from a travel blog, not on the organiser's site yet)",
-   "venue": "Half Moon Festival",
-   "area": "Ban Tai",
-   "place": "Koh Phangan",
-   "source": "https://www.halfmoonfestival.com/",
-   "verified": false
-  },
-  {
-   "date": "2027-02-11",
-   "artist": "MO:DEM Teaser Party",
-   "about": "A three-day psytrance party at Hidden Paradise in Ban Tai, from the team behind the MO:DEM festival in Croatia.",
-   "note": "MO:DEM Teaser Party Thailand 2027 (psytrance, 11-14 Feb): Highko Retro, Xolotl, Synthetik Chaos, Phobos and more",
-   "venue": "Hidden Paradise",
-   "area": "Ban Tai",
-   "place": "Koh Phangan",
-   "source": "https://phangan.events/events/modem-teaser-party-thailand-2027/",
-   "verified": false
-  },
-  {
    "date": "2027-02-13",
    "artist": "Peggy Gou",
    "about": "South Korean DJ who plays house and techno.",
@@ -117,17 +35,6 @@
    "place": "Bali",
    "source": "https://www.savaya.com/event-calendar/february-13-2027",
    "verified": true
-  },
-  {
-   "date": "2027-02-13",
-   "artist": "Half Moon Festival",
-   "about": "A two-day party in the jungle at Ban Tai, Koh Phangan, held every two weeks.",
-   "note": "Half Moon Festival (13-14 Feb; no DJs named; dates from a travel blog, not on the organiser's site yet)",
-   "venue": "Half Moon Festival",
-   "area": "Ban Tai",
-   "place": "Koh Phangan",
-   "source": "https://www.halfmoonfestival.com/",
-   "verified": false
   },
   {
    "date": "2027-02-14",
@@ -147,39 +54,6 @@
    "place": "Bali",
    "source": "https://www.savaya.com/event-calendar/february-20-2027",
    "verified": true
-  },
-  {
-   "date": "2027-02-20",
-   "artist": "Defected",
-   "about": "The London house label's party night, part of its winter run of Saturdays at Illuzion.",
-   "note": "Defected Phuket, Illuzion Saturdays series, 9 pm to 3 am; no DJs named; DJ Mag (15 Nov 2026) lists the same date; not on Illuzion's own calendar yet",
-   "venue": "Illuzion Phuket",
-   "area": "Patong",
-   "place": "Phuket",
-   "source": "https://phangan.events/events/defected-phuket-3/",
-   "verified": false
-  },
-  {
-   "date": "2027-02-22",
-   "artist": "Full Moon Party",
-   "about": "An all-night party on Haad Rin beach, Koh Phangan, where each bar on the sand plays its own music; it runs every full moon.",
-   "note": "Full Moon Party (no guest DJs named)",
-   "venue": "Haad Rin Beach",
-   "area": "Haad Rin",
-   "place": "Koh Phangan",
-   "source": "https://fullmoonparty-thailand.com/schedules/",
-   "verified": true
-  },
-  {
-   "date": "2027-02-25",
-   "artist": "ATMAN Begins Teaser Party",
-   "about": "A 48-hour psytrance party at Lost Jungle, Koh Phangan, ahead of the ATMAN festival.",
-   "note": "ATMAN Begins Teaser Party (psytrance, 25-27 Feb): Agressive Mood, Maze of Madness, Daash, Psynonima and more",
-   "venue": "Lost Jungle",
-   "area": "Koh Phangan",
-   "place": "Koh Phangan",
-   "source": "https://phangan.events/events/atman-begins-teaser-party-at-lost-jungle/",
-   "verified": false
   },
   {
    "date": "2027-02-27",
@@ -202,17 +76,6 @@
    "verified": true
   },
   {
-   "date": "2027-02-28",
-   "artist": "Half Moon Festival",
-   "about": "A two-day party in the jungle at Ban Tai, Koh Phangan, held every two weeks.",
-   "note": "Half Moon Festival (28 Feb - 1 Mar; no DJs named; dates from a travel blog, not on the organiser's site yet)",
-   "venue": "Half Moon Festival",
-   "area": "Ban Tai",
-   "place": "Koh Phangan",
-   "source": "https://www.halfmoonfestival.com/",
-   "verified": false
-  },
-  {
    "date": "2027-03-13",
    "artist": "FISHER",
    "about": "Australian DJ who plays tech house.",
@@ -223,14 +86,83 @@
    "verified": true
   },
   {
-   "date": "2027-03-13",
-   "artist": "Defected",
-   "about": "The London house label's party night, the last of its winter run of Saturdays at Illuzion.",
-   "note": "Date from DJ Mag's residency news (15 Nov 2026: 26 Dec, 30 Jan, 20 Feb, 13 Mar); no DJs named; not on Illuzion's own calendar yet",
-   "venue": "Illuzion Phuket",
-   "area": "Patong",
-   "place": "Phuket",
-   "source": "https://djmag.com/news/defected-announces-illuzion-phuket-winter-residency",
+   "date": "2027-02-07",
+   "weekly": "sun",
+   "artist": "Sunday Session",
+   "about": "A Sunday night party on the cliff over the Uluwatu surf break; the bar stays open until 2 am.",
+   "note": "The Sunday party on the cliff over the surf break; the venue's site lists Sunday hours to 2 am but no session page",
+   "venue": "Single Fin",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.singlefinbali.com/",
+   "verified": false
+  },
+  {
+   "date": "2027-02-06",
+   "weekly": "sat",
+   "artist": "Off The Record",
+   "about": "A Saturday pool party at Ulu Cliffhouse with house DJs, from the afternoon to sunset.",
+   "note": "Saturday pool party, afternoon to sunset; resident and guest DJs",
+   "venue": "Ulu Cliffhouse",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.ulucliffhouse.com/whats-on",
+   "verified": false
+  },
+  {
+   "date": "2027-02-06",
+   "weekly": "sat",
+   "artist": "Eden Garden Saturday",
+   "about": "An all-night party above Haad Yuan beach, every Saturday from 9 pm to 9 am; entry is free.",
+   "note": "All night, 9 pm to 9 am, free entry",
+   "venue": "Eden Garden",
+   "area": "Haad Yuan",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/eden-garden-saturday/",
+   "verified": false
+  },
+  {
+   "date": "2027-02-22",
+   "artist": "Full Moon Party",
+   "about": "An all-night party on Haad Rin beach, Koh Phangan, where each bar on the sand plays its own music; it runs every full moon.",
+   "note": "Full Moon Party (no guest DJs named)",
+   "venue": "Haad Rin Beach",
+   "area": "Haad Rin",
+   "place": "Koh Phangan",
+   "source": "https://fullmoonparty-thailand.com/schedules/",
+   "verified": true
+  },
+  {
+   "date": "2027-02-01",
+   "artist": "Half Moon Festival",
+   "about": "A two-day party in the jungle at Ban Tai, Koh Phangan, held every two weeks.",
+   "note": "Half Moon Festival (1 Feb; no DJs named; dates from a travel blog, not on the organiser's site yet)",
+   "venue": "Half Moon Festival",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://www.halfmoonfestival.com/",
+   "verified": false
+  },
+  {
+   "date": "2027-02-13",
+   "artist": "Half Moon Festival",
+   "about": "A two-day party in the jungle at Ban Tai, Koh Phangan, held every two weeks.",
+   "note": "Half Moon Festival (13-14 Feb; no DJs named; dates from a travel blog, not on the organiser's site yet)",
+   "venue": "Half Moon Festival",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://www.halfmoonfestival.com/",
+   "verified": false
+  },
+  {
+   "date": "2027-02-28",
+   "artist": "Half Moon Festival",
+   "about": "A two-day party in the jungle at Ban Tai, Koh Phangan, held every two weeks.",
+   "note": "Half Moon Festival (28 Feb - 1 Mar; no DJs named; dates from a travel blog, not on the organiser's site yet)",
+   "venue": "Half Moon Festival",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://www.halfmoonfestival.com/",
    "verified": false
   },
   {
@@ -253,6 +185,200 @@
    "area": "Ban Tai",
    "place": "Koh Phangan",
    "source": "https://www.halfmoonfestival.com/",
+   "verified": false
+  },
+  {
+   "date": "2027-02-11",
+   "artist": "MO:DEM Teaser Party",
+   "about": "A three-day psytrance party at Hidden Paradise in Ban Tai, from the team behind the MO:DEM festival in Croatia.",
+   "note": "MO:DEM Teaser Party Thailand 2027 (psytrance, 11-14 Feb): Highko Retro, Xolotl, Synthetik Chaos, Phobos and more",
+   "venue": "Hidden Paradise",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/modem-teaser-party-thailand-2027/",
+   "verified": false
+  },
+  {
+   "date": "2027-02-25",
+   "artist": "ATMAN Begins Teaser Party",
+   "about": "A 48-hour psytrance party at Lost Jungle, Koh Phangan, ahead of the ATMAN festival.",
+   "note": "ATMAN Begins Teaser Party (psytrance, 25-27 Feb): Agressive Mood, Maze of Madness, Daash, Psynonima and more",
+   "venue": "Lost Jungle",
+   "area": "Koh Phangan",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/atman-begins-teaser-party-at-lost-jungle/",
+   "verified": false
+  },
+  {
+   "date": "2027-01-26",
+   "artist": "O Beach Ibiza",
+   "venue": "Barra Cuda Beach Club",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://welcometoibiza.com/agenda-ibiza/fiestas/o-beach-tours-regresa-a-tailandia/",
+   "link": "https://welcometoibiza.com/agenda-ibiza/fiestas/o-beach-tours-regresa-a-tailandia/",
+   "verified": false,
+   "about": "O Beach Ibiza brings its pool party to Barra Cuda on Patong Beach, the eighth of nine Phuket dates."
+  },
+  {
+   "date": "2027-02-03",
+   "artist": "O Beach Ibiza",
+   "venue": "Barra Cuda Beach Club",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://welcometoibiza.com/agenda-ibiza/fiestas/o-beach-tours-regresa-a-tailandia/",
+   "link": "https://welcometoibiza.com/agenda-ibiza/fiestas/o-beach-tours-regresa-a-tailandia/",
+   "verified": false,
+   "about": "The last of O Beach Ibiza's nine winter parties at Barra Cuda on Patong Beach."
+  },
+  {
+   "date": "2027-01-27",
+   "artist": "Adam Ten",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://phuket.cafedelmar.com/events/adam-ten-jan2027",
+   "link": "https://phuket.cafedelmar.com/events/adam-ten-jan2027",
+   "verified": true,
+   "about": "Adam Ten debuts on the Temple Stage from 11 am, with the Clubroom after-party included."
+  },
+  {
+   "date": "2027-01-31",
+   "artist": "Zoo del Mar",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://phuket.cafedelmar.com/events/zoo-del-mar-29-nov-2026",
+   "link": "https://phuket.cafedelmar.com/events/zoo-del-mar-29-nov-2026",
+   "verified": false,
+   "about": "A Sunday pool party with DJs and live acts from 1 pm to 7 pm, held every Sunday.",
+   "weekly": "sun"
+  },
+  {
+   "date": "2027-01-30",
+   "artist": "Defected",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://defected.com/events",
+   "link": "https://defected.com/events",
+   "verified": false,
+   "about": "Defected brings a house night to Illuzion as part of its winter Saturday residency."
+  },
+  {
+   "date": "2027-02-20",
+   "artist": "Defected",
+   "about": "The London house label's party night, part of its winter run of Saturdays at Illuzion.",
+   "note": "Defected Phuket, Illuzion Saturdays series, 9 pm to 3 am; no DJs named; DJ Mag (15 Nov 2026) lists the same date; not on Illuzion's own calendar yet",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://phangan.events/events/defected-phuket-3/",
+   "verified": false
+  },
+  {
+   "date": "2027-03-13",
+   "artist": "Defected",
+   "about": "The London house label's party night, the last of its winter run of Saturdays at Illuzion.",
+   "note": "Date from DJ Mag's residency news (15 Nov 2026: 26 Dec, 30 Jan, 20 Feb, 13 Mar); no DJs named; not on Illuzion's own calendar yet",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://djmag.com/news/defected-announces-illuzion-phuket-winter-residency",
+   "verified": false
+  },
+  {
+   "date": "2027-01-29",
+   "artist": "Zamna Phuket (day 1)",
+   "venue": "Yeden Gardens",
+   "area": "Takua Thung, Phang Nga",
+   "place": "Phuket",
+   "source": "https://www.ticketmelon.com/zamna/phuket",
+   "link": "https://www.ticketmelon.com/zamna/phuket",
+   "verified": true,
+   "about": "Zamna's first Phuket festival opens at 4 pm in Yeden Gardens; lineup not yet announced."
+  },
+  {
+   "date": "2027-01-30",
+   "artist": "Zamna Phuket (day 2)",
+   "venue": "Yeden Gardens",
+   "area": "Takua Thung, Phang Nga",
+   "place": "Phuket",
+   "source": "https://www.ticketmelon.com/zamna/phuket",
+   "link": "https://www.ticketmelon.com/zamna/phuket",
+   "verified": true,
+   "about": "The second day of Zamna Phuket runs until midnight; lineup not yet announced."
+  },
+  {
+   "date": "2027-01-27",
+   "artist": "Ladies Night",
+   "venue": "CÉ LA VI",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://sg.celavi.com/events/ladies-night",
+   "link": "https://sg.celavi.com/events/ladies-night",
+   "verified": false,
+   "about": "A Wednesday party from 10 pm in the rooftop club lounge, held every Wednesday.",
+   "weekly": "wed"
+  },
+  {
+   "date": "2027-01-28",
+   "artist": "Groove Room",
+   "venue": "CÉ LA VI",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://sg.celavi.com/events/groove-room",
+   "link": "https://sg.celavi.com/events/groove-room",
+   "verified": false,
+   "about": "A hip hop and R&B night in the club lounge from 10 pm, held every Thursday.",
+   "weekly": "thu"
+  },
+  {
+   "date": "2027-01-29",
+   "artist": "Higher",
+   "venue": "CÉ LA VI",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://sg.celavi.com/events/higher",
+   "link": "https://sg.celavi.com/events/higher",
+   "verified": false,
+   "about": "A Friday club night in the rooftop lounge from 10 pm, held every Friday.",
+   "weekly": "fri"
+  },
+  {
+   "date": "2027-01-31",
+   "artist": "Soul Kiss",
+   "venue": "CÉ LA VI",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://sg.celavi.com/events/soul-kiss",
+   "link": "https://sg.celavi.com/events/soul-kiss",
+   "verified": false,
+   "about": "Resident DJs play the open-air club lounge from 10 pm every Sunday.",
+   "weekly": "sun"
+  },
+  {
+   "date": "2027-02-06",
+   "weekly": "sat",
+   "artist": "Elevate",
+   "about": "CÉ LA VI's Saturday club night of house and electronic music, 10 pm to 4 am, with guest and resident DJs.",
+   "note": "Listed by the venue as every Saturday, 10 pm to 4 am; no guest DJs named for 2027 yet",
+   "venue": "CÉ LA VI",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://sg.celavi.com/events/elevate",
+   "verified": false
+  },
+  {
+   "date": "2027-02-03",
+   "weekly": "wed",
+   "artist": "TGIW",
+   "about": "Zouk's Wednesday night of top 40 hits and EDM classics; women and students get in free, subject to capacity.",
+   "note": "On Zouk's calendar every Wednesday through Dec 2026; no 2027 dates posted yet",
+   "venue": "Zouk",
+   "area": "Clarke Quay",
+   "place": "Singapore",
+   "source": "https://zoukgroup.com/singapore/zouk/event/EVE109748600020261202/tgiw/",
    "verified": false
   }
  ],
