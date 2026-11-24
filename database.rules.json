@@ -179,7 +179,8 @@
               "destination": { ".validate": "newData.isString()" },
               "venue": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60" },
               "area": { ".validate": "newData.isString() && newData.val().length <= 60" },
-              "date": { ".validate": "newData.isString() && newData.val().matches(/^2027-0[23]-[0-3][0-9]$/)" },
+              /* Events run 25 Jan to 31 Mar 2027 (owner: the last week of January has Zamna); the date poll keeps 1 Feb to 31 Mar. */
+              "date": { ".validate": "newData.isString() && newData.val().matches(/^2027-(01-(2[5-9]|3[01])|0[23]-[0-3][0-9])$/)" },
               "weekly": { ".validate": "newData.isString() && newData.val().matches(/^(mon|tue|wed|thu|fri|sat|sun)$/)" },
               "artist": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200" },
               "about": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200" },

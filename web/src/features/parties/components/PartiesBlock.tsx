@@ -9,6 +9,7 @@ import { addShow, editShow, removeShow, setIn, type PartyDraft } from "../api/pa
 import { bigVenues, eventsList, shownUnder } from "../lib/big";
 import { areaShown, placeLine, placeOf, type MapPlace } from "../lib/detail";
 import { lastSeason, lastYearLines } from "../lib/lastYear";
+import { EVENTS_WINDOW } from "../lib/window";
 import { byPlaceVenueDate, venueKey, type KnownVenue, type ListedShow } from "../lib/shows";
 import { AddPartySheet } from "./AddPartySheet";
 import { EventsFilterChips, useEventsFilter } from "./EventsFilter";
@@ -16,9 +17,6 @@ import { LastSeason, LastYearLine } from "./LastYearLine";
 import { ShowRow } from "./ShowRow";
 import { ShowSheet } from "./ShowSheet";
 import "./Parties.css";
-
-/** The rules' range, used when the trip has no season yet (case 9). */
-const DEFAULT_SEASON = { from: "2027-02-01", to: "2027-03-31" };
 
 type SheetState = { mode: "add" } | { mode: "edit"; id: string } | null;
 
@@ -66,7 +64,6 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap }: 
   const shows = trip.parties?.shows ?? {};
   const marks = trip.parties?.in ?? {};
   const members = trip.crew?.members ?? {};
-  const season = trip.info?.season ?? DEFAULT_SEASON;
   const destinationNames = trip.info?.destinations ?? {};
   const nameOf = (id: string) => destinationNames[id]?.name ?? id;
   const areas = trip.places?.areas ?? {};
@@ -79,7 +76,7 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap }: 
   }));
   const big = bigVenues(trip.places?.venues);
   const groups = eventsList(shows, known, filter, big);
-  const lines = lastYearLines(Object.values(shows), lastYear, season).filter((line) => shownUnder(filter, line, big));
+  const lines = lastYearLines(Object.values(shows), lastYear, EVENTS_WINDOW).filter((line) => shownUnder(filter, line, big));
   const editing = sheet?.mode === "edit" ? shows[sheet.id] : undefined;
   const opened: ListedShow | undefined = detail && shows[detail] ? { ...shows[detail], id: detail } : undefined;
 
@@ -233,7 +230,6 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap }: 
         editing={editing}
         destinations={destinations}
         venues={venuesByDestination(trip, byPlaceVenueDate(shows, known))}
-        season={season}
         yourName={viewer.memberId ? (members[viewer.memberId]?.name ?? viewer.memberId) : ""}
         onClose={() => setSheet(null)}
         onSave={save}

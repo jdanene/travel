@@ -2,7 +2,7 @@
  * The rules tests of Trip 2 (1 to 9), of the admin list (10 to 12, plan
  * D15), of Add dates (13 to 15, plan D16), of Add to map (16 and 17), of
  * weekly shows (18), of the profile photo (19), of a place's photo (20) and
- * of the invite title (21), of organizer keys (22) and of trip texts (23 to 25), against the database emulator. Run with
+ * of the invite title (21), of organizer keys (22), of trip texts (23 to 25) and of the events window (26), against the database emulator. Run with
  * `npm run test:rules` in web/; it starts the emulator, runs this file and
  * stops it. Each test names the rule it proves, in the words of plan
  * section 4.
@@ -205,5 +205,15 @@ describe("database rules", () => {
     await assertFails(set(ref(db("uid-o"), day), { texts: 6, at: 6 }));
     await assertFails(set(ref(db("uid-o"), day), { texts: 1, at: 7 }));
     await assertFails(remove(ref(db("uid-o"), day)));
+  });
+
+  it("26. takes a show from 25 Jan to 31 Mar 2027 and refuses 24 Jan and 1 Apr", async () => {
+    const a = db("uid-a");
+    const on = (id: string, date: string) => set(ref(a, paths.show(T, id)), show({ source: "friend", addedBy: "alice", artist: "Zamna", date }));
+    await assertSucceeds(on("j1", "2027-01-25"));
+    await assertSucceeds(on("j2", "2027-01-31"));
+    await assertSucceeds(on("m1", "2027-03-31"));
+    await assertFails(on("j0", "2027-01-24"));
+    await assertFails(on("a1", "2027-04-01"));
   });
 });

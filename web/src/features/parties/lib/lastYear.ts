@@ -24,7 +24,7 @@ const weekday = (day: string) => new Date(timeOf(day)).getUTCDay();
 /**
  * Decides where the list says "Nothing announced yet. Here is who played
  * this weekend last year:" (requirements section 0, goal 3). For each venue
- * that has a show this year, and each weekend of the season, it looks for
+ * that has a show this year, and each weekend of the events window, it looks for
  * an empty weekend at that venue and fills it with what played there on
  * the same weekend last year.
  *
@@ -33,22 +33,24 @@ const weekday = (day: string) => new Date(timeOf(day)).getUTCDay();
  * Friday row the mock does not show, so the mock wins.
  *
  * Inputs: shows — this year's shows (a weekly show is skipped: it says
- * nothing about one weekend); lastYear — last year's shows; season —
- * the trip's first and last day, "YYYY-MM-DD". Venue names match across
- * the two lists ignoring case and spaces. A weekend half inside the
- * season counts only its days inside.
+ * nothing about one weekend); lastYear — last year's shows; window —
+ * the first and last day events may fall on, "YYYY-MM-DD" (EVENTS_WINDOW,
+ * 25 Jan to 31 Mar 2027, so last year's lines reach back to late January
+ * 2026). Venue names match across the two lists ignoring case and spaces.
+ * A weekend half inside the window counts only its days inside.
  * Output: one line per venue and empty weekend that last year filled, by
  * destination, venue and date. A weekend with a show this year has no
  * line; a weekend last year left empty has no line either; a last-year
  * show on a weekday is never shown.
  * Examples (each is a test in lastYear.test.ts):
- *   Savaya has Sat 13 and Sun 14 Feb 2027; last year had Fri 6, Sat 7,
- *   Sun 8 and Sat 14 Feb 2026
- *     → one line, Sat 6 – Sun 7 Feb: Sat 7 Feb Nic Fanciulli, Sun 8 Feb Francis Mercier
+ *   Savaya has Sat 13 and Sun 14 Feb 2027; last year had Sat 31 Jan, Fri 6,
+ *   Sat 7, Sun 8 and Sat 14 Feb 2026
+ *     → two lines: Sat 30 – Sun 31 Jan: Sat 31 Jan Black Coffee;
+ *       Sat 6 – Sun 7 Feb: Sat 7 Feb Nic Fanciulli, Sun 8 Feb Francis Mercier
  *   last year " SAVAYA" on Sun 1 Mar 2026, this year nothing on Sat 27 – Sun 28 Feb 2027
  *     → one Savaya line for 27–28 Feb that holds Sun 1 Mar 2026
  */
-export function lastYearLines(shows: Array<ShowKey & { weekly?: string }>, lastYear: ShowKey[], season: { from: string; to: string }): LastYearLine[] {
+export function lastYearLines(shows: Array<ShowKey & { weekly?: string }>, lastYear: ShowKey[], window: { from: string; to: string }): LastYearLine[] {
   const venues = new Map<string, { destination: DestinationId; venue: string; days: Set<string> }>();
   for (const show of shows.filter((one) => !one.weekly).sort((a, b) => a.date.localeCompare(b.date))) {
     const key = venueKey(show.destination, show.venue);
@@ -65,8 +67,8 @@ export function lastYearLines(shows: Array<ShowKey & { weekly?: string }>, lastY
 
   const lines: LastYearLine[] = [];
   for (const [key, venue] of venues) {
-    for (const saturday of saturdays(season)) {
-      const weekend = [saturday, addDays(saturday, 1)].filter((day) => day >= season.from && day <= season.to);
+    for (const saturday of saturdays(window)) {
+      const weekend = [saturday, addDays(saturday, 1)].filter((day) => day >= window.from && day <= window.to);
       if (weekend.some((day) => venue.days.has(day))) continue;
       const played = weekend.flatMap((day) => before.get(`${key}|${addDays(day, -DAYS_BACK)}`) ?? []);
       if (played.length > 0) lines.push({ destination: venue.destination, venue: venue.venue, from: saturday, to: addDays(saturday, 1), shows: played });
@@ -99,10 +101,10 @@ export function lastSeason(destination: DestinationId, venue: string, lastYear: 
     .map(({ date, artist }) => ({ date, artist }));
 }
 
-/** Every Saturday whose weekend touches the season, the Saturday before it included. */
-function saturdays(season: { from: string; to: string }): string[] {
-  const first = addDays(season.from, -((weekday(season.from) + 1) % 7));
+/** Every Saturday whose weekend touches the window, the Saturday before it included. */
+function saturdays(window: { from: string; to: string }): string[] {
+  const first = addDays(window.from, -((weekday(window.from) + 1) % 7));
   const days: string[] = [];
-  for (let day = first; day <= season.to; day = addDays(day, 7)) days.push(day);
+  for (let day = first; day <= window.to; day = addDays(day, 7)) days.push(day);
   return days;
 }

@@ -40,10 +40,11 @@ test("onSourceSite opens the source's own host over https and nothing else", () 
   assert.equal(onSourceSite(savaya, "https://whatsform.com/ek7dt5"), false);
 });
 
-test("checkEvents keeps acts in the season, leaves out series and placeholders, and survives a source that is down", async (t) => {
+test("checkEvents keeps acts in the window (from 25 Jan), leaves out series and placeholders, and survives a source that is down", async (t) => {
   const night = (name, date) => `<script type="application/ld+json">{"@type":"Event","name":"${name}","startDate":"${date}"}</script>`;
   const pages = {
     "https://www.savaya.com/event-calendar": page("savaya-calendar.html"),
+    "https://www.savaya.com/event-calendar/january-31-2027": night("ZAMNA", "Jan 31, 2027"),
     "https://www.savaya.com/event-calendar/february-13-2027": page("savaya-event.html"),
     "https://www.savaya.com/event-calendar/february-2-2027": night("SAVAYA TUESDAY", "Feb 02, 2027"),
     "https://www.savaya.com/event-calendar/february-9-2027": night("SAVAYA TUESDAY", "Feb 09, 2027"),
@@ -61,8 +62,9 @@ test("checkEvents keeps acts in the season, leaves out series and placeholders, 
   const answer = await checkEvents([savaya, down]);
 
   assert.deepEqual(answer.events, [
+    { destination: "bali", venue: "Savaya", area: "Uluwatu", date: "2027-01-31", artist: "ZAMNA", link: "https://www.savaya.com/event-calendar/january-31-2027" },
     { destination: "bali", venue: "Savaya", area: "Uluwatu", date: "2027-02-13", artist: "PEGGY GOU", link: "https://www.savaya.com/event-calendar/february-13-2027" },
   ]);
   assert.deepEqual(answer.failed, [{ venue: "Down Club", reason: "unreadable" }]);
-  assert.ok(!opened.some((url) => url.includes("january-31") || url.includes("whatsform")), "opens no night outside the season and no other host");
+  assert.ok(!opened.some((url) => url.includes("whatsform")), "opens no other host");
 });

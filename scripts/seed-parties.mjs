@@ -40,6 +40,7 @@ register(
     ),
 );
 const { showId } = await import("../web/src/features/parties/lib/shows.ts");
+const { EVENTS_WINDOW, inEventsWindow } = await import("../web/src/features/parties/lib/window.ts");
 
 const PROJECT = "travel-ca8f9";
 const TRIP_FILE = "local/trip.json";
@@ -76,8 +77,9 @@ const destinationOf = new Map(Object.entries(trip.destinations ?? {}).map(([id, 
 
 /**
  * Reads one lineup file into records keyed by showId, or stops naming the
- * file and the entry. `inSeason` limits this year's dates to the trip's
- * season, as the rules do for a friend's show.
+ * file and the entry. `inSeason` limits this year's dates to the events
+ * window (25 Jan to 31 Mar 2027), as the rules do for a friend's show.
+ * Last year's dates are not limited: January feeds "Last season:".
  */
 function readLineup(path, { inSeason }) {
   const file = readJson(path);
@@ -86,7 +88,7 @@ function readLineup(path, { inSeason }) {
   file.shows.forEach((entry, i) => {
     const where = `${path}, shows[${i}]`;
     if (!isDay(entry?.date)) stop(`${where} has no date as YYYY-MM-DD.`);
-    if (inSeason && (entry.date < trip.season.from || entry.date > trip.season.to)) stop(`${where}: ${entry.date} lies outside the season.`);
+    if (inSeason && !inEventsWindow(entry.date)) stop(`${where}: ${entry.date} lies outside ${EVENTS_WINDOW.from} to ${EVENTS_WINDOW.to}.`);
     if (!isText(entry.venue, 60)) stop(`${where} needs a venue of 1 to 60 characters.`);
     if (!isText(entry.artist, 200)) stop(`${where} needs an artist of 1 to 200 characters.`);
     if (entry.weekly !== undefined && (!WEEKDAYS.includes(entry.weekly) || weekdayOf(entry.date) !== entry.weekly)) {
