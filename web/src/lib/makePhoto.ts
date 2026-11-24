@@ -2,7 +2,7 @@ import { landscapeCrop, PHOTO_SIDE, PLACE_PHOTO_MAX_CHARS, photoSize, squareCrop
 
 export type PhotoResult = { ok: true; url: string } | { ok: false; message: string };
 
-/** The refusals the page shows under "Add a photo (optional)"; recorded in design/app/README.md, exception 7. */
+/** The refusals the page shows under "Add a photo"; recorded in design/app/README.md, exception 7. */
 export const PHOTO_ERRORS = {
   notImage: "That file is not a photo. Pick another.",
   unreadable: "That photo could not be read. Try another.",

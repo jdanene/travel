@@ -22,7 +22,7 @@ interface PhotoFieldProps {
  * Output: the field. The file input is the real control (keyboard and
  * screen readers reach it); its label is the visible button.
  * Examples (checked in Chrome at 375 px):
- *   no photo                           → one button, "Add a photo (optional)"
+ *   no photo                           → one button, "Add a photo"
  *   a photo                            → the photo, "Change photo" and "Remove photo"
  *   a .txt file                        → "That file is not a photo. Pick another." under the button
  */
@@ -57,7 +57,7 @@ export function PhotoField({ photo, onChange, shape = "face" }: PhotoFieldProps)
             aria-invalid={error !== null}
             aria-describedby={error ? `${id}-error` : undefined}
           />
-          {photo ? "Change photo" : "Add a photo (optional)"}
+          {photo ? "Change photo" : "Add a photo"}
         </label>
         {photo && (
           <button type="button" className="pill" onClick={() => onChange(null)} disabled={reading}>
