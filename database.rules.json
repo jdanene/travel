@@ -164,14 +164,14 @@
           },
           "custom": {
             "$placeId": {
-              /* A friend adds a place under its member, inside a box around the destination (the same boxes as web/src/features/map/lib/places.ts); the adder or an organizer removes it. No edits. */
+              /* A friend adds a place under its member, anywhere in the world (owner, 24 Nov 2026); its destination is the trip's nearest one, for grouping. The adder or an organizer removes it. No edits. */
               ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).exists() && ((!data.exists() && newData.child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val()) || (data.exists() && !newData.exists() && (data.child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true)))",
-              ".validate": "$placeId.length <= 200 && newData.hasChildren(['name', 'kind', 'destination', 'lat', 'lng', 'addedBy', 'at']) && root.child('trips').child($tripId).child('info').child('destinations').child(newData.child('destination').val()).exists() && ((newData.child('destination').val() === 'bali' && newData.child('lat').val() >= -9.0 && newData.child('lat').val() <= -8.0 && newData.child('lng').val() >= 114.4 && newData.child('lng').val() <= 115.8) || (newData.child('destination').val() === 'kohPhangan' && newData.child('lat').val() >= 9.6 && newData.child('lat').val() <= 9.85 && newData.child('lng').val() >= 99.9 && newData.child('lng').val() <= 100.15) || (newData.child('destination').val() === 'phuket' && newData.child('lat').val() >= 7.7 && newData.child('lat').val() <= 8.4 && newData.child('lng').val() >= 98.2 && newData.child('lng').val() <= 98.5) || (newData.child('destination').val() === 'singapore' && newData.child('lat').val() >= 1.15 && newData.child('lat').val() <= 1.48 && newData.child('lng').val() >= 103.6 && newData.child('lng').val() <= 104.1))",
+              ".validate": "$placeId.length <= 200 && newData.hasChildren(['name', 'kind', 'destination', 'lat', 'lng', 'addedBy', 'at']) && root.child('trips').child($tripId).child('info').child('destinations').child(newData.child('destination').val()).exists()",
               "name": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60" },
               "kind": { ".validate": "newData.isString() && newData.val().matches(/^(event|food|beach|activity|other)$/)" },
               "destination": { ".validate": "newData.isString()" },
-              "lat": { ".validate": "newData.isNumber()" },
-              "lng": { ".validate": "newData.isNumber()" },
+              "lat": { ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90" },
+              "lng": { ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180" },
               "link": { ".validate": "newData.isString() && newData.val().length <= 500 && newData.val().beginsWith('https://')" },
               "description": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200" },
               "photo": { ".validate": "newData.isString() && newData.val().length <= 80000 && newData.val().beginsWith('data:image/jpeg;base64,')" },
