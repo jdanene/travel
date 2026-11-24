@@ -128,20 +128,28 @@ function fields(draft: PartyDraft) {
 }
 
 /**
- * Puts a tag on an event, or takes it off. A new tag's name goes in the
- * same write, so a tag never exists without its name. Any member's write
+ * Puts a tag the trip has on an event, or takes it off. Any member's write
  * is accepted; a device that has not joined is refused.
  *
- * Inputs: the trip id, the event's showId, the tag's slug, whether the
- * event carries it, and the name of a tag the trip does not have yet.
+ * Inputs: the trip id, the event's showId, the tag's slug, and whether the event carries it.
  * Output: the write's result.
  * Examples (checked on the emulator):
- *   setShowTag(t, peggyGou, "big", false)                → { ok: true }; Peggy Gou leaves Big nights
- *   setShowTag(t, peggyGou, "rooftop", true, "Rooftop")  → { ok: true }; a "Rooftop" chip appears
+ *   setShowTag(t, peggyGou, "big", false)    → { ok: true }; Peggy Gou leaves Big nights
+ *   setShowTag(t, peggyGou, "rooftop", true) → { ok: true }; its row shows a grey "Rooftop"
  */
-export function setShowTag(tripId: string, showId: string, tag: string, on: boolean, newName?: string): Promise<WriteResult> {
-  return write({
-    [paths.showTag(tripId, showId, tag)]: on ? true : null,
-    ...(newName ? { [paths.tagName(tripId, tag)]: newName } : {}),
-  });
+export function setShowTag(tripId: string, showId: string, tag: string, on: boolean): Promise<WriteResult> {
+  return write({ [paths.showTag(tripId, showId, tag)]: on ? true : null });
+}
+
+/**
+ * Makes a new tag: its name at places/tagNames. It shows as a filter chip
+ * for everyone at once, with no event yet. Any member may; a name never
+ * changes, so a tag the trip has is refused.
+ *
+ * Inputs: the trip id, the tag's slug (tagSlug()), and its name (1 to 24 characters).
+ * Output: the write's result; "refused" on a device that has not joined.
+ * Examples (checked on the emulator): makeTag(t, "rooftop", "Rooftop") → { ok: true }; a "Rooftop" chip appears
+ */
+export function makeTag(tripId: string, tag: string, name: string): Promise<WriteResult> {
+  return write({ [paths.tagName(tripId, tag)]: name });
 }

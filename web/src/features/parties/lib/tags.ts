@@ -31,6 +31,8 @@ export interface TripTags {
   bigVenues: Set<string>;
   /** tag → display name; "big" is "Big nights" unless the trip names it; a tag with no name shows its slug. */
   names: Record<string, string>;
+  /** The tags the trip has made (the keys of places/tagNames), with or without an event. */
+  made: Set<string>;
 }
 
 /**
@@ -39,7 +41,7 @@ export interface TripTags {
  * nobody can tag a venue).
  *
  * Inputs: trip — its parties and places branches; either may be missing.
- * Output: { byShow, bigVenues, names }.
+ * Output: { byShow, bigVenues, names, made }.
  * Examples (each is a test in tags.test.ts):
  *   showTags { s1: { big: true } }                                 → byShow s1 → { big }; names { big: "Big nights" }
  *   Savaya `big: true` with no event, Klymax `big: true` with one  → bigVenues { bali_savaya }
@@ -53,26 +55,38 @@ export function tripTags(trip: Pick<Trip, "parties" | "places">): TripTags {
       .map((venue) => venueKey(venue.destination, venue.name))
       .filter((key) => !withEvents.has(key)),
   );
-  return { byShow, bigVenues, names: { [BIG]: "Big nights", ...(trip.places?.tagNames ?? {}) } };
+  const tagNames = trip.places?.tagNames ?? {};
+  return { byShow, bigVenues, names: { [BIG]: "Big nights", ...tagNames }, made: new Set(Object.keys(tagNames)) };
 }
 
 /**
- * The filter chips before "All": one per tag that any event carries, and
- * Big nights while a big venue with no event shows under it; "Big nights"
+ * Orders tags as every list of them does: "Big nights" first, then the
+ * rest by name, ignoring case.
+ *
+ * Inputs: names — tag → name.
+ * Output: a compare function for tag slugs.
+ * Examples (checked through tagChips() in tags.test.ts): rooftop, big, after-dark → big, after-dark, rooftop
+ */
+export const byTagName = (names: Record<string, string>) => (a: string, b: string) =>
+  Number(b === BIG) - Number(a === BIG) || (names[a] ?? a).localeCompare(names[b] ?? b, "en", { sensitivity: "base" });
+
+/**
+ * The filter chips before "All" (owner, 24 Nov 2026: "we create a new tag
+ * by pressing a button next to the existing tabs"): one per tag the trip
+ * has made, even with no event yet, one per tag an event carries, and Big
+ * nights while a big venue with no event shows under it; "Big nights"
  * first, then the rest by name.
  *
  * Inputs: tags — tripTags() of the trip.
- * Output: the chips; empty when no event carries a tag and no big venue waits.
+ * Output: the chips; empty when the trip has made no tag, no event carries one and no big venue waits.
  * Examples (each is a test in tags.test.ts):
- *   one event big and "rooftop", another big → Big nights, Rooftop
- *   no event tagged, no big venue             → []
+ *   tagNames { rooftop }, one event big     → Big nights, Rooftop (Rooftop with no event yet)
+ *   no tag made, none on an event, no big venue → []
  */
 export function tagChips(tags: TripTags): TagChip[] {
-  const used = new Set(Object.values(tags.byShow).flatMap((set) => [...set]));
-  if (tags.bigVenues.size > 0) used.add(BIG);
-  return [...used]
-    .map((tag) => ({ tag, name: tags.names[tag] ?? tag }))
-    .sort((a, b) => Number(b.tag === BIG) - Number(a.tag === BIG) || a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
+  const listed = new Set([...tags.made, ...Object.values(tags.byShow).flatMap((set) => [...set])]);
+  if (tags.bigVenues.size > 0) listed.add(BIG);
+  return [...listed].sort(byTagName(tags.names)).map((tag) => ({ tag, name: tags.names[tag] ?? tag }));
 }
 
 /**

@@ -6,6 +6,16 @@
 .parties-empty { margin: 0.75rem 0 0.25rem; }
 /* "Big nights" and "All · 27": the shared chips, under the heading row and above the first destination. */
 .parties-filter { margin: 0.75rem 0 0; }
+/* On a phone the chips scroll sideways in one line, edge to edge of the card's padding, with no bar. */
+@media (max-width: 899px) {
+  .parties-filter { flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; scroll-padding-inline: 0.25rem; padding-bottom: 0.125rem; }
+  .parties-filter::-webkit-scrollbar { display: none; }
+  .parties-filter .pill { flex: none; white-space: nowrap; }
+}
+.parties-filter .tag-make { padding: 0; width: 2.75rem; justify-content: center; }
+.parties-filter .tag-make svg.i { stroke-width: 2.4; }
+.parties-filter + .tags-new { margin-top: 0.625rem; }
+.tags-new-error { margin-top: 0.5rem; }
 .parties-filter .pill { font-variant-numeric: tabular-nums; }
 
 .place { font-size: 1.25rem; font-weight: 700; letter-spacing: -.02em; margin: 1.125rem 0 0.125rem; }
@@ -96,7 +106,6 @@
 .tags-new { display: flex; gap: 0.5rem; align-items: stretch; margin-top: 1rem; }
 .tags-new .field { flex: 1; min-width: 0; margin-bottom: 0; }
 .tags-new .tags-add { width: auto; height: auto; padding: 0 1.25rem; }
-.event-tags .field-error { margin-top: 0.5rem; }
 
 /* Add an event's Venue suggestions: the place search's list (components/PlaceSearch.css), as options. */
 .venue-hits { margin: -0.25rem 0 0.625rem; }

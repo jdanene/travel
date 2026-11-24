@@ -5,8 +5,8 @@ import { Notice } from "../../../components/Notice";
 import type { WriteResult } from "../../../lib/db";
 import { idFromName } from "../../../lib/ids";
 import type { MemberId, Trip } from "../../../types/trip";
-import { addShow, editShow, removeShow, setIn, setShowTag, type PartyDraft } from "../api/parties";
-import { eventShown, eventsList, tagChips, tripTags, type EventsFilter } from "../lib/tags";
+import { addShow, editShow, removeShow, makeTag, setIn, setShowTag, type PartyDraft } from "../api/parties";
+import { byTagName, eventShown, eventsList, tagChips, tripTags, type EventsFilter } from "../lib/tags";
 import { areaShown, placeLine, placeOf, type MapPlace } from "../lib/detail";
 import { lastSeason, lastYearLines } from "../lib/lastYear";
 import { EVENTS_WINDOW } from "../lib/window";
@@ -39,12 +39,13 @@ interface PartiesBlockProps {
  * ones first, then by date), with the last-year line where a weekend is
  * empty and "Last season:" under a venue with nothing announced. Open from
  * the start; it never waits on the dates. A tap on a show opens its sheet.
- * At the top, one chip per tag the events carry ("Big nights" first) and
- * "All · 27": by default the list holds the events tagged Big nights, the
- * big venues with nothing announced, and every friend's event (lib/tags.ts);
- * the device remembers the choice. Without a tag the chips are not drawn.
- * Each row shows its other tags as grey labels; any member adds or removes
- * an event's tags in its show sheet.
+ * At the top, one chip per tag the trip has ("Big nights" first), "All · 27"
+ * and, for a member, "+" to make a new tag: by default the list holds the
+ * events tagged Big nights, the big venues with nothing announced, and
+ * every friend's event (lib/tags.ts); the device remembers the choice. A
+ * tag with nothing under it says "No events tagged yet. Open an event to
+ * add it." Each row shows its other tags as grey labels; any member puts
+ * the trip's tags on an event or takes them off in its show sheet.
  *
  * Inputs: the trip id, the trip from the one listener, this device's
  * member and organizer mark, and a way to open the map.
@@ -89,9 +90,10 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
   const tagsOf = (id: string) => [...(tags.byShow[id] ?? [])];
   // The row's grey labels: the event's tags but the picked one, Big nights first, then by name.
   const rowTags = (id: string) =>
-    tagChips({ ...tags, byShow: { [id]: tags.byShow[id] ?? new Set() }, bigVenues: new Set() })
-      .filter((chip) => chip.tag !== filter)
-      .map((chip) => chip.name);
+    tagsOf(id)
+      .filter((tag) => tag !== filter)
+      .sort(byTagName(tags.names))
+      .map((tag) => tags.names[tag] ?? tag);
   const editing = sheet?.mode === "edit" ? shows[sheet.id] : undefined;
   const opened: ListedShow | undefined = detail && shows[detail] ? { ...shows[detail], id: detail } : undefined;
 
@@ -169,8 +171,18 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
           </button>
         )}
       </div>
-      {chips.length > 0 && <EventsFilterChips filter={filter} chips={chips} total={Object.keys(shows).length} onChoose={setFilter} />}
-      {groups.length === 0 && <p className="sub parties-empty">Nothing announced yet.</p>}
+      {(chips.length > 0 || viewer.memberId !== null) && (
+        <EventsFilterChips
+          filter={filter}
+          chips={chips}
+          total={Object.keys(shows).length}
+          onChoose={setFilter}
+          onMake={viewer.memberId !== null ? (tag, name) => makeTag(tripId, tag, name) : undefined}
+        />
+      )}
+      {groups.length === 0 && (
+        <p className="sub parties-empty">{filter === "all" ? "Nothing announced yet." : "No events tagged yet. Open an event to add it."}</p>
+      )}
       {groups.map(({ destination, venues: venueGroups }) => (
         <section key={destination} aria-labelledby={`place-${destination}`}>
           <h3 className="place" id={`place-${destination}`}>
@@ -240,7 +252,7 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
         }
         tags={opened ? tagsOf(opened.id) : []}
         tagNames={tags.names}
-        onTag={viewer.memberId && opened ? (tag, on, newName) => setShowTag(tripId, opened.id, tag, on, newName) : undefined}
+        onTag={viewer.memberId && opened ? (tag, on) => setShowTag(tripId, opened.id, tag, on) : undefined}
         onClose={() => setDetail(null)}
       />
       <AddPartySheet

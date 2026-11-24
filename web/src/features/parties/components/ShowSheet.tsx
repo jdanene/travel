@@ -25,7 +25,7 @@ interface ShowSheetProps {
   tags: string[];
   tagNames: Record<string, string>;
   /** Puts a tag on the event or takes it off; absent on a device that has not joined. */
-  onTag?: (tag: string, on: boolean, newName?: string) => Promise<WriteResult>;
+  onTag?: (tag: string, on: boolean) => Promise<WriteResult>;
   onClose: () => void;
 }
 

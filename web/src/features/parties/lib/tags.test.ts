@@ -25,12 +25,11 @@ describe("tripTags", () => {
 });
 
 describe("tagChips", () => {
-  it("puts Big nights first, then the rest by name", () => {
-    const more = tripTags({ ...trip, parties: { shows, showTags: { k1: { big: true, rooftop: true }, m1: { big: true } } } });
-    expect(tagChips(more).map((chip) => chip.name)).toEqual(["Big nights", "Rooftop"]);
+  it("lists a made tag with no event yet, after Big nights", () => {
+    expect(tagChips(tags).map((chip) => chip.name)).toEqual(["Big nights", "Rooftop"]);
   });
 
-  it("has no chip when no event is tagged and no big venue waits", () => {
+  it("has no chip when no tag is made, none is on an event and no big venue waits", () => {
     expect(tagChips(tripTags({ parties: { shows }, places: { venues: { "mrs-sippy": venues["mrs-sippy"] } } }))).toEqual([]);
   });
 });
