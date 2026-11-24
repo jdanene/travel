@@ -27,6 +27,9 @@ export const memberField = (tripId: string, memberId: string, field: "name" | "r
 /** This device's organizer mark. */
 export const organizer = (tripId: string, uid: string) => `trips/${tripId}/crew/organizers/${uid}`;
 
+/** One organizer key; an organizer adds one, and no phone can read it back. */
+export const organizerKey = (tripId: string, key: string) => `tripSecrets/${tripId}/organizerKey/${key}`;
+
 /** This device's claim on the organizer key; no phone can read it back. */
 export const organizerClaim = (tripId: string, uid: string) => `tripSecrets/${tripId}/claims/${uid}`;
 

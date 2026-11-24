@@ -10,8 +10,7 @@ import "./EditInvite.css";
 
 /**
  * "Edit invite": the organizer's quiet text link at the foot of the trip
- * page (the page puts it in .organizer-foot, beside "Text the crew"),
- * where a friend sees "Organizer sign-in". It opens the sheet "Invite
+ * page, after "Invite friends" and before "Text the crew", where a friend sees "Organizer sign-in". It opens the sheet "Invite
  * title": one field with the title, a live preview of the link as Messages
  * and WhatsApp show it ("You're invited to “…”. Tap here to access"), and
  * Save. Friends never see it: the page renders it for an organizer only.
