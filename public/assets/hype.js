@@ -165,7 +165,6 @@ window.HYPE = (() => {
   function board(tiles, pool, ms) {
     const free = pool.slice(), cur = [];
     // A tile's own scene counts as busy too, or it would swap between two cuts of one clip and look frozen.
-    // The WASTED card only ever goes on the last tile, the bottom corner, and only once per full round of the pool.
     // Order is random on every visit and every round, but every item comes up once per round before any repeats.
     // The WASTED card moves around like any picture, except onto the title panel (class "t").
     let shown = new Set();
