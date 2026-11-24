@@ -49,7 +49,7 @@ Each was weighed against a second design. D1 against plain files with no build (
 | last-year show | A show from the 2026 file. Read only. | "Here is who played this weekend last year:" |
 | in | A member is going to a show. | "I'm in" |
 | confirm | The organizer settles the dates or a destination's stay. | "Confirm these dates", "Confirm this stay" |
-| stage | Which block leads the page: dates, stay, parties or all set. | the page itself |
+| stage | Where the trip stands: dates, plan or all set. It decides what shows and what is pinned; no section leads. | the page itself |
 
 "Place" means two things in the owner's notes (a destination, and a listing). Code never uses it.
 
@@ -65,7 +65,7 @@ Each context is one folder under `web/src/features/`. Each owns one branch of th
 | `parties` | shows, last-year shows, who is in | the last-year line; "not confirmed"; a friend's own entries |
 | `map` | nothing. It draws the pins it is given. | pins that share a spot fan out |
 
-`web/src/app/` is the shell. It owns the route, the stage rule, the pinned lines, the "next" rows and the All set summary, because those join several contexts. `web/src/lib/`, `web/src/components/` and `web/src/types/` are shared.
+`web/src/app/` is the shell. It owns the route, the stage rule, the pinned lines and the All set summary, because those join several contexts. `web/src/lib/`, `web/src/components/` and `web/src/types/` are shared.
 
 Code flows one way: shared → features → app. A feature never imports another feature. What two features need moves to a shared folder. No barrel files. Every folder has a `README.md` that says what it is for, what belongs in it, what does not, and who may import it.
 
@@ -73,16 +73,15 @@ Each rule above is one pure function in the context's `lib/`, with the four-part
 
 ### The stage rule (`web/src/app/lib/stage.ts`)
 
-`stage(trip, memberId)` returns the block that leads:
+Dates, Stay and Parties are equals (owner, 23 Nov 2026). The page is a stack of open sections of equal weight: one heading size (screen 2's "Which dates work?"), one gap between sections, no "next" rows, and no section collapses another. The order on screen is fixed and means nothing: Dates, Stay, Parties, then the Map row. The only rule of order: Stay shows after the organizer confirms the dates.
 
-1. `dates` while no date option is confirmed; Parties shows as a "next" row and opens.
-2. `stay` once the dates are confirmed, while a destination that has a stay option has no confirmed stay.
-3. `parties` while the member is in for no show.
-4. `allSet` after that.
+`stage(trip)` returns where the trip stands. It decides only whether Stay shows, what is pinned and whether the summary shows:
 
-Stay is hidden while the dates are not confirmed: no block, no row, no pins, no summary line.
+1. `dates` while no date option is confirmed. Dates and Parties show, both open. Stay shows nowhere.
+2. `plan` once the dates are confirmed, until every destination that has a stay option has a confirmed stay. Dates shrinks to its pinned line; Stay and Parties show, both open. With no stay option yet, the stage stays `plan`, so friends can add a place.
+3. `allSet` after that. The All set summary sits at the top, each confirmed stay is a pinned line, and Parties stays open below.
 
-A settled block shrinks to its pinned line and still opens. A later block shows as a "next" row and opens too (screen 2). A friend can therefore heart a stay before the dates are confirmed. If the organizer undoes a confirm, the page goes back to that stage.
+Stay is hidden while the dates are not confirmed: no block, no row, no pins, no summary line. Parties never decides the stage and is never settled. A pinned line still opens its section. If the organizer undoes a confirm, the page goes back to the stage the rule gives.
 
 ### The last-year rule (`web/src/features/parties/lib/lastYear.ts`)
 
@@ -447,15 +446,15 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 
 **Waits on:** Trip 3. **Size:** M.
 
-**Goal.** The page loads the whole trip with one listener, shows every failure with its reason, and knows which block leads.
+**Goal.** The page loads the whole trip with one listener, shows every failure with its reason, and knows where the trip stands.
 
-**Design.** Screens 2, 4, 7 and 9 show the four stages. The header line on each is "Bali · Koh Phangan · Feb 2027".
+**Design.** Screens 2, 4, 7 and 9 show the trip at each point; the app shows their sections as equals (exception 10). The header line on each is "Bali · Koh Phangan · Feb 2027".
 
 **Do.**
 1. `web/src/lib/useTrip.ts` (new): one listener on the trip. It returns loading, not found, no connection, or the trip.
 2. `web/src/lib/db.ts` (new): the one write helper. It turns a refusal or a lost connection into a message. No feature calls the SDK directly.
-3. `web/src/app/lib/stage.ts` (new): `stage(trip, memberId)`, the rule in section 3, with the four-part header.
-4. `web/src/app/TripPage.tsx` (new): the header line, a slot for the leading block, slots for pinned lines and "next" rows. The blocks are placeholders until their tickets.
+3. `web/src/app/lib/stage.ts` (new): `stage(trip)`, the rule in section 3, with the four-part header.
+4. `web/src/app/TripPage.tsx` (new): the header line, then the open sections and the pinned lines the stage calls for. The sections are placeholders until their tickets.
 5. `web/src/components/Notice.tsx` (new): one line for a failure or a notice, with an optional "Try again".
 
 **Reuse and refactor.** Every later ticket reads through `useTrip` and writes through `db.ts`. A second listener or a direct SDK call is a finding.
@@ -466,12 +465,12 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 3. (9) The trip is half there: `stage` still returns a stage; each block shows its empty state; nothing throws.
 4. (36) The trip changes while a sheet is open: the sheet stays; the page updates under it.
 5. (37) A confirm is undone: `stage` returns the earlier stage.
-6. A destination has no stay option: it does not hold the page at the stay stage.
+6. A destination has no stay option: it does not keep the trip at `plan` once the others have confirmed stays.
 7. (42) The date confirm is undone: Stay hides again, with its options and hearts kept.
 
 **Failures.** Reads reconnect by themselves. A refused write shows its reason and never retries.
 
-**Tests.** The examples in the header of `stage`: one for each of the four stages, edge case 6, and case 42 (the date confirm undone: back to `dates`, Stay hidden).
+**Tests.** The examples in the header of `stage`: one for each of the three stages, case 42 (the date confirm undone: back to `dates`, Stay hidden), and no stay option yet (still `plan`).
 
 **Done when.** With the emulator: a good link shows the frame; a wrong id shows the message; stopping the emulator shows "No connection".
 
@@ -492,7 +491,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 2. `web/src/features/crew/api/crew.ts` (new): the read side: members, expected names, this device's member.
 3. `web/src/features/crew/components/Invitation.tsx` (new): screen 1. The three buttons do nothing yet (Trip 6).
 4. `web/src/components/Avatars.tsx` (new): a row of initials with a count. Every "who" list in the app uses it.
-5. `TripPage` shows the invitation to a device that has no member, and the stage to one that has.
+5. `TripPage` shows the invitation to a device that has no member, and the sections to one that has.
 
 **Reuse and refactor.** `Avatars` is the only place that draws initials.
 
@@ -535,7 +534,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 2. (5) Two friends tap the same name: both devices point to one member. Allowed.
 3. (6) A typed name is empty or longer than 24 characters: refuse with the reason under the field. A typed name equal to a listed one joins as that member.
 4. (7) A member taps another reply later: it replaces the old one.
-5. The reply is "Can't make it": the member is saved; the page shows the invitation with their reply marked, and the stage below it.
+5. The reply is "Can't make it": the member is saved; the page shows the invitation with their reply marked, and the sections below it.
 6. The organizer key is wrong: show "This organizer link is not valid." The friend can still join as a friend.
 7. The organizer opens the link before joining: the join sheet comes first, then the claim.
 8. The connection drops between the tap and the write: the reply shows as sending, then sends; a refusal flips it back with the reason.
@@ -554,18 +553,17 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 
 **Waits on:** Trip 6. **Size:** M.
 
-**Goal.** A friend answers the dates in one tap per option. The organizer confirms one option. The page then pins the dates and moves on.
+**Goal.** A friend answers the dates in one tap per option. The organizer confirms one option. The page then pins the dates, and Stay appears.
 
-**Design.** Screen 2 (friend), screen 3 (organizer), the pinned line on screen 4. Words: "Which dates work?", "Each includes the Full Moon Party, Mon 22 Feb.", "10 nights · 5 yes · 1 maybe · 1 no", "Most yes", "Yes", "Maybe", "No", "Not answered yet: LC", "Organizer view.", "3 have not answered: RJ, LC, SN", "Pick the dates", "said yes", "Confirm these dates", "13–23 Feb · confirmed". The "next" row reads "Parties · 6 shows" with "next". There is no Stay row before the dates are confirmed (exception 9).
+**Design.** Screen 2 (friend), screen 3 (organizer), the pinned line on screen 4. Words: "Which dates work?", "Each includes the Full Moon Party, Mon 22 Feb.", "10 nights · 5 yes · 1 maybe · 1 no", "Most yes", "Yes", "Maybe", "No", "Not answered yet: LC", "Organizer view.", "3 have not answered: RJ, LC, SN", "Pick the dates", "said yes", "Confirm these dates", "13–23 Feb · confirmed". The mock's "next" rows ("Stay · 7 options", "Parties · 6 shows") are not built: Parties is an open section beside Dates, and Stay waits for the confirm (exceptions 9 and 10).
 
 **Do.**
 1. `web/src/features/dates/lib/dates.ts` (new): `summary(option, answers)` (nights and counts), `mostYes(options, answers)`, `notAnswered(members, answers)`, with headers.
 2. `web/src/features/dates/api/dates.ts` (new): save an answer; confirm an option in a transaction; undo a confirm.
 3. `web/src/features/dates/components/DatesBlock.tsx` (new): screen 2 for a friend, screen 3 for an organizer.
 4. `web/src/components/PinnedLine.tsx` (new): the settled line of screen 4. It opens the block it stands for.
-5. `web/src/components/NextRow.tsx` (new): the "next" row of screen 2. It opens its block.
 
-**Reuse and refactor.** `PinnedLine` and `NextRow` serve Stay and Parties too. `Avatars` draws "said yes".
+**Reuse and refactor.** `PinnedLine` serves the confirmed stays too. `Avatars` draws "said yes". There is no `NextRow`: no section is "next" (exception 10).
 
 **Edge cases.**
 1. (10) A member changes an answer: the new one replaces the old; the counts move at once.
@@ -574,7 +572,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 4. (13) An answer for an option that is gone, or with a wrong value: ignored in every count.
 5. (14) After the confirm: the block opens from the pinned line, shows the counts, and takes no new answers.
 6. Two options tie for most yes: no "Most yes" mark.
-7. There are no date options: the block reads "No dates to vote on yet." and the next block leads.
+7. There are no date options: the section reads "No dates to vote on yet."; Parties stays open below it.
 8. Members who replied "Can't make it" are not counted in "not answered".
 9. The organizer opens the pinned line: it shows a way to undo the confirm, with the mock's button style and the words "Change the dates".
 
@@ -641,7 +639,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 
 The block renders only when dates/confirmed exists (case 42).
 
-**Reuse and refactor.** Uses `Sheet`, `Avatars`, `PinnedLine`, `NextRow`. The area list comes from `places/areas`; do not type it again.
+**Reuse and refactor.** Uses `Sheet`, `Avatars`, `PinnedLine`. The area list comes from `places/areas`; do not type it again.
 
 **Edge cases.**
 1. (15) The text is not an Airbnb or Booking.com link: show "Paste an Airbnb or Booking.com link." in the error style and make no call.
@@ -783,7 +781,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 
 **Waits on:** Trip 7, Trip 9, Trip 11. **Size:** S.
 
-**Goal.** When everything is settled the page leads with a short summary.
+**Goal.** When the dates and every stay are settled, a short summary sits at the top of the page; Parties stays open below it.
 
 **Design.** Screen 9. Words: "All set", "Sat 13 – Tue 23 Feb / Dates confirmed by JD", "Cliffside villa with pool / Bali stay confirmed · Uluwatu · sleeps 10", "You're in for 2 parties / Peggy Gou Sat 13 Feb · Full Moon Party Mon 22 Feb".
 
@@ -799,7 +797,7 @@ No stay pins and no stay line while the dates are not confirmed.
 1. One stay line for each destination with a confirmed stay (exception 3 in `design/app/README.md`).
 2. The member is in for one party: "You're in for 1 party". For many: list the first two, then "+N more".
 3. (37) A confirm is undone: the page leaves "All set" for that stage.
-4. The member taps "I'm in" off for their last party: the page returns to the parties stage.
+4. The member is in for no party: the parties card is a plain row, "Who's playing · 6 shows", that scrolls to the Parties section. With one or more: "You're in for N parties". Parties never takes the page out of "All set".
 5. The organizer who confirmed has left the member list: the line reads "Dates confirmed" with no name.
 
 **Failures.** None of its own.

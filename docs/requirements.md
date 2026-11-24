@@ -12,6 +12,8 @@ The app has three main goals. Home shows only these three, and each must take on
 2. **Stay:** agree where to sleep. A friend adds an option by pasting an Airbnb or Booking.com link. Friends tap a heart. The organizer confirms. Stay shows only after the organizer confirms the dates. Until then the page has no Stay block.
 3. **Parties:** see who is playing and who is in. Parties are open from the start, before the dates are settled. Where a venue has nothing announced for a date, the page says "Nothing announced yet. Here is who played this weekend last year:" and lists last year's acts for the same weekend. One page lists place, venue, date and artist, with this year and last year together. Each show has an I'm in button. Any friend can add a party: an Add a party button takes the place, the venue, the date and who is playing, and an optional link. The new entry shows who added it. A friend can edit or remove an entry they added, and the organizer can edit or remove any entry.
 
+Dates, Stay and Parties are equals. The page never makes a friend finish one before another. The only rule of order: Stay shows after the organizer confirms the dates.
+
 Everything else is a side journey: saved TikToks and Reels, the map, votes on other things, the itinerary, club tables. A side journey is one tap away and never sits on Home. Where a later section conflicts with this one, this section wins.
 
 ### The first version (MVP)

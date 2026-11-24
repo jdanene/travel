@@ -1,27 +1,22 @@
+import type { ReactNode } from "react";
 import { Notice } from "../components/Notice";
 import { monthYear } from "../lib/format";
 import { useTrip } from "../lib/useTrip";
 import type { Trip } from "../types/trip";
-import { datesSettled, stage, type Stage } from "./lib/stage";
+import { stage } from "./lib/stage";
 import "./TripPage.css";
 
-/** The mock's title for each leading block (screens 2, 4, 7 and 9). */
-const TITLES: Record<Stage, string> = {
-  dates: "Which dates work?",
-  stay: "Where do we stay?",
-  parties: "Who's playing",
-  allSet: "All set",
-};
-
 /**
- * The trip page: the header line, the pinned lines of settled blocks, the
- * block that leads, and a "next" row for each later block. The blocks are
- * placeholders here; each one's own ticket fills it in.
+ * The trip page: the header line, then Dates, Stay and Parties as open
+ * sections of equal weight (exception 10). The stage decides only what
+ * shows: Stay waits for the dates, a settled section shrinks to its pinned
+ * line, and "All set" adds the summary. The sections are placeholders here;
+ * each one's own ticket fills it in.
  *
  * Inputs: tripId — from the address bar.
  * Output: the page, or one notice when the trip cannot be shown.
  * Examples (checked on the emulator at 390 px):
- *   a new trip      → "Bali · Koh Phangan · Feb 2027", "Which dates work?", a Parties "next" row
+ *   a new trip      → "Bali · Koh Phangan · Feb 2027", "Which dates work?", then "Who's playing"
  *   /trip/wrong     → "This link does not open a trip. Ask the organizer for the link."
  *   emulator down   → "No connection" after 5 seconds
  */
@@ -46,52 +41,34 @@ export function TripPage({ tripId }: { tripId: string }) {
   }
 }
 
-function ReadyPage({ trip, uid, offline }: { trip: Trip; uid: string; offline: boolean }) {
-  const memberId = trip.crew?.devices?.[uid] ?? null;
-  const leading = stage(trip, memberId);
+function ReadyPage({ trip, offline }: { trip: Trip; uid: string; offline: boolean }) {
+  const now = stage(trip);
   const info = trip.info;
 
   return (
     <>
       {info && (
-        <p className="cap headline">
+        <h1 className="cap headline">
           {info.name} · {monthYear(info.season.from)}
-        </p>
+        </h1>
       )}
       {offline && <Notice>No connection</Notice>}
-      <section aria-labelledby="lead-title">
-        <h1 id="lead-title" className="h1 lead">
-          {TITLES[leading]}
-        </h1>
-      </section>
-      <NextRows trip={trip} leading={leading} />
+      {now === "allSet" && <Section id="all-set" title="All set" />}
+      {now === "dates" && <Section id="dates" title="Which dates work?" />}
+      {now === "plan" && <Section id="stay" title="Where do we stay?" />}
+      <Section id="parties" title="Who's playing" />
     </>
   );
 }
 
-/**
- * The "next" rows under the leading block. Stay has no row until the dates
- * are settled (exception 9); Parties has one from the start.
- */
-function NextRows({ trip, leading }: { trip: Trip; leading: Stage }) {
-  const stayCount = Object.keys(trip.stay?.options ?? {}).length;
-  const showCount = Object.keys(trip.parties?.shows ?? {}).length;
-  const rows: Array<{ name: string; count: string }> = [];
-  if (leading === "dates" || leading === "stay") {
-    if (leading === "dates" && datesSettled(trip)) rows.push({ name: "Stay", count: `${stayCount} options` });
-    rows.push({ name: "Parties", count: `${showCount} shows` });
-  }
-  if (rows.length === 0) return null;
+/** One open section: a heading in the mock's screen-2 size, then its block. */
+function Section({ id, title, children }: { id: string; title: string; children?: ReactNode }) {
   return (
-    <div className="next-rows">
-      {rows.map((row) => (
-        <div className="row next" key={row.name}>
-          <span>
-            <b>{row.name}</b> · {row.count}
-          </span>
-          <span className="cap">next</span>
-        </div>
-      ))}
-    </div>
+    <section className="section" id={id} aria-labelledby={`${id}-title`}>
+      <h2 id={`${id}-title`} className="h1 section-title">
+        {title}
+      </h2>
+      {children}
+    </section>
   );
 }

@@ -36,6 +36,7 @@ Content, order, words and icons come from the mock. Use its words exactly: grep 
 
 7. **Words for states the mock does not draw.** The mock shows the happy path. These strings are new and are fixed here: the join sheet "Who are you?", "Your name", "Already replied"; the empty states "No dates to vote on yet.", "No places yet.", "Nothing announced yet.", "No pins yet."; the organizer's undo "Change the dates", "Change the stay"; the failures "This link does not open a trip. Ask the organizer for the link.", "No connection", "This organizer link is not valid.", "Try again"; the edit actions "Edit", "Remove"; the splash button "OPEN THE TRIP".
 8. **A Map row at the foot of the page.** The mock opens the map from the summary only. Before "All set" there is no summary, so the page ends with one row, "Map", that opens it.
-9. **Stay waits for the dates.** Screen 2 shows a Stay "next" row before the dates are confirmed. The app shows no Stay row until the dates are confirmed; Parties is the only "next" row on screen 2. (Owner, 23 Nov 2026.)
+9. **Stay waits for the dates.** Screen 2 shows a Stay "next" row before the dates are confirmed. The app shows no Stay row until the dates are confirmed. (Owner, 23 Nov 2026.)
+10. **Dates, Stay and Parties are equals.** The mock shows one block leading and the others pinned or "next". The app shows open sections of equal weight. The only rule of order: Stay does not show until the dates are confirmed. A settled section shrinks to its pinned line. (Owner, 23 Nov 2026.)
 
 Record a new exception here, in the same commit as the code that makes it.

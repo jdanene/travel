@@ -1,6 +1,7 @@
-/* The mock's rows for a block that is not leading (.collapsed, screens 2 and 4). */
-.row { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 12px 14px; border-radius: 14px; background: var(--soft); margin-bottom: 8px; font-size: 14.5px; text-align: left; }
-.row b { font-weight: 700; }
-.row.next { color: var(--mut); }
-.next-rows { margin-top: 12px; }
-.lead { margin: 4px 0 12px; }
+/*
+ * Dates, Stay and Parties are equal open sections (exception 10): one
+ * heading size (the mock's .h1 of screen 2) and one gap between sections.
+ */
+.section { margin-top: 28px; }
+.section:first-of-type { margin-top: 12px; }
+.section-title { margin-bottom: 4px; }

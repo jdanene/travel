@@ -1,12 +1,15 @@
-import type { MemberId, Trip } from "../../types/trip";
+import type { Trip } from "../../types/trip";
 
-/** The block that leads the page. */
-export type Stage = "dates" | "stay" | "parties" | "allSet";
+/**
+ * Where the trip stands. It decides only whether Stay shows, what is
+ * pinned and whether the summary shows; Dates, Stay and Parties are equal
+ * open sections, and none of them leads (owner, 23 Nov 2026).
+ */
+export type Stage = "dates" | "plan" | "allSet";
 
 /**
  * Says whether the dates are settled: a confirmed date option that still
- * exists. Stay shows only after this (owner, 23 Nov 2026): no block, no
- * "next" row, no pins and no summary line before it.
+ * exists. Stay shows only after this.
  *
  * Inputs: trip — the whole trip, or any half of it.
  * Output: true when dates/confirmed names an option that is in dates/options.
@@ -18,43 +21,35 @@ export function datesSettled(trip: Trip): boolean {
 }
 
 /**
- * Picks the block that leads the page for one member, so the page asks one
- * thing at a time and moves forward as the trip settles (plan section 3).
+ * Says where the trip stands, so the page knows which sections to show
+ * and which to pin (plan section 3).
  *
- * 1. dates   while there are date options and none is confirmed; Parties
- *            shows as a "next" row and opens.
- * 2. stay    once the dates are confirmed, while a destination that has a
- *            stay option has no confirmed stay.
- * 3. parties while the member is in for no show.
- * 4. allSet  after that.
+ * 1. dates   while no date option is confirmed. Dates and Parties show;
+ *            Stay shows nowhere.
+ * 2. plan    once the dates are confirmed, until every destination that has
+ *            a stay option has a confirmed stay. Dates is pinned; Stay and
+ *            Parties show.
+ * 3. allSet  after that. The summary shows; each confirmed stay is pinned;
+ *            Parties stays open.
  *
- * A trip with no date options skips the dates; Stay then stays hidden,
- * because the dates cannot be confirmed.
+ * Parties never decides the stage: a friend can be in for no show and still
+ * be all set.
  *
  * Inputs: trip — the whole trip; a missing branch counts as empty, so a
  * half-written trip still has a stage (case 9).
- * memberId — this device's member, or null before the friend replies.
- * Output: the leading stage.
+ * Output: the stage.
  * Examples (each is a test in stage.test.ts):
- *   options, none confirmed, a Bali stay option        → "dates"
- *   dates confirmed, a Bali option, no confirmed stay  → "stay"
- *   case 42: date confirm undone, every stay confirmed → "dates"
- *   dates confirmed, no stay options at all            → "parties"
- *   dates confirmed, the member is in for one show     → "allSet"
+ *   options, none confirmed, a Bali stay option         → "dates"
+ *   dates confirmed, a Bali option, no confirmed stay   → "plan"
+ *   dates confirmed, the Bali stay confirmed            → "allSet"
+ *   case 42: date confirm undone, every stay confirmed  → "dates"
+ *   dates confirmed, nobody has added a place yet       → "plan", so friends can still add one
  */
-export function stage(trip: Trip, memberId: MemberId | null): Stage {
-  const hasDateOptions = Object.keys(trip.dates?.options ?? {}).length > 0;
-  if (hasDateOptions && !datesSettled(trip)) return "dates";
+export function stage(trip: Trip): Stage {
+  if (!datesSettled(trip)) return "dates";
 
-  if (datesSettled(trip)) {
-    const confirmed = trip.stay?.confirmed ?? {};
-    const options = Object.values(trip.stay?.options ?? {});
-    const waiting = options.some((option) => confirmed[option.destination] === undefined);
-    if (waiting) return "stay";
-  }
-
-  const shows = trip.parties?.shows ?? {};
-  const marks = trip.parties?.in ?? {};
-  const isIn = memberId !== null && Object.keys(shows).some((showId) => marks[showId]?.[memberId] === true);
-  return isIn ? "allSet" : "parties";
+  const confirmed = trip.stay?.confirmed ?? {};
+  const options = Object.values(trip.stay?.options ?? {});
+  const waiting = options.some((option) => confirmed[option.destination] === undefined);
+  return options.length === 0 || waiting ? "plan" : "allSet";
 }
