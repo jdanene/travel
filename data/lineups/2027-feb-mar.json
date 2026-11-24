@@ -245,17 +245,6 @@
    "verified": false
   },
   {
-   "date": "2027-03-22",
-   "artist": "Full Moon Party",
-   "about": "An all-night party on Haad Rin beach, Koh Phangan, where each bar on the sand plays its own music; it runs every full moon.",
-   "note": "Full Moon Party (no guest DJs named); pre- and after-parties 20 to 24 Mar",
-   "venue": "Haad Rin Beach",
-   "area": "Haad Rin",
-   "place": "Koh Phangan",
-   "source": "https://fullmoonparty-thailand.com/schedules/",
-   "verified": true
-  },
-  {
    "date": "2027-03-29",
    "artist": "Half Moon Festival",
    "about": "A two-day party in the jungle at Ban Tai, Koh Phangan, held every two weeks.",
@@ -294,5 +283,8 @@
   "CÉ LA VI (no dated nights in 2027; a listings site shows March 2027 nights the venue's own site does not)",
   "Singapore festivals: none announced for Feb or Mar 2027",
   "Savaya is closed on 7 and 8 Mar 2027"
+ ],
+ "excluded": [
+  "Full Moon Party on 2027-03-22: the owner only wants the 22 February one. Never add it back."
  ]
 }
