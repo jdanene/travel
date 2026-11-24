@@ -4,6 +4,7 @@ import { idFromName } from "../../../lib/ids";
 import type { Reply } from "../../../types/trip";
 import type { CrewView, Person } from "../api/crew";
 import { notReplied, REPLIES } from "../lib/crew";
+import { PhotoField } from "./PhotoField";
 
 /** The longest name the rules accept. */
 const MAX_NAME = 24;
@@ -13,7 +14,8 @@ interface JoinSheetProps {
   reply: Reply | null;
   crew: CrewView;
   onClose: () => void;
-  onPick: (person: Person) => void;
+  /** The friend picked, and the photo they added, if any. */
+  onPick: (person: Person, photo: string | null) => void;
 }
 
 /**
@@ -22,6 +24,9 @@ interface JoinSheetProps {
  * is typed once. Names already taken sit under "Already replied", so a
  * friend on a second phone can pick their own name again (case 4).
  *
+ * Under the name, "Add a photo (optional)" opens the phone's picker; the
+ * photo joins with whichever name is picked or typed.
+ *
  * Inputs: the reply tapped, the crew view, closing, and what a pick does.
  * Output: the sheet. A typed name is trimmed; an empty one or one over 24
  * characters is refused with the reason under the field; one equal to a
@@ -29,17 +34,25 @@ interface JoinSheetProps {
  * Examples (checked on the emulator):
  *   expected RJ and LC, nobody else  → two name buttons, the field, and the reply as the main button
  *   typed "  lc "                    → joins as the listed "LC"
+ *   a photo added, then "RB" typed   → joins as RB with the photo
  */
 export function JoinSheet({ reply, crew, onClose, onPick }: JoinSheetProps) {
   const [typed, setTyped] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [photo, setPhoto] = useState<string | null>(null);
   const open = notReplied(crew.expected, crew.byId);
   const label = REPLIES.find((choice) => choice.reply === reply)?.label ?? "";
 
   const close = () => {
     setTyped("");
     setError(null);
+    setPhoto(null);
     onClose();
+  };
+
+  const pick = (person: Person) => {
+    setPhoto(null);
+    onPick(person, photo);
   };
 
   const submit = (event: FormEvent) => {
@@ -50,7 +63,7 @@ export function JoinSheet({ reply, crew, onClose, onPick }: JoinSheetProps) {
     const id = idFromName(name);
     setTyped("");
     setError(null);
-    onPick({ id, name: crew.expected[id] ?? crew.byId[id]?.name ?? name });
+    pick({ id, name: crew.expected[id] ?? crew.byId[id]?.name ?? name });
   };
 
   return (
@@ -58,7 +71,7 @@ export function JoinSheet({ reply, crew, onClose, onPick }: JoinSheetProps) {
       {open.length > 0 && (
         <div className="pills" style={{ margin: "12px 0 4px" }}>
           {open.map((person) => (
-            <button key={person.id} type="button" className="pill" onClick={() => onPick(person)}>
+            <button key={person.id} type="button" className="pill" onClick={() => pick(person)}>
               {person.name}
             </button>
           ))}
@@ -69,7 +82,7 @@ export function JoinSheet({ reply, crew, onClose, onPick }: JoinSheetProps) {
           <p className="sect">Already replied</p>
           <div className="pills">
             {crew.members.map((member) => (
-              <button key={member.id} type="button" className="pill" onClick={() => onPick({ id: member.id, name: member.name })}>
+              <button key={member.id} type="button" className="pill" onClick={() => pick({ id: member.id, name: member.name })}>
                 {member.name}
               </button>
             ))}
@@ -93,6 +106,7 @@ export function JoinSheet({ reply, crew, onClose, onPick }: JoinSheetProps) {
             {error}
           </p>
         )}
+        <PhotoField photo={photo} onChange={setPhoto} />
         <button type="submit" className="btn" style={{ marginTop: 6 }}>
           {label}
         </button>

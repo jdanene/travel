@@ -106,7 +106,7 @@ Paths live in one file, `web/src/lib/paths.ts`. The rules file repeats them; the
                 destinations: {bali:{name, lat, lng}, kohPhangan:{name, lat, lng}} }
   crew
     expected  { {memberId}: name }                    from the trip file
-    members   { {memberId}: { name, reply, at } }
+    members   { {memberId}: { name, reply, at, photo? } }   photo: a 160 px JPEG data URL, at most 30000 characters (24 Nov 2026)
     devices   { {uid}: memberId }
     organizers{ {uid}: true }
   dates

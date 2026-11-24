@@ -94,3 +94,23 @@ export function nights(from: string, to: string): number {
   const b = parts(to);
   return Math.round((Date.UTC(b.year, b.month, b.date) - Date.UTC(a.year, a.month, a.date)) / 86_400_000);
 }
+
+/**
+ * The trip's months, as the title block writes them: short on screen, long
+ * for screen readers.
+ * Inputs: from and to — "YYYY-MM-DD", from first; style — "short" or "long".
+ * Output: "Feb–Mar 2027" (short) or "February to March 2027" (long); one
+ * month alone when both days share it; both years when they differ.
+ * Examples (each one is a test in format.test.ts):
+ *   seasonLine("2027-02-01", "2027-03-31", "short") → "Feb–Mar 2027"
+ *   seasonLine("2026-12-20", "2027-01-05", "long")  → "December 2026 to January 2027"
+ */
+export function seasonLine(from: string, to: string, style: "short" | "long"): string {
+  const a = parts(from);
+  const b = parts(to);
+  const names = style === "short" ? MONTHS : LONG_MONTHS;
+  const join = style === "short" ? "–" : " to ";
+  if (a.year !== b.year) return `${names[a.month]} ${a.year}${join}${names[b.month]} ${b.year}`;
+  if (a.month === b.month) return `${names[a.month]} ${a.year}`;
+  return `${names[a.month]}${join}${names[b.month]} ${b.year}`;
+}

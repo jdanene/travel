@@ -17,6 +17,10 @@ export const device = (tripId: string, uid: string) => `trips/${tripId}/crew/dev
 /** One member's name and reply. */
 export const member = (tripId: string, memberId: string) => `trips/${tripId}/crew/members/${memberId}`;
 
+/** One field of a member: written alone, so a new reply keeps the photo and a new photo keeps the reply. */
+export const memberField = (tripId: string, memberId: string, field: "name" | "reply" | "at" | "photo") =>
+  `trips/${tripId}/crew/members/${memberId}/${field}`;
+
 /** This device's organizer mark. */
 export const organizer = (tripId: string, uid: string) => `trips/${tripId}/crew/organizers/${uid}`;
 

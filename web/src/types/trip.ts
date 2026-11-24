@@ -35,6 +35,8 @@ export interface Member {
   name: string;
   reply: Reply;
   at: number;
+  /** The member's own photo: a 160 px JPEG data URL; absent means initials. */
+  photo?: string;
 }
 
 export interface Crew {

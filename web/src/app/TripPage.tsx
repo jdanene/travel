@@ -1,7 +1,9 @@
+import { PhotosProvider } from "../components/Avatars";
 import { Notice } from "../components/Notice";
 import { crewOf, useOrganizerLink, type CrewView } from "../features/crew/api/crew";
 import { Invitation } from "../features/crew/components/Invitation";
 import { OrganizerSignIn } from "../features/crew/components/OrganizerSignIn";
+import { PhotoSheet } from "../features/crew/components/PhotoSheet";
 import { repliedLine } from "../features/crew/lib/crew";
 import { DatesModule } from "../features/dates/components/DatesModule";
 import { StayModule } from "../features/stay/components/StayModule";
@@ -11,7 +13,7 @@ import { PartiesBlock } from "../features/parties/components/PartiesBlock";
 import { pins } from "./lib/pins";
 import { useTrip } from "../lib/useTrip";
 import type { Trip } from "../types/trip";
-import { lazy, Suspense, type ReactNode } from "react";
+import { lazy, Suspense, useState, type ReactNode } from "react";
 import { Home } from "./Home";
 import type { ModuleId } from "./lib/modules";
 
@@ -53,9 +55,11 @@ export function TripPage({ tripId }: { tripId: string }) {
 function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip; uid: string; offline: boolean }) {
   const crew = crewOf(trip, uid);
   const organizerLink = useOrganizerLink(tripId, uid, crew);
+  const [photoOpen, setPhotoOpen] = useState(false);
+  const you = crew.memberId && crew.member ? { id: crew.memberId, name: crew.member.name } : undefined;
 
   return (
-    <>
+    <PhotosProvider photos={crew.photos}>
       {offline && <Notice>No connection</Notice>}
       {organizerLink === "invalid" && <Notice>This organizer link is not valid.</Notice>}
       {/* Before a reply the friend sees the invitation (12/1). A friend who
@@ -67,6 +71,8 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
             trip={trip}
             memberId={crew.memberId}
             organizer={crew.organizer}
+            you={you}
+            onYou={() => setPhotoOpen(true)}
             replied={repliedLine(crew.expected, crew.byId)}
             content={(openModule) => moduleSlots(tripId, trip, crew, openModule)}
           />
@@ -74,7 +80,10 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
       )}
       {/* The organizer signs in with Google from any phone (D15); an organizer no longer needs it. */}
       {!crew.isOrganizer && <OrganizerSignIn tripId={tripId} />}
-    </>
+      {crew.memberId && crew.member && (
+        <PhotoSheet open={photoOpen} tripId={tripId} memberId={crew.memberId} member={crew.member} onClose={() => setPhotoOpen(false)} />
+      )}
+    </PhotosProvider>
   );
 }
 

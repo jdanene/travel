@@ -1,6 +1,6 @@
 /**
- * The rules tests of Trip 2 (1 to 9) and of the admin list (10 to 12,
- * plan D15), against the database emulator. Run with
+ * The rules tests of Trip 2 (1 to 9), of the admin list (10 to 12,
+ * plan D15) and of the profile photo (13), against the database emulator. Run with
  * `npm run test:rules` in web/; it starts the emulator, runs this file and
  * stops it. Each test names the rule it proves, in the words of plan
  * section 4.
@@ -111,4 +111,12 @@ describe("database rules", () => {
 
   it("12. refuses the organizer mark to a verified email that is not on the admin list", () =>
     assertFails(set(ref(google("uid-g3", "friend@example.com", true), paths.organizer(T, "uid-g3")), true)));
+
+  it("13. keeps a member's photo, and refuses one that is too long or not a JPEG data URL", async () => {
+    const a = db("uid-a");
+    await set(ref(a, paths.member(T, "alice")), { name: "Alice", reply: "in", at: 1 });
+    await assertSucceeds(set(ref(a, paths.memberField(T, "alice", "photo")), "data:image/jpeg;base64,/9j/4AAQ"));
+    await assertFails(set(ref(a, paths.memberField(T, "alice", "photo")), "data:image/jpeg;base64," + "A".repeat(30000)));
+    await assertFails(set(ref(a, paths.memberField(T, "alice", "photo")), "data:image/png;base64,iVBOR"));
+  });
 });

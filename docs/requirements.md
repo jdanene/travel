@@ -40,7 +40,7 @@ The app is as clean and easy as Airbnb. This is a requirement, not a preference.
 - Few words, in plain sentences. No jargon, no labels the crew must learn.
 - One accent color. No heavy borders, no clutter, no decoration.
 - A friend who opens the link for the first time can answer in one tap, without instructions.
-- The game-cover style belongs to the hype page only, not to the app.
+- The game-cover style belongs to the hype page, with two exceptions in the app (owner, 24 Nov 2026): the title block under the cover uses the hype title's type, and the cover is the hype collage. Everything else in the app keeps the clean look.
 
 ### What "like Paperless" and "like Partiful" mean
 
