@@ -29,12 +29,16 @@ interface StayModuleProps {
  * crew's names, and this member.
  * Output: one group per city that has a place (the trip's destinations
  * first, then other cities in the order they were added), or "No places
- * yet.", then "Add a place".
- * Examples (checked at 390 px):
+ * yet.", then "Add a place". Each city's heading has its own "Add", which
+ * opens the sheet with that city picked; "Add a place" opens on the only
+ * city when there is one, else the first.
+ * Examples (checked at 375 px and 1650 px):
  *   a villa in Bali and a hotel in Bangkok → "Bali" with the villa, "Bangkok" with the hotel, "Add a place"
+ *   "Add" beside Bangkok                   → Add a place with Bangkok picked
  */
 export function StayModule({ tripId, stay, destinations, areas, names, memberId }: StayModuleProps) {
-  const [adding, setAdding] = useState(false);
+  /** The city the Add a place sheet opens with; null while it is closed. */
+  const [adding, setAdding] = useState<string | null>(null);
   const [failure, setFailure] = useState<WriteResult | null>(null);
   const report = (result: WriteResult) => setFailure(result.ok ? null : result);
 
@@ -46,6 +50,8 @@ export function StayModule({ tripId, stay, destinations, areas, names, memberId 
     .sort((a, b) => a.at - b.at)
     .map(cityOf);
   const cities = [...new Map([...destinations.map((place) => place.name), ...added].map((name) => [idFromName(name), name])).values()];
+  // With exactly one city so far, "Add a place" opens on it.
+  const withPlaces = cities.filter((city) => Object.values(options).some((option) => idFromName(cityOf(option)) === idFromName(city)));
   const show = (id: string) =>
     requestAnimationFrame(() => document.getElementById(`stay-${id}`)?.scrollIntoView({ behavior: "smooth", block: "center" }));
 
@@ -70,9 +76,15 @@ export function StayModule({ tripId, stay, destinations, areas, names, memberId 
         if (ids.length === 0) return null;
         return (
           <section key={key} aria-labelledby={`stay-${key}`}>
-            <h3 id={`stay-${key}`} className="sect" style={{ margin: "12px 0 2px" }}>
-              {city}
-            </h3>
+            <div className="stay-city">
+              <h3 id={`stay-${key}`} className="sect">
+                {city}
+              </h3>
+              <button type="button" className="stay-city-add" aria-label={`Add a place in ${city}`} onClick={() => setAdding(city)}>
+                <Icon name="plus" size={16} />
+                Add
+              </button>
+            </div>
             <div className="stay-grid">
               {ids.map((id) => (
                 <StayCard
@@ -89,18 +101,19 @@ export function StayModule({ tripId, stay, destinations, areas, names, memberId 
           </section>
         );
       })}
-      <button type="button" className="btn sec stay-add" onClick={() => setAdding(true)}>
+      <button type="button" className="btn sec stay-add" onClick={() => setAdding(withPlaces.length === 1 ? withPlaces[0] : (cities[0] ?? ""))}>
         <Icon name="link" />
         Add a place
       </button>
       <AddPlaceSheet
-        open={adding}
+        open={adding !== null}
         destinations={destinations}
         cities={cities}
+        city={adding ?? undefined}
         areas={areas}
         known={Object.keys(options)}
         memberId={memberId}
-        onClose={() => setAdding(false)}
+        onClose={() => setAdding(null)}
         onAdd={add}
         onShow={show}
       />
