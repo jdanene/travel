@@ -52,5 +52,16 @@ export function reply(tripId: string, id: string, memberId: MemberId, text: stri
  * Examples (checked on the emulator): RB deletes its own poll → the poll and its votes go on every phone
  */
 export function remove(tripId: string, id: string): Promise<WriteResult> {
-  return write({ [paths.activityEntry(tripId, id)]: null, [paths.activityVotes(tripId, id)]: null, [paths.activityReplies(tripId, id)]: null });
+  return write({ [paths.activityEntry(tripId, id)]: null, [paths.activityVotes(tripId, id)]: null, [paths.activityReplies(tripId, id)]: null, [paths.activityReactions(tripId, id)]: null });
+}
+
+/**
+ * Puts the member's emoji on a Feed line, or takes it off. One emoji each;
+ * a new one replaces the old.
+ * Inputs: the trip, the line's id, the member, and the emoji (null takes it off).
+ * Output: the write result.
+ * Examples (checked on the emulator): KA picks 🔥 on RB's post → "🔥 1" under it on every phone; KA taps it again → gone
+ */
+export function react(tripId: string, id: string, memberId: MemberId, emoji: string | null): Promise<WriteResult> {
+  return write({ [paths.activityReaction(tripId, id, memberId)]: emoji });
 }

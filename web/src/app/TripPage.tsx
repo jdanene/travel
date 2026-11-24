@@ -97,6 +97,7 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
                   entries={trip.activity}
                   votes={trip.activityVotes}
                   replies={trip.activityReplies}
+                  reactions={trip.activityReactions}
                   memberId={crew.memberId}
                   isOrganizer={crew.isOrganizer}
                   names={Object.fromEntries(crew.members.map((member) => [member.id, member.name]))}

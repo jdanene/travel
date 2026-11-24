@@ -111,3 +111,9 @@ export const activityReplies = (tripId: string, id: string) => `trips/${tripId}/
 
 /** One reply under a post or a poll. */
 export const activityReply = (tripId: string, id: string, replyId: string) => `trips/${tripId}/activityReplies/${id}/${replyId}`;
+
+/** Every emoji on one Feed line; removed with a deleted post. */
+export const activityReactions = (tripId: string, id: string) => `trips/${tripId}/activityReactions/${id}`;
+
+/** A member's emoji on one Feed line: one each, and it can change. */
+export const activityReaction = (tripId: string, id: string, memberId: string) => `trips/${tripId}/activityReactions/${id}/${memberId}`;

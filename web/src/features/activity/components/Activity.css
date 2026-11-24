@@ -124,7 +124,7 @@ button.fl:active { background: var(--soft); }
 /* Activity is an outline on the charcoal page, not a white card (owner, 24 Nov 2026).
    The card remaps the ink tokens to the page's light ones, so every line inside follows. */
 .feedcard {
-  background: transparent; border-width: 1px; border-color: rgba(244, 241, 234, 0.55); color: var(--on-page);
+  background: transparent; border-width: 1px; border-color: #57534d; color: var(--on-page);
   --ink: var(--on-page); --ink2: var(--on-page); --mut: var(--on-page-mut);
   --line: rgba(244, 241, 234, 0.14); --soft: rgba(244, 241, 234, 0.1); --edge: rgba(244, 241, 234, 0.6);
   --acc: #f4f1ea; --on-acc: #111;
@@ -140,3 +140,17 @@ button.fl:active { background: var(--soft); }
 .feedcard .av.sys { background: #f4f1ea; color: #111; }
 /* The "+" menu is a white popover; it keeps the dark ink. */
 .feedcard .msg-menu { --ink: #1c1c1e; --ink2: #3a3a3c; --mut: #6e6e73; --soft: #f5f5f4; --edge: #000; color: #1c1c1e; }
+
+/* Emoji under a Feed line: count chips and the add button. */
+.rx { display: flex; flex-wrap: wrap; gap: 0.375rem; align-items: center; padding: 0 0 0.5rem 2.75rem; }
+.rx-chip { display: inline-flex; align-items: center; gap: 0.3125rem; min-height: 1.875rem; padding: 0 0.5625rem; border-radius: 999px; border: 1px solid rgba(244, 241, 234, 0.3); font-size: 0.8125rem; font-weight: 700; color: var(--on-page); transition: transform 0.12s ease, background 0.12s ease; }
+.rx-chip span { font-size: 1rem; line-height: 1; }
+.rx-chip[aria-pressed="true"] { background: rgba(244, 241, 234, 0.2); border-color: rgba(244, 241, 234, 0.7); }
+.rx-chip:active, .rx-add:active { transform: scale(0.92); }
+.rx-add { display: grid; place-items: center; width: 1.875rem; height: 1.875rem; border-radius: 999px; color: var(--on-page-mut); transition: transform 0.12s ease; }
+.rx-add:hover { color: var(--on-page); }
+.rx-picker { width: 100%; height: min(24rem, 60vh); --border-size: 0; --input-font-size: 16px; --emoji-size: 1.5rem; --num-columns: 8; }
+.feedcard > .msg { margin-top: 0.5rem; }
+
+/* The feed never ends, so it keeps one height and scrolls inside the card (owner, 24 Nov 2026). */
+.feedcard .feed { max-height: min(28rem, 62vh); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: #57534d transparent; margin-right: -0.375rem; padding-right: 0.375rem; }

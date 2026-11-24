@@ -246,6 +246,8 @@ export interface Trip {
   activityVotes?: Record<string, Record<MemberId, number>>;
   /** Replies under a post or a poll: { entryId: { replyId: reply } }. */
   activityReplies?: Record<string, Record<string, ActivityReply>>;
+  /** Emoji on a Feed line: { entryId: { memberId: emoji } }; one each, and it can change. */
+  activityReactions?: Record<string, Record<MemberId, string>>;
 }
 
 export interface ActivityReply {

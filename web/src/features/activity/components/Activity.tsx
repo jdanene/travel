@@ -1,11 +1,12 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { newActivityId } from "../../../lib/activity";
 import type { ActivityEntry, ActivityReply, MemberId } from "../../../types/trip";
-import { post, remove, reply, vote } from "../api/activity";
+import { post, react, remove, reply, vote } from "../api/activity";
 import type { Draft } from "../lib/lines";
 import { whenLabels } from "../lib/lines";
 import { Composer } from "./Composer";
 import { LineRow, Written, type Viewer } from "./Entries";
+import { EmojiSheet, Reactions } from "./Reactions";
 import "./Activity.css";
 
 /** Lines drawn before "Show more", and how many more each tap adds (mock 5 draws six). */
@@ -17,6 +18,8 @@ interface ActivityProps {
   entries: Record<string, ActivityEntry> | undefined;
   votes: Record<string, Record<MemberId, number>> | undefined;
   replies: Record<string, Record<string, ActivityReply>> | undefined;
+  /** Emoji on each line: { entryId: { memberId: emoji } }. */
+  reactions: Record<string, Record<MemberId, string>> | undefined;
   memberId: MemberId;
   isOrganizer: boolean;
   /** Member id to name, for every member who replied. */
@@ -30,8 +33,7 @@ interface ActivityProps {
 }
 
 /**
- * The Activity card of mock 5, the first card on the home page: the
- * message bar, then one list, newest first, with day dividers ("TODAY",
+ * The Activity card of mock 5, the last card on the home page: one list, newest first, with day dividers ("TODAY",
  * "YESTERDAY", "SAT 21 NOV") and "Show more" after six. Automatic lines
  * are a face and one line; posts and polls sit in a light box. A friend's
  * own post shows at once, marked "Sending…" until the server has it, and
@@ -47,10 +49,11 @@ interface ActivityProps {
  *   KA adds an event                      → "KA added an event: …" tops RB's list; a tap opens Events
  *   only you                              → "Just you so far" and the bar
  */
-export function Activity({ tripId, entries, votes, replies, memberId, isOrganizer, names, crewSize, thumbOf, openerOf }: ActivityProps) {
+export function Activity({ tripId, entries, votes, replies, reactions, memberId, isOrganizer, names, crewSize, thumbOf, openerOf }: ActivityProps) {
   const [shown, setShown] = useState(FIRST);
   const [sending, setSending] = useState<ReadonlySet<string>>(new Set());
   const [problem, setProblem] = useState<string | null>(null);
+  const [picking, setPicking] = useState<string | null>(null);
   const now = useMinuteClock();
   // Ids drawn on the first render do not ease in; every later one does, once.
   const seen = useRef<Set<string> | null>(null);
@@ -83,12 +86,6 @@ export function Activity({ tripId, entries, votes, replies, memberId, isOrganize
   return (
     <section className="feedcard" aria-labelledby="activity-title">
       <h2 id="activity-title">Feed</h2>
-      <Composer placeholder="Message" onSend={send} />
-      {problem && (
-        <p className="msg-error" role="alert">
-          {problem}
-        </p>
-      )}
       {alone ? (
         <p className="empty">
           <b>Just you so far</b>Share the trip link. When friends join, set dates or add a place, a line shows up here.
@@ -123,6 +120,15 @@ export function Activity({ tripId, entries, votes, replies, memberId, isOrganize
                   ) : (
                     <LineRow entry={entry} viewer={viewer} thumb={thumbOf(entry)} onOpen={openerOf(entry)} />
                   )}
+                  {!sending.has(id) && (
+                    <Reactions
+                      marks={reactions?.[id]}
+                      memberId={memberId}
+                      names={names}
+                      onReact={(emoji) => void react(tripId, id, memberId, emoji).then(report)}
+                      onPick={() => setPicking(id)}
+                    />
+                  )}
                 </div>
               </Fragment>
             );
@@ -134,6 +140,21 @@ export function Activity({ tripId, entries, votes, replies, memberId, isOrganize
           )}
         </div>
       )}
+      {/* The message bar sits at the foot of the feed (owner, 24 Nov 2026). */}
+      {problem && (
+        <p className="msg-error" role="alert">
+          {problem}
+        </p>
+      )}
+      <Composer placeholder="Message" onSend={send} />
+      <EmojiSheet
+        open={picking !== null}
+        onClose={() => setPicking(null)}
+        onPick={(emoji) => {
+          if (picking) void react(tripId, picking, memberId, emoji).then(report);
+          setPicking(null);
+        }}
+      />
     </section>
   );
 }
