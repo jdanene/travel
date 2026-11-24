@@ -86,7 +86,6 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
   const groups = eventsList(shows, known, filter, tags);
   // A last-year line shows inside its venue, so it follows the venue in or out of the list.
   const lines = lastYearLines(Object.values(shows), lastYear, EVENTS_WINDOW);
-  const listedVenues = new Set(groups.flatMap((group) => group.venues.map((venue) => venue.key)));
   const tagsOf = (id: string) => [...(tags.byShow[id] ?? [])];
   // The row's grey labels: the event's tags but the picked one, Big nights first, then by name.
   const rowTags = (id: string) =>
@@ -155,9 +154,8 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
 
   const destinations = Object.entries(destinationNames).map(([id, { name, lat, lng }]) => ({ id, name, lat, lng }));
   const canAdd = viewer.memberId !== null && destinations.length > 0;
-  // The map draws the venues the list keeps (app/lib/pins.ts); an event whose tag was just taken off may have left it.
-  const found = opened ? placeOf(opened, trip.places) : null;
-  const openedPlace = opened && found && (found.kind !== "venue" || listedVenues.has(venueKey(opened.destination, opened.venue))) ? found : null;
+  // The map pins every venue with an event this season, whatever the filter (app/lib/pins.ts), so an event's venue is on it.
+  const openedPlace = opened ? placeOf(opened, trip.places) : null;
 
   return (
     <div className="parties">

@@ -69,7 +69,7 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
   useEventCheck(tripId, trip, crew.member ? crew.memberId : null);
   useWarmMap(trip);
   const [photoOpen, setPhotoOpen] = useState(false);
-  // The Events filter is the map's too: the map draws the venues the list keeps (owner, 24 Nov 2026).
+  // The Events filter; the map does not follow it, it holds every pin (design exception 24).
   const events = useEventsFilter(tagChips(tripTags(trip)));
   const you = crew.memberId && crew.member ? { id: crew.memberId, name: crew.member.name } : undefined;
 
@@ -121,7 +121,7 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
  *
  * Inputs: the trip id, the trip, the crew view of this device, the events
  * check (its line sits at the foot of Events for the organizer), a way to
- * open another module, the Events filter (the map follows it), the pin the map should open on, and a way to open
+ * open another module, the Events filter, the pin the map should open on, and a way to open
  * the map (on one place, or as it was).
  * Output: the content for each module; null until its ticket fills it.
  * Examples (checked on screen): the Dates slot holds the Dates module.
@@ -204,7 +204,7 @@ function moduleSlots(
           <TripMap
             tripId={tripId}
             destinations={mapDestinations(trip)}
-            pins={pins(trip, filter)}
+            pins={pins(trip)}
             memberId={crew.memberId}
             isOrganizer={crew.isOrganizer}
             focus={mapFocus.pin ?? undefined}

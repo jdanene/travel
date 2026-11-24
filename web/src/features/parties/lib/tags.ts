@@ -153,7 +153,7 @@ export function tagSlug(name: string): string {
 /**
  * The Events list under a filter: byPlaceVenueDate() of the events the
  * filter keeps, with each venue that has nothing left to show taken out
- * unless venueShown() keeps it. The map draws the venues this list keeps.
+ * unless venueShown() keeps it. The map does not follow it (app/lib/pins.ts).
  *
  * Inputs: shows — parties/shows; known — the venues of places/venues;
  * filter; tags — tripTags() of the trip.
