@@ -13,6 +13,7 @@ import { pins } from "./lib/pins";
 import { useTrip } from "../lib/useTrip";
 import type { Trip } from "../types/trip";
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
+import { CheckEventsLine, useEventCheck, type EventCheck } from "./CheckEvents";
 import { Home } from "./Home";
 import type { ModuleId } from "./lib/modules";
 
@@ -57,6 +58,8 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
   // The pin the show sheet's "See on the map" asked for. The map reads it once, as it mounts; FocusedMap
   // clears it then, so a later tap on the Map button opens the map as it was.
   const [mapFocus, setMapFocus] = useState<string | null>(null);
+  // The events check runs once a friend has joined; a friend who can't make it still sees the list.
+  const eventCheck = useEventCheck(tripId, trip, crew.member ? crew.memberId : null);
 
   return (
     <>
@@ -73,7 +76,7 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
             organizer={crew.organizer}
             replied={repliedLine(crew.expected, crew.byId)}
             content={(openModule) =>
-              moduleSlots(tripId, trip, crew, openModule, { pin: mapFocus, clear: () => setMapFocus(null) }, (place) => {
+              moduleSlots(tripId, trip, crew, eventCheck, openModule, { pin: mapFocus, clear: () => setMapFocus(null) }, (place) => {
                 setMapFocus(place ? `${place.kind}:${place.id}` : null);
                 openModule("map");
               })
@@ -91,9 +94,10 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
  * What each module shows when open: one slot per module, so each module's
  * ticket plugs in here without touching the home page's layout.
  *
- * Inputs: the trip id, the trip, the crew view of this device, a way
- * to open another module, the pin the map should open on, and a way to
- * open the map (on one place, or as it was).
+ * Inputs: the trip id, the trip, the crew view of this device, the events
+ * check (its line sits at the foot of Events for the organizer), a way to
+ * open another module, the pin the map should open on, and a way to open
+ * the map (on one place, or as it was).
  * Output: the content for each module; null until its ticket fills it.
  * Examples (checked on screen): the Dates slot holds the Dates module.
  */
@@ -104,6 +108,7 @@ function moduleSlots(
   tripId: string,
   trip: Trip,
   crew: CrewView,
+  eventCheck: EventCheck,
   openModule: (id: ModuleId) => void,
   mapFocus: { pin: string | null; clear: () => void },
   seeMap: (place?: MapPlace) => void,
@@ -131,7 +136,12 @@ function moduleSlots(
         isOrganizer={crew.isOrganizer}
       />
     ), // Trip 9: the Stay module.
-    parties: <PartiesBlock tripId={tripId} trip={trip} memberId={crew.memberId} isOrganizer={crew.isOrganizer} onSeeMap={seeMap} />, // Trip 11: the Events module (code: parties). A show's sheet opens the map on its venue.
+    parties: (
+      <>
+        <PartiesBlock tripId={tripId} trip={trip} memberId={crew.memberId} isOrganizer={crew.isOrganizer} onSeeMap={seeMap} />
+        {crew.isOrganizer && <CheckEventsLine check={eventCheck} lastAt={trip.parties?.lastCheck?.at} />}
+      </>
+    ), // Trip 11: the Events module (code: parties). A show's sheet opens the map on its venue; the organizer's events check sits at its foot.
     links: crew.memberId && (
       <LinksModule
         tripId={tripId}

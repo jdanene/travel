@@ -1,6 +1,7 @@
 /**
  * The app's side of the link reader (services/link-reader): one call that
- * reads a pasted link. Stay and Links both use it.
+ * reads a pasted link, which Stay and Links both use, and one that asks it
+ * to check the clubs' pages for events.
  */
 
 const READER_URL: string | undefined = import.meta.env.VITE_READER_URL;
@@ -45,4 +46,53 @@ export async function readLink(url: string): Promise<ReadLink | null> {
     }
   }
   return null;
+}
+
+/** One event the check found on a club's own page. */
+export interface FoundEvent {
+  destination: string;
+  venue: string;
+  area?: string;
+  date: string;
+  artist: string;
+  link: string;
+}
+
+/** A club the check could not read, and why ("timeout", "unreadable", …). */
+export interface FailedSource {
+  venue: string;
+  reason: string;
+}
+
+const CHECK_TIMEOUT_MS = 20_000;
+
+/**
+ * Asks the reader to check the clubs' own event pages. One try: the check
+ * runs in the background, and the next one is twelve hours away.
+ *
+ * Output: the events the reader found (at most 100) and the clubs it could
+ * not read, or null when the reader is not set up, cannot be reached, takes
+ * more than 20 seconds, or answers with something else. An event that is
+ * not an object with text fields is dropped here; the caller checks the
+ * rest, as the database rules do.
+ * Examples (checked against a local run of the reader):
+ *   reader up   → { events: [{ destination: "bali", venue: "Savaya", date: "2027-02-13", artist: "PEGGY GOU", … }], failed: [] }
+ *   reader down → null
+ */
+export async function checkClubs(): Promise<{ events: FoundEvent[]; failed: FailedSource[] } | null> {
+  if (!READER_URL) return null;
+  try {
+    const response = await fetch(`${READER_URL}?check=events`, { signal: AbortSignal.timeout(CHECK_TIMEOUT_MS) });
+    const answer = (await response.json()) as { ok?: unknown; events?: unknown; failed?: unknown };
+    if (answer.ok !== true || !Array.isArray(answer.events)) return null;
+    const text = (value: unknown) => typeof value === "string";
+    return {
+      events: answer.events
+        .filter((e): e is FoundEvent => !!e && ["destination", "venue", "date", "artist", "link"].every((key) => text(e[key])) && (e.area === undefined || text(e.area)))
+        .slice(0, 100),
+      failed: Array.isArray(answer.failed) ? answer.failed.filter((f): f is FailedSource => !!f && text(f.venue) && text(f.reason)) : [],
+    };
+  } catch {
+    return null;
+  }
 }

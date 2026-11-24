@@ -38,7 +38,7 @@ if ! account=$(aws_ sts get-caller-identity --query Account --output text 2>/dev
 fi
 
 zip_file=$(mktemp -d)/link-reader.zip
-step "package the code" zip -q -j "$zip_file" handler.mjs parse.mjs sites.mjs
+step "package the code" zip -q -j "$zip_file" handler.mjs fetch-page.mjs parse.mjs sites.mjs events.mjs event-sources.mjs
 
 # The role lets the function write its own logs and nothing else.
 if ! aws_ iam get-role --role-name "$NAME" >/dev/null 2>&1; then
@@ -51,15 +51,17 @@ if ! aws_ iam get-role --role-name "$NAME" >/dev/null 2>&1; then
 fi
 role="arn:aws:iam::$account:role/$NAME"
 
+# 20 seconds covers the events check, which opens no page after 10 s and
+# gives each page 6 s.
 if aws_ lambda get-function --function-name "$NAME" >/dev/null 2>&1; then
   step "replace the code" aws_ lambda update-function-code --function-name "$NAME" --zip-file "fileb://$zip_file"
   step "wait for the code" aws_ lambda wait function-updated-v2 --function-name "$NAME"
   step "replace the settings" aws_ lambda update-function-configuration --function-name "$NAME" \
-    --runtime nodejs22.x --handler handler.handler --timeout 10 --memory-size 256 --role "$role"
+    --runtime nodejs22.x --handler handler.handler --timeout 20 --memory-size 256 --role "$role"
   step "wait for the settings" aws_ lambda wait function-updated-v2 --function-name "$NAME"
 else
   step "create the function" aws_ lambda create-function --function-name "$NAME" --zip-file "fileb://$zip_file" \
-    --runtime nodejs22.x --handler handler.handler --timeout 10 --memory-size 256 --architectures arm64 --role "$role"
+    --runtime nodejs22.x --handler handler.handler --timeout 20 --memory-size 256 --architectures arm64 --role "$role"
   step "wait for the function" aws_ lambda wait function-active-v2 --function-name "$NAME"
 fi
 

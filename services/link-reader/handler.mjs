@@ -1,24 +1,25 @@
 // The link reader: an AWS Lambda behind a function URL. Given a pasted
 // Airbnb, Booking.com, Instagram or TikTok address, it fetches the page and
-// returns what the app shows for it. It holds no secret, stores nothing and
-// never retries; the app retries (plan section 5.4).
+// returns what the app shows for it. Asked to check for events, it reads the
+// clubs' own event pages (events.mjs). It holds no secret, stores nothing
+// and never retries; the app retries a read (plan section 5.4).
 
 import { siteOf } from "./sites.mjs";
 import { parseListing, parsePost } from "./parse.mjs";
+import { fetchPage } from "./fetch-page.mjs";
+import { checkEvents } from "./events.mjs";
 
-const MAX_BYTES = 512 * 1024;
-const MAX_REDIRECTS = 3;
-const DEADLINE_MS = 6000;
 const ORIGINS = /^(https:\/\/travel-ca8f9\.web\.app|http:\/\/localhost(:\d{1,5})?)$/;
-// The sites answer a browser; a bare client gets a different page or none.
-const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36";
 
 /**
  * Answers GET ?url=<address> with what the page says, for the Add a place
- * sheet (a listing) and the Add a link sheet (a post).
+ * sheet (a listing) and the Add a link sheet (a post), and GET ?check=events
+ * with the clubs' events in February and March 2027, for the app's events
+ * check.
  *
- * Inputs: event, a Lambda function URL event. Its query holds url; its Origin
- *   header, when present, must be the app's site or http://localhost.
+ * Inputs: event, a Lambda function URL event. Its query holds url, or check
+ *   set to "events"; its Origin header, when present, must be the app's site
+ *   or http://localhost.
  *
  * Output: an HTTP response. Status 200 with JSON for every read that ran:
  *   { ok: true, name, photoUrl?, area?, sleeps? }   an Airbnb or Booking.com listing
@@ -36,6 +37,8 @@ const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/
  *     → 200 { ok: true, name: "Las Palmas Uluwatu", area: "South Kuta", sleeps: 2, photoUrl: "https://a0.muscache.com/…" }
  *   GET ?url=https://example.com → 200 { ok: false, reason: "not_allowed" }
  *   GET ?url=https://www.booking.com/hotel/th/x.html → 200 { ok: false, reason: "unreadable" }  (challenge page)
+ *   GET ?check=events → 200 { ok: true, checkedAt: 1795400000000, events: [{ destination: "bali", venue: "Savaya", … }], failed: [] }
+ *     (run locally against the live club pages; not yet deployed)
  */
 export async function handler(event) {
   const method = event.requestContext?.http?.method ?? "GET";
@@ -46,8 +49,15 @@ export async function handler(event) {
   }
   if (method !== "GET") return { statusCode: 405, headers: cors, body: "" };
 
-  const answer = origin && !ORIGINS.test(origin) ? refuse("not_allowed") : await read(event.queryStringParameters?.url ?? "");
-  console.log(JSON.stringify({ host: hostOf(event.queryStringParameters?.url), ok: answer.ok, reason: answer.reason }));
+  const query = event.queryStringParameters ?? {};
+  const answer = origin && !ORIGINS.test(origin) ? refuse("not_allowed") : query.check === "events" ? await checkOnce() : await read(query.url ?? "");
+  console.log(
+    JSON.stringify(
+      query.check === "events"
+        ? { check: "events", ok: answer.ok, events: answer.events?.length, failed: answer.failed }
+        : { host: hostOf(query.url), ok: answer.ok, reason: answer.reason },
+    ),
+  );
   return {
     statusCode: 200,
     headers: { ...cors, "content-type": "application/json; charset=utf-8", "cache-control": "no-store", vary: "Origin" },
@@ -55,61 +65,28 @@ export async function handler(event) {
   };
 }
 
-// Fetches the address, following up to three redirects that stay on the same
-// site, and parses the first 512 KB. Every failure becomes a reason.
+// Reads a pasted address on one of the allowed sites; every redirect must
+// stay on that site. Every failure becomes a reason.
 async function read(address) {
   const first = siteOf(address);
   if (!first) return refuse("not_allowed");
-  const abort = new AbortController();
-  const timer = setTimeout(() => abort.abort(), DEADLINE_MS);
-  try {
-    let url = address;
-    let response;
-    for (let hop = 0; ; hop++) {
-      response = await fetch(url, {
-        redirect: "manual",
-        signal: abort.signal,
-        headers: { "user-agent": USER_AGENT, accept: "text/html,application/xhtml+xml", "accept-language": "en-US,en;q=0.9" },
-      });
-      if (response.status < 300 || response.status >= 400) break;
-      const next = response.headers.get("location") && new URL(response.headers.get("location"), url).toString();
-      await response.body?.cancel();
-      if (!next || hop === MAX_REDIRECTS || siteOf(next)?.site !== first.site) return refuse("not_allowed");
-      url = next;
-    }
-    if (!response.ok) {
-      await response.body?.cancel();
-      return refuse("unreadable");
-    }
-    const { text, cut } = await firstBytes(response, MAX_BYTES);
-    const found = first.kind === "listing" ? parseListing(text, url) : parsePost(text, url);
-    if (found) return { ok: true, ...found };
-    return refuse(cut ? "too_large" : "unreadable");
-  } catch {
-    return refuse(abort.signal.aborted ? "timeout" : "unreadable");
-  } finally {
-    clearTimeout(timer);
-  }
+  const page = await fetchPage(address, (next) => siteOf(next)?.site === first.site);
+  if (!page.ok) return refuse(page.reason);
+  const found = first.kind === "listing" ? parseListing(page.text, page.url) : parsePost(page.text, page.url);
+  if (found) return { ok: true, ...found };
+  return refuse(page.cut ? "too_large" : "unreadable");
 }
 
-// Reads at most limit bytes of the body and drops the rest.
-async function firstBytes(response, limit) {
-  const reader = response.body.getReader();
-  const chunks = [];
-  let size = 0;
-  let cut = false;
-  while (size < limit) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    chunks.push(value);
-    size += value.length;
-  }
-  if (size >= limit) {
-    cut = true;
-    await reader.cancel();
-  }
-  const bytes = Buffer.concat(chunks).subarray(0, limit);
-  return { text: bytes.toString("utf8"), cut };
+// One check of the clubs serves every call for 10 minutes, so a burst of
+// calls to the public address never becomes a burst of requests to the clubs.
+const CHECK_REUSE_MS = 10 * 60 * 1000;
+let lastCheck = null;
+
+async function checkOnce() {
+  if (lastCheck && Date.now() - lastCheck.checkedAt < CHECK_REUSE_MS) return lastCheck;
+  const answer = await checkEvents();
+  lastCheck = answer;
+  return answer;
 }
 
 function refuse(reason) {

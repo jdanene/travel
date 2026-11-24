@@ -46,9 +46,28 @@ export async function write(changes: Record<string, unknown>): Promise<WriteResu
  *   confirm with nothing confirmed  → { ok: true, won: true }
  *   confirm after another organizer → { ok: true, won: false }
  */
-export async function writeOnce(path: string, value: unknown): Promise<(WriteResult & { won?: boolean })> {
+export async function writeOnce(path: string, value: unknown): Promise<WriteResult & { won?: boolean }> {
+  return writeIf<unknown>(path, (current) => (current === null ? value : undefined));
+}
+
+/**
+ * Writes what next() makes of the stored value, in a transaction, so of two
+ * devices that read the same value only one writes; the other's next()
+ * runs again on the winner's value. This is how one device claims a job
+ * that all of them could start (the events check).
+ *
+ * Inputs: path — from paths.ts; next — given the stored value (null when
+ * there is none), returns the value to write, or undefined to write nothing.
+ * It may run more than once, so it must not do anything else.
+ * Output: { ok: true, won: true } when this device's value landed;
+ * { ok: true, won: false } when next() declined; or a failure, as for write().
+ * Examples (checked on the emulator):
+ *   claim the check with no lastCheck            → { ok: true, won: true }
+ *   claim it again an hour later                 → { ok: true, won: false }
+ */
+export async function writeIf<T>(path: string, next: (current: T | null) => T | undefined): Promise<WriteResult & { won?: boolean }> {
   try {
-    const result = await runTransaction(ref(database, path), (current) => (current === null ? value : undefined));
+    const result = await runTransaction(ref(database, path), (current: T | null) => next(current));
     return { ok: true, won: result.committed };
   } catch (error) {
     return { ok: false, reason: failure(error) };
