@@ -117,7 +117,8 @@ Paths live in one file, `web/src/lib/paths.ts`. The rules file repeats them; the
     hearts    { {stayId}: { {memberId}: true } }
     confirmed { {destination}: { stayId, by, at } }
   parties
-    shows     { {showId}: { destination, venue, area?, date, artist, link?, verified, source: "seed"|"friend", addedBy?, at } }
+    shows     { {showId}: { destination, venue, area?, date, artist, link?, verified, source: "seed"|"friend"|"check", addedBy?, at } }
+    lastCheck { at, by }                              the last events check; see "The events check" below
     lastYear  { {showId}: { destination, venue, date, artist } }
     in        { {showId}: { {memberId}: true } }
   links
@@ -141,6 +142,11 @@ Rules, in words:
 - A device adds a stay option or a show with `addedBy` equal to its member. It edits or removes a show only when it added it, or when it is an organizer.
 - Only an organizer writes `dates/confirmed`, `stay/confirmed` and `crew/organizers`. A device becomes an organizer when its claim holds a key that exists.
 - Every write is checked for shape and length. A value outside the shape is refused.
+- Any member adds a show the events check found (`source: "check"`, no `addedBy`, `verified: false`, an https `link`), but never over a show that exists. Only an organizer edits or removes it. Any member writes `parties/lastCheck` under its own member, with `at` no more than 60 s ahead of the server and later than the last one.
+
+### The events check (owner, 23 Nov 2026)
+
+"Check what's available now, and any time someone logs in." When a friend who has joined opens the trip, the app claims `parties/lastCheck` in a transaction, but only when the last check is 12 hours old or more; the phone whose claim lands asks the link reader (`GET ?check=events`) and writes each event the trip does not list yet. The reader reads only schema.org Event data on each club's own site (`services/link-reader/event-sources.mjs`; README there lists every club and why it is or is not read). Show ids come from `showId()`, so a seeded show is not added again. The organizer has "Check for new events" at the foot of the Parties module. This replaces the Haiku design of requirements 5.2b for now: no AI model, no key, and no Cloud Functions.
 
 ## 5. Audits (create-a-project, section 10)
 

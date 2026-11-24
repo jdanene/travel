@@ -11,6 +11,7 @@ import { pins } from "./lib/pins";
 import { useTrip } from "../lib/useTrip";
 import type { Trip } from "../types/trip";
 import { lazy, Suspense, type ReactNode } from "react";
+import { CheckEventsLine, useEventCheck, type EventCheck } from "./CheckEvents";
 import { Home } from "./Home";
 import type { ModuleId } from "./lib/modules";
 
@@ -51,6 +52,8 @@ export function TripPage({ tripId }: { tripId: string }) {
 function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip; uid: string; offline: boolean }) {
   const crew = crewOf(trip, uid);
   const organizerLink = useOrganizerLink(tripId, uid, crew);
+  // The events check runs once a friend has joined; a friend who can't make it still sees the list.
+  const eventCheck = useEventCheck(tripId, trip, crew.member ? crew.memberId : null);
 
   return (
     <>
@@ -66,7 +69,7 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
             memberId={crew.memberId}
             organizer={crew.organizer}
             replied={repliedLine(crew.expected, crew.byId)}
-            content={(openModule) => moduleSlots(tripId, trip, crew, openModule)}
+            content={(openModule) => moduleSlots(tripId, trip, crew, eventCheck, openModule)}
           />
         </>
       )}
@@ -78,15 +81,16 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
  * What each module shows when open: one slot per module, so each module's
  * ticket plugs in here without touching the home page's layout.
  *
- * Inputs: the trip id, the trip, the crew view of this device, and a way
- * to open another module.
+ * Inputs: the trip id, the trip, the crew view of this device, the events
+ * check (its line sits under Parties for the organizer), and a way to open
+ * another module.
  * Output: the content for each module; null until its ticket fills it.
  * Examples (checked on screen): the Dates slot holds the Dates module.
  */
 /** The map loads on its first opening, so Leaflet stays out of the first page load. */
 const TripMap = lazy(() => import("../features/map/components/TripMap").then((module) => ({ default: module.TripMap })));
 
-function moduleSlots(tripId: string, trip: Trip, crew: CrewView, openModule: (id: ModuleId) => void): Record<ModuleId, ReactNode> {
+function moduleSlots(tripId: string, trip: Trip, crew: CrewView, eventCheck: EventCheck, openModule: (id: ModuleId) => void): Record<ModuleId, ReactNode> {
   return {
     dates: crew.memberId && (
       <DatesModule
@@ -110,7 +114,12 @@ function moduleSlots(tripId: string, trip: Trip, crew: CrewView, openModule: (id
         isOrganizer={crew.isOrganizer}
       />
     ), // Trip 9: the Stay module.
-    parties: <PartiesBlock tripId={tripId} trip={trip} memberId={crew.memberId} isOrganizer={crew.isOrganizer} onSeeMap={() => openModule("map")} />, // Trip 11: the Parties module.
+    parties: (
+      <>
+        <PartiesBlock tripId={tripId} trip={trip} memberId={crew.memberId} isOrganizer={crew.isOrganizer} onSeeMap={() => openModule("map")} />
+        {crew.isOrganizer && <CheckEventsLine check={eventCheck} lastAt={trip.parties?.lastCheck?.at} />}
+      </>
+    ), // Trip 11: the Parties module; the organizer's events check at its foot.
     links: crew.memberId && (
       <LinksModule
         tripId={tripId}

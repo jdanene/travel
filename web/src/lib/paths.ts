@@ -44,6 +44,9 @@ export const stayConfirmed = (tripId: string, destination: string) =>
 /** One show. */
 export const show = (tripId: string, showId: string) => `trips/${tripId}/parties/shows/${showId}`;
 
+/** When the events check last ran, and who claimed it. */
+export const lastCheck = (tripId: string) => `trips/${tripId}/parties/lastCheck`;
+
 /** Every "in" mark on one show; removed with the show. */
 export const showIn = (tripId: string, showId: string) => `trips/${tripId}/parties/in/${showId}`;
 

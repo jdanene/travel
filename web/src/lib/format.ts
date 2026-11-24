@@ -1,7 +1,8 @@
 /**
  * Every date format on the page, in one place, in the mock's style
  * ("Feb 2027", "Mon 22 Feb"). Days arrive as "YYYY-MM-DD" and are read as
- * calendar days, never as moments, so no time zone can move them.
+ * calendar days, never as moments, so no time zone can move them. The one
+ * moment, ago(), counts back from now.
  */
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -93,4 +94,20 @@ export function nights(from: string, to: string): number {
   const a = parts(from);
   const b = parts(to);
   return Math.round((Date.UTC(b.year, b.month, b.date) - Date.UTC(a.year, a.month, a.date)) / 86_400_000);
+}
+
+/**
+ * How long ago a moment was, in the short words of a status line.
+ * Inputs: at and now — milliseconds; at may be later than now (another
+ * phone's clock), which reads as just now.
+ * Output: "just now" under a minute, then "5 min ago", "3 h ago", "1 day ago", "4 days ago".
+ * Examples (checked on screen): ago(now - 3 * 3_600_000, now) → "3 h ago"
+ */
+export function ago(at: number, now: number): string {
+  const minutes = Math.floor((now - at) / 60_000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes} min ago`;
+  if (minutes < 24 * 60) return `${Math.floor(minutes / 60)} h ago`;
+  const days = Math.floor(minutes / (24 * 60));
+  return `${days} ${days === 1 ? "day" : "days"} ago`;
 }

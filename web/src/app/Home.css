@@ -22,3 +22,7 @@
   .fb-state span { max-width: 18rem; }
 }
 @media (min-width: 900px) { .map-wait { height: clamp(30rem, 62vh, 42rem); } }
+/* The organizer's events check at the foot of the Parties module: a quiet text button and its status. */
+.check-events { display: flex; flex-wrap: wrap; align-items: center; gap: 0 0.75rem; margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid var(--line); }
+.check-now { min-height: 2.75rem; color: var(--acc); font-size: 0.9375rem; font-weight: 700; }
+.check-now:disabled { opacity: .5; cursor: default; }

@@ -86,7 +86,8 @@ export interface Show {
   artist: string;
   link?: string;
   verified: boolean;
-  source: "seed" | "friend";
+  /** "check" is a show the events check found on the club's own page; nobody added it. */
+  source: "seed" | "friend" | "check";
   addedBy?: MemberId;
   at: number;
 }
@@ -102,6 +103,8 @@ export interface Parties {
   shows?: Record<string, Show>;
   lastYear?: Record<string, LastYearShow>;
   in?: Record<string, Record<MemberId, true>>;
+  /** When the events check last ran, and the member whose device claimed it. */
+  lastCheck?: { at: number; by: MemberId };
 }
 
 export interface LinkItem {
