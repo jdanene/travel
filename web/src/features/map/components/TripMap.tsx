@@ -1,9 +1,9 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Notice } from "../../../components/Notice";
 import type { Pin } from "../../../types/pin";
-import { fanOut } from "../lib/fan";
+import { groupByScreen } from "../lib/fan";
 import { PinCard } from "./PinCard";
 import "./TripMap.css";
 
@@ -37,11 +37,12 @@ interface TripMapProps {
  * The map: the one fancy thing in the app. A switch between the
  * destinations, OpenStreetMap tiles, a pin for each stay and venue, and a
  * card for the pin tapped. It draws the pins it is given and knows nothing
- * of stays or shows.
+ * of stays or shows. Pins whose labels would overlap at the current zoom
+ * show as one count pin ("3 pins") that lists them; zooming in splits it.
  *
  * Inputs: the destinations with their centres, the pins, and what a tap on
  * the card does.
- * Output: the map. Pins that share a spot fan out (case 35). Switching
+ * Output: the map. Pins that collide group (case 35). Switching
  * destination closes the card. A destination with no pins says "No pins
  * yet." When no tile has loaded after 8 seconds, a notice and a plain list
  * of the pins replace the map; the list opens the same cards (case 32).
@@ -51,12 +52,13 @@ interface TripMapProps {
 export function TripMap({ destinations, pins, onOpen }: TripMapProps) {
   const [destination, setDestination] = useState(destinations[0]?.id ?? "");
   const [selected, setSelected] = useState<string | null>(null);
+  const [group, setGroup] = useState<string[] | null>(null);
   const [tilesFailed, setTilesFailed] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const layer = useRef<L.LayerGroup | null>(null);
 
-  const here = useMemo(() => fanOut(pins.filter((pin) => pin.destination === destination)), [pins, destination]);
+  const here = useMemo(() => pins.filter((pin) => pin.destination === destination), [pins, destination]);
   const count = (id: string) => pins.filter((pin) => pin.destination === id).length;
   const chosen = here.find((pin) => pin.id === selected) ?? null;
   const centre = destinations.find((candidate) => candidate.id === destination);
@@ -80,30 +82,55 @@ export function TripMap({ destinations, pins, onOpen }: TripMapProps) {
 
   useEffect(() => {
     const current = map.current;
-    const group = layer.current;
-    if (!current || !group || !centre) return;
-    group.clearLayers();
-    for (const pin of here) {
-      const html = `<span class="mk${pin.kind === "stay" ? " stay" : ""}${pin.id === selected ? " on" : ""}"><i>${GLYPH[pin.kind]}</i>${escapeHtml(pin.name)}</span>`;
-      const icon = L.divIcon({ className: "", html, iconSize: [0, 0], iconAnchor: [0, -pin.shiftPx] });
-      L.marker([pin.lat, pin.lng], { icon, title: pin.name, keyboard: true })
-        .on("click", () => setSelected(pin.id))
-        .addTo(group);
-    }
-  }, [here, selected, centre]);
-
-  useEffect(() => {
-    const current = map.current;
     if (!current || !centre) return;
     if (here.length > 1) current.fitBounds(L.latLngBounds(here.map((pin) => [pin.lat, pin.lng])), { padding: [48, 48], maxZoom: 14 });
     else current.setView(here[0] ? [here[0].lat, here[0].lng] : [centre.lat, centre.lng], here.length ? 14 : 10);
     // Fit only when the destination or the number of pins changes, not when a pin is selected.
   }, [destination, here.length]);
 
+  /** Draws the pins at the current zoom: a pin alone as itself, colliding pins as one count pin. */
+  const draw = useCallback(() => {
+    const current = map.current;
+    const markers = layer.current;
+    if (!current || !markers) return;
+    markers.clearLayers();
+    const byId = new Map(here.map((pin) => [pin.id, pin]));
+    const points = here.map((pin) => ({ id: pin.id, ...current.latLngToContainerPoint([pin.lat, pin.lng]) }));
+    for (const found of groupByScreen(points)) {
+      const first = byId.get(found.ids[0])!;
+      const many = found.ids.length > 1;
+      const on = found.ids.includes(selected ?? "");
+      const label = many ? `${found.ids.length} pins` : escapeHtml(first.name);
+      const kind = many ? "venue" : first.kind;
+      const html = `<span class="mk${kind === "stay" ? " stay" : ""}${on ? " on" : ""}${many ? " many" : ""}"><i>${GLYPH[kind]}</i>${label}</span>`;
+      L.marker([first.lat, first.lng], { icon: L.divIcon({ className: "", html, iconSize: [0, 0] }), title: many ? found.ids.map((id) => byId.get(id)!.name).join(", ") : first.name, keyboard: true })
+        .on("click", () => {
+          if (many) setGroup(found.ids);
+          else {
+            setGroup(null);
+            setSelected(first.id);
+          }
+        })
+        .addTo(markers);
+    }
+  }, [here, selected]);
+
+  useEffect(() => {
+    const current = map.current;
+    if (!current) return;
+    draw();
+    current.on("zoomend", draw);
+    return () => {
+      current.off("zoomend", draw);
+    };
+  }, [draw, destination]);
+
   const choose = (id: string) => {
     setDestination(id);
     setSelected(null);
+    setGroup(null);
   };
+  const listed = group ? here.filter((pin) => group.includes(pin.id)) : [];
 
   return (
     <>
@@ -117,10 +144,10 @@ export function TripMap({ destinations, pins, onOpen }: TripMapProps) {
       {tilesFailed && <Notice>No connection</Notice>}
       <div className="map-box" ref={box} hidden={tilesFailed} aria-label={`Map of ${centre?.name ?? ""}`} />
       {here.length === 0 && <p className="sub" style={{ marginTop: 10 }}>No pins yet.</p>}
-      {tilesFailed && (
+      {(tilesFailed || listed.length > 0) && (
         <div className="pin-list">
-          {here.map((pin) => (
-            <button key={pin.id} type="button" onClick={() => setSelected(pin.id)}>
+          {(tilesFailed ? here : listed).map((pin) => (
+            <button key={pin.id} type="button" aria-pressed={pin.id === selected} onClick={() => setSelected(pin.id)}>
               {pin.name}
             </button>
           ))}

@@ -1,33 +1,33 @@
-import type { Pin } from "../../../types/pin";
+/** A pin's place on screen, in pixels from the map's top left. */
+export interface ScreenPoint {
+  id: string;
+  x: number;
+  y: number;
+}
 
-/** The height of one pin label plus a gap, in screen pixels. */
-export const FAN_STEP_PX = 34;
+/** How close two pin labels may sit before they count as one spot: about one label. */
+export const COLLIDE_PX = { x: 120, y: 30 };
 
 /**
- * Spreads pins that share one spot, so every pin can be tapped (case 35).
- * Many venues sit at their area's centre, because they are not on
- * OpenStreetMap, and stays always do. The labels stack in a column centred
- * on the spot, a fixed number of pixels apart, so they stay apart at any
- * zoom; a shift in degrees would vanish when the map shows a whole island.
+ * Groups pins whose labels would overlap on screen at the current zoom, so
+ * every pin can be reached (case 35): a group shows as one count pin that
+ * opens a short list, and zooming in splits it. Pins that share one spot
+ * (venues at their area's centre, every stay) always group.
  *
- * Inputs: pins — any list; spots match to five decimals (about 1 m).
- * Output: the same pins in the same order, each with `shiftPx`, its
- * vertical shift on screen: 0 for a pin alone.
+ * Inputs: points — each pin's screen position at the current zoom, in the
+ * order the pins should list.
+ * Output: groups of pin ids, each with the screen point of its first pin;
+ * a group of one is a pin drawn as itself.
  * Examples (checked on the map):
- *   one pin                → shiftPx 0
- *   three pins on Ban Tai  → shiftPx -34, 0 and 34
+ *   Atlas, Desa Kitsuné and Potato Head at island zoom → one group of three
+ *   the same three zoomed in to Canggu                 → three groups of one
  */
-export function fanOut(pins: Pin[]): Array<Pin & { shiftPx: number }> {
-  const groups = new Map<string, number[]>();
-  pins.forEach((pin, index) => {
-    const key = `${pin.lat.toFixed(5)},${pin.lng.toFixed(5)}`;
-    groups.set(key, [...(groups.get(key) ?? []), index]);
-  });
-  const spread = pins.map((pin) => ({ ...pin, shiftPx: 0 }));
-  for (const members of groups.values()) {
-    members.forEach((index, i) => {
-      spread[index].shiftPx = (i - (members.length - 1) / 2) * FAN_STEP_PX;
-    });
+export function groupByScreen(points: ScreenPoint[]): Array<{ ids: string[]; x: number; y: number }> {
+  const groups: Array<{ ids: string[]; x: number; y: number }> = [];
+  for (const point of points) {
+    const near = groups.find((group) => Math.abs(group.x - point.x) < COLLIDE_PX.x && Math.abs(group.y - point.y) < COLLIDE_PX.y);
+    if (near) near.ids.push(point.id);
+    else groups.push({ ids: [point.id], x: point.x, y: point.y });
   }
-  return spread;
+  return groups;
 }

@@ -6,7 +6,8 @@
 .fb-name { display: flex; gap: 10px; align-items: center; }
 .fb-name b { font-size: 18px; }
 .fb-state { font-size: 14px; color: var(--mut); text-align: right; }
-.fb-state span { display: block; }
+.fb-state { min-width: 0; }
+.fb-state span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 210px; margin-left: auto; }
 .fb-head .close { color: #8e8e93; }
 .fb-body { padding: 0 18px 16px; }
 .all-set { margin-top: 6px; font-weight: 700; color: var(--acc); }
