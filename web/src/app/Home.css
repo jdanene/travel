@@ -1,7 +1,6 @@
 /* Screen 12/2: the module buttons (.fb), equal in size, opening in place (12/3). */
 .modules { padding-top: 1.25rem; }
-.fb { border-radius: 1.125rem; background: #fff; border: 2px solid var(--edge); box-shadow: var(--pop); margin-bottom: 0.75rem; }
-.fb.open { box-shadow: 4px 4px 0 var(--edge); }
+.fb { border-radius: 1.125rem; background: #fff; border: 2px solid var(--edge); margin-bottom: 0.75rem; }
 .fb-head { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; width: 100%; padding: 1rem 1.125rem; text-align: left; border-radius: 1.125rem; }
 .fb-name { display: flex; gap: 0.625rem; align-items: center; }
 .fb-name b { font-size: 1.125rem; }
@@ -10,7 +9,7 @@
 .fb-state span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 13.125rem; margin-left: auto; }
 .fb-head .close { color: #8e8e93; }
 .fb-body { padding: 0 1.125rem 1rem; }
-.all-set { margin-top: 0.375rem; font-weight: 700; color: var(--acc-ink); }
+.all-set { margin-top: 0.375rem; font-weight: 700; color: var(--acc); }
 .map-wait { height: 22.5rem; border-radius: 1rem; background: #e8eef0; }
 /* An opened module scrolls to the top of the window with a little air above it. */
 .fb { scroll-margin-top: 0.75rem; }

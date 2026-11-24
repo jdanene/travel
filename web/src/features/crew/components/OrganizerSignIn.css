@@ -1,6 +1,6 @@
 /* "Organizer sign-in": the last thing on the page, small and grey, so friends read past it. */
 .organizer-foot { margin-top: 2.5rem; text-align: center; }
-.organizer-link { min-height: 2.75rem; padding: 0 0.75rem; font-size: 0.8125rem; color: var(--mut); text-decoration: underline; text-underline-offset: 0.25em; }
-.organizer-link:hover { color: var(--ink2); }
+.organizer-link { min-height: 2.75rem; padding: 0 0.75rem; font-size: 0.8125rem; color: var(--on-page-mut); text-decoration: underline; text-underline-offset: 0.25em; }
+.organizer-link:hover { color: var(--on-page); }
 .organizer-link:disabled { cursor: progress; opacity: .6; }
 .organizer-foot .notice { text-align: left; }

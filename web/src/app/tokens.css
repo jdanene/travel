@@ -15,16 +15,17 @@ html { font-size: clamp(1rem, 0.83rem + 0.3vw, 1.1875rem); }
   --acc-soft: #fff4c7;
   --pink: #ff3cac;
   --edge: #000;
-  --pop: 3px 3px 0 var(--edge);
-  --pop-sm: 2px 2px 0 var(--edge);
   --ink: #1c1c1e;
   --ink2: #3a3a3c;
   --mut: #6e6e73;
   --line: #ececee;
   --soft: #f5f5f4;
   --bg: #fff;
-  --page: #f4f3f0;
-  --paper: #faf7f2; /* design 12: the flyer's page */
+  /* The page behind the cards: charcoal (owner, 24 Nov 2026). Change the page here, with its text and shadow. */
+  --page: #23211f;
+  --on-page: #f4f1ea;
+  --on-page-mut: #c9c3b8;
+  --paper: var(--page);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -46,7 +47,7 @@ svg.i { width: 1.375rem; height: 1.375rem; fill: none; stroke: currentColor; str
 
 /* the page frame: one phone-wide column; on a phone it fills the screen.
    From 900 px up it is a centred page of up to 1200 px (exception 9). */
-.frame { max-width: 40rem; min-height: 100vh; min-height: 100dvh; margin: 0 auto; background: var(--paper); padding: 0 1.25rem 2.5rem; }
+.frame { color: var(--on-page); max-width: 40rem; min-height: 100vh; min-height: 100dvh; margin: 0 auto; background: var(--paper); padding: 0 1.25rem 2.5rem; }
 @media (min-width: 900px) {
   body { background: var(--paper); }
   .frame { max-width: calc(1200px + 2 * clamp(2rem, 4vw, 4rem)); padding: clamp(1.5rem, 3vw, 3rem) clamp(2rem, 4vw, 4rem) 4rem; }
@@ -64,19 +65,17 @@ svg.i { width: 1.375rem; height: 1.375rem; fill: none; stroke: currentColor; str
 .seg3 button { height: 2.625rem; border-radius: 0.75rem; display: grid; place-items: center; font-size: 0.9375rem; font-weight: 600; background: #fff; }
 .seg3 button[aria-pressed="true"] { background: var(--acc); color: var(--on-acc); }
 
-/* The hype sound button's look (public/assets/hype.css .snd) on every button: a black outline and a hard
-   black shadow that the button presses into on tap. Main buttons and anything selected are yellow; the
-   rest are white with a smaller shadow. Features add their own buttons to these two lists. */
-.btn, .seg3 button, .pill, .inbtn, .heart, .check-now {
-  border: 2.5px solid var(--edge); box-shadow: var(--pop-sm);
-  transition: transform .08s ease-out, box-shadow .08s ease-out, background-color .15s ease-out;
-}
+/* The hype buttons, flat (owner, 24 Nov 2026): a black outline, no shadow. Main buttons and anything selected
+   are yellow; the rest are white. Features add their own buttons to these two lists. */
+.btn, .seg3 button, .pill, .inbtn, .heart, .check-now { color: var(--ink); border: 2.5px solid var(--edge); box-shadow: none; transition: background-color .15s ease-out; }
 .btn:not(.sec), .seg3 button[aria-pressed="true"], .seg3 button.main, .pill[aria-pressed="true"], .inbtn[aria-pressed="true"], .heart[aria-pressed="true"], .check-now {
-  background: var(--acc); color: var(--on-acc); box-shadow: var(--pop);
-}
-.btn:not(:disabled):active, .seg3 button:active, .pill:active, .inbtn:active, .heart:active, .check-now:not(:disabled):active {
-  transform: translate(2px, 2px); box-shadow: 0 0 0 var(--edge);
+  background: var(--acc); color: var(--on-acc);
 }
 @media (prefers-reduced-motion: reduce) {
   .btn, .seg3 button, .pill, .inbtn, .heart, .check-now { transition: none; }
 }
+
+/* Cards and sheets keep the light look on the dark page; text directly on the page is light. */
+.fb, .sheet, .notice { color: var(--ink); }
+.flyer .cap, .flyer .sub, .invite-reply .cap { color: var(--on-page-mut); }
+.flyer :focus-visible, .invite-reply :focus-visible, .organizer-foot :focus-visible { outline-color: var(--acc); }

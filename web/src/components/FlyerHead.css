@@ -18,12 +18,12 @@
 
 /* The title block, in the hype page's type (public/assets/hype.css, .title and .dest): the trip's name in
    Anton with a white fill, a black outline and a hard shadow, slightly tilted; under it the countries and
-   the months in the pink script. The script has a dark outline, so it reads on the light page. */
+   the months in the pink script. On the charcoal page the script needs no outline. */
 .flyer-title { display: flex; flex-direction: column; align-items: center; gap: 0.375rem; margin-top: 0.625rem; font-weight: 400; }
 .flyer-trip { font: 400 min(2.625rem, 10.4vw)/1.05 Anton, "Plus Jakarta Sans", sans-serif; letter-spacing: .01em; white-space: nowrap;
   color: #fff; -webkit-text-stroke: .11em #000; paint-order: stroke fill; text-shadow: .06em .075em 0 #000; transform: rotate(-3deg); padding: 0 .1em; }
 .flyer-where { display: flex; flex-wrap: wrap; justify-content: center; column-gap: 0; font: 400 1.4375rem/1.2 Yellowtail, cursive; color: #ffe3f4;
-  -webkit-text-stroke: .14em #2b0a20; paint-order: stroke fill; text-shadow: 0 0 .35em #ff3cac99; }
+  text-shadow: 0 0 .35em #ff3cac99; }
 .flyer-where > span { white-space: pre; }
 
 /* Desktop: the photo is a rounded picture in its column, not a full-bleed band. */

@@ -1,15 +1,15 @@
 /* Screen 12/1: the note under the date line, the buttons, the replied line. */
-.invite-note { font-size: 1rem; color: var(--ink2); margin: 0.75rem 1.5rem 1.125rem; text-wrap: pretty; }
+.invite-note { font-size: 1rem; color: var(--on-page); margin: 0.75rem 1.5rem 1.125rem; text-wrap: pretty; }
 .invite-reply .seg3 button { height: 3.25rem; }
 /* "I'm in" is the main button (the mock's .on), yellow in tokens.css; "Maybe" and "Can't" stay white until chosen. */
 .invite-reply .cap { text-align: center; margin-top: 0.75rem; }
 /* "Been here before?": a quiet row well below the buttons, so it never reads as a fourth reply. */
-.invite-back { margin: 1.75rem 0 0; padding-top: 1.25rem; border-top: 1px solid var(--line); }
-.invite-back p { margin: 0 0 0.625rem; font-size: 0.875rem; font-weight: 600; color: var(--ink2); text-align: center; }
+.invite-back { margin: 1.75rem 0 0; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.14); }
+.invite-back p { margin: 0 0 0.625rem; font-size: 0.875rem; font-weight: 600; color: var(--on-page); text-align: center; }
 .invite-back ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.25rem 0.5rem; }
-.invite-back button { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; min-width: 3.5rem; min-height: 2.75rem; padding: 0.375rem 0.25rem; border: 0; border-radius: 0.75rem; background: none; color: var(--ink); font: inherit; font-size: 0.8125rem; cursor: pointer; }
-.invite-back button:hover { background: var(--soft); }
-.invite-back button:focus-visible { outline: 2px solid var(--edge); outline-offset: 2px; }
+.invite-back button { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; min-width: 3.5rem; min-height: 2.75rem; padding: 0.375rem 0.25rem; border: 0; border-radius: 0.75rem; background: none; color: var(--on-page); font: inherit; font-size: 0.8125rem; cursor: pointer; }
+.invite-back button:hover { background: rgba(255, 255, 255, 0.08); }
+.invite-back button:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
 .invite-back .av { width: 2.5rem; height: 2.5rem; font-size: 0.8125rem; }
 .invite-back span:last-child { max-width: 5.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 

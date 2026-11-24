@@ -273,11 +273,11 @@ window.HYPE = (() => {
     warm(to);
   }
 
-  // Readies the trip app while the splash plays, so the tap finds it cached: the smoke's stylesheet, the trip's
-  // page and the app's script and stylesheet (their built names read from /app/index.html) as prefetches, which
+  // Readies the trip app while the splash plays, so the tap finds it cached: the smoke's stylesheet, the app's
+  // script and stylesheet (their built names read from /app/index.html) as prefetches, which
   // the browser keeps for the next page even under "no-cache", and early connections to Firebase.
   // Inputs: to — the trip's path. Output: nothing; every failure is silent, and the tap then loads the app as before.
-  // Examples (checked in Chrome on the emulator): the splash with ?t=<id> → rel=prefetch for /trip/<id>,
+  // Examples (checked in Chrome on the emulator): the splash with ?t=<id> → rel=prefetch for
   //   /app/assets/index-<hash>.js and its CSS, three preconnects.
   function warm(to) {
     const link = (rel, href, extra) => {
@@ -287,7 +287,6 @@ window.HYPE = (() => {
       document.head.appendChild(l);
     };
     link("stylesheet", "/assets/smoke.css");
-    link("prefetch", to);
     ["https://travel-ca8f9-default-rtdb.firebaseio.com", "https://identitytoolkit.googleapis.com", "https://www.googleapis.com"]
       .forEach(host => link("preconnect", host, { crossOrigin: "anonymous" }));
     fetch("/app/index.html").then(r => (r.ok ? r.text() : "")).then(html => {
