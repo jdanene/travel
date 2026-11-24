@@ -177,3 +177,23 @@ function cut(text) {
 function withoutEmpty(record) {
   return Object.fromEntries(Object.entries(record).filter(([, v]) => v !== undefined && v !== ""));
 }
+
+const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+// The calendar day a text names: "2027-02-13T22:00", "Feb 13, 2027",
+// "february-13-2027", "February 22nd 2027" or "13 February 2027" all give
+// "2027-02-13". null for no day, or a day that does not exist (30
+// February). Shared with events.mjs and event-lists.mjs.
+export function dayOf(text) {
+  let year, month, day;
+  const iso = text.match(/(\d{4})-(\d{2})-(\d{2})/);
+  const monthFirst = text.match(/\b([a-z]{3})[a-z]*\.?[\s,-]+(\d{1,2})(?:st|nd|rd|th)?[\s,-]+(\d{4})\b/i);
+  const dayFirst = text.match(/\b(\d{1,2})(?:st|nd|rd|th)?[\s-]+([a-z]{3})[a-z]*\.?[\s,-]+(\d{4})\b/i);
+  if (iso) [, year, month, day] = iso.map(Number);
+  else if (monthFirst) [year, month, day] = [Number(monthFirst[3]), MONTHS.indexOf(monthFirst[1].toLowerCase()) + 1, Number(monthFirst[2])];
+  else if (dayFirst) [year, month, day] = [Number(dayFirst[3]), MONTHS.indexOf(dayFirst[2].toLowerCase()) + 1, Number(dayFirst[1])];
+  else return null;
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (month < 1 || date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return null;
+  return date.toISOString().slice(0, 10);
+}

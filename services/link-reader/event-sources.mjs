@@ -6,17 +6,13 @@
 // its destination and area, the page that lists its events, and, when the
 // events sit one to a page, the shape of a link to such a page.
 //
-// Checked from a Mac on 23 Nov 2026, each club's own events page. Only a
-// page that publishes schema.org Event data can be read, so only Savaya,
-// Illuzion Phuket and Zouk are listed. The rest, with the reason, are in
-// README.md: in Bali and Koh Phangan, Atlas Beach Club, Atlas Super Club,
-// Klymax, Potato Head, Desa Kitsuné, Café del Mar Bali, Single Fin, the
-// Full Moon Party, the Half Moon Festival, Jungle Experience, Waterfall
-// Party, Hidden Paradise and Lost Jungle; in Phuket, Café del Mar Phuket,
-// Maya Beach Club, XANA Beach Club, Yona Beach Club, Armania Phuket and
-// Baba Beach Club; in Singapore, Marquee and CÉ LA VI.
+// A club whose page carries schema.org Event data needs no more. A club
+// that lists its nights as plain text names its reader in event-lists.mjs
+// (list). Checked from a Mac on 23 Nov 2026; README.md lists every club in
+// data/places.json, what its page showed, and why a club is not read.
 
 import { plainHttps } from "./sites.mjs";
+import { readCafeDelMarBali, readCafeDelMarPhuket, readCeLaVi, readDesaKitsune, readFullMoonParty, readKlymax, readMarquee, readPotatoHead } from "./event-lists.mjs";
 
 export const SOURCES = [
   {
@@ -43,6 +39,25 @@ export const SOURCES = [
     // February or March act shows up about a week before it plays.
     url: "https://zoukgroup.com/singapore/events/",
   },
+  { venue: "Café del Mar Phuket", destination: "phuket", area: "Kamala", url: "https://phuket.cafedelmar.com/events", list: readCafeDelMarPhuket },
+  // The home page's highlights; sg.celavi.com/events answers 404.
+  { venue: "CÉ LA VI", destination: "singapore", area: "Marina Bay", url: "https://sg.celavi.com/", list: readCeLaVi },
+  // One night only, the coming one.
+  { venue: "Klymax", destination: "bali", area: "Seminyak", url: "https://klymax.co/", list: readKlymax },
+  { venue: "Café del Mar Bali", destination: "bali", area: "Canggu", url: "https://www.cafedelmarbali.co.id/whats-on", list: readCafeDelMarBali },
+  { venue: "Desa Kitsuné", destination: "bali", area: "Canggu", url: "https://desakitsune.com/events", list: readDesaKitsune },
+  // The feed its "What's on" page loads, music only: from today to six months ahead.
+  { venue: "Potato Head", destination: "bali", area: "Seminyak", url: "https://seminyak.potatohead.co/api/cached/experiences?type=Event&categories=music", list: readPotatoHead },
+  // The feed its events page loads, for nights from 1 Feb 2027 (00:00 in Singapore) on.
+  {
+    venue: "Marquee",
+    destination: "singapore",
+    area: "Marina Bay",
+    url: "https://taogroup.com/wp-json/wp/v2/events?event_venue%5B%5D=824&filter%5Bmeta_key%5D=event_start_date&filter%5Bmeta_compare%5D=%3E%3D&filter%5Bmeta_value%5D=1801411200000&filter%5Borderby%5D=meta_value&filter%5Border%5D=asc&per_page=60&_fields=link,acf.event_title,acf.event_start_date",
+    list: readMarquee,
+  },
+  // The party's schedule site; the seed names the venue Haad Rin Beach.
+  { venue: "Haad Rin Beach", destination: "kohPhangan", area: "Haad Rin", url: "https://fullmoonparty-thailand.com/schedules/", list: readFullMoonParty },
 ];
 
 /**

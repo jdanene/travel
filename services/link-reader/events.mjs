@@ -1,12 +1,13 @@
 // The events check: reads the clubs' own event pages (event-sources.mjs)
-// and returns the events dated inside the trip's season. It reads only the
-// schema.org Event data a page publishes for search engines; it does not
-// guess at page layouts, and it calls no AI model. It stores nothing: the
-// app writes what it returns (the function has no database access).
+// and returns the events dated inside the trip's season. It reads a page's
+// schema.org Event data, and, for a club that lists its nights as text or in
+// a feed, that club's reader (event-lists.mjs). It calls no AI model. It
+// stores nothing: the app writes what it returns (the function has no
+// database access).
 
 import { fetchPage } from "./fetch-page.mjs";
 import { SOURCES, onSourceSite } from "./event-sources.mjs";
-import { clean, decodeEntities } from "./parse.mjs";
+import { clean, dayOf, decodeEntities } from "./parse.mjs";
 
 /** The trip's season; database.rules.json allows show dates in it and no others. */
 const SEASON = { from: "2027-02-01", to: "2027-03-31" };
@@ -19,10 +20,9 @@ const MAX_PAGES_PER_SOURCE = 62;
 const START_PAGES_FOR_MS = 10_000;
 /** A name a club gives a night before it names the act. */
 const PLACEHOLDER = /^(?:(?:special|secret|mystery|surprise) guests?|tba|tbc|to be (?:announced|confirmed))$/i;
-/** A name on this many nights of one club is a series (a house night, a sunset session), not an act. */
+/** A name on this many nights of one club in the season is a series (a house night, a sunset session), not an act. */
 const SERIES_NIGHTS = 3;
 
-const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
 
 /**
  * Checks every source once and returns the acts it announces for February
@@ -38,11 +38,12 @@ const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "
  *              artist is the club's name for the night, and link is the
  *              https page the event came from. A night named "Special
  *              guest" or "TBA", or a name the club gives three or more
- *              nights, is left out: it is not an act.
+ *              nights in the season, is left out: it is not an act.
  *   failed     [{ venue, reason }], one entry per source that failed, with
  *              the reader's reasons ("not_allowed", "unreadable",
  *              "timeout"). "unreadable" also means the page lists no event
- *              and links to none. Events read before a failure are kept.
+ *              and links to none, or its list reader does not recognise it
+ *              (event-lists.mjs); a feed that lists nothing is no failure. Events read before a failure are kept.
  *
  * Examples (run from a Mac against the live pages on 23 Nov 2026; the
  * offline version is a test in events.test.mjs):
@@ -66,10 +67,11 @@ export async function checkEvents(sources = SOURCES) {
   await eachAtMost(AT_ONCE, sources, async (source) => {
     const page = await open(source, source.url);
     if (!page.ok) return fail(source, page.reason);
-    const events = readEvents(page.text);
+    const listed = source.list ? source.list(page.text, page.url, checkedAt) : null;
+    const events = [...readEvents(page.text), ...(listed ?? [])];
     const links = eventLinks(page.text, page.url, source);
-    if (!events.length && !links.length) return fail(source, "unreadable");
-    found.push(...events.map((event) => ({ source, event, link: page.url })));
+    if (!events.length && !links.length && !listed) return fail(source, "unreadable");
+    found.push(...events.map((event) => ({ source, event, link: event.link ?? page.url })));
     for (const link of links.filter((url) => inSeason(dayOf(new URL(url).pathname) ?? SEASON.from)).slice(0, MAX_PAGES_PER_SOURCE)) {
       pages.push({ source, link });
     }
@@ -155,6 +157,7 @@ function eventLinks(html, pageUrl, source) {
 function actsInSeason(found) {
   const nights = new Map();
   for (const { source, event } of found) {
+    if (!inSeason(event.date)) continue;
     const key = `${source.venue}|${event.name.toLowerCase()}`;
     nights.set(key, (nights.get(key) ?? new Set()).add(event.date));
   }
@@ -173,23 +176,6 @@ function actsInSeason(found) {
 
 function inSeason(day) {
   return day >= SEASON.from && day <= SEASON.to;
-}
-
-// The calendar day a text names: "2027-02-13T22:00", "Feb 13, 2027",
-// "february-13-2027" or "13 February 2027" all give "2027-02-13". null for
-// no day, or a day that does not exist (30 February).
-function dayOf(text) {
-  let year, month, day;
-  const iso = text.match(/(\d{4})-(\d{2})-(\d{2})/);
-  const monthFirst = text.match(/\b([a-z]{3})[a-z]*\.?[\s,-]+(\d{1,2})(?:st|nd|rd|th)?[\s,-]+(\d{4})\b/i);
-  const dayFirst = text.match(/\b(\d{1,2})(?:st|nd|rd|th)?[\s-]+([a-z]{3})[a-z]*\.?[\s,-]+(\d{4})\b/i);
-  if (iso) [, year, month, day] = iso.map(Number);
-  else if (monthFirst) [year, month, day] = [Number(monthFirst[3]), MONTHS.indexOf(monthFirst[1].toLowerCase()) + 1, Number(monthFirst[2])];
-  else if (dayFirst) [year, month, day] = [Number(dayFirst[3]), MONTHS.indexOf(dayFirst[2].toLowerCase()) + 1, Number(dayFirst[1])];
-  else return null;
-  const date = new Date(Date.UTC(year, month - 1, day));
-  if (month < 1 || date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return null;
-  return date.toISOString().slice(0, 10);
 }
 
 // Runs task over items with at most limit running at once.

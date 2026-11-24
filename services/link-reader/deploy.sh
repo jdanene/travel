@@ -38,7 +38,7 @@ if ! account=$(aws_ sts get-caller-identity --query Account --output text 2>/dev
 fi
 
 zip_file=$(mktemp -d)/link-reader.zip
-step "package the code" zip -q -j "$zip_file" handler.mjs fetch-page.mjs parse.mjs sites.mjs events.mjs event-sources.mjs
+step "package the code" zip -q -j "$zip_file" handler.mjs fetch-page.mjs parse.mjs sites.mjs events.mjs event-sources.mjs event-lists.mjs
 
 # The role lets the function write its own logs and nothing else.
 if ! aws_ iam get-role --role-name "$NAME" >/dev/null 2>&1; then
