@@ -1,10 +1,11 @@
 /**
- * The days an event may fall on: the last week of January to the end of
- * March 2027 (owner, 24 Nov 2026: "add the last week of Jan, which has
- * Zamna in one of our locations"). It is wider than the trip's season,
- * which the date poll keeps at 1 Feb to 31 Mar. database.rules.json
- * (parties/shows/date) and services/link-reader/events.mjs fix the same
- * days; change all three together.
+ * The days the automatic events check looks for, and where last year's
+ * lines show: the last week of January to the end of March 2027 (owner,
+ * 24 Nov 2026: "add the last week of Jan, which has Zamna in one of our
+ * locations"). A friend may add an event on any day (owner, 24 Nov 2026:
+ * "don't restrict the calendar"), so neither the Add an event sheet nor
+ * database.rules.json uses it. services/link-reader/events.mjs fixes the
+ * same days for the check; change both together.
  */
 export const EVENTS_WINDOW = { from: "2027-01-25", to: "2027-03-31" } as const;
 

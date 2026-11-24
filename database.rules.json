@@ -65,10 +65,10 @@
             "$optionId": {
               /* A friend adds an option under its member, never over one that exists; the adder or an organizer removes one that is not confirmed. The page offers Remove only while nobody else has voted on it. */
               ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() !== null && ((!data.exists() && newData.child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val()) || (data.exists() && !newData.exists() && (data.child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true) && root.child('trips').child($tripId).child('dates').child('confirmed').child('optionId').val() !== $optionId))",
-              /* The season is fixed: 1 Feb to 31 Mar 2027 (owner). The id is the two days, so one range is one option. */
+              /* Any two real days, From first (owner, 24 Nov 2026: "don't restrict the calendar"). The id is the two days, so one range is one option. */
               ".validate": "newData.hasChildren(['from', 'to', 'addedBy', 'at']) && newData.child('from').val() <= newData.child('to').val() && $optionId === newData.child('from').val() + '_' + newData.child('to').val()",
-              "from": { ".validate": "newData.isString() && newData.val().matches(/^2027-(02-(0[1-9]|1[0-9]|2[0-8])|03-(0[1-9]|[12][0-9]|3[01]))$/)" },
-              "to": { ".validate": "newData.isString() && newData.val().matches(/^2027-(02-(0[1-9]|1[0-9]|2[0-8])|03-(0[1-9]|[12][0-9]|3[01]))$/)" },
+              "from": { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/)" },
+              "to": { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/)" },
               "addedBy": { ".validate": "newData.isString() && newData.val().length <= 40" },
               "at": { ".validate": "newData.isNumber()" },
               "$other": { ".validate": false }
@@ -255,8 +255,8 @@
               "destination": { ".validate": "newData.isString()" },
               "venue": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60" },
               "area": { ".validate": "newData.isString() && newData.val().length <= 60" },
-              /* Events run 25 Jan to 31 Mar 2027 (owner: the last week of January has Zamna); the date poll keeps 1 Feb to 31 Mar. */
-              "date": { ".validate": "newData.isString() && newData.val().matches(/^2027-(01-(2[5-9]|3[01])|0[23]-[0-3][0-9])$/)" },
+              /* Any day of any month and year (owner, 24 Nov 2026: "don't restrict the calendar"). */
+              "date": { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/)" },
               "weekly": { ".validate": "newData.isString() && newData.val().matches(/^(mon|tue|wed|thu|fri|sat|sun)$/)" },
               "artist": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200" },
               "about": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200" },

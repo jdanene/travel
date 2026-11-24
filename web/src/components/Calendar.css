@@ -1,0 +1,26 @@
+/* The shared calendar: a month grid in the sheets' skin. White ground, black for the picked day, soft grey between a range's ends. */
+.cal { border-radius: 1rem; box-shadow: inset 0 0 0 1px var(--line); padding: 0.5rem 0.5rem 0.625rem; margin: -0.25rem 0 0.75rem; background: #fff; }
+.cal-head { display: flex; align-items: center; justify-content: space-between; padding: 0 0 0.25rem; }
+.cal-head b { font-size: 1rem; font-weight: 700; letter-spacing: -.01em; }
+.cal-step { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: 50%; color: var(--ink); }
+@media (hover: hover) { .cal-step:hover { background: var(--soft); } }
+.cal-grid { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.cal-grid th { padding: 0.25rem 0; font-size: 0.75rem; font-weight: 600; color: var(--mut); text-align: center; }
+.cal-grid td { padding: 0.125rem 0; text-align: center; }
+.cal-grid td.in { background: var(--soft); }
+.cal-grid td.start { border-radius: 1.375rem 0 0 1.375rem; }
+.cal-grid td.end { border-radius: 0 1.375rem 1.375rem 0; }
+.cal-grid button { width: 2.75rem; max-width: 100%; height: 2.75rem; border-radius: 50%; font-size: 0.9375rem; font-variant-numeric: tabular-nums; color: var(--ink); transition: background-color .15s ease-out; }
+@media (hover: hover) { .cal-grid button:hover:not([aria-pressed="true"]) { background: var(--acc-soft); } }
+.cal-grid button[aria-pressed="true"] { background: var(--acc); color: var(--on-acc); font-weight: 700; }
+.cal-grid button:focus-visible { outline: 2px solid var(--edge); outline-offset: 1px; }
+@media (prefers-reduced-motion: reduce) { .cal-grid button { transition: none; } }
+
+/* The field that opens it: the sheets' .field, as a button. */
+.date-button { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 0.5rem; width: 100%; text-align: left; }
+.date-button small, .date-button span { grid-column: 1; }
+.date-button span { font-size: 1rem; min-height: 1.5rem; font-variant-numeric: tabular-nums; }
+.date-button .date-empty { color: var(--mut); }
+.date-button svg.i { grid-row: 1 / span 2; grid-column: 2; color: var(--mut); }
+.date-button[aria-expanded="true"] { box-shadow: inset 0 0 0 2px var(--edge); }
+.date-button[aria-invalid="true"] { box-shadow: inset 0 0 0 2px #b42318; }
