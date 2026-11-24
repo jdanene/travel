@@ -7,10 +7,11 @@ import { StayModule } from "../features/stay/components/StayModule";
 import { LinksModule } from "../features/links/components/LinksModule";
 import type { MapDestination } from "../features/map/components/TripMap";
 import { PartiesBlock } from "../features/parties/components/PartiesBlock";
+import type { MapPlace } from "../features/parties/lib/detail";
 import { pins } from "./lib/pins";
 import { useTrip } from "../lib/useTrip";
 import type { Trip } from "../types/trip";
-import { lazy, Suspense, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { Home } from "./Home";
 import type { ModuleId } from "./lib/modules";
 
@@ -51,6 +52,9 @@ export function TripPage({ tripId }: { tripId: string }) {
 function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip; uid: string; offline: boolean }) {
   const crew = crewOf(trip, uid);
   const organizerLink = useOrganizerLink(tripId, uid, crew);
+  // The pin the show sheet's "See on the map" asked for. The map reads it once, as it mounts; FocusedMap
+  // clears it then, so a later tap on the Map button opens the map as it was.
+  const [mapFocus, setMapFocus] = useState<string | null>(null);
 
   return (
     <>
@@ -66,7 +70,12 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
             memberId={crew.memberId}
             organizer={crew.organizer}
             replied={repliedLine(crew.expected, crew.byId)}
-            content={(openModule) => moduleSlots(tripId, trip, crew, openModule)}
+            content={(openModule) =>
+              moduleSlots(tripId, trip, crew, openModule, { pin: mapFocus, clear: () => setMapFocus(null) }, (place) => {
+                setMapFocus(place ? `${place.kind}:${place.id}` : null);
+                openModule("map");
+              })
+            }
           />
         </>
       )}
@@ -78,15 +87,23 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
  * What each module shows when open: one slot per module, so each module's
  * ticket plugs in here without touching the home page's layout.
  *
- * Inputs: the trip id, the trip, the crew view of this device, and a way
- * to open another module.
+ * Inputs: the trip id, the trip, the crew view of this device, a way
+ * to open another module, the pin the map should open on, and a way to
+ * open the map (on one place, or as it was).
  * Output: the content for each module; null until its ticket fills it.
  * Examples (checked on screen): the Dates slot holds the Dates module.
  */
 /** The map loads on its first opening, so Leaflet stays out of the first page load. */
 const TripMap = lazy(() => import("../features/map/components/TripMap").then((module) => ({ default: module.TripMap })));
 
-function moduleSlots(tripId: string, trip: Trip, crew: CrewView, openModule: (id: ModuleId) => void): Record<ModuleId, ReactNode> {
+function moduleSlots(
+  tripId: string,
+  trip: Trip,
+  crew: CrewView,
+  openModule: (id: ModuleId) => void,
+  mapFocus: { pin: string | null; clear: () => void },
+  seeMap: (place?: MapPlace) => void,
+): Record<ModuleId, ReactNode> {
   return {
     dates: crew.memberId && (
       <DatesModule
@@ -110,7 +127,7 @@ function moduleSlots(tripId: string, trip: Trip, crew: CrewView, openModule: (id
         isOrganizer={crew.isOrganizer}
       />
     ), // Trip 9: the Stay module.
-    parties: <PartiesBlock tripId={tripId} trip={trip} memberId={crew.memberId} isOrganizer={crew.isOrganizer} onSeeMap={() => openModule("map")} />, // Trip 11: the Parties module.
+    parties: <PartiesBlock tripId={tripId} trip={trip} memberId={crew.memberId} isOrganizer={crew.isOrganizer} onSeeMap={seeMap} />, // Trip 11: the Events module (code: parties). A show's sheet opens the map on its venue.
     links: crew.memberId && (
       <LinksModule
         tripId={tripId}
@@ -123,14 +140,34 @@ function moduleSlots(tripId: string, trip: Trip, crew: CrewView, openModule: (id
     ), // Trip 16: the Links module.
     map: (
       <Suspense fallback={<div className="map-wait" aria-busy="true" />}>
-        <TripMap
-          destinations={mapDestinations(trip)}
-          pins={pins(trip)}
-          onOpen={(pin) => openModule(pin.kind === "stay" ? "stay" : "parties")}
-        />
+        <FocusedMap focus={mapFocus}>
+          <TripMap
+            destinations={mapDestinations(trip)}
+            pins={pins(trip)}
+            focus={mapFocus.pin ?? undefined}
+            onOpen={(pin) => openModule(pin.kind === "stay" ? "stay" : "parties")}
+          />
+        </FocusedMap>
       </Suspense>
     ), // Trip 12: the Map module. A stay card opens Stay; a venue card opens Parties.
   };
+}
+
+/**
+ * Hands the map its focus pin once. It sits inside the map's Suspense, so
+ * its effect runs only after the lazy map has loaded and read the pin; then
+ * it clears the pin, and a later tap on the Map button opens the map as it was.
+ *
+ * Inputs: focus — the pin and how to clear it; children — the map.
+ * Output: the map.
+ * Examples (checked on the emulator): "See on the map" on Peggy Gou → Savaya's card open; Map button later → all Bali pins
+ */
+function FocusedMap({ focus, children }: { focus: { pin: string | null; clear: () => void }; children: ReactNode }) {
+  useEffect(() => {
+    if (focus.pin) focus.clear();
+    // Once per mount: the map reads its focus only as it mounts.
+  }, []);
+  return <>{children}</>;
 }
 
 /**

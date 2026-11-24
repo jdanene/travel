@@ -78,12 +78,20 @@ export interface Stay {
   confirmed?: Record<DestinationId, Confirmation & { stayId: string }>;
 }
 
+/** A day of the week, as a weekly show stores it. */
+export type Weekday = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+
 export interface Show {
   destination: DestinationId;
   venue: string;
   area?: string;
+  /** The first night; for a weekly show, its first one in the season. */
   date: string;
+  /** Present on a show that repeats every week on this day ("Every Sunday"). */
+  weekly?: Weekday;
   artist: string;
+  /** One plain line that says what the event is. */
+  about?: string;
   link?: string;
   verified: boolean;
   source: "seed" | "friend";

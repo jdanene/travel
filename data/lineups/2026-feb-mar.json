@@ -1,7 +1,33 @@
 {
   "checked": "2026-11-23",
-  "window": "2026-02-01 to 2026-03-31",
+  "window": "2026-01-01 to 2026-03-31; January comes from the owner's list and only feeds \"Last season:\"",
   "shows": [
+    {"date": "2026-01-01", "artist": "Amelie Lens", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
+    {"date": "2026-01-02", "artist": "Fatboy Slim", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
+    {"date": "2026-01-03", "artist": "Solardo", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
+    {"date": "2026-01-04", "artist": "Alex Wann", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
+    {"date": "2026-01-10", "artist": "Carl Cox", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
+    {"date": "2026-01-11", "artist": "Satori", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
+    {"date": "2026-01-17", "artist": "Michael Bibi", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
+    {"date": "2026-01-18", "artist": "Josh Baker & Seth Troxler", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
+    {"date": "2026-01-24", "artist": "Marco Carola b2b Frank Storm", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
+    {"date": "2026-01-31", "artist": "WhoMadeWho", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
+
+    {"date": "2026-01-01", "artist": "Swae Lee", "venue": "Atlas Beach Club", "area": "Canggu", "place": "Bali", "source": "owner's list", "verified": false},
+    {"date": "2026-01-02", "artist": "Rudimental", "venue": "Atlas Beach Club", "area": "Canggu", "place": "Bali", "source": "owner's list", "verified": false},
+    {"date": "2026-01-31", "artist": "Afrojack", "venue": "Atlas Beach Club", "area": "Canggu", "place": "Bali", "source": "owner's list", "verified": false},
+
+    {"date": "2026-01-30", "artist": "DJ Panda × Inquisitive", "venue": "Atlas Super Club", "area": "Canggu", "place": "Bali", "source": "owner's list", "verified": false},
+    {"date": "2026-01-31", "artist": "Crooked Colours", "venue": "Atlas Super Club", "area": "Canggu", "place": "Bali", "source": "owner's list", "verified": false},
+
+    {"date": "2026-01-01", "artist": "Adam Dado, Dialect, GECO", "venue": "Klymax", "area": "Seminyak", "place": "Bali", "source": "owner's list", "verified": false},
+
+    {"date": "2026-01-31", "artist": "Sunset Park residents", "venue": "Potato Head", "area": "Seminyak", "place": "Bali", "source": "owner's list", "verified": false},
+
+    {"date": "2026-01-22", "artist": "Maréa", "venue": "Café del Mar Bali", "area": "Canggu", "place": "Bali", "source": "owner's list", "verified": false},
+
+    {"date": "2026-01-03", "artist": "Full Moon Party", "venue": "Haad Rin Beach", "area": "Haad Rin", "place": "Koh Phangan", "source": "owner's list", "verified": false},
+
     {"date": "2026-02-01", "artist": "Amémé", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": true},
     {"date": "2026-02-06", "artist": "Peggy Gou", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
     {"date": "2026-02-07", "artist": "Nic Fanciulli", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": true},
@@ -28,8 +54,8 @@
 
     {"date": "2026-02-01", "artist": "Sunday Session", "venue": "Single Fin", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
 
-    {"date": "2026-02-02", "artist": "Full Moon Party", "note": "Full Moon Party (guest DJs not named in sources)", "venue": "Full Moon Party, Haad Rin Beach", "area": "Haad Rin", "place": "Koh Phangan", "source": "owner's list", "verified": false},
-    {"date": "2026-03-03", "artist": "Full Moon Party", "note": "Full Moon Party (guest DJs not named in sources)", "venue": "Full Moon Party, Haad Rin Beach", "area": "Haad Rin", "place": "Koh Phangan", "source": "https://pickyourtrail.com/blog/full-moon-party-thailand", "verified": false},
+    {"date": "2026-02-02", "artist": "Full Moon Party", "note": "Full Moon Party (guest DJs not named in sources)", "venue": "Haad Rin Beach", "area": "Haad Rin", "place": "Koh Phangan", "source": "owner's list", "verified": false},
+    {"date": "2026-03-03", "artist": "Full Moon Party", "note": "Full Moon Party (guest DJs not named in sources)", "venue": "Haad Rin Beach", "area": "Haad Rin", "place": "Koh Phangan", "source": "https://pickyourtrail.com/blog/full-moon-party-thailand", "verified": false},
 
     {"date": "2026-02-09", "artist": "Half Moon Festival", "note": "Halfmoon Festival, 9-10 Feb: Harmony Beach Club pre-party, then Magic Forest (DJs not named in source)", "venue": "Half Moon Festival", "area": "Ban Tai", "place": "Koh Phangan", "source": "https://megatix.in.th/events/halfmoon-festival-9th-10th-february-2026", "verified": false},
     {"date": "2026-03-10", "artist": "Blastoyz, Sun Diary, Khainz", "note": "Halfmoon Festival, 10-11 Mar: Sun Diary, T-Gecko, Eros Bilgic, Khainz, Ghost Rider, Blastoyz, Junam", "venue": "Half Moon Festival", "area": "Ban Tai", "place": "Koh Phangan", "source": "https://ra.co/events/2379566", "verified": false},
@@ -40,11 +66,8 @@
     {"date": "2026-03-25", "artist": "1200 Micrograms, Chicago, Starling", "note": "Chicago, 1200 Micrograms, Starling, Nevo, Fishi, Tony Gatsby, Jordan Love, Cleo P, Not Zano, Sharina, Assaf Almog, Timo", "venue": "Waterfall Party", "area": "Ban Tai", "place": "Koh Phangan", "source": "https://phangan.events/events/chicago-1200-mics-at-waterfall-festival-koh-phangan", "verified": false}
   ],
   "nothing_found": [
-    "Atlas Beach Club",
     "FINNS",
-    "Klymax",
-    "Café del Mar Bali",
-    "Ulu Cliffhouse (closed for renovation; reopened for Day Zero week in April 2026)",
+    "Ulu Cliffhouse (closed for renovation through January and February 2026; open again in 2026)",
     "Zumana (opened 19 August 2026)",
     "La Brisa"
   ]

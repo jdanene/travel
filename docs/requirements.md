@@ -4,15 +4,15 @@ Status: draft for the owner's review, 23 Nov 2026.
 
 Sources: the owner's scope note and the ChatGPT draft (both in `text/requirements.md`), and research on existing apps (section 11).
 
-## 0. What matters (owner, 23 Nov 2026)
+## 0. What matters (owner, 23 Nov 2026; Parties renamed Events, 24 Nov 2026)
 
 The app has three main goals. Home shows them as module buttons, with Links and the Map, and each must take one tap to answer.
 
 1. **Dates:** agree on the days. The trip is in February and March 2027. The Full Moon Party on 22 February 2027 is the anchor.
 2. **Stay:** agree where to sleep. A friend adds an option by pasting an Airbnb or Booking.com link. Friends tap a heart. The organizer confirms. Stay shows only after the organizer confirms the dates. Until then the page has no Stay block.
-3. **Parties:** see who is playing and who is in. Parties are open from the start, before the dates are settled. Where a venue has nothing announced for a date, the page says "Nothing announced yet. Here is who played this weekend last year:" and lists last year's acts for the same weekend. One page lists place, venue, date and artist, with this year and last year together. Each show has an I'm in button. Any friend can add a party: an Add a party button takes the place, the venue, the date and who is playing, and an optional link. The new entry shows who added it. A friend can edit or remove an entry they added, and the organizer can edit or remove any entry.
+3. **Events:** see who is playing and who is in. Events are open from the start, before the dates are settled. Where a venue has nothing announced for a date, the page says "Nothing announced yet. Here is who played this weekend last year:" and lists last year's acts for the same weekend. One page lists place, venue, date and artist, with this year and last year together. Each event has an I'm in button. Any friend can add an event: an Add an event button takes the place, the venue, the date and who is playing, and an optional link. The new entry shows who added it. A friend can edit or remove an entry they added, and the organizer can edit or remove any entry.
 
-Dates, Stay, Parties and Links are equal modules. The only rule of order: Stay shows after the organizer confirms the dates.
+Dates, Stay, Events and Links are equal modules. The only rule of order: Stay shows after the organizer confirms the dates.
 
 Everything else is a side journey: votes on other things, the itinerary, club tables. A side journey is one tap away and never sits on Home. Where a later section conflicts with this one, this section wins.
 
@@ -23,8 +23,8 @@ The first version is small. It has six things:
 1. Join the trip from one link, with a name.
 2. Dates.
 3. Stay.
-4. Parties.
-5. A map of the places: the stay options and the party venues. A tap on a pin shows its name and opens its card. The map is the one fancy thing in the app. Nothing else may be fancier.
+4. Events.
+5. A map of the places: the stay options and the event venues. A tap on a pin shows its name and opens its card. The map is the one fancy thing in the app. Nothing else may be fancier.
 6. Links: a friend pastes an Instagram or TikTok link, picks the place, and it shows for everyone.
 
 Nothing else goes into the first version, not even small extras. There is no Directions button anywhere in the app (owner, 23 Nov 2026).
@@ -48,7 +48,7 @@ When the owner names Paperless Post or Partiful, he means how they work, not how
 
 - One link opens one page. There is no app to learn.
 - A friend sees everything before replying, and replies on that page with a name only.
-- The reply can ask the questions: which dates, which stay, which parties.
+- The reply can ask the questions: which dates, which stay, which events.
 - Everyone sees who has replied and what they answered.
 - The page is made of simple blocks, one action in each.
 - The organizer uses the same page, with a confirm action on each block, and can see who has not answered.

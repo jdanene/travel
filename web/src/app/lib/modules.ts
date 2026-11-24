@@ -29,7 +29,7 @@ export function datesSettled(trip: Trip): boolean {
  * Says whether the trip is all set: the dates are confirmed, at least one
  * place was added, and every destination that has a place has a confirmed
  * stay. The home page then shows "All set" under the title; nothing else
- * changes. Parties never count: a friend in for no show is still all set.
+ * changes. Events never count: a friend in for no show is still all set.
  *
  * Inputs: trip — the whole trip.
  * Output: true or false.
@@ -45,7 +45,7 @@ export function allSet(trip: Trip): boolean {
 
 /**
  * The module buttons of the home page, in their fixed order (Dates, Stay,
- * Parties, Links, Map), each with the state line on its right (plan
+ * Events, Links, Map), each with the state line on its right (plan
  * section 3). The order means nothing; the only rule is that Stay exists
  * once the dates are confirmed, and goes again if the confirm is undone,
  * with its data kept (case 42).
@@ -54,21 +54,26 @@ export function allSet(trip: Trip): boolean {
  * memberId — this device's member, or null before a reply.
  * Output: the modules to show. A settled module's line is its result:
  * "13–23 Feb · confirmed", "Cliffside villa · confirmed" (one line per
- * destination with a confirmed stay).
+ * destination with a confirmed stay). Events reads "15 events · I'm in".
  * Examples (each is a test in modules.test.ts):
- *   dates open                → Dates "Tap to answer", Parties, Links, Map; no Stay
+ *   dates open                → Dates "Tap to answer", Events, Links, Map; no Stay
  *   dates confirmed           → Dates "13–23 Feb · confirmed", Stay "1 option · heart one", …
  *   everything confirmed      → Stay "Cliffside villa · confirmed", and allSet() is true
+ *   one event listed          → Events "1 event · I'm in"
  */
 export function modules(trip: Trip, memberId: MemberId | null): Module[] {
   const shown: Module[] = [{ id: "dates", lines: [datesLine(trip, memberId)] }];
   if (datesSettled(trip)) shown.push({ id: "stay", lines: stayLines(trip) });
-  const shows = Object.keys(trip.parties?.shows ?? {}).length;
-  shown.push({ id: "parties", lines: [shows ? `${count(shows, "show")} · I'm in` : "Nothing announced yet."] });
+  shown.push({ id: "parties", lines: [eventsLine(trip)] });
   const links = Object.keys(trip.links?.items ?? {}).length;
   shown.push({ id: "links", lines: [links ? count(links, "link") : "No links yet."] });
   shown.push({ id: "map", lines: [] });
   return shown;
+}
+
+function eventsLine(trip: Trip): string {
+  const total = Object.keys(trip.parties?.shows ?? {}).length;
+  return total ? `${count(total, "event")} · I'm in` : "Nothing announced yet.";
 }
 
 function datesLine(trip: Trip, memberId: MemberId | null): string {

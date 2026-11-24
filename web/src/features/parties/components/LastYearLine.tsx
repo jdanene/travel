@@ -34,3 +34,32 @@ function weekendLabel(from: string, to: string): string {
   const sameMonth = start.split(" ")[2] === end.split(" ")[2];
   return `${sameMonth ? start.split(" ").slice(0, 2).join(" ") : start} – ${end}`;
 }
+
+/**
+ * What a venue with nothing announced this year shows: "Nothing announced
+ * yet." and, when the owner's list has acts there, "Last season:" with up
+ * to three of them, newest first. Read only.
+ *
+ * Inputs: shows — the result of lastSeason(); may be empty.
+ * Output: the grey block of screen 20/7 holding the two lines, or the
+ * first line alone when last season had nothing there.
+ * Examples (checked on the emulator at 375 px):
+ *   Atlas Beach Club → "Nothing announced yet." "Last season:" Sat 31 Jan Afrojack, Fri 2 Jan Rudimental, Thu 1 Jan Swae Lee
+ *   La Brisa         → "Nothing announced yet."
+ */
+export function LastSeason({ shows }: { shows: Array<{ date: string; artist: string }> }) {
+  if (shows.length === 0) return <p className="sub venue-empty">Nothing announced yet.</p>;
+  return (
+    <div className="na">
+      <p>
+        <b>Nothing announced yet.</b> Last season:
+      </p>
+      {shows.map((show) => (
+        <div key={`${show.date}-${show.artist}`} className="lr">
+          <span>{weekdayDate(show.date)}</span>
+          {show.artist}
+        </div>
+      ))}
+    </div>
+  );
+}

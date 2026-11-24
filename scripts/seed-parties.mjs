@@ -16,8 +16,11 @@
  *
  * Field map: place becomes destination (matched by name against the
  * destinations of local/trip.json); source becomes link when it is an
- * address; artist, venue, area, date and verified keep their names. note
- * holds research notes and is not written.
+ * address; artist, about, venue, area, date, weekly and verified keep their
+ * names. about is the one plain line under the event's name.
+ * weekly ("sun", "sat", ...) marks a show that repeats every week, and date
+ * is then its first night, which must fall on that day. note holds research
+ * notes and is not written.
  *
  * Both files are checked before anything is written. A missing file, a file
  * that is not JSON, or a show with a missing or wrong field stops the script
@@ -64,6 +67,8 @@ function readJson(path) {
 const isDay = (value) => typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value));
 const isText = (value, max) => typeof value === "string" && value.trim().length > 0 && value.trim().length <= max;
 const nameKey = (name) => String(name).trim().toLowerCase().replace(/\s+/g, " ");
+const WEEKDAYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+const weekdayOf = (day) => WEEKDAYS[new Date(`${day}T00:00:00Z`).getUTCDay()];
 
 const { tripId } = readJson(STATE_FILE);
 const trip = readJson(TRIP_FILE);
@@ -84,10 +89,13 @@ function readLineup(path, { inSeason }) {
     if (inSeason && (entry.date < trip.season.from || entry.date > trip.season.to)) stop(`${where}: ${entry.date} lies outside the season.`);
     if (!isText(entry.venue, 60)) stop(`${where} needs a venue of 1 to 60 characters.`);
     if (!isText(entry.artist, 200)) stop(`${where} needs an artist of 1 to 200 characters.`);
+    if (entry.weekly !== undefined && (!WEEKDAYS.includes(entry.weekly) || weekdayOf(entry.date) !== entry.weekly)) {
+      stop(`${where}: weekly "${entry.weekly}" must be a day name (${WEEKDAYS.join(", ")}) and fall on its date ${entry.date}.`);
+    }
     const destination = destinationOf.get(nameKey(entry.place));
     if (!destination) stop(`${where}: place "${entry.place}" is not a destination in ${TRIP_FILE}.`);
     const show = { destination, venue: entry.venue.trim(), date: entry.date, artist: entry.artist.trim() };
-    records[showId(show)] = { ...show, area: isText(entry.area, 60) ? entry.area.trim() : undefined, link: entry.source, verified: entry.verified };
+    records[showId(show)] = { ...show, area: isText(entry.area, 60) ? entry.area.trim() : undefined, weekly: entry.weekly, about: isText(entry.about, 200) ? entry.about.trim() : undefined, link: entry.source, verified: entry.verified };
   });
   return { records, at: isDay(file.checked) ? Date.parse(file.checked) : Date.now() };
 }
@@ -96,10 +104,12 @@ const thisYear = readLineup(THIS_YEAR, { inSeason: true });
 const lastYear = readLineup(LAST_YEAR, { inSeason: false });
 
 const update = {};
-for (const [id, { area, link, verified, ...show }] of Object.entries(thisYear.records)) {
+for (const [id, { area, weekly, about, link, verified, ...show }] of Object.entries(thisYear.records)) {
   update[`trips/${tripId}/parties/shows/${id}`] = {
     ...show,
     ...(area ? { area } : {}),
+    ...(weekly ? { weekly } : {}),
+    ...(about ? { about } : {}),
     ...(typeof link === "string" && /^https?:\/\//.test(link) && link.length <= 500 ? { link } : {}),
     verified: verified === true,
     source: "seed",

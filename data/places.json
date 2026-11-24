@@ -1,5 +1,5 @@
 {
-  "source": "Positions from OpenStreetMap, read with the Nominatim search on 23 Nov 2026. A venue with \"onMap\": false is not on OpenStreetMap; it sits at its area's centre, or at the island's centre when the lineup gives no area.",
+  "source": "Positions from OpenStreetMap, read with the Nominatim search on 23 and 24 Nov 2026. A venue with \"onMap\": false is not on OpenStreetMap; it sits at its area's centre, or at the island's centre when the lineup gives no area.",
   "destinations": {
     "bali": { "lat": -8.45572, "lng": 115.27043 },
     "kohPhangan": { "lat": 9.73495, "lng": 100.03057 }
@@ -11,22 +11,31 @@
     "ubud": { "name": "Ubud", "destination": "bali", "lat": -8.51702, "lng": 115.25505 },
     "munduk": { "name": "Munduk", "destination": "bali", "lat": -8.26837, "lng": 115.07771 },
     "haad-rin": { "name": "Haad Rin", "destination": "kohPhangan", "lat": 9.67562, "lng": 100.06559 },
+    "haad-yuan": { "name": "Haad Yuan", "destination": "kohPhangan", "lat": 9.69147, "lng": 100.07386 },
     "ban-tai": { "name": "Ban Tai", "destination": "kohPhangan", "lat": 9.70014, "lng": 100.03473 },
     "thong-sala": { "name": "Thong Sala", "destination": "kohPhangan", "lat": 9.71056, "lng": 99.98638 },
     "srithanu": { "name": "Srithanu", "destination": "kohPhangan", "lat": 9.75563, "lng": 99.9635 }
   },
   "venues": {
     "savaya": { "name": "Savaya", "destination": "bali", "areaId": "uluwatu", "lat": -8.84641, "lng": 115.14065, "line": "Club on the cliffs" },
-    "single-fin": { "name": "Single Fin", "destination": "bali", "areaId": "uluwatu", "lat": -8.81501, "lng": 115.08892 },
-    "atlas-super-club": { "name": "Atlas Super Club", "destination": "bali", "areaId": "canggu", "lat": -8.66432, "lng": 115.13907 },
-    "desa-kitsune": { "name": "Desa Kitsuné", "destination": "bali", "areaId": "canggu", "lat": -8.6399, "lng": 115.1436, "onMap": false },
-    "potato-head": { "name": "Potato Head", "destination": "bali", "areaId": "seminyak", "lat": -8.67941, "lng": 115.14996 },
-    "haad-rin-beach": { "name": "Haad Rin Beach", "destination": "kohPhangan", "areaId": "haad-rin", "lat": 9.67667, "lng": 100.06808 },
-    "full-moon-party-haad-rin-beach": { "name": "Full Moon Party, Haad Rin Beach", "destination": "kohPhangan", "areaId": "haad-rin", "lat": 9.67667, "lng": 100.06808 },
-    "half-moon-festival": { "name": "Half Moon Festival", "destination": "kohPhangan", "areaId": "ban-tai", "lat": 9.70014, "lng": 100.03473, "onMap": false },
+    "single-fin": { "name": "Single Fin", "destination": "bali", "areaId": "uluwatu", "lat": -8.81501, "lng": 115.08892, "line": "Bar on the cliff over the surf break" },
+    "ulu-cliffhouse": { "name": "Ulu Cliffhouse", "destination": "bali", "areaId": "uluwatu", "lat": -8.81407, "lng": 115.09152, "line": "Pool club on the cliff" },
+    "el-kabron": { "name": "El Kabron", "destination": "bali", "areaId": "uluwatu", "lat": -8.80194, "lng": 115.11741, "line": "Cliff-top club with sunset parties" },
+    "atlas-beach-club": { "name": "Atlas Beach Club", "destination": "bali", "areaId": "canggu", "lat": -8.6399, "lng": 115.1436, "onMap": false, "line": "Beach club with guest DJs" },
+    "atlas-super-club": { "name": "Atlas Super Club", "destination": "bali", "areaId": "canggu", "lat": -8.66432, "lng": 115.13907, "line": "Nightclub beside Atlas Beach Club" },
+    "desa-kitsune": { "name": "Desa Kitsuné", "destination": "bali", "areaId": "canggu", "lat": -8.6399, "lng": 115.1436, "onMap": false, "line": "Garden club with house DJs" },
+    "cafe-del-mar-bali": { "name": "Café del Mar Bali", "destination": "bali", "areaId": "canggu", "lat": -8.6399, "lng": 115.1436, "onMap": false, "line": "Beach club with a large pool" },
+    "finns-beach-club": { "name": "FINNS Beach Club", "destination": "bali", "areaId": "canggu", "lat": -8.6399, "lng": 115.1436, "onMap": false, "line": "Large beach club with DJs every day" },
+    "la-brisa": { "name": "La Brisa", "destination": "bali", "areaId": "canggu", "lat": -8.65458, "lng": 115.12481, "line": "Driftwood beach club" },
+    "potato-head": { "name": "Potato Head", "destination": "bali", "areaId": "seminyak", "lat": -8.67941, "lng": 115.14996, "line": "Beach club with a pool" },
+    "klymax": { "name": "Klymax", "destination": "bali", "areaId": "seminyak", "lat": -8.67907, "lng": 115.14988, "line": "Late-night club" },
+    "mrs-sippy": { "name": "Mrs Sippy", "destination": "bali", "areaId": "seminyak", "lat": -8.67961, "lng": 115.15123, "line": "Pool club with a high dive" },
+    "haad-rin-beach": { "name": "Haad Rin Beach", "destination": "kohPhangan", "areaId": "haad-rin", "lat": 9.67667, "lng": 100.06808, "line": "Beach of the Full Moon Party" },
+    "eden-garden": { "name": "Eden Garden", "destination": "kohPhangan", "areaId": "haad-yuan", "lat": 9.69368, "lng": 100.07616, "line": "All-night party above Haad Yuan beach" },
+    "half-moon-festival": { "name": "Half Moon Festival", "destination": "kohPhangan", "areaId": "ban-tai", "lat": 9.71454, "lng": 100.02814, "line": "Jungle festival every two weeks" },
     "hidden-paradise": { "name": "Hidden Paradise", "destination": "kohPhangan", "areaId": "ban-tai", "lat": 9.70014, "lng": 100.03473, "onMap": false },
-    "jungle-experience": { "name": "Jungle Experience", "destination": "kohPhangan", "areaId": "ban-tai", "lat": 9.70014, "lng": 100.03473, "onMap": false },
-    "waterfall-party": { "name": "Waterfall Party", "destination": "kohPhangan", "areaId": "ban-tai", "lat": 9.70588, "lng": 100.04692 },
+    "jungle-experience": { "name": "Jungle Experience", "destination": "kohPhangan", "areaId": "ban-tai", "lat": 9.71299, "lng": 100.03276, "line": "Jungle party with two stages" },
+    "waterfall-party": { "name": "Waterfall Party", "destination": "kohPhangan", "areaId": "ban-tai", "lat": 9.70588, "lng": 100.04692, "line": "All-night party by a waterfall" },
     "lost-jungle": { "name": "Lost Jungle", "destination": "kohPhangan", "lat": 9.73495, "lng": 100.03057, "onMap": false }
   }
 }

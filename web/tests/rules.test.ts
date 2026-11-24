@@ -96,4 +96,10 @@ describe("database rules", () => {
     await assertSucceeds(update(ref(db("uid-a"), "/"), { [paths.show(T, "f1")]: null, [paths.showIn(T, "f1")]: null }));
     await assertSucceeds(remove(ref(db("uid-o"), paths.show(T, "seed1"))));
   });
+
+  it("10. takes a weekly show's day as a day name and refuses anything else", async () => {
+    const a = db("uid-a");
+    await assertSucceeds(set(ref(a, paths.show(T, "w1")), show({ source: "friend", addedBy: "alice", artist: "Sunday Session", date: "2027-02-07", weekly: "sun" })));
+    await assertFails(set(ref(a, paths.show(T, "w2")), show({ source: "friend", addedBy: "alice", artist: "Funday", date: "2027-02-07", weekly: "sunday" })));
+  });
 });

@@ -46,6 +46,8 @@ interface TripMapProps {
   pins: Pin[];
   /** A tap on the open card. */
   onOpen: (pin: Pin) => void;
+  /** A pin to open on: the map starts on its destination, centred on it, with its card open. */
+  focus?: string;
 }
 
 /**
@@ -55,18 +57,22 @@ interface TripMapProps {
  * of stays or shows. Pins whose labels would overlap at the current zoom
  * show as one count pin ("3 pins") that lists them; zooming in splits it.
  *
- * Inputs: the destinations with their centres, the pins, and what a tap on
- * the card does.
+ * Inputs: the destinations with their centres, the pins, what a tap on
+ * the card does, and a pin to start on (the show sheet's "See on the map").
+ * Only the first value of focus counts; the map is mounted afresh each
+ * time its module opens.
  * Output: the map. Pins that collide group (case 35). Switching
  * destination closes the card. A destination with no pins says "No pins
  * yet." When no tile has loaded after 8 seconds, a notice and a plain list
  * of the pins replace the map; the list opens the same cards (case 32).
  * Examples (checked at 390 px against 12/6 and 20/10):
  *   Bali → "Bali", "Koh Phangan · 6 pins", the Bali venues; a tap on Savaya opens its card
+ *   focus "venue:eden-garden" → Koh Phangan, zoomed on Eden Garden, its card open
  */
-export function TripMap({ destinations, pins, onOpen }: TripMapProps) {
-  const [destination, setDestination] = useState(destinations[0]?.id ?? "");
-  const [selected, setSelected] = useState<string | null>(null);
+export function TripMap({ destinations, pins, onOpen, focus }: TripMapProps) {
+  const start = useRef(pins.find((pin) => pin.id === focus));
+  const [destination, setDestination] = useState(start.current?.destination ?? destinations[0]?.id ?? "");
+  const [selected, setSelected] = useState<string | null>(start.current?.id ?? null);
   const [group, setGroup] = useState<string[] | null>(null);
   const [tilesFailed, setTilesFailed] = useState(false);
   const box = useRef<HTMLDivElement>(null);
@@ -98,7 +104,9 @@ export function TripMap({ destinations, pins, onOpen }: TripMapProps) {
   useEffect(() => {
     const current = map.current;
     if (!current || !centre) return;
-    if (here.length > 1) current.fitBounds(L.latLngBounds(here.map((pin) => [pin.lat, pin.lng])), { padding: [48, 48], maxZoom: 14 });
+    const target = here.find((pin) => pin.id === start.current?.id);
+    if (target) current.setView([target.lat, target.lng], 15);
+    else if (here.length > 1) current.fitBounds(L.latLngBounds(here.map((pin) => [pin.lat, pin.lng])), { padding: [48, 48], maxZoom: 14 });
     else current.setView(here[0] ? [here[0].lat, here[0].lng] : [centre.lat, centre.lng], here.length ? 14 : 10);
     // Fit only when the destination or the number of pins changes, not when a pin is selected.
   }, [destination, here.length]);
@@ -141,6 +149,7 @@ export function TripMap({ destinations, pins, onOpen }: TripMapProps) {
   }, [draw, destination]);
 
   const choose = (id: string) => {
+    start.current = undefined;
     setDestination(id);
     setSelected(null);
     setGroup(null);
