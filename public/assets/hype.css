@@ -1,0 +1,80 @@
+/* Shared look for the hype pages: title, destinations, WASTED, sound button. */
+@import url("https://fonts.googleapis.com/css2?family=Anton&family=Yellowtail&display=swap");
+
+* { box-sizing: border-box; margin: 0; }
+html, body { height: 100%; background: #000; color: #fff; font-family: system-ui, -apple-system, sans-serif; overflow: hidden; }
+
+/* A photo or clip that fills its box. */
+.fill { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: center / cover no-repeat; }
+.pop { filter: saturate(1.3) contrast(1.1); }
+.gray { filter: grayscale(1) contrast(1.15) brightness(.7); }
+
+/* Layers that take turns: only the one marked .on shows. */
+.layer { opacity: 0; transition: opacity .2s; }
+.layer.on { opacity: 1; animation: push 2.6s ease-out both; }
+@keyframes push { from { transform: scale(1.14); } to { transform: scale(1.02); } }
+
+/* Halftone over everything, like a printed game cover. */
+.grain::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 50;
+  background: radial-gradient(#0004 1px, transparent 1.4px) 0 0 / 4px 4px; }
+
+.title { font: 400 clamp(84px, 14vw, 210px)/.85 Anton, Impact, sans-serif; color: #fff;
+  -webkit-text-stroke: 5px #000; paint-order: stroke fill; text-shadow: 7px 8px 0 #000; transform: rotate(-3deg); }
+.dest { font: clamp(30px, 4vw, 58px)/1.15 Yellowtail, cursive; color: #ffe3f4;
+  text-shadow: 0 0 8px #ff3cac, 0 0 20px #ff3cac, 0 0 34px #ff3cac; }
+.wasted { font: 400 clamp(84px, 13vw, 200px)/.9 Anton, Impact, sans-serif; color: #c1121f;
+  -webkit-text-stroke: 5px #000; paint-order: stroke fill; text-shadow: 7px 8px 0 #000; }
+.water { font: 400 clamp(20px, 2.8vw, 40px) Anton, sans-serif; letter-spacing: .05em;
+  -webkit-text-stroke: 2px #000; paint-order: stroke fill; text-shadow: 4px 4px 0 #000; }
+.passed { font: 400 clamp(96px, 16vw, 230px)/.9 Anton, Impact, sans-serif; color: #ffd23d;
+  -webkit-text-stroke: 5px #000; paint-order: stroke fill; text-shadow: 7px 8px 0 #000; }
+
+/* Music button: browsers start videos muted, so sound waits for a tap. */
+.snd { position: fixed; z-index: 60; right: 18px; bottom: 18px; width: 54px; height: 54px; border-radius: 50%;
+  border: 3px solid #000; background: #ffd23d; color: #000; display: grid; place-items: center; cursor: pointer; box-shadow: 4px 4px 0 #000; }
+.snd.on { background: #fff; }
+.snd:not(.on) { animation: nudge 1.4s ease-in-out infinite; }
+@keyframes nudge { 50% { transform: scale(1.14); } }
+.snd svg { width: 28px; height: 28px; }
+
+/* The way into the trip: one button at the bottom centre, in the sound button's yellow and the title's type.
+   It grows with the window but stays inside option 13's bottom-centre panel, so it never reaches the WASTED panel
+   beside it, and it clears the sound button on a 320px phone. */
+.enter { position: fixed; z-index: 60; left: 50%; bottom: 18px; transform: translateX(-50%);
+  display: inline-grid; place-items: center; min-height: 54px; padding: 0 clamp(14px, 2vw, 24px);
+  font: 400 clamp(18px, 2.2vw, 26px)/1 Anton, Impact, sans-serif; letter-spacing: .06em; white-space: nowrap;
+  color: #000; background: #ffd23d; border: 3px solid #000; box-shadow: 4px 4px 0 #000; text-decoration: none;
+  -webkit-tap-highlight-color: transparent; transition: transform .12s ease-out, box-shadow .12s ease-out, background-color .12s; }
+.enter:hover { background: #fff; }
+.enter:active { transform: translate(calc(-50% + 3px), 3px); box-shadow: 1px 1px 0 #000; }
+.enter:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+/* On a phone the page scrolls; room at the end keeps the last panel (WASTED) clear of the button. */
+@media (max-width: 760px) { body.has-enter { padding-bottom: 90px; } }
+
+/* Small link back to the list of options, only while choosing. */
+.opt { position: fixed; z-index: 60; left: 12px; bottom: 10px; font: 12px system-ui, sans-serif; color: #ccc; text-shadow: 0 1px 2px #000; }
+.opt a { color: #ffd23d; }
+
+/* Name of a famous place, on its photo only. */
+.place { position: absolute; left: 10px; bottom: 8px; font: 400 clamp(16px, 2.2vw, 34px) Anton, Impact, sans-serif; letter-spacing: .04em; text-transform: uppercase;
+  color: #fff; -webkit-text-stroke: 1.5px #000; paint-order: stroke fill; text-shadow: 3px 3px 0 #000; }
+
+/* No play button over clips on phones: they start by themselves. */
+video::-webkit-media-controls, video::-webkit-media-controls-start-playback-button, video::-webkit-media-controls-overlay-play-button { display: none !important; -webkit-appearance: none; }
+video { pointer-events: none; }
+
+/* The WASTED card, in grey. The part of the photo from the face down to the taped arm always fits the panel,
+   whatever the panel's shape, so the drip is in view. --w is that part's width (it is 898 by 760 of an 898 by 1100 photo). */
+.wst { container-type: size; background: #000; overflow: hidden; }
+.wst > * { --w: min(100cqw, calc(var(--k, 118.2) * 1cqh)); }
+.wst .wst-bg { filter: grayscale(1) blur(16px) brightness(.4); transform: scale(1.15); }
+.wst .wst-ph { inset: auto; left: 50%; top: 50%; width: var(--w); height: calc(var(--w) * var(--ar, 1.225)); transform: translate(-50%, var(--cy, -54.5%));
+  background-size: 100% 100%; filter: grayscale(1) contrast(1.1) brightness(.85); }
+/* The words sit on the shirt, between the face and the arm. */
+.wst .wst-t { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; transform: translateY(calc(var(--w) * var(--ty, .12))); }
+.wst .wasted { font-size: calc(var(--w) * .17); -webkit-text-stroke-width: .035em; text-shadow: .04em .05em 0 #000; }
+.wst .water { font-size: calc(var(--w) * .036); -webkit-text-stroke-width: .06em; text-shadow: .08em .08em 0 #000; }
+
+
+/* The countries, in brackets under the destinations. */
+.dest .ctry { font-size: .72em; }

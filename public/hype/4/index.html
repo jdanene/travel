@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>TRAVEL</title>
+<link rel="stylesheet" href="/assets/hype.css?v=12">
+<style>
+  .wall { position: fixed; inset: 0; padding: 6px; gap: 6px; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); }
+  .tile { position: relative; overflow: hidden; border: 3px solid #000; background: #111; }
+  .tile .layer { transition: opacity .6s; }
+  .tile .layer.on { animation: none; }
+  .head { grid-column: 2 / span 2; grid-row: 2; display: grid; place-items: center; text-align: center; background: #000; }
+  .head .fill { filter: brightness(.5) saturate(1.3); }
+  .head > div:last-child { position: relative; z-index: 2; }
+  .head .title { font-size: clamp(64px, 9vw, 150px); }
+  .head .dest { font-size: clamp(24px, 2.6vw, 40px); }
+  @media (max-width: 760px) {
+    .wall { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(6, 1fr); }
+    .head { grid-column: 1 / span 2; grid-row: 3; }
+  }
+</style>
+</head>
+<body class="grain">
+  <main class="wall" id="wall"></main>
+<script src="/assets/hype.js?v=15"></script>
+<script>
+  const H = HYPE, wall = document.getElementById("wall"), tiles = [], main = H.clips[0];
+  for (let k = 0; k < 10; k++) {
+    if (k === 5) {   // the title sits in the middle of the wall
+      const head = document.createElement("div");
+      head.className = "tile head";
+      head.append(H.el(main, "", { sound: true }));
+      head.insertAdjacentHTML("beforeend", '<div><div class="title">TRAVEL</div><div class="dest">Bali · Koh Phangan · Feb 2027<br><span class="ctry">(Indonesia, Thailand)</span></div></div>');
+      wall.append(head);
+    }
+    const t = document.createElement("div");
+    t.className = "tile"; wall.append(t); tiles.push(t);
+  }
+  H.board(tiles, H.photos.filter(p => p !== main), 4000);
+  H.sound(); H.back(4);
+</script>
+</body>
+</html>

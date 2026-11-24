@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>TRAVEL · Pick one</title>
+<link rel="stylesheet" href="/assets/hype.css">
+<style>
+  html, body { overflow: auto; }
+  body { background: #0b0b0b; padding: 36px clamp(16px, 5vw, 60px) 50px; }
+  .head .title { font-size: clamp(56px, 9vw, 110px); transform-origin: left; }
+  .list { margin-top: 28px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+  a { display: block; color: #fff; text-decoration: none; border: 3px solid #000; outline: 2px solid #2a2a2a; background: #151515; transition: outline-color .2s, transform .2s; }
+  a:hover { outline-color: #ffd23d; transform: translateY(-3px); }
+  .th { position: relative; height: 150px; overflow: hidden; }
+  .t { padding: 10px 12px 12px; font: 400 22px Anton, sans-serif; letter-spacing: .04em; color: #ffd23d; }
+</style>
+</head>
+<body>
+  <div class="head"><div class="title">TRAVEL</div></div>
+  <div class="list" id="list"></div>
+<script src="/assets/hype.js"></script>
+<script>
+  const H = HYPE, names = ["Cover grid", "Quick cuts", "Flash cuts", "Wall", "Collage", "Passed · Wasted", "Split", "Three phones",
+    "Scroll", "Wall + Passed", "Phone stage", "Film strips", "Cover grid II", "Punch cuts", "Crew split"];
+  names.forEach((n, k) => {
+    const a = document.createElement("a");
+    a.href = `/hype/${k + 1}/`;
+    a.innerHTML = `<div class="th"></div><div class="t">${k + 1} · ${n}</div>`;
+    a.querySelector(".th").append(H.el(H.photos[(k * 5) % H.photos.length], "", { small: true }));
+    document.getElementById("list").append(a);
+  });
+</script>
+</body>
+</html>

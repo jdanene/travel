@@ -14,3 +14,9 @@ docs/skills/
 
 # Downloaded cover photos (Unsplash); only the finished cover is published.
 design/cover/photos/
+
+# Trip app: local trip file and links, build output, dependencies.
+local/
+public/app/
+node_modules/
+*-debug.log

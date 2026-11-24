@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>TRAVEL</title>
+<link rel="stylesheet" href="/assets/hype.css?v=12">
+<style>
+  .bg { position: fixed; inset: -60px; }
+  .bg .fill { filter: blur(30px) brightness(.4) saturate(1.4); }
+  .row { position: fixed; inset: 0 0 18vh; display: flex; align-items: center; justify-content: center; gap: clamp(12px, 2.4vw, 36px); }
+  .phone { position: relative; height: min(70vh, 720px); aspect-ratio: 9 / 16; border-radius: 30px; overflow: hidden; border: 6px solid #000;
+    box-shadow: 0 0 0 3px #fff, 0 24px 50px #000c; }
+  .phone .layer { transition: opacity .6s; }
+  .phone .layer.on { animation: none; }
+  .phone .place { top: 14px; bottom: auto; left: 14px; }   /* the title covers the bottom of the phones */
+  .phone:nth-child(1) { transform: rotate(-4deg) translateY(16px); }
+  .phone:nth-child(3) { transform: rotate(4deg) translateY(16px); }
+  .phone:nth-child(2) { z-index: 2; height: min(76vh, 780px); }
+  .foot { position: fixed; left: 0; right: 0; bottom: 3vh; z-index: 5; text-align: center; }
+  .foot .title { font-size: clamp(70px, 11vw, 160px); }
+  @media (max-width: 760px) {
+    .phone:nth-child(1), .phone:nth-child(3) { display: none; }
+    .phone:nth-child(2) { height: 66vh; }
+  }
+</style>
+</head>
+<body class="grain">
+  <div class="bg" id="bg"></div>
+  <div class="row" id="row"></div>
+  <div class="foot"><div class="title">TRAVEL</div><div class="dest">Bali · Koh Phangan · Feb 2027<br><span class="ctry">(Indonesia, Thailand)</span></div></div>
+<script src="/assets/hype.js?v=15"></script>
+<script>
+  const H = HYPE, row = document.getElementById("row"), phones = [];
+  document.getElementById("bg").append(H.el(H.ours[0]));
+  for (let k = 0; k < 3; k++) { const p = document.createElement("div"); p.className = "phone"; row.append(p); phones.push(p); }
+  // The three phones cycle through every clip and every place photo.
+  H.board(phones, H.photos, 4000);
+  H.bed(); H.sound(); H.back(8);
+</script>
+</body>
+</html>

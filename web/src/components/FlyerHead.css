@@ -1,0 +1,16 @@
+/* The top of the flyer (design 12, .fly .hero and .fly .nm). */
+.flyer-hero { height: 20.625rem; margin: 0 -1.25rem; background: #ddd center 35% / cover no-repeat; border-radius: 0 0 1.875rem 1.875rem; }
+.flyer-hero.tall { height: 26.25rem; }
+/* After a reply the photo is shorter, so the first module buttons show without scrolling (exception 9). */
+.flyer-hero.short { height: clamp(11rem, 30vh, 15rem); }
+.flyer-name { text-align: center; margin-top: -2.5rem; position: relative; }
+.flyer-name .av { width: 4.5rem; height: 4.5rem; font-size: 1.25rem; border-width: 4px; }
+.flyer-name .h1 { margin-top: 0.5rem; text-wrap: balance; }
+.flyer-replied { display: none; }
+
+/* Desktop: the photo is a rounded picture in its column, not a full-bleed band. */
+@media (min-width: 900px) {
+  .flyer-hero, .flyer-hero.short { height: clamp(20rem, 46vh, 30rem); margin: 0; border-radius: 1.75rem; }
+  .flyer-name .h1 { font-size: clamp(1.875rem, 1.2rem + 1vw, 2.5rem); }
+  .flyer-replied { display: block; margin-top: 0.75rem; }
+}

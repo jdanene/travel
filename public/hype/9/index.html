@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>TRAVEL</title>
+<link rel="stylesheet" href="/assets/hype.css?v=12">
+<style>
+  .wrap { position: fixed; inset: 0; display: grid; grid-template-columns: 1fr minmax(300px, 36vw); }
+  .cols { position: relative; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 10px; background: #000; }
+  .col { display: flex; flex-direction: column; gap: 10px; animation: up 60s linear infinite; }
+  .col.down { animation-name: down; }
+  @keyframes up { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+  @keyframes down { from { transform: translateY(-50%); } to { transform: translateY(0); } }
+  .shot { position: relative; flex: none; aspect-ratio: 4 / 5; overflow: hidden; border: 3px solid #000; outline: 2px solid #ffffff22; }
+  .vid { position: relative; overflow: hidden; border-left: 8px solid #000; }
+  .label { position: fixed; z-index: 10; left: clamp(18px, 3vw, 44px); bottom: clamp(18px, 5vh, 48px); }
+  .label .title { transform-origin: left; }
+  .cols::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 45%, #000c); pointer-events: none; }
+  @media (max-width: 760px) {
+    .wrap { grid-template-columns: 1fr; grid-template-rows: 1fr 46vh; }
+    .vid { border-left: 0; border-top: 8px solid #000; grid-row: 2; }
+    .label { bottom: calc(46vh + 16px); }
+  }
+</style>
+</head>
+<body class="grain">
+  <div class="wrap">
+    <div class="cols"><div class="col" id="c1"></div><div class="col down" id="c2"></div></div>
+    <div class="vid" id="vid"></div>
+  </div>
+  <div class="label"><div class="title">TRAVEL</div><div class="dest">Bali · Koh Phangan · Feb 2027<br><span class="ctry">(Indonesia, Thailand)</span></div></div>
+<script src="/assets/hype.js?v=15"></script>
+<script>
+  const H = HYPE, half = Math.ceil(H.photos.length / 2);
+  // Each column holds its photos twice so the scroll loops without a seam.
+  [[H.photos.slice(0, half), "c1"], [H.photos.slice(half), "c2"]].forEach(([set, id]) => {
+    const col = document.getElementById(id);
+    [...set, ...set].forEach(it => { const s = document.createElement("div"); s.className = "shot"; s.append(H.el(it, "", { small: true })); col.append(s); });
+  });
+  document.getElementById("vid").append(H.el(H.reel, "", { sound: true }));
+  H.sound(); H.back(9);
+</script>
+</body>
+</html>

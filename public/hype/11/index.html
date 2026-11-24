@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>TRAVEL</title>
+<link rel="stylesheet" href="/assets/hype.css?v=12">
+<style>
+  #bg { position: fixed; inset: -60px; background: center / cover no-repeat; filter: blur(32px) brightness(.45) saturate(1.4); transition: background-image .2s; }
+  .frame { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); height: min(86vh, 900px); aspect-ratio: 9 / 16;
+    border: 6px solid #000; outline: 3px solid #fff; overflow: hidden; box-shadow: 0 30px 60px #000c; }
+  .left { position: fixed; z-index: 5; left: clamp(20px, 4vw, 60px); top: 50%; transform: translateY(-50%); }
+  .left .title { transform-origin: left; }
+  @media (max-width: 760px) {
+    .frame { height: 100vh; width: 100vw; border: 0; outline: 0; }
+    .left { top: auto; bottom: 6vh; transform: none; }
+  }
+</style>
+</head>
+<body class="grain">
+  <div id="bg"></div>
+  <div class="frame" id="frame"></div>
+  <div class="left"><div class="title">TRAVEL</div><div class="dest">Bali · Koh Phangan · Feb 2027<br><span class="ctry">(Indonesia, Thailand)</span></div></div>
+<script src="/assets/hype.js?v=15"></script>
+<script>
+  const H = HYPE, frame = document.getElementById("frame"), bg = document.getElementById("bg");
+  const items = H.mix(3);
+  const layers = items.map(it => H.el(it, "layer", { lazy: true }));
+  layers.forEach(l => frame.append(l));
+  H.cycle(layers, 2500, i => { const it = items[i]; if (it.kind === "img") bg.style.backgroundImage = `url(${it.src})`; });
+  H.bed(); H.sound(); H.back(11);
+</script>
+</body>
+</html>

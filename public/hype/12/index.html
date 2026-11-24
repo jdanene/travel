@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>TRAVEL</title>
+<link rel="stylesheet" href="/assets/hype.css?v=12">
+<style>
+  .strip { position: fixed; left: 0; right: 0; height: 24vh; overflow: hidden; padding: 8px 0; }
+  .strip.top { top: 0; } .strip.bot { bottom: 0; }
+  .track { display: flex; gap: 10px; height: 100%; width: max-content; animation: left 80s linear infinite; }
+  .bot .track { animation-name: right; }
+  @keyframes left { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @keyframes right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+  .shot { position: relative; flex: none; height: 100%; aspect-ratio: 4 / 5; overflow: hidden; border: 3px solid #000; outline: 2px solid #ffffff2a; }
+  .mid { position: fixed; top: 24vh; bottom: 24vh; left: 0; right: 0; display: grid; place-items: center; }
+  .screen { position: relative; height: calc(52vh - 16px); aspect-ratio: 16 / 9; max-width: 94vw; border: 6px solid #000; outline: 3px solid #ffd23d; overflow: hidden; }
+  .tag { position: absolute; z-index: 3; left: 22px; bottom: 18px; }
+  .tag .title { transform-origin: left; font-size: clamp(56px, 8vw, 130px); }
+  .tag .dest { font-size: clamp(22px, 2.6vw, 40px); }
+</style>
+</head>
+<body class="grain">
+  <div class="strip top"><div class="track" id="t1"></div></div>
+  <div class="mid"><div class="screen" id="screen"><div class="tag"><div class="title">TRAVEL</div><div class="dest">Bali · Koh Phangan · Feb 2027<br><span class="ctry">(Indonesia, Thailand)</span></div></div></div></div>
+  <div class="strip bot"><div class="track" id="t2"></div></div>
+<script src="/assets/hype.js?v=15"></script>
+<script>
+  const H = HYPE, half = Math.ceil(H.photos.length / 2);
+  // Each strip holds its photos twice so the scroll loops without a seam.
+  [[H.photos.slice(0, half), "t1"], [H.photos.slice(half), "t2"]].forEach(([set, id]) => {
+    const tr = document.getElementById(id);
+    [...set, ...set].forEach(it => { const s = document.createElement("div"); s.className = "shot"; s.append(H.el(it, "", { small: true })); tr.append(s); });
+  });
+  document.getElementById("screen").prepend(H.el(H.reel, "", { sound: true }));
+  H.sound(); H.back(12);
+</script>
+</body>
+</html>

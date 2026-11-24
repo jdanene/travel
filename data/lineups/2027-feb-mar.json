@@ -1,0 +1,158 @@
+{
+ "checked": "2026-11-23",
+ "window": "2027-02-01 to 2027-03-31",
+ "shows": [
+  {
+   "date": "2027-02-01",
+   "artist": "Half Moon Festival", "note": "Half Moon Festival (1 Feb; no DJs named; dates from a travel blog, not on the organiser's site yet)",
+   "venue": "Half Moon Festival",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://thaiest.com/blog/half-moon-festival",
+   "verified": false
+  },
+  {
+   "date": "2027-02-11",
+   "artist": "MO:DEM Teaser Party", "note": "MO:DEM Teaser Party Thailand 2027 (psytrance, 11-14 Feb): Highko Retro, Xolotl, Synthetik Chaos, Phobos and more",
+   "venue": "Hidden Paradise",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/modem-teaser-party-thailand-2027/",
+   "verified": false
+  },
+  {
+   "date": "2027-02-13",
+   "artist": "Peggy Gou",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/february-13-2027",
+   "verified": true
+  },
+  {
+   "date": "2027-02-13",
+   "artist": "Half Moon Festival", "note": "Half Moon Festival (13-14 Feb; no DJs named; dates from a travel blog, not on the organiser's site yet)",
+   "venue": "Half Moon Festival",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://thaiest.com/blog/half-moon-festival",
+   "verified": false
+  },
+  {
+   "date": "2027-02-14",
+   "artist": "Baby J",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/february-14-2027",
+   "verified": true
+  },
+  {
+   "date": "2027-02-20",
+   "artist": "Franky Rizardo",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/february-20-2027",
+   "verified": true
+  },
+  {
+   "date": "2027-02-22",
+   "artist": "Full Moon Party", "note": "Full Moon Party (no guest DJs named)",
+   "venue": "Haad Rin Beach",
+   "area": "Haad Rin",
+   "place": "Koh Phangan",
+   "source": "https://fullmoonparty-thailand.com/schedules/",
+   "verified": true
+  },
+  {
+   "date": "2027-02-25",
+   "artist": "ATMAN Begins Teaser Party", "note": "ATMAN Begins Teaser Party (psytrance, 25-27 Feb): Agressive Mood, Maze of Madness, Daash, Psynonima and more",
+   "venue": "Lost Jungle",
+   "area": "Koh Phangan",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/atman-begins-teaser-party-at-lost-jungle/",
+   "verified": false
+  },
+  {
+   "date": "2027-02-27",
+   "artist": "ANTS",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/february-27-2027",
+   "verified": true
+  },
+  {
+   "date": "2027-02-28",
+   "artist": "Ben Böhmer",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/february-28-2027",
+   "verified": true
+  },
+  {
+   "date": "2027-02-28",
+   "artist": "Half Moon Festival", "note": "Half Moon Festival (28 Feb - 1 Mar; no DJs named; dates from a travel blog, not on the organiser's site yet)",
+   "venue": "Half Moon Festival",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://thaiest.com/blog/half-moon-festival",
+   "verified": false
+  },
+  {
+   "date": "2027-03-13",
+   "artist": "FISHER",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/march-13-2027",
+   "verified": true
+  },
+  {
+   "date": "2027-03-14",
+   "artist": "Half Moon Festival", "note": "Half Moon Festival (14-15 Mar; no DJs named; dates from a travel blog, not on the organiser's site yet)",
+   "venue": "Half Moon Festival",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://thaiest.com/blog/half-moon-festival",
+   "verified": false
+  },
+  {
+   "date": "2027-03-22",
+   "artist": "Full Moon Party", "note": "Full Moon Party (no guest DJs named)",
+   "venue": "Haad Rin Beach",
+   "area": "Haad Rin",
+   "place": "Koh Phangan",
+   "source": "https://fullmoonparty-thailand.com/schedules/",
+   "verified": true
+  },
+  {
+   "date": "2027-03-29",
+   "artist": "Half Moon Festival", "note": "Half Moon Festival (29-30 Mar; no DJs named; dates from a travel blog, not on the organiser's site yet)",
+   "venue": "Half Moon Festival",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://thaiest.com/blog/half-moon-festival",
+   "verified": false
+  }
+ ],
+ "not_announced": [
+  "Atlas Beach Club",
+  "Atlas Super Club",
+  "FINNS (events page broken; nothing dated after NYE)",
+  "Potato Head (nothing dated after NYE)",
+  "Klymax",
+  "Desa Kitsuné (nothing dated after 31 Dec)",
+  "Café del Mar Bali (nothing dated after NYE)",
+  "Single Fin",
+  "Ulu Cliffhouse (weekly Saturdays only, no named artists)",
+  "Zumana",
+  "La Brisa (events page unreachable; nothing dated after NYE in listings)",
+  "Savaya 'Special Guest' dates with no artist named yet: 6, 7, 21 Feb; 6, 14, 20, 21, 27, 28 Mar",
+  "Jungle Experience (latest listed date 12 Jan 2027)",
+  "Waterfall Party (latest listed date 24 Jan 2027)",
+  "Half Moon Festival organiser site (lists December 2026 only)"
+ ]
+}
