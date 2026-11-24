@@ -28,9 +28,12 @@ interface InvitationProps {
  * Inputs: the trip, this device, the trip's info (absent on a half-written
  * trip) and the crew view.
  * Output: the invitation. With no note, the quotation is left out (Trip 5,
- * case 5).
- * Examples (checked at 390 px against 12/1):
+ * case 5). "I'm in" is the main button, filled in the accent colour, as on
+ * 12/1; "Maybe" and "Can't" are secondary. From 900 px up the photo takes
+ * the left column and the trip, the note and the replies the right.
+ * Examples (checked on the emulator at 375 px against 12/1, and at 1650 px):
  *   the example trip, 6 of 8 replied → "Bali · Koh Phangan", the note, "I'm in / Maybe / Can't", "6 of 8 replied · no app, no account"
+ *   1650 px                          → the photo on the left; the trip, the note and the buttons on the right
  */
 export function Invitation({ tripId, uid, info, crew }: InvitationProps) {
   const [joining, setJoining] = useState<Reply | null>(null);
@@ -50,8 +53,8 @@ export function Invitation({ tripId, uid, info, crew }: InvitationProps) {
   };
 
   return (
-    <>
-      <FlyerHead organizer={crew.organizer} info={info} tall>
+    <div className="invite">
+      <FlyerHead organizer={crew.organizer} info={info} photo="tall">
         {info?.note && (
           <p className="invite-note">
             “{info.note}”{info.noteBy && ` — ${info.noteBy}`}
@@ -62,7 +65,13 @@ export function Invitation({ tripId, uid, info, crew }: InvitationProps) {
         {failure && !failure.ok && <Notice>{failure.reason === "refused" ? "This was not saved." : "No connection"}</Notice>}
         <div className="seg3" role="group" aria-label="Your reply">
           {REPLIES.map(({ reply, label }) => (
-            <button key={reply} type="button" aria-pressed={crew.member?.reply === reply} onClick={() => onReply(reply)}>
+            <button
+              key={reply}
+              type="button"
+              className={reply === "in" ? "main" : undefined}
+              aria-pressed={crew.member?.reply === reply}
+              onClick={() => onReply(reply)}
+            >
               {label}
             </button>
           ))}
@@ -70,6 +79,6 @@ export function Invitation({ tripId, uid, info, crew }: InvitationProps) {
         <p className="cap">{repliedLine(crew.expected, crew.byId)} · no app, no account</p>
       </div>
       <JoinSheet reply={joining} crew={crew} onClose={() => setJoining(null)} onPick={onPick} />
-    </>
+    </div>
   );
 }
