@@ -1,10 +1,13 @@
 import { Notice } from "../components/Notice";
-import { crewOf, useOrganizerLink } from "../features/crew/api/crew";
+import { crewOf, useOrganizerLink, type CrewView } from "../features/crew/api/crew";
 import { Invitation } from "../features/crew/components/Invitation";
+import { DatesModule } from "../features/dates/components/DatesModule";
+import type { MapDestination } from "../features/map/components/TripMap";
 import { PartiesBlock } from "../features/parties/components/PartiesBlock";
+import { pins } from "./lib/pins";
 import { useTrip } from "../lib/useTrip";
 import type { Trip } from "../types/trip";
-import type { ReactNode } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import { Home } from "./Home";
 import type { ModuleId } from "./lib/modules";
 
@@ -55,12 +58,7 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
       {(!crew.member || crew.member.reply === "out") && <Invitation tripId={tripId} uid={uid} info={trip.info} crew={crew} />}
       {crew.member && (
         <>
-          {crew.isOrganizer && (
-            <Notice>
-              <b>Organizer view.</b>
-            </Notice>
-          )}
-          <Home trip={trip} memberId={crew.memberId} organizer={crew.organizer} content={moduleSlots(tripId, trip, uid)} />
+          <Home trip={trip} memberId={crew.memberId} organizer={crew.organizer} content={(openModule) => moduleSlots(tripId, trip, crew, openModule)} />
         </>
       )}
     </>
@@ -71,19 +69,52 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
  * What each module shows when open: one slot per module, so each module's
  * ticket plugs in here without touching the home page's layout.
  *
- * Inputs: the trip id, the trip and this device.
+ * Inputs: the trip id, the trip, the crew view of this device, and a way
+ * to open another module.
  * Output: the content for each module; null until its ticket fills it.
- * Examples: none yet; every slot is empty until Trips 7, 9, 11, 12 and 16.
+ * Examples (checked on screen): the Dates slot holds the Dates module.
  */
-function moduleSlots(tripId: string, trip: Trip, uid: string): Record<ModuleId, ReactNode> {
-  void tripId;
-  void trip;
-  void uid;
+/** The map loads on its first opening, so Leaflet stays out of the first page load. */
+const TripMap = lazy(() => import("../features/map/components/TripMap").then((module) => ({ default: module.TripMap })));
+
+function moduleSlots(tripId: string, trip: Trip, crew: CrewView, openModule: (id: ModuleId) => void): Record<ModuleId, ReactNode> {
   return {
-    dates: null, // Trip 7: the Dates module.
+    dates: crew.memberId && (
+      <DatesModule
+        tripId={tripId}
+        info={trip.info}
+        dates={trip.dates}
+        expected={crew.expected}
+        members={crew.byId}
+        memberId={crew.memberId}
+        isOrganizer={crew.isOrganizer}
+      />
+    ), // Trip 7: the Dates module.
     stay: null, // Trip 9: the Stay module.
-    parties: <PartiesBlock tripId={tripId} trip={trip} uid={uid} />, // Trip 11: the Parties module.
+    parties: <PartiesBlock tripId={tripId} trip={trip} memberId={crew.memberId} isOrganizer={crew.isOrganizer} onSeeMap={() => openModule("map")} />, // Trip 11: the Parties module.
     links: null, // Trip 16: the Links module.
-    map: null, // Trip 12: the Map module.
+    map: (
+      <Suspense fallback={<div className="map-wait" aria-busy="true" />}>
+        <TripMap
+          destinations={mapDestinations(trip)}
+          pins={pins(trip)}
+          onOpen={(pin) => openModule(pin.kind === "stay" ? "stay" : "parties")}
+        />
+      </Suspense>
+    ), // Trip 12: the Map module. Stay pins come from pins(); Trip 9 fills the Stay module a stay card opens.
   };
+}
+
+/**
+ * The destinations the map switches between, with their centres, in the
+ * trip file's order. A destination with no centre is left out.
+ *
+ * Inputs: the trip.
+ * Output: { id, name, lat, lng } for each destination.
+ * Examples (checked on screen): the example trip → Bali, then Koh Phangan
+ */
+function mapDestinations(trip: Trip): MapDestination[] {
+  return Object.entries(trip.info?.destinations ?? {})
+    .filter(([, place]) => place.lat !== undefined && place.lng !== undefined)
+    .map(([id, place]) => ({ id, name: place.name, lat: place.lat!, lng: place.lng! }));
 }

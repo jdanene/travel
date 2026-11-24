@@ -69,3 +69,28 @@ export function dayRange(from: string, to: string): string {
   const b = parts(to);
   return a.month === b.month ? `${a.date}–${b.date} ${MONTHS[b.month]}` : `${dayMonth(from)} – ${dayMonth(to)}`;
 }
+
+/**
+ * A range of days with weekdays, as the date options read on screen 20/2.
+ * Inputs: from and to — "YYYY-MM-DD", from first.
+ * Output: "Sat 13 – Tue 23 Feb" inside one month; "Fri 19 Feb – Mon 1 Mar" across two.
+ * Examples: weekdayRange("2027-02-13", "2027-02-23") → "Sat 13 – Tue 23 Feb"
+ */
+export function weekdayRange(from: string, to: string): string {
+  const a = parts(from);
+  const b = parts(to);
+  const start = a.month === b.month ? `${WEEKDAYS[a.weekday]} ${a.date}` : weekdayDate(from);
+  return `${start} – ${weekdayDate(to)}`;
+}
+
+/**
+ * The nights between two days.
+ * Inputs: from and to — "YYYY-MM-DD", from first.
+ * Output: a whole number; 0 when the days are equal.
+ * Examples: nights("2027-02-13", "2027-02-23") → 10
+ */
+export function nights(from: string, to: string): number {
+  const a = parts(from);
+  const b = parts(to);
+  return Math.round((Date.UTC(b.year, b.month, b.date) - Date.UTC(a.year, a.month, a.date)) / 86_400_000);
+}

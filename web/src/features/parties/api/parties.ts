@@ -12,25 +12,6 @@ export interface PartyDraft {
   link: string;
 }
 
-export interface Viewer {
-  memberId: MemberId | null;
-  isOrganizer: boolean;
-}
-
-/**
- * Who is looking at the list, for "I'm in" and "Edit". The crew context
- * owns this rule; a feature never imports another feature, so the parties
- * module reads the same two fields of the trip that the rules read.
- *
- * Inputs: the trip and this device's uid.
- * Output: the member this device points to, or null before a reply, and
- * whether the device holds the organizer mark.
- * Examples (checked on the emulator): after a reply → { memberId: "rb", isOrganizer: false }
- */
-export function viewerOf(trip: Trip, uid: string): Viewer {
-  return { memberId: trip.crew?.devices?.[uid] ?? null, isOrganizer: trip.crew?.organizers?.[uid] === true };
-}
-
 /**
  * Marks a member in for a show, or takes the mark back. The listener shows
  * the change at once; with no connection the write waits and sends later,

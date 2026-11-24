@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Icon } from "../../../components/Icon";
 import { Notice } from "../../../components/Notice";
 import type { WriteResult } from "../../../lib/db";
-import type { Trip } from "../../../types/trip";
-import { addShow, editShow, removeShow, setIn, viewerOf, type PartyDraft } from "../api/parties";
+import type { MemberId, Trip } from "../../../types/trip";
+import { addShow, editShow, removeShow, setIn, type PartyDraft } from "../api/parties";
 import { lastYearLines } from "../lib/lastYear";
 import { byPlaceVenueDate, venueKey, type ListedShow } from "../lib/shows";
 import { AddPartySheet } from "./AddPartySheet";
@@ -19,7 +19,11 @@ type SheetState = { mode: "add" } | { mode: "edit"; id: string } | null;
 interface PartiesBlockProps {
   tripId: string;
   trip: Trip;
-  uid: string;
+  /** This device's member; null before a reply, and then nothing can be tapped. */
+  memberId: MemberId | null;
+  isOrganizer: boolean;
+  /** Opens the Map module, for "See on the map ›" (12/5). */
+  onSeeMap?: () => void;
 }
 
 /**
@@ -28,7 +32,8 @@ interface PartiesBlockProps {
  * by date, with the last-year line where a weekend is empty. Open from the
  * start; it never waits on the dates.
  *
- * Inputs: the trip id, the trip from the one listener, and this device.
+ * Inputs: the trip id, the trip from the one listener, this device's
+ * member and organizer mark, and a way to open the map.
  * Output: the list and the Add a party sheet. With no shows at all, "Nothing
  * announced yet." and the Add button. A refused or failed write shows one
  * notice above the list; the listener already put the data back.
@@ -37,10 +42,10 @@ interface PartiesBlockProps {
  *   tap "I'm in"     → filled at once, "1 in" with your initials
  *   add a listed party → the sheet closes and that row scrolls into view
  */
-export function PartiesBlock({ tripId, trip, uid }: PartiesBlockProps) {
+export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap }: PartiesBlockProps) {
   const [sheet, setSheet] = useState<SheetState>(null);
   const [problem, setProblem] = useState<string | null>(null);
-  const viewer = viewerOf(trip, uid);
+  const viewer = { memberId, isOrganizer };
   const shows = trip.parties?.shows ?? {};
   const marks = trip.parties?.in ?? {};
   const members = trip.crew?.members ?? {};
@@ -146,6 +151,11 @@ export function PartiesBlock({ tripId, trip, uid }: PartiesBlockProps) {
           })}
         </section>
       ))}
+      {onSeeMap && groups.length > 0 && (
+        <button type="button" className="cap see-map" onClick={onSeeMap}>
+          See on the map ›
+        </button>
+      )}
       <AddPartySheet
         open={sheet !== null && (sheet.mode === "add" || editing !== undefined)}
         editing={editing}

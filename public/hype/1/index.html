@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>TRAVEL</title>
-<link rel="stylesheet" href="/assets/hype.css?v=7">
+<link rel="stylesheet" href="/assets/hype.css?v=9">
 <style>
   .grid { position: fixed; inset: 0; padding: 8px; gap: 8px; display: grid;
     grid-template-columns: 1.1fr 1.6fr 1fr; grid-template-rows: 1fr 1fr 1fr;
@@ -28,20 +28,19 @@
 <body class="grain">
   <main class="grid">
     <div class="p" id="a" style="grid-area:a"><span class="stars">★★★★★</span></div>
-    <div class="p t" id="t" style="grid-area:t"><div class="center"><div><div class="title">TRAVEL</div><div class="dest">Bali · Koh Phangan</div></div></div></div>
+    <div class="p t" id="t" style="grid-area:t"><div class="center"><div><div class="title">TRAVEL</div><div class="dest">Bali · Koh Phangan · Feb 2027</div></div></div></div>
     <div class="p" id="c" style="grid-area:c"></div>
     <div class="p" id="d" style="grid-area:d"></div>
     <div class="p" id="g" style="grid-area:g"></div>
     <div class="p" id="e" style="grid-area:e"></div>
     <div class="p" id="w" style="grid-area:w"></div>
   </main>
-<script src="/assets/hype.js?v=7"></script>
+<script src="/assets/hype.js?v=9"></script>
 <script>
-  const H = HYPE, bg = H.bali.find(b => !b.label);   // the beach club at sunset
-  document.getElementById("t").prepend(H.el(bg));                      // beach club at sunset behind the title
-  // Every other panel cycles through all the clips and photos; no two panels show the same one.
-  H.board(["a", "c", "d", "g", "e", "w"].map(id => document.getElementById(id)), H.photos.filter(p => p !== bg), 4000);
-  H.bed(); H.sound();
+  const H = HYPE;
+  // Every panel, the title panel too, cycles through every clip and photo; no two panels show the same one.
+  H.board(["t", "a", "c", "d", "g", "e", "w"].map(id => document.getElementById(id)), H.photos, 4000);
+  H.bed(); H.sound(); H.enter();
 </script>
 </body>
 </html>

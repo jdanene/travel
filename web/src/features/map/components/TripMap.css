@@ -1,0 +1,14 @@
+/* The map of 12/6 and 20/10, fitted into the module frame: the pills, the map, the pins (.mk), the open card. */
+.map-pills { margin: 0 0 12px; }
+.map-box { height: 360px; border-radius: 16px; overflow: hidden; background: #e8eef0; }
+.map-box .leaflet-container { width: 100%; height: 100%; font: inherit; background: #e8eef0; }
+.map-box .leaflet-control-attribution { font-size: 11px; }
+.mk { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px 6px 6px; border-radius: 20px; background: #fff; box-shadow: 0 3px 12px rgba(0,0,0,.2); font: 700 13.5px/1 "Plus Jakarta Sans", sans-serif; color: var(--ink); white-space: nowrap; transform: translate(-50%, -50%); width: max-content; cursor: pointer; }
+.mk i { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--soft); font-style: normal; }
+.mk i svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.mk.on { background: var(--ink); color: #fff; transform: translate(-50%, -50%) scale(1.08); }
+.mk.on i { background: var(--acc); color: #fff; }
+.mk.stay i { background: var(--acc-soft); color: var(--acc); }
+.pin-card { display: block; width: 100%; text-align: left; margin-top: 12px; padding: 14px 16px; border-radius: 18px; background: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.08), inset 0 0 0 1px var(--line); }
+.pin-list { display: grid; gap: 8px; margin-top: 8px; }
+.pin-list button { text-align: left; padding: 10px 14px; border-radius: 14px; background: var(--soft); font-weight: 600; }

@@ -39,3 +39,4 @@
 .party-sheet .cap { margin-top: 10px; text-align: center; }
 
 @media (prefers-reduced-motion: reduce) { .inbtn { transition: none; } }
+.see-map { display: inline-flex; align-items: center; min-height: 32px; margin-top: 8px; color: var(--acc); font-weight: 700; }
