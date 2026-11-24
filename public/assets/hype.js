@@ -166,14 +166,19 @@ window.HYPE = (() => {
     const free = pool.slice(), cur = [];
     // A tile's own scene counts as busy too, or it would swap between two cuts of one clip and look frozen.
     // The WASTED card only ever goes on the last tile, the bottom corner, and only once per full round of the pool.
+    // Order is random on every visit and every round, but every item comes up once per round before any repeats.
     const last = tiles.length - 1;
-    let since = pool.length;
+    let since = pool.length, shown = new Set();
     const take = k => {
       const busy = new Set(cur.filter(c => c).map(scene));
-      const i = free.findIndex(it => !busy.has(scene(it)) && (!it.wasted || (k === last && since >= pool.length)));
-      if (i < 0) return null;
-      since = free[i].wasted ? 0 : since + 1;
-      return free.splice(i, 1)[0];
+      const ok = it => !busy.has(scene(it)) && (!it.wasted || (k === last && since >= pool.length));
+      let options = free.filter(it => ok(it) && !shown.has(it));
+      if (!options.length) { shown = new Set(cur.filter(c => c)); options = free.filter(ok); }   // a new round
+      if (!options.length) return null;
+      const it = options[Math.floor(Math.random() * options.length)];
+      shown.add(it);
+      since = it.wasted ? 0 : since + 1;
+      return free.splice(free.indexOf(it), 1)[0];
     };
     const put = (k, item, wait) => {
       const t = tiles[k], e = el(item, "layer", { small: true });
@@ -194,6 +199,7 @@ window.HYPE = (() => {
     // The last tile opens on the WASTED card, so the page starts with it at the bottom.
     const w = free.findIndex(it => it.wasted);
     if (w >= 0) { cur[last] = free.splice(w, 1)[0]; since = 0; }
+    if (cur[last]) shown.add(cur[last]);
     tiles.forEach((t, k) => { if (!cur[k]) cur[k] = take(k); if (cur[k]) put(k, cur[k], Math.round(k * ms / tiles.length)); });
   }
 
