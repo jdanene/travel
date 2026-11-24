@@ -9,14 +9,18 @@
  * The first run makes the trip id (20 random characters) and the organizer
  * key, and saves both in local/trip.state.json (local/trip.state.emulator.json
  * with --emulator). Every later run keeps them.
- * Each run replaces info, crew/expected, dates/options and places, and
- * touches nothing else: answers, hearts, stays and shows stay. Everything
+ * Each run replaces info, crew/expected, dates/options, places and the
+ * admin list (tripSecrets/{tripId}/admins, from the file's `admins`), and
+ * touches nothing else: answers, hearts, stays and shows stay. Removing an
+ * email from `admins` stops it making new organizers; a device that is
+ * already an organizer stays one until its crew/organizers/{uid} entry is
+ * deleted by hand (plan, D15). Everything
  * goes in one update, so nothing is half written. No step retries.
  */
 import { execFileSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { idFromName } from "../web/src/lib/ids.ts";
+import { emailKey, idFromName } from "../web/src/lib/ids.ts";
 import { validateTripFile } from "./trip-file.mjs";
 
 const PROJECT = "travel-ca8f9";
@@ -77,6 +81,10 @@ const update = {
   ),
   [`trips/${tripId}/places`]: { areas: places.areas, venues: places.venues },
   [`tripSecrets/${tripId}/organizerKey`]: { [organizerKey]: true },
+  // The whole node, so an email taken out of the file is taken out here; null when there are none.
+  [`tripSecrets/${tripId}/admins`]: (file.admins ?? []).length
+    ? Object.fromEntries(file.admins.map((email) => [emailKey(email.trim()), true]))
+    : null,
 };
 
 const updateFile = "local/trip.update.json";

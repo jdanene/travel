@@ -26,6 +26,7 @@ Sources: `docs/requirements.md` section 0, the mocks `public/designs/12/index.ht
 | D12 | `scripts/ship.sh` is the one deploy command. It is new, and it is the maintained one from now on. | The repo has no deploy script yet. |
 | D13 | The home page is design 12's flyer: the cover photo, the organizer's avatar, the name, the date line, and a stack of equal module buttons that open in place (Dates, Stay, Parties, Links, Map). Inside a module, design 20's content and sheets. | Owner, 23 Nov 2026. One open module at a time keeps one job on the screen. |
 | D14 | Links is a module: a friend pastes an Instagram, TikTok or other link for a destination, and it shows for everyone. Its data is `links/items`; the link reader also reads Instagram and TikTok. | Owner, 23 Nov 2026: the bucket for cool things found online. |
+| D15 | The organizer may also sign in with Google. A verified email on the trip's admin list (`admins` in `local/trip.json`, written by `create-trip` to `tripSecrets/{tripId}/admins`) makes that device an organizer, on any device. Google is linked to the device's anonymous account, so its uid and member stay; on a second device the Google account's uid is used, and the device picks its name under "Already replied". The organizer link keeps working. | Owner: "My email will be admin". One link on one device was easy to lose. |
 
 Each was weighed against a second design. D1 against plain files with no build (rejected: nine screens of live state in hand-written DOM code is harder to read than components). D3 against email links (rejected: a step to learn). D7 against one listener per feature (rejected: five loading states for one small page). D8 against typed fields only (rejected: screen 5 shows the listing's name and photo; typed fields stay as the fallback).
 
@@ -38,7 +39,7 @@ Each was weighed against a second design. D1 against plain files with no build (
 | trip | The one aggregate. Everything hangs from it. | "Bali · Koh Phangan" |
 | member | One friend in the crew. Has a name and a reply. | initials |
 | device | One phone or browser. Points to one member. | not shown |
-| organizer | A device that claimed the organizer key. | "Organizer view." |
+| organizer | A device that claimed the organizer key, or signed in with an admin email. | "Organizer view." |
 | reply | in, maybe or out. | "I'm in", "Maybe", "Can't make it" |
 | date option | One range of days. | "Sat 13 – Tue 23 Feb" |
 | answer | A member's yes, maybe or no to a date option. | "Yes", "Maybe", "No" |
@@ -128,6 +129,8 @@ Paths live in one file, `web/src/lib/paths.ts`. The rules file repeats them; the
 /tripSecrets/{tripId}            no phone can read this branch
   organizerKey { {key}: true }
   claims       { {uid}: key }    a device writes its own claim; the rules test the key exists
+  admins       { {emailKey}: true }  from the trip file's `admins`; emailKey is the email in lower case
+                                     with every "." as "," (web/src/lib/ids.ts); replaced whole on each run
 ```
 
 Ids that must not repeat are made from their content: a member, area or venue id from its name (`web/src/lib/ids.ts`, which the scripts import too); a date option id from its two days; a `linkId` from the link address without its query string; `stayId` from the listing address without its query string; a seeded `showId` from destination, venue, date and artist. Two friends who add the same thing write the same record.
@@ -139,7 +142,7 @@ Rules, in words:
 - A device writes an answer, a heart, an "in" mark or a reply only under the member its uid points to.
 - A device adds a link and removes its own; an organizer removes any link.
 - A device adds a stay option or a show with `addedBy` equal to its member. It edits or removes a show only when it added it, or when it is an organizer.
-- Only an organizer writes `dates/confirmed`, `stay/confirmed` and `crew/organizers`. A device becomes an organizer when its claim holds a key that exists.
+- Only an organizer writes `dates/confirmed`, `stay/confirmed` and `crew/organizers`. A device becomes an organizer when its claim holds a key that exists, or when it is signed in with a verified email that is on `tripSecrets/{tripId}/admins`.
 - Every write is checked for shape and length. A value outside the shape is refused.
 
 ## 5. Audits (create-a-project, section 10)

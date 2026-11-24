@@ -10,8 +10,8 @@
    *   "an organizer" a device listed under trips/$tripId/crew/organizers
    *
    * The scripts in scripts/ write info, crew/expected, dates/options,
-   * parties/lastYear, places and tripSecrets/organizerKey with admin rights,
-   * so no rule below lets a phone write them.
+   * parties/lastYear, places, tripSecrets/organizerKey and tripSecrets/admins
+   * with admin rights, so no rule below lets a phone write them.
    */
   "rules": {
     "trips": {
@@ -37,7 +37,9 @@
           },
           "organizers": {
             "$uid": {
-              ".write": "auth != null && auth.uid === $uid && root.child('tripSecrets').child($tripId).child('claims').child(auth.uid).exists() && root.child('tripSecrets').child($tripId).child('organizerKey').child(root.child('tripSecrets').child($tripId).child('claims').child(auth.uid).val()).exists()",
+              /* A device becomes an organizer by the key of the organizer link, or by a verified
+                 email on the admin list: tripSecrets/$tripId/admins/<email, lower case, "." as ","> (D15). */
+              ".write": "auth != null && auth.uid === $uid && ((root.child('tripSecrets').child($tripId).child('claims').child(auth.uid).exists() && root.child('tripSecrets').child($tripId).child('organizerKey').child(root.child('tripSecrets').child($tripId).child('claims').child(auth.uid).val()).exists()) || (auth.token.email_verified === true && root.child('tripSecrets').child($tripId).child('admins').child(auth.token.email.toLowerCase().replace('.', ',')).exists()))",
               ".validate": "newData.val() === true"
             }
           }
