@@ -1,5 +1,5 @@
 /**
- * The nine rules tests of Trip 2, against the database emulator. Run with
+ * The rules tests of Trip 2 and of Add dates, against the database emulator. Run with
  * `npm run test:rules` in web/; it starts the emulator, runs this file and
  * stops it. Each test names the rule it proves, in the words of plan
  * section 4.
@@ -95,5 +95,28 @@ describe("database rules", () => {
     await assertFails(remove(ref(db("uid-a"), paths.show(T, "seed1"))));
     await assertSucceeds(update(ref(db("uid-a"), "/"), { [paths.show(T, "f1")]: null, [paths.showIn(T, "f1")]: null }));
     await assertSucceeds(remove(ref(db("uid-o"), paths.show(T, "seed1"))));
+  });
+
+  it("10. lets a friend add a date option with its Yes in one write, under its own member", async () => {
+    const id = "2027-02-18_2027-02-24";
+    await assertSucceeds(update(ref(db("uid-a"), "/"), {
+      [paths.dateOption(T, id)]: { from: "2027-02-18", to: "2027-02-24", addedBy: "alice", at: 1 },
+      [paths.answer(T, id, "alice")]: "yes",
+    }));
+    await assertFails(set(ref(db("uid-a"), paths.dateOption(T, "2027-02-19_2027-02-25")), { from: "2027-02-19", to: "2027-02-25", addedBy: "bob", at: 1 }));
+  });
+
+  it("11. refuses an option over one that exists, and lets the adder remove it with its answers", async () => {
+    const id = "2027-03-01_2027-03-05";
+    await assertSucceeds(set(ref(db("uid-b"), paths.dateOption(T, id)), { from: "2027-03-01", to: "2027-03-05", addedBy: "bob", at: 1 }));
+    await assertFails(set(ref(db("uid-a"), paths.dateOption(T, id)), { from: "2027-03-01", to: "2027-03-05", addedBy: "alice", at: 2 }));
+    await assertFails(remove(ref(db("uid-a"), paths.dateOption(T, id))));
+    await assertSucceeds(update(ref(db("uid-b"), "/"), { [paths.dateOption(T, id)]: null, [paths.optionAnswers(T, id)]: null }));
+  });
+
+  it("12. refuses an option outside the season, or with To before From", async () => {
+    const a = db("uid-a");
+    await assertFails(set(ref(a, paths.dateOption(T, "2027-03-28_2027-04-02")), { from: "2027-03-28", to: "2027-04-02", addedBy: "alice", at: 1 }));
+    await assertFails(set(ref(a, paths.dateOption(T, "2027-02-20_2027-02-10")), { from: "2027-02-20", to: "2027-02-10", addedBy: "alice", at: 1 }));
   });
 });

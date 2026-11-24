@@ -9,14 +9,17 @@
  * The first run makes the trip id (20 random characters) and the organizer
  * key, and saves both in local/trip.state.json (local/trip.state.emulator.json
  * with --emulator). Every later run keeps them.
- * Each run replaces info, crew/expected, dates/options and places, and
- * touches nothing else: answers, hearts, stays and shows stay. Everything
+ * Each run replaces info, crew/expected and places, writes each starting
+ * date option by its own path, and touches nothing else: the options
+ * friends added with "Add dates", answers, hearts, stays and shows stay.
+ * A starting option taken out of the trip file stays in the database; the
+ * organizer removes it on the page. Everything
  * goes in one update, so nothing is half written. No step retries.
  */
 import { execFileSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { idFromName } from "../web/src/lib/ids.ts";
+import { dateOptionId, idFromName } from "../web/src/lib/ids.ts";
 import { validateTripFile } from "./trip-file.mjs";
 
 const PROJECT = "travel-ca8f9";
@@ -72,9 +75,8 @@ const info = {
 const update = {
   [`trips/${tripId}/info`]: info,
   [`trips/${tripId}/crew/expected`]: Object.fromEntries(file.crew.map((name) => [idFromName(name), name])),
-  [`trips/${tripId}/dates/options`]: Object.fromEntries(
-    file.dateOptions.map(({ from, to }) => [`${from}_${to}`, { from, to }]),
-  ),
+  // One path per option, so the options friends added stay.
+  ...Object.fromEntries(file.dateOptions.map(({ from, to }) => [`trips/${tripId}/dates/options/${dateOptionId(from, to)}`, { from, to }])),
   [`trips/${tripId}/places`]: { areas: places.areas, venues: places.venues },
   [`tripSecrets/${tripId}/organizerKey`]: { [organizerKey]: true },
 };

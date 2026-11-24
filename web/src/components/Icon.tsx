@@ -10,6 +10,8 @@ const PATHS = {
   heart: <path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.6 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z" />,
   plus: <path d="M12 5v14M5 12h14" />,
   chev: <path d="M9 5l7 7-7 7" />,
+  /** Not in the mocks: the mark on a date option that holds the Full Moon Party. */
+  moon: <path d="M19.5 14.6A7.8 7.8 0 0 1 9.4 4.5a7.8 7.8 0 1 0 10.1 10.1z" />,
 };
 
 export type IconName = keyof typeof PATHS;

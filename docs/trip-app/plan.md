@@ -26,6 +26,7 @@ Sources: `docs/requirements.md` section 0, the mocks `public/designs/12/index.ht
 | D12 | `scripts/ship.sh` is the one deploy command. It is new, and it is the maintained one from now on. | The repo has no deploy script yet. |
 | D13 | The home page is design 12's flyer: the cover photo, the organizer's avatar, the name, the date line, and a stack of equal module buttons that open in place (Dates, Stay, Parties, Links, Map). Inside a module, design 20's content and sheets. | Owner, 23 Nov 2026. One open module at a time keeps one job on the screen. |
 | D14 | Links is a module: a friend pastes an Instagram, TikTok or other link for a destination, and it shows for everyone. Its data is `links/items`; the link reader also reads Instagram and TikTok. | Owner, 23 Nov 2026: the bucket for cool things found online. |
+| D16 | Any friend adds a date option with "Add dates" (From, To, inside 1 Feb to 31 Mar 2027). It shows for everyone at once, sorted by its first day, with "added by" on it and the adder's Yes. An option need not include 22 Feb; one that does carries a moon mark and "Full Moon Party". The organizer still confirms one option. | Owner, 24 Nov 2026: "there should be an option to create your own date interval, and that interval then shows for everyone else." Three fixed options were too restrictive. A range per friend with a computed best stretch was weighed and dropped by the owner for this. |
 
 Each was weighed against a second design. D1 against plain files with no build (rejected: nine screens of live state in hand-written DOM code is harder to read than components). D3 against email links (rejected: a step to learn). D7 against one listener per feature (rejected: five loading states for one small page). D8 against typed fields only (rejected: screen 5 shows the listing's name and photo; typed fields stay as the fallback).
 
@@ -40,7 +41,7 @@ Each was weighed against a second design. D1 against plain files with no build (
 | device | One phone or browser. Points to one member. | not shown |
 | organizer | A device that claimed the organizer key. | "Organizer view." |
 | reply | in, maybe or out. | "I'm in", "Maybe", "Can't make it" |
-| date option | One range of days. | "Sat 13 – Tue 23 Feb" |
+| date option | One range of days: a starting one from the trip file, or one a friend added. | "Sat 13 – Tue 23 Feb" |
 | answer | A member's yes, maybe or no to a date option. | "Yes", "Maybe", "No" |
 | destination | Bali or Koh Phangan. | "Bali", "Koh Phangan" |
 | area | A part of a destination, with a map centre. | "Uluwatu", "Haad Rin" |
@@ -81,7 +82,7 @@ The home page is a stack of module buttons of equal weight (owner, 23 Nov 2026; 
 
 `modules(trip, memberId)` returns the ordered list of modules to show, each with the state line on the right of its button:
 
-- **Dates:** "Tap to answer" before the member answers; once the dates are confirmed, the result, "13–23 Feb · confirmed".
+- **Dates:** "Tap to answer" until the member answers every option (a friend's new option asks again), then "Answered"; once the dates are confirmed, the result, "13–23 Feb · confirmed".
 - **Stay:** present only once the dates are confirmed. "7 options · heart one" before a stay is confirmed; then the result per destination, "Cliffside villa · confirmed" (two lines when both destinations have one).
 - **Parties:** "6 shows · I'm in". Open from the start; never settled.
 - **Links:** the count of links. Open from the start.
@@ -109,7 +110,7 @@ Paths live in one file, `web/src/lib/paths.ts`. The rules file repeats them; the
     devices   { {uid}: memberId }
     organizers{ {uid}: true }
   dates
-    options   { {optionId}: { from, to } }
+    options   { {optionId}: { from, to, addedBy?, at? } }   optionId "{from}_{to}"; no addedBy on the trip file's starting options
     answers   { {optionId}: { {memberId}: "yes"|"maybe"|"no" } }
     confirmed { optionId, by, at } | absent
   stay
@@ -137,6 +138,7 @@ Rules, in words:
 - Nobody lists `/trips`. A signed-in device reads one trip when it knows the id.
 - A device writes `crew/devices/{its own uid}` and nothing else there.
 - A device writes an answer, a heart, an "in" mark or a reply only under the member its uid points to.
+- A device adds a date option with `addedBy` equal to its member, never over one that exists, with both days inside 1 Feb to 31 Mar 2027 and from not after to. The adder or an organizer removes an option that is not confirmed, with its answers in the same write. The page offers Remove only while nobody but the adder has voted; the rules cannot count votes.
 - A device adds a link and removes its own; an organizer removes any link.
 - A device adds a stay option or a show with `addedBy` equal to its member. It edits or removes a show only when it added it, or when it is an organizer.
 - Only an organizer writes `dates/confirmed`, `stay/confirmed` and `crew/organizers`. A device becomes an organizer when its claim holds a key that exists.
@@ -190,6 +192,11 @@ The number is the case's id. Each ticket lists its own.
 12. The organizer confirms an option nobody said yes to: allowed.
 13. An answer points to an option that no longer exists, or holds a wrong value: ignore it.
 14. After the confirm: answers stay readable; the Dates button shows the result and still opens.
+50. Add dates with a day missing or outside 1 Feb to 31 Mar: "Pick a day from 1 Feb to 31 Mar." under that field; To before From: "Pick a day on or after From." under To. The typed days stay.
+51. Add dates with a range that is listed already (by one friend or two at once): no new option; the friend's vote on it is set to Yes and the card is brought into view. Two friends adding the same new range at once: the first write wins, the second is refused and shows "This was not saved."
+52. The adder removes their option: it and its answers go for everyone. Remove shows only while nobody else voted and it is not confirmed; an organizer may remove any such option, the starting ones too.
+53. An option that holds 22 Feb shows the moon mark and "Full Moon Party"; one that does not is still allowed.
+54. Re-running create-trip writes each starting option by its own path, so friends' options and all answers stay. A starting option taken out of the trip file stays; the organizer removes it on the page.
 
 **Link reader and stay (Trip 8, Trip 9)**
 15. The text is not an Airbnb or Booking.com link: say "Paste an Airbnb or Booking.com link." and make no call.
@@ -575,6 +582,8 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 The edge cases above are the ones found before the build. Find the rest: for every call, every write and every state, ask what happens when it is missing, fails, repeats or races, and record each case you handle in the PR body.
 
 ### Trip 7 · Dates
+
+**Changed by D16 (24 Nov 2026):** friends add their own options with "Add dates" (cases 50 to 54), and the line above the options reads "The Full Moon Party is Mon 22 Feb." with a moon mark on each option that holds it. The rest of this ticket stands.
 
 **Waits on:** Trip 6. **Size:** M.
 

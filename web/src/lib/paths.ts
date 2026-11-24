@@ -23,6 +23,12 @@ export const organizer = (tripId: string, uid: string) => `trips/${tripId}/crew/
 /** This device's claim on the organizer key; no phone can read it back. */
 export const organizerClaim = (tripId: string, uid: string) => `tripSecrets/${tripId}/claims/${uid}`;
 
+/** One date option. */
+export const dateOption = (tripId: string, optionId: string) => `trips/${tripId}/dates/options/${optionId}`;
+
+/** Every answer to one date option; removed with the option. */
+export const optionAnswers = (tripId: string, optionId: string) => `trips/${tripId}/dates/answers/${optionId}`;
+
 /** A member's answer to one date option. */
 export const answer = (tripId: string, optionId: string, memberId: string) =>
   `trips/${tripId}/dates/answers/${optionId}/${memberId}`;

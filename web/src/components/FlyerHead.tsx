@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { dayMonth, longMonthYear } from "../lib/format";
+import { dayMonth, seasonSpan } from "../lib/format";
 import { initials } from "../lib/initials";
 import type { TripInfo } from "../types/trip";
 import "./Avatars.css";
@@ -27,12 +27,12 @@ interface FlyerHeadProps {
  * share it, so the trip looks the same before and after a reply.
  *
  * Inputs: the organizer's name, the trip's info, the photo height, the
- * replied line, and any lines below. The date line is the season's month
+ * replied line, and any lines below. The date line is the season's months
  * and the anchor day.
  * Output: the head of the page; the title is the page's one h1. From 900 px
  * up the photo is a rounded picture in the left column.
  * Examples (checked at 375 px against 12/2, and at 1650 px):
- *   organizer "JD" → the photo, a 72 px "JD" circle, "Bali · Koh Phangan", "February 2027 · Full Moon Party 22 Feb"
+ *   organizer "JD" → the photo, a 72 px "JD" circle, "Bali · Koh Phangan", "February – March 2027 · Full Moon Party 22 Feb"
  *   at 1650 px     → the same, with "6 of 8 replied" under the date line
  */
 export function FlyerHead({ organizer, info, photo, replied, children }: FlyerHeadProps) {
@@ -51,7 +51,7 @@ export function FlyerHead({ organizer, info, photo, replied, children }: FlyerHe
           <>
             <h1 className="h1">{info.name}</h1>
             <p className="sub">
-              {longMonthYear(info.season.from)} · {info.anchor.name} {dayMonth(info.anchor.date)}
+              {seasonSpan(info.season.from, info.season.to)} · {info.anchor.name} {dayMonth(info.anchor.date)}
             </p>
           </>
         )}

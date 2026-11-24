@@ -26,14 +26,22 @@ export function monthYear(day: string): string {
 }
 
 /**
- * The long month and year of a day, as on the invitation.
- * Inputs: day — "YYYY-MM-DD".
- * Output: "February 2027".
- * Examples: longMonthYear("2027-02-01") → "February 2027"
+ * The months of the trip's season, long, as the flyer's date line writes
+ * them, so the line says the trip runs February and March, not February.
+ * Inputs: from and to — "YYYY-MM-DD", from first.
+ * Output: one month and year when both days share a month; two months and
+ * one year inside one year; two months with their years across a new year.
+ * Examples:
+ *   seasonSpan("2027-02-01", "2027-03-31") → "February – March 2027"
+ *   seasonSpan("2027-02-01", "2027-02-28") → "February 2027"
+ *   seasonSpan("2026-12-01", "2027-01-31") → "December 2026 – January 2027"
  */
-export function longMonthYear(day: string): string {
-  const { year, month } = parts(day);
-  return `${LONG_MONTHS[month]} ${year}`;
+export function seasonSpan(from: string, to: string): string {
+  const a = parts(from);
+  const b = parts(to);
+  if (a.year !== b.year) return `${LONG_MONTHS[a.month]} ${a.year} – ${LONG_MONTHS[b.month]} ${b.year}`;
+  if (a.month !== b.month) return `${LONG_MONTHS[a.month]} – ${LONG_MONTHS[b.month]} ${b.year}`;
+  return `${LONG_MONTHS[a.month]} ${a.year}`;
 }
 
 /**

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mostYes, notAnswered, summary } from "./dates";
+import { checkDates, mostYes, notAnswered, summary } from "./dates";
 
 // The header examples of the date counts: the typical case and the surprising one.
 const option = { from: "2027-02-13", to: "2027-02-23" };
@@ -28,5 +28,15 @@ describe("date counts", () => {
 
   it("notAnswered leaves out who can't make it", () => {
     expect(notAnswered({}, { rb: { name: "RB", reply: "out", at: 1 } }, { a: option }, {})).toEqual([]);
+  });
+
+  const season = { from: "2027-02-01", to: "2027-03-31" };
+
+  it("checkDates accepts two days in the season", () => {
+    expect(checkDates({ from: "2027-02-13", to: "2027-02-23" }, season)).toEqual({});
+  });
+
+  it("checkDates refuses a To before From, next to To", () => {
+    expect(checkDates({ from: "2027-02-13", to: "2027-02-10" }, season)).toEqual({ to: "Pick a day on or after From." });
   });
 });

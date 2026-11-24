@@ -21,7 +21,7 @@ const isText = (value, max) => typeof value === "string" && value.trim().length 
  * the file is good.
  * Examples:
  *   the example file                          → []
- *   a date option of 2027-02-24 to 2027-03-01 → ["dateOptions[0] leaves out Full Moon Party on 2027-02-22"]
+ *   a date option of 2027-03-01 to 2027-02-24 → ["dateOptions[0] ends before it starts"]
  */
 export function validateTripFile(file, idFromName) {
   if (typeof file !== "object" || file === null || Array.isArray(file)) return ["the file is not a JSON object"];
@@ -58,7 +58,6 @@ export function validateTripFile(file, idFromName) {
       if (!isDay(option?.from) || !isDay(option?.to)) return problems.push(`${where} needs from and to as YYYY-MM-DD`);
       if (option.to < option.from) return problems.push(`${where} ends before it starts`);
       if (seasonGood && (option.from < season.from || option.to > season.to)) problems.push(`${where} lies outside the season`);
-      if (anchorGood && (anchor.date < option.from || anchor.date > option.to)) problems.push(`${where} leaves out ${anchor.name} on ${anchor.date}`);
     });
   }
 

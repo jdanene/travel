@@ -30,3 +30,17 @@ export function idFromName(name: string): string {
   const first = name.trim().codePointAt(0) ?? 0;
   return `u-${first.toString(16)}`;
 }
+
+/**
+ * Makes a date option's id from its two days, so the same range always
+ * gives the same id: two friends who add 13–23 Feb add one option, and the
+ * trip script's starting options use the same ids.
+ *
+ * Inputs: from and to — "YYYY-MM-DD".
+ * Output: "from_to".
+ * Examples:
+ *   dateOptionId("2027-02-13", "2027-02-23") → "2027-02-13_2027-02-23"
+ */
+export function dateOptionId(from: string, to: string): string {
+  return `${from}_${to}`;
+}
