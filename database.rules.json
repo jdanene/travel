@@ -1,0 +1,146 @@
+{
+  /*
+   * Realtime Database rules for the trip app. The contract is section 4 of
+   * docs/trip-app/plan.md; web/src/lib/paths.ts builds the same paths, and
+   * web/tests/rules.test.ts holds the two together.
+   *
+   * Words used below:
+   *   "its member"   the member id this device points to:
+   *                  trips/$tripId/crew/devices/<auth.uid>
+   *   "an organizer" a device listed under trips/$tripId/crew/organizers
+   *
+   * The scripts in scripts/ write info, crew/expected, dates/options,
+   * parties/lastYear, places and tripSecrets/organizerKey with admin rights,
+   * so no rule below lets a phone write them.
+   */
+  "rules": {
+    "trips": {
+      "$tripId": {
+        ".read": "auth != null",
+
+        "crew": {
+          "members": {
+            "$memberId": {
+              ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() === $memberId",
+              ".validate": "newData.hasChildren(['name', 'reply', 'at'])",
+              "name": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" },
+              "reply": { ".validate": "newData.isString() && newData.val().matches(/^(in|maybe|out)$/)" },
+              "at": { ".validate": "newData.isNumber()" },
+              "$other": { ".validate": false }
+            }
+          },
+          "devices": {
+            "$uid": {
+              ".write": "auth != null && auth.uid === $uid",
+              ".validate": "newData.isString() && newData.val().matches(/^[a-z0-9-]{1,40}$/)"
+            }
+          },
+          "organizers": {
+            "$uid": {
+              ".write": "auth != null && auth.uid === $uid && root.child('tripSecrets').child($tripId).child('claims').child(auth.uid).exists() && root.child('tripSecrets').child($tripId).child('organizerKey').child(root.child('tripSecrets').child($tripId).child('claims').child(auth.uid).val()).exists()",
+              ".validate": "newData.val() === true"
+            }
+          }
+        },
+
+        "dates": {
+          "answers": {
+            "$optionId": {
+              "$memberId": {
+                ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() === $memberId",
+                ".validate": "newData.isString() && newData.val().matches(/^(yes|maybe|no)$/) && root.child('trips').child($tripId).child('dates').child('options').child($optionId).exists()"
+              }
+            }
+          },
+          "confirmed": {
+            ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true",
+            ".validate": "newData.hasChildren(['optionId', 'by', 'at']) && root.child('trips').child($tripId).child('dates').child('options').child(newData.child('optionId').val()).exists()",
+            "optionId": { ".validate": "newData.isString()" },
+            "by": { ".validate": "newData.isString() && newData.val().length <= 40" },
+            "at": { ".validate": "newData.isNumber()" },
+            "$other": { ".validate": false }
+          }
+        },
+
+        "stay": {
+          "options": {
+            "$stayId": {
+              ".write": "auth != null && !data.exists() && newData.child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val()",
+              ".validate": "$stayId.length <= 200 && newData.hasChildren(['destination', 'url', 'name', 'area', 'addedBy', 'at']) && root.child('trips').child($tripId).child('info').child('destinations').child(newData.child('destination').val()).exists()",
+              "destination": { ".validate": "newData.isString()" },
+              "url": { ".validate": "newData.isString() && newData.val().length <= 500 && newData.val().beginsWith('https://')" },
+              "name": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120" },
+              "area": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60" },
+              "sleeps": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 50" },
+              "photoUrl": { ".validate": "newData.isString() && newData.val().length <= 1000 && newData.val().beginsWith('https://')" },
+              "addedBy": { ".validate": "newData.isString()" },
+              "at": { ".validate": "newData.isNumber()" },
+              "$other": { ".validate": false }
+            }
+          },
+          "hearts": {
+            "$stayId": {
+              "$memberId": {
+                ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() === $memberId",
+                ".validate": "newData.val() === true && root.child('trips').child($tripId).child('stay').child('options').child($stayId).exists()"
+              }
+            }
+          },
+          "confirmed": {
+            "$destination": {
+              ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true",
+              ".validate": "newData.hasChildren(['stayId', 'by', 'at']) && root.child('trips').child($tripId).child('stay').child('options').child(newData.child('stayId').val()).child('destination').val() === $destination",
+              "stayId": { ".validate": "newData.isString()" },
+              "by": { ".validate": "newData.isString() && newData.val().length <= 40" },
+              "at": { ".validate": "newData.isNumber()" },
+              "$other": { ".validate": false }
+            }
+          }
+        },
+
+        "parties": {
+          "shows": {
+            "$showId": {
+              /* A friend adds a show under its member; the adder or an organizer edits or removes it. */
+              ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).exists() && ((!data.exists() && newData.child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() && newData.child('source').val() === 'friend') || (data.exists() && (data.child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true)))",
+              ".validate": "$showId.length <= 200 && newData.hasChildren(['destination', 'venue', 'date', 'artist', 'verified', 'source', 'at']) && root.child('trips').child($tripId).child('info').child('destinations').child(newData.child('destination').val()).exists() && (!data.exists() || newData.child('addedBy').val() === data.child('addedBy').val())",
+              "destination": { ".validate": "newData.isString()" },
+              "venue": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60" },
+              "area": { ".validate": "newData.isString() && newData.val().length <= 60" },
+              "date": { ".validate": "newData.isString() && newData.val().matches(/^2027-0[23]-[0-3][0-9]$/)" },
+              "artist": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200" },
+              "link": { ".validate": "newData.isString() && newData.val().length <= 500 && newData.val().matches(/^https?:\\/\\//)" },
+              "verified": { ".validate": "newData.isBoolean()" },
+              "source": { ".validate": "newData.isString() && newData.val().matches(/^(seed|friend)$/)" },
+              "addedBy": { ".validate": "newData.isString()" },
+              "at": { ".validate": "newData.isNumber()" },
+              "$other": { ".validate": false }
+            }
+          },
+          "in": {
+            "$showId": {
+              /* Removing a show takes its "in" marks with it, in the same write. */
+              ".write": "auth != null && !newData.exists() && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).exists() && (root.child('trips').child($tripId).child('parties').child('shows').child($showId).child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true)",
+              "$memberId": {
+                ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() === $memberId",
+                ".validate": "newData.val() === true && root.child('trips').child($tripId).child('parties').child('shows').child($showId).exists()"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "tripSecrets": {
+      "$tripId": {
+        "claims": {
+          "$uid": {
+            /* A device writes its own claim; only a key that exists is accepted. */
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_-]{16,64}$/) && root.child('tripSecrets').child($tripId).child('organizerKey').child(newData.val()).exists()"
+          }
+        }
+      }
+    }
+  }
+}

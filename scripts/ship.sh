@@ -1,5 +1,6 @@
 #!/bin/sh
-# Builds the trip app and deploys the site to Firebase (travel-ca8f9).
+# Builds the trip app, then deploys the database rules and the site to
+# Firebase (travel-ca8f9). Rules go first, so a new page never meets old rules.
 #
 # Usage: sh scripts/ship.sh [--with-reader]
 #   --with-reader  also deploys the link reader (Trip 8). Accepted, not used yet.
@@ -32,6 +33,7 @@ step() {
 
 step "install the app's packages" npm --prefix web ci
 step "build the app into public/app" npm --prefix web run build
+step "deploy database rules" firebase deploy --only database --project travel-ca8f9
 step "deploy hosting" firebase deploy --only hosting --project travel-ca8f9
 
 [ "$with_reader" = yes ] && echo "==> link reader: not built yet (Trip 8)"

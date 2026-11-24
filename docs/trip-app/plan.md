@@ -239,11 +239,17 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 
 ## 6. Tests
 
-Only the tests a ticket names. Test lines stay at or under code lines. No screenshot loops: check each screen once in a browser at 390 px wide against the mock, and write what you saw in the PR as text.
+The owner said "take it easy on the test" (23 Nov 2026). This section overrides the "Tests" line of every ticket.
 
-- Rule functions: the examples in their headers, run with Vitest.
-- Database rules: `tests/rules.test.ts` against the Firebase emulator (Java 21 is installed).
-- Link reader: its parser against saved pages, no network.
+- Keep only the tests that prove the risky rules: the database rules tests, and the header examples of the pure rule functions (`stage`, the last-year rule, the date counts).
+- A header example covers the typical case and the one surprising case. Drop the rest.
+- No tests for UI components, no snapshot tests, no end-to-end tests. Check each screen once by eye at 390 px wide, and write one line per screen in the pull request.
+- Do not chase a flaky test. If a test fails for a reason outside the rule it checks, delete it and say so in the pull request.
+
+Where they run:
+
+- Header examples: Vitest, `npm test` in `web/`.
+- Database rules: `web/tests/rules.test.ts`, `npm run test:rules` in `web/`. It starts the database emulator, runs the nine tests of Trip 2 and stops it (Java 21 is installed).
 
 ## 7. Not in this build
 
@@ -268,7 +274,7 @@ One builder runs the tickets in order on the branch `trip-app`. Trip 8 and Trip 
 |---|---|---|---|
 | [x] | Trip 0 · Handoff on the branch | 1 | nothing |
 | [x] | Trip 1 · App shell and ship script | 1 | 0 |
-| [ ] | Trip 2 · Database, sign-in and rules | 1 | 1 |
+| [x] | Trip 2 · Database, sign-in and rules | 1 | 1 |
 | [ ] | Trip 3 · Create a trip | 1 | 2 |
 | [ ] | Trip 4 · Load the trip and pick the stage | 1 | 3 |
 | [ ] | Trip 5 · Invitation and who replied | 1 | 4 |
@@ -379,7 +385,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 
 **Failures.** A refusal reaches the page as a message with its reason (Trip 4 shows it). Sign-in has a count of three. The SDK reconnects by itself.
 
-**Tests.** `tests/rules.test.ts` (new), against the emulator. Exactly these:
+**Tests.** `web/tests/rules.test.ts` (new), against the emulator. Exactly these:
 1. A list of `/trips` is refused.
 2. A signed-in device reads one trip; a device that is not signed in does not.
 3. A device writes its own entry in `crew/devices` and is refused another's.

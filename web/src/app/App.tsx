@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import { signIn } from "../lib/firebase";
+
 /**
  * The app's one route, /trip/<tripId>. It reads the trip id from the address
  * and draws the page frame around it.
@@ -11,6 +14,11 @@
  *   /trip/     → the same frame, empty
  */
 export function App() {
+  // Sign in on load; Trip 4 moves this behind the trip listener.
+  useEffect(() => {
+    void signIn();
+  }, []);
+
   const tripId = /^\/trip\/([^/?#]+)/.exec(window.location.pathname)?.[1] ?? null;
 
   return (

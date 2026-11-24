@@ -24,11 +24,11 @@ This repo holds the Travel trip app and its hype pages. Read this file before an
 - Code flows one way: shared, then features, then app. No barrel files. Every folder has a `README.md` that says what belongs there and who may import it.
 - `scripts/`: the deploy (`ship.sh`) and the data scripts. `services/link-reader/`: the Lambda.
 
-Every function carries the four-part header: description, inputs, output, examples. Every example is a test.
+Every function carries the four-part header: description, inputs, output, examples. In a pure rule function every example is a test; elsewhere the examples say what was checked on the emulator or on screen.
 
 ## Tests (plan section 6)
 
-Write only the tests a ticket names. Test lines stay at or under code lines. Do not loop on screenshots: check each screen once at 390 px wide against the mock, and write what you saw in the pull request as text. Put no images in the pull request.
+The owner asked for light testing. Keep only the database rules tests and the header examples of the pure rule functions, each with its typical case and its one surprising case. No tests for UI components, no snapshots, no end-to-end tests. Check each screen once by eye at 390 px wide and write one line per screen in the pull request. Put no images in the pull request.
 
-- Rule functions: the header examples, run with Vitest (`cd web && npm test`).
-- Database rules: `tests/rules.test.ts` against the Firebase emulator.
+- Header examples: `cd web && npm test`.
+- Database rules: `cd web && npm run test:rules` (starts and stops the emulator).
