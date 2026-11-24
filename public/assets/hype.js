@@ -284,7 +284,8 @@ window.HYPE = (() => {
   // four loads at a time, most needed first: the prewarm script (web/src/prewarm.ts) with the Firebase chunk, which
   // signs in and saves the whole trip for the app's first paint; the trip's own page; the app's entry script as a
   // modulepreload (fetched and compiled); the stylesheets; the fonts; the cover collage page and the cliff photo; the map's
-  // style, sprite, tile index and label fonts; every other script (the map chunk with MapLibre); the collage's stills. The scripts and
+  // style, sprite, tile index and label fonts; every other script (the map chunk with MapLibre); the files the app
+  // fetches by address (the emoji picker's data); the collage's stills. The scripts and
   // stylesheets are named in /app/preload.json, which the build writes.
   // On Save-Data or a 2g connection it only prefetches the app's script and stylesheet, as before.
   // Inputs: id — the trip id; href — the trip's address (never with the organizer key, which stays off the page). Output: nothing; every failure is silent, and the tap
@@ -355,6 +356,8 @@ window.HYPE = (() => {
       }));
       // The rest of the app's scripts: the map chunk with MapLibre, and any other chunk the build made.
       list.scripts.filter(s => s !== list.entry && s !== list.prewarm).forEach(s => add(() => link("modulepreload", s)));
+      // Files the app fetches by address, such as the emoji picker's data in Activity.
+      (list.data || []).forEach(url => add(() => fetch(url)));
       // Last, every still the collage draws from; the splash has shown most of them already.
       photos.filter(p => p.kind === "img").map(p => p.src).filter((url, k, all) => all.indexOf(url) === k).forEach(url => add(() => image(url)));
     }).catch(() => lean(link));

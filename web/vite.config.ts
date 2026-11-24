@@ -9,22 +9,24 @@ const OUT_DIR = resolve(__dirname, "../public/app");
  * Publishes /app/preload.json, the list the splash reads to load the whole
  * app while it plays (public/assets/hype.js): every built script and
  * stylesheet, the app's entry, the prewarm entry (src/prewarm.ts) and the chunks it imports, and the
- * Google Fonts stylesheet the app's index.html links. It reads Vite's own
+ * Google Fonts stylesheet the app's index.html links, and every file the code
+ * fetches by address (the emoji picker's data). It reads Vite's own
  * manifest, so a chunk added later is listed without a change here.
  *
  * Inputs: none; runs once after the build has written its files.
  * Output: public/app/preload.json, as
- *   { entry, prewarm, shared: [...], scripts: [...], styles: [...], fonts: [...] }, every path from the site's root.
+ *   { entry, prewarm, shared: [...], scripts: [...], styles: [...], data: [...], fonts: [...] }, every path from the site's root.
  * Examples (checked after `npm run build`):
  *   { "entry": "/app/assets/index-<hash>.js", "prewarm": "/app/assets/prewarm-<hash>.js", "shared": [Firebase chunk],
- *     "scripts": [entry, Firebase chunk, TripMap chunk, …], "styles": [index, TripMap], "fonts": [Google Fonts CSS] }
+ *     "scripts": [entry, Firebase chunk, TripMap chunk, …], "styles": [index, TripMap], "data": [the emoji data],
+ *     "fonts": [Google Fonts CSS] }
  */
 function preloadList(): Plugin {
   return {
     name: "travel-preload-list",
     apply: "build",
     writeBundle() {
-      type Entry = { file: string; css?: string[]; imports?: string[]; isEntry?: boolean; name?: string; src?: string };
+      type Entry = { file: string; css?: string[]; assets?: string[]; imports?: string[]; isEntry?: boolean; name?: string; src?: string };
       const manifest = JSON.parse(readFileSync(resolve(OUT_DIR, ".vite/manifest.json"), "utf8")) as Record<string, Entry>;
       const at = (file: string) => `/app/${file}`;
       const entries = Object.values(manifest);
@@ -34,10 +36,12 @@ function preloadList(): Plugin {
       const shared = (prewarm?.imports ?? []).map((key) => at(manifest[key].file));
       const scripts = [...new Set(entries.map((item) => item.file).filter((file) => file.endsWith(".js")))].map(at);
       const styles = [...new Set(entries.flatMap((item) => [item.file, ...(item.css ?? [])]).filter((file) => file.endsWith(".css")))].map(at);
+      // Files the code fetches by address, such as the emoji picker's data in Activity.
+      const data = [...new Set(entries.flatMap((item) => item.assets ?? []))].map(at);
       const fonts = [...readFileSync(resolve(__dirname, "index.html"), "utf8").matchAll(/href="(https:\/\/fonts\.googleapis\.com\/css2[^"]+)"/g)].map((match) =>
         match[1].replace(/&amp;/g, "&"),
       );
-      const list = { entry: entry && at(entry.file), prewarm: prewarm && at(prewarm.file), shared, scripts, styles, fonts };
+      const list = { entry: entry && at(entry.file), prewarm: prewarm && at(prewarm.file), shared, scripts, styles, data, fonts };
       writeFileSync(resolve(OUT_DIR, "preload.json"), JSON.stringify(list, null, 1));
     },
   };
