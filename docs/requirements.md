@@ -38,7 +38,7 @@ The app is as clean and easy as Airbnb. This is a requirement, not a preference.
 - One job on each screen, and one main button.
 - Large photos with rounded corners. White space around everything.
 - Few words, in plain sentences. No jargon, no labels the crew must learn.
-- The app uses the hype colours (owner, 24 Nov 2026: "the app should be GTA colour"). Main and selected buttons are the hype yellow (#ffd23d) with black text and a black outline; other buttons are white with the same outline; module cards carry the outline too. Everything is flat, with no raised shadows. The page behind the cards is charcoal (#23211f), with light text on it. Accent text is black; the hype pink (#ff3cac) is a colour only, never text. No clutter, no decoration.
+- The app uses the hype colours (owner, 24 Nov 2026: "the app should be GTA colour"). Main and selected buttons are black (#111) with white text; yellow stays on the splash; other buttons are white with the same outline; module cards carry the outline too. Everything is flat, with no raised shadows. The page behind the cards is charcoal (#23211f), with light text on it. Accent text is black; the hype pink (#ff3cac) is a colour only, never text. No clutter, no decoration.
 - A friend who opens the link for the first time can answer in one tap, without instructions.
 - The game-cover style belongs to the hype page, with two exceptions in the app (owner, 24 Nov 2026): the title block under the cover uses the hype title's type, and the cover is the hype collage. Everything else keeps the clean layout, in the hype colours.
 

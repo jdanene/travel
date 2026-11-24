@@ -7,12 +7,12 @@
  */
 html { font-size: clamp(1rem, 0.83rem + 0.3vw, 1.1875rem); }
 :root {
-  /* The hype pages' colours (owner, 24 Nov 2026: "the app should be GTA colour"):
-     the yellow fill takes black text; accent text and lines are black; pink only as a colour, never for text. */
-  --acc: #ffd23d;
-  --on-acc: #000;
+  /* Main and selected buttons are black with white text (owner, 24 Nov 2026); yellow stays on the splash.
+     Accent text and lines are black; pink only as a colour, never for text. */
+  --acc: #111111;
+  --on-acc: #fff;
   --acc-ink: #000;
-  --acc-soft: #fff4c7;
+  --acc-soft: #e8e8e8;
   --pink: #ff3cac;
   --edge: #000;
   --ink: #1c1c1e;
@@ -78,7 +78,9 @@ svg.i { width: 1.375rem; height: 1.375rem; fill: none; stroke: currentColor; str
 /* Cards and sheets keep the light look on the dark page; text directly on the page is light. */
 .fb, .sheet, .notice { color: var(--ink); }
 .flyer .cap, .flyer .sub, .invite-reply .cap { color: var(--on-page-mut); }
-.flyer :focus-visible, .invite-reply :focus-visible, .organizer-foot :focus-visible { outline-color: var(--acc); }
+.flyer :focus-visible, .invite-reply :focus-visible, .organizer-foot :focus-visible { outline-color: var(--on-page); }
+/* A black button on the charcoal page gets a light edge, so it does not sink into the page. */
+.invite-reply .seg3 button.main, .invite-reply .seg3 button[aria-pressed="true"] { border-color: var(--on-page); }
 
 /* The trip fades in as soon as it is drawn (owner, 24 Nov 2026: "just make it a smooth transition"). */
 .frame > :not([aria-busy]) { animation: app-in 200ms ease-out both; }

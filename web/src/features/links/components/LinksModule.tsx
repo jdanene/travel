@@ -24,7 +24,7 @@ interface LinksModuleProps {
  *
  * Inputs: the trip, the links branch, the destinations, the crew's names,
  * this member, and whether it is an organizer.
- * Output: one line that says what Links is ("Cool TikToks and Instas about
+ * Output: one line that says what Links is ("TikToks and Instas about
  * Bali and Thailand."), the groups with their cards, "No links yet." when there are none
  * (case 49), and "Add a link". "Remove" shows on a friend's own cards, and
  * on every card for an organizer (case 48).
@@ -47,7 +47,7 @@ export function LinksModule({ tripId, links, destinations, names, memberId, isOr
   return (
     <>
       <p className="sub" style={{ marginBottom: 8 }}>
-        Cool TikToks and Instas about Bali and Thailand.
+        TikToks and Instas about Bali and Thailand.
       </p>
       {failure && !failure.ok && <Notice>{failure.reason === "refused" ? "This was not saved." : "No connection"}</Notice>}
       {Object.keys(items).length === 0 && <p className="sub">No links yet.</p>}
