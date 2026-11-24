@@ -267,7 +267,7 @@ One builder runs the tickets in order on the branch `trip-app`. Trip 8 and Trip 
 | Done | Ticket | Milestone | Waits on |
 |---|---|---|---|
 | [x] | Trip 0 · Handoff on the branch | 1 | nothing |
-| [ ] | Trip 1 · App shell and ship script | 1 | 0 |
+| [x] | Trip 1 · App shell and ship script | 1 | 0 |
 | [ ] | Trip 2 · Database, sign-in and rules | 1 | 1 |
 | [ ] | Trip 3 · Create a trip | 1 | 2 |
 | [ ] | Trip 4 · Load the trip and pick the stage | 1 | 3 |

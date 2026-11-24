@@ -1,0 +1,38 @@
+#!/bin/sh
+# Builds the trip app and deploys the site to Firebase (travel-ca8f9).
+#
+# Usage: sh scripts/ship.sh [--with-reader]
+#   --with-reader  also deploys the link reader (Trip 8). Accepted, not used yet.
+#
+# Each step prints its name before it runs. The first step that fails stops
+# the script with the step's name and exit code. No step retries, and every
+# step replaces what is live, so a second run is safe.
+set -u
+
+cd "$(dirname "$0")/.." || exit 1
+
+with_reader=no
+for arg in "$@"; do
+  case "$arg" in
+    --with-reader) with_reader=yes ;;
+    *) echo "ship.sh: unknown option $arg" >&2; exit 2 ;;
+  esac
+done
+
+step() {
+  name=$1; shift
+  echo "==> $name"
+  "$@"
+  code=$?
+  if [ "$code" -ne 0 ]; then
+    echo "ship.sh: step \"$name\" failed with exit code $code" >&2
+    exit "$code"
+  fi
+}
+
+step "install the app's packages" npm --prefix web ci
+step "build the app into public/app" npm --prefix web run build
+step "deploy hosting" firebase deploy --only hosting --project travel-ca8f9
+
+[ "$with_reader" = yes ] && echo "==> link reader: not built yet (Trip 8)"
+echo "ship.sh: done"

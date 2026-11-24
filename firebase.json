@@ -5,6 +5,12 @@
       "firebase.json",
       "**/.*"
     ],
+    "rewrites": [
+      {
+        "source": "/trip/**",
+        "destination": "/app/index.html"
+      }
+    ],
     "headers": [
       {
         "source": "**",
@@ -16,5 +22,13 @@
         ]
       }
     ]
+  },
+  "emulators": {
+    "hosting": {
+      "port": 5055
+    },
+    "ui": {
+      "enabled": false
+    }
   }
 }
