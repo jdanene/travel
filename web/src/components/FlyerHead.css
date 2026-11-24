@@ -11,7 +11,13 @@
 
 /* Your own face, beside the organizer's: a button that opens your photo. */
 .flyer-faces { align-items: flex-end; }
-.flyer-you { display: inline-grid; border-radius: 50%; -webkit-tap-highlight-color: transparent; }
+.flyer-faces > .flyer-you:not(:first-child) { margin-left: 0.25rem; }
+.flyer-you { display: inline-flex; flex-direction: column; align-items: center; gap: 0.25rem; border-radius: 0.75rem; -webkit-tap-highlight-color: transparent; }
+/* A camera badge on your own face and a caption under it, so the photo is easy to find. */
+.flyer-you-face { position: relative; display: inline-grid; }
+.flyer-cam { position: absolute; right: -0.125rem; bottom: -0.125rem; width: 1.375rem; height: 1.375rem; border-radius: 50%; display: grid; place-items: center; background: #111; border: 2px solid #fff; }
+.flyer-cam svg { width: 0.875rem; height: 0.875rem; fill: none; stroke: #fff; stroke-width: 2; stroke-linejoin: round; }
+.flyer-you-cap { font-size: 0.75rem; font-weight: 600; color: var(--on-page); white-space: nowrap; }
 .flyer-you:focus-visible { outline-offset: 0; }
 .flyer-name .flyer-small { width: 2.75rem; height: 2.75rem; font-size: 0.875rem; border-width: 3px; }
 .flyer-faces > * + * { margin-left: -0.875rem; }

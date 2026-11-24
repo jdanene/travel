@@ -17,6 +17,11 @@ export function PhotosProvider({ photos, children }: { photos: Record<string, st
   return <Photos.Provider value={photos}>{children}</Photos.Provider>;
 }
 
+/** The photo of one member, if they added one. */
+export function usePhoto(id: string): string | undefined {
+  return useContext(Photos)[id];
+}
+
 /**
  * One circle: the person's photo when they have one, else their initials.
  *

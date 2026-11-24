@@ -62,6 +62,7 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
   const [mapFocus, setMapFocus] = useState<string | null>(null);
   // The events check runs once a friend has joined; a friend who can't make it still sees the list.
   const eventCheck = useEventCheck(tripId, trip, crew.member ? crew.memberId : null);
+  useWarmMap(trip);
   const [photoOpen, setPhotoOpen] = useState(false);
   const you = crew.memberId && crew.member ? { id: crew.memberId, name: crew.member.name } : undefined;
 
@@ -110,8 +111,29 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
  * Output: the content for each module; null until its ticket fills it.
  * Examples (checked on screen): the Dates slot holds the Dates module.
  */
-/** The map loads on its first opening, so Leaflet stays out of the first page load. */
-const TripMap = lazy(() => import("../features/map/components/TripMap").then((module) => ({ default: module.TripMap })));
+/** The map's code is its own file, so it stays out of the first page load; warmUpMap fetches it right after. */
+const loadMap = () => import("../features/map/components/TripMap");
+const TripMap = lazy(() => loadMap().then((module) => ({ default: module.TripMap })));
+
+/**
+ * Readies the Map module once the trip is drawn (owner, 24 Nov 2026: "Don't lazy load the map, load it immediately
+ * so there isn't a delay"): when the browser is next idle, it loads the map's code and makes the map out of sight on
+ * the first destination, so its style and first tiles are in before the friend opens Map. On Save-Data the map
+ * still waits for its first opening.
+ * Inputs: the trip. Output: nothing.
+ * Examples (checked on the emulator): the trip drawn → about a second later the Bali map is made; Map opens drawn
+ */
+function useWarmMap(trip: Trip): void {
+  const first = mapDestinations(trip)[0];
+  useEffect(() => {
+    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
+    if (!first || saveData) return;
+    const go = () => void loadMap().then((module) => module.warmMap(first)).catch(() => {});
+    const idle = window.requestIdleCallback ? window.requestIdleCallback(go, { timeout: 1500 }) : window.setTimeout(go, 300);
+    return () => (window.cancelIdleCallback ? window.cancelIdleCallback(idle) : window.clearTimeout(idle));
+    // Once, for the first destination the trip had when it was drawn.
+  }, [first?.id]);
+}
 
 function moduleSlots(
   tripId: string,

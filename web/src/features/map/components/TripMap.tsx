@@ -98,6 +98,90 @@ interface TripMapProps {
  *   Add to map, "single fin", pick "Single Fin · Pecatu", Food, Add → its pin and card "Food · added by KA"
  *   focus "venue:eden-garden" → Koh Phangan, zoomed on Eden Garden, its card open
  */
+/** A map made ahead of time, waiting out of sight; TripMap moves it in when the Map module opens. */
+interface Held {
+  map: MapLibreMap;
+  el: HTMLDivElement;
+  /** Whether a first basemap tile has arrived. */
+  loaded: boolean;
+}
+let parked: Held | null = null;
+
+/** The out-of-sight box a waiting map sits in, at the size of the Map module on a phone. */
+function park(): HTMLDivElement {
+  let box = document.getElementById("map-park") as HTMLDivElement | null;
+  if (!box) {
+    box = document.createElement("div");
+    box.id = "map-park";
+    box.setAttribute("aria-hidden", "true");
+    box.inert = true;
+    document.body.append(box);
+  }
+  return box;
+}
+
+/**
+ * Makes the map with the app's gestures (owner, 24 Nov 2026: "should be able to zoom in and out on the map with
+ * fingers, both on computer and cell"): one-finger drag and two-finger pinch on a phone, trackpad pinch, two-finger
+ * scroll and the mouse wheel on a computer, double-click and double-tap zoom, and + / − buttons. No rotation, no tilt.
+ * Inputs: the element to draw in and the destination to start on.
+ * Output: the map. It throws when the device has no WebGL.
+ */
+function makeMap(el: HTMLDivElement, centre: { lat: number; lng: number }): MapLibreMap {
+  const made = new maplibregl.Map({
+    container: el,
+    style: BASEMAP_STYLE,
+    center: [centre.lng, centre.lat],
+    zoom: 10,
+    attributionControl: false,
+    scrollZoom: true,
+    dragPan: true,
+    doubleClickZoom: true,
+    touchZoomRotate: true,
+    dragRotate: false,
+    pitchWithRotate: false,
+    touchPitch: false,
+    renderWorldCopies: false,
+  });
+  made.touchZoomRotate.disableRotation();
+  made.keyboard.disableRotation();
+  made.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+  made.addControl(new maplibregl.AttributionControl({ compact: false }), "bottom-right");
+  made.on("style.load", () => softenBasemap(made));
+  return made;
+}
+
+/** Marks the held map loaded when its first basemap tile arrives. */
+function watchTiles(held: Held): void {
+  held.map.on("data", (event) => {
+    if (event.dataType === "source" && "sourceId" in event && event.sourceId === BASEMAP_SOURCE && "tile" in event && event.tile) held.loaded = true;
+  });
+}
+
+/**
+ * Makes the map ahead of time, out of sight, so the Map module opens at once
+ * (owner, 24 Nov 2026: "Don't lazy load the map"). The trip page calls it
+ * when the browser is idle after the trip is drawn; the style and the first
+ * tiles of the first destination load then. A second call does nothing.
+ *
+ * Inputs: centre — the first destination.
+ * Output: nothing. A device without WebGL keeps nothing; TripMap then shows the list.
+ * Examples (checked on the emulator): the trip drawn → a second later the Bali tiles are in; Map opens with them drawn
+ */
+export function warmMap(centre: { lat: number; lng: number }): void {
+  if (parked) return;
+  const el = document.createElement("div");
+  el.className = "map-fill";
+  park().append(el);
+  try {
+    parked = { map: makeMap(el, centre), el, loaded: false };
+  } catch {
+    el.remove();
+    return;
+  }
+  watchTiles(parked);
+}
+
 export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onOpen, focus }: TripMapProps) {
   const start = useRef(pins.find((pin) => pin.id === focus));
   const [destination, setDestination] = useState(start.current?.destination ?? destinations[0]?.id ?? "");
@@ -123,38 +207,39 @@ export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onO
 
   useEffect(() => {
     if (!box.current || !centre) return;
-    let created: MapLibreMap;
-    try {
-      created = new maplibregl.Map({
-        container: box.current,
-        style: BASEMAP_STYLE,
-        center: [centre.lng, centre.lat],
-        zoom: 10,
-        attributionControl: false,
-        scrollZoom: false,
-        dragRotate: false,
-        pitchWithRotate: false,
-        touchPitch: false,
-        renderWorldCopies: false,
-      });
-    } catch {
-      setTilesFailed(true); // No WebGL: the list stands in for the map.
-      return;
+    // The map made ahead of time (warmMap) is moved in, already drawn; else one is made now.
+    let holder = parked;
+    parked = null;
+    if (!holder) {
+      const el = document.createElement("div");
+      el.className = "map-fill";
+      try {
+        holder = { map: makeMap(el, centre), el, loaded: false };
+      } catch {
+        setTilesFailed(true); // No WebGL: the list stands in for the map.
+        return;
+      }
+      watchTiles(holder);
     }
-    created.touchZoomRotate.disableRotation();
-    created.keyboard.disableRotation();
-    created.addControl(new maplibregl.AttributionControl({ compact: false }), "bottom-right");
-    created.on("style.load", () => softenBasemap(created));
-    let loaded = false;
-    created.on("data", (event) => {
-      if (event.dataType === "source" && "sourceId" in event && event.sourceId === BASEMAP_SOURCE && "tile" in event && event.tile) loaded = true;
-    });
-    const timer = setTimeout(() => !loaded && setTilesFailed(true), TILES_WAIT_MS);
+    const kept = holder;
+    const created = kept.map;
+    box.current.prepend(kept.el);
+    created.resize();
+    created.jumpTo({ center: [centre.lng, centre.lat], zoom: 10 });
+    // The box changes size with the window and when the module opens; the map follows it.
+    const resized = new ResizeObserver(() => created.resize());
+    resized.observe(box.current);
+    const timer = setTimeout(() => !kept.loaded && setTilesFailed(true), TILES_WAIT_MS);
     map.current = created;
     return () => {
       clearTimeout(timer);
-      created.remove();
+      resized.disconnect();
       map.current = null;
+      for (const marker of markers.current) marker.remove();
+      markers.current = [];
+      // Kept for the next opening, out of sight, so the Map opens at once every time.
+      park().append(kept.el);
+      parked = kept;
     };
     // The map is made once; the camera effect below follows the destination.
   }, []);

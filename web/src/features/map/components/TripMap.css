@@ -49,3 +49,11 @@
 @media (min-width: 900px) {
   .map-box { height: clamp(30rem, 62vh, 42rem); }
 }
+
+/* The map's own box fills the module's; the page never takes a gesture that starts on the map. */
+.map-fill { position: absolute; inset: 0; touch-action: none; overscroll-behavior: contain; }
+/* A map made ahead of time waits here, out of sight, at the module's size on a phone. */
+#map-park { position: fixed; left: -200vw; top: 0; width: min(37.5rem, 100vw); height: 22.5rem; position: fixed; overflow: hidden; pointer-events: none; }
+#map-park .map-fill { touch-action: auto; }
+.map-box .maplibregl-ctrl-group { border-radius: 0.75rem; border: 2px solid var(--edge); box-shadow: none; overflow: hidden; }
+.map-box .maplibregl-ctrl-group button { width: 2.25rem; height: 2.25rem; }

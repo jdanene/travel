@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { seasonLine } from "../lib/format";
 import type { TripInfo } from "../types/trip";
-import { Face, type Person } from "./Avatars";
+import { Face, usePhoto, type Person } from "./Avatars";
 import "./Avatars.css";
 import "./FlyerHead.css";
 
@@ -56,9 +56,17 @@ interface FlyerHeadProps {
 export function FlyerHead({ organizer, you, onYou, info, photo, replied, children }: FlyerHeadProps) {
   const [still] = useState(prefersStill);
   const youAreOrganizer = organizer !== undefined && you !== undefined && organizer.id === you.id;
+  // Your own face says what it does: a camera badge, and "Add photo" or "Change photo" under it.
+  const yourPhoto = usePhoto(you?.id ?? "");
   const yourFace = (person: Person, className: string) => (
-    <button type="button" className="flyer-you" onClick={onYou} aria-label="Your photo">
-      <Face person={person} className={className} />
+    <button type="button" className="flyer-you" onClick={onYou} aria-label={yourPhoto ? "Change photo" : "Add photo"}>
+      <span className="flyer-you-face">
+        <Face person={person} className={className} />
+        <span className="flyer-cam" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1.5-2h6l1.5 2h2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z" /><circle cx="12" cy="12.5" r="3.2" /></svg>
+        </span>
+      </span>
+      <span className="flyer-you-cap" aria-hidden="true">{yourPhoto ? "Change photo" : "Add photo"}</span>
     </button>
   );
 
