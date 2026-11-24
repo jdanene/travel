@@ -175,7 +175,9 @@ window.HYPE = (() => {
 
   // A wall of tiles. Each tile runs on its own clock: a photo stays ms, a clip plays to its end.
   // No scene is ever on two tiles at once: a tile only takes an item whose scene no other tile is showing.
-  function board(tiles, pool, ms) {
+  // clips, when given, caps how many tiles play a clip at once (the app's cover keeps it to two).
+  // A tile taken off the page stops swapping, so a re-laid board leaves nothing running behind it.
+  function board(tiles, pool, ms, clips = Infinity) {
     const free = pool.slice(), cur = [];
     // A tile's own scene counts as busy too, or it would swap between two cuts of one clip and look frozen.
     // Order is random on every visit and every round, but every item comes up once per round before any repeats.
@@ -183,7 +185,8 @@ window.HYPE = (() => {
     let shown = new Set();
     const take = k => {
       const busy = new Set(cur.filter(c => c).map(scene));
-      const ok = it => !busy.has(scene(it)) && !(it.card && tiles[k].classList.contains("t"));
+      const playing = cur.filter((c, j) => c && j !== k && c.kind === "vid").length;
+      const ok = it => !busy.has(scene(it)) && !(it.card && tiles[k].classList.contains("t")) && !(it.kind === "vid" && playing >= clips);
       let options = free.filter(it => ok(it) && !shown.has(it));
       if (!options.length) { shown = new Set(cur.filter(c => c)); options = free.filter(ok); }   // a new round
       if (!options.length) return null;
@@ -200,6 +203,7 @@ window.HYPE = (() => {
     };
     // If every free item is already on another tile, try again shortly instead of freezing.
     const swap = k => {
+      if (!tiles[k].isConnected) return;
       const next = take(k);
       if (!next) return setTimeout(() => swap(k), 300);
       if (cur[k]) free.push(cur[k]);
