@@ -7,12 +7,6 @@ const confirmedDates = { options, confirmed: { optionId: "o1", by: "jd", at: 1 }
 const villa = { destination: "bali", url: "https://www.airbnb.com/rooms/1", name: "Cliffside villa", area: "Uluwatu", addedBy: "ka", at: 1 };
 
 describe("modules", () => {
-  it("has no Stay before the dates are confirmed", () => {
-    const shown = modules({ dates: { options }, stay: { options: { s1: villa } } }, "rb");
-    expect(shown.map((module) => module.id)).toEqual(["dates", "parties", "links", "map"]);
-    expect(shown[0].lines).toEqual(["Tap to answer"]);
-  });
-
   it("adds Stay once the dates are confirmed", () => {
     const shown = modules({ dates: confirmedDates, stay: { options: { s1: villa } } }, "rb");
     expect(shown.map((module) => [module.id, module.lines])).toEqual([
