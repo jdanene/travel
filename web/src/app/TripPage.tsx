@@ -1,6 +1,7 @@
 import { PhotosProvider } from "../components/Avatars";
 import { Notice } from "../components/Notice";
 import { crewOf, useOrganizerLink, type CrewView } from "../features/crew/api/crew";
+import { EditInvite } from "../features/crew/components/EditInvite";
 import { Invitation } from "../features/crew/components/Invitation";
 import { OrganizerSignIn } from "../features/crew/components/OrganizerSignIn";
 import { PhotoSheet } from "../features/crew/components/PhotoSheet";
@@ -22,8 +23,8 @@ import type { ModuleId } from "./lib/modules";
 /**
  * The trip page, kept a thin composition so its layout changes in one
  * place: a failure notice, or the invitation (12/1) before a reply, or the
- * home page (12/2) after it, and "Organizer sign-in" at the foot for a
- * device that is not an organizer.
+ * home page (12/2) after it, and at the foot "Organizer sign-in" for a
+ * device that is not an organizer, or "Edit invite" for one that is.
  *
  * Inputs: tripId — from the address bar.
  * Output: the page, or one notice when the trip cannot be shown.
@@ -91,8 +92,9 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
           />
         </>
       )}
-      {/* The organizer signs in with Google from any phone (D15); an organizer no longer needs it. */}
-      {!crew.isOrganizer && <OrganizerSignIn tripId={tripId} />}
+      {/* The organizer signs in with Google from any phone (D15); an organizer no longer needs it,
+          and finds "Edit invite" in its place. */}
+      {crew.isOrganizer ? <EditInvite tripId={tripId} info={trip.info} /> : <OrganizerSignIn tripId={tripId} />}
       {crew.memberId && crew.member && (
         <PhotoSheet open={photoOpen} tripId={tripId} memberId={crew.memberId} member={crew.member} onClose={() => setPhotoOpen(false)} />
       )}

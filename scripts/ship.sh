@@ -1,6 +1,7 @@
 #!/bin/sh
 # Builds the trip app, deploys the database rules, creates or updates the
-# trip, seeds the parties, then deploys the site to Firebase (travel-ca8f9).
+# trip, seeds the parties, stamps the organizer's invite title into the link
+# preview, then deploys the site to Firebase (travel-ca8f9).
 # Rules go first, so a new page never meets old rules; the trip exists
 # before the seed writes into it. At the end it prints the two links.
 #
@@ -57,6 +58,7 @@ step "build the app into public/app" npm --prefix web run build
 step "deploy database rules" firebase deploy --only database --project travel-ca8f9
 step "create or update the trip" node scripts/create-trip.mjs
 step "seed this year's and last year's parties" node scripts/seed-parties.mjs
+step "stamp the invite title into the link preview" node scripts/stamp-preview.mjs
 step "deploy hosting" firebase deploy --only hosting --project travel-ca8f9
 
 if [ "$with_reader" = yes ]; then

@@ -9,8 +9,11 @@
  * The first run makes the trip id (20 random characters) and the organizer
  * key, and saves both in local/trip.state.json (local/trip.state.emulator.json
  * with --emulator). Every later run keeps them.
- * Each run replaces info, crew/expected, places/areas, places/venues and
- * the admin list (tripSecrets/{tripId}/admins, from the file's `admins`),
+ * Each run replaces info (each field by its own path, so info/inviteTitle,
+ * which an organizer sets with "Edit invite", stays; absent, the page and
+ * the link preview use the default), crew/expected, places/areas,
+ * places/venues and the admin list (tripSecrets/{tripId}/admins, from the
+ * file's `admins`),
  * writes each starting date option by its own path, and touches nothing
  * else: the options friends added with "Add dates", answers, hearts, stays,
  * shows and the friends' places (places/custom) stay. A starting option
@@ -77,7 +80,8 @@ const info = {
   destinations,
 };
 const update = {
-  [`trips/${tripId}/info`]: info,
+  // One path per field, so info/inviteTitle, the organizer's, stays; a field set to null is removed.
+  ...Object.fromEntries(Object.entries(info).map(([key, value]) => [`trips/${tripId}/info/${key}`, value])),
   [`trips/${tripId}/crew/expected`]: Object.fromEntries(file.crew.map((name) => [idFromName(name), name])),
   // One path per option, so the options friends added stay.
   ...Object.fromEntries(file.dateOptions.map(({ from, to }) => [`trips/${tripId}/dates/options/${dateOptionId(from, to)}`, { from, to }])),

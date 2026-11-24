@@ -20,6 +20,8 @@ export type Answer = "yes" | "maybe" | "no";
 
 export interface TripInfo {
   name: string;
+  /** The name in the link preview, set by an organizer ("Edit invite"); absent means DEFAULT_INVITE_TITLE (lib/invite.ts). */
+  inviteTitle?: string;
   /** The line under the name on the invitation (screen 1). */
   summary?: string;
   note?: string;

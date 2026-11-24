@@ -1,8 +1,8 @@
 /**
  * The rules tests of Trip 2 (1 to 9), of the admin list (10 to 12, plan
  * D15), of Add dates (13 to 15, plan D16), of Add to map (16 and 17), of
- * weekly shows (18), of the profile photo (19) and of a place's photo (20),
- * against the database emulator. Run with
+ * weekly shows (18), of the profile photo (19), of a place's photo (20) and
+ * of the invite title (21), against the database emulator. Run with
  * `npm run test:rules` in web/; it starts the emulator, runs this file and
  * stops it. Each test names the rule it proves, in the words of plan
  * section 4.
@@ -164,5 +164,11 @@ describe("database rules", () => {
     const a = db("uid-a");
     await assertSucceeds(set(ref(a, paths.customPlace(T, "ph1")), place({ addedBy: "alice", description: "Sunset drinks", photo: "data:image/jpeg;base64,/9j/4AAQ" })));
     await assertFails(set(ref(a, paths.customPlace(T, "ph2")), place({ addedBy: "alice", photo: "data:image/jpeg;base64," + "A".repeat(80000) })));
+  });
+
+  it("21. lets only an organizer write the invite title, of 1 to 60 characters", async () => {
+    await assertFails(set(ref(db("uid-a"), paths.inviteTitle(T)), "Alice's trip"));
+    await assertSucceeds(set(ref(db("uid-o"), paths.inviteTitle(T)), "Bali & Koh Phangan 2027"));
+    await assertFails(set(ref(db("uid-o"), paths.inviteTitle(T)), "x".repeat(61)));
   });
 });

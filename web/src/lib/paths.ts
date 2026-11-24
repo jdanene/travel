@@ -11,6 +11,9 @@
 /** The whole trip, read by the one listener. */
 export const trip = (tripId: string) => `trips/${tripId}`;
 
+/** The invite title in the link preview; only an organizer writes it. */
+export const inviteTitle = (tripId: string) => `trips/${tripId}/info/inviteTitle`;
+
 /** The member this device points to: crew/devices/{uid}. */
 export const device = (tripId: string, uid: string) => `trips/${tripId}/crew/devices/${uid}`;
 
