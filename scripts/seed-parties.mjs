@@ -16,7 +16,8 @@
  *
  * Field map: place becomes destination (matched by name against the
  * destinations of local/trip.json); source becomes link when it is an
- * address; artist, venue, area, date and verified keep their names.
+ * address; artist, venue, area, date and verified keep their names. note
+ * holds research notes and is not written.
  *
  * Both files are checked before anything is written. A missing file, a file
  * that is not JSON, or a show with a missing or wrong field stops the script

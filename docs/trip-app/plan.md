@@ -150,7 +150,7 @@ Read on 23 Nov 2026 with `grep -rn -i` over `docs`, `design` and `public`.
 
 - `docs/requirements.md` section 0 states the three goals, the five things in the first version, the look, and what "like Paperless / Partiful" means. This plan restates none of it; it adds only the decisions in section 2.
 - `public/designs/20/index.html` (196 lines; all ten screens on line 183) fixes every screen. `design/app/README.md` maps screens to requirements.
-- `data/lineups/2027-feb-mar.json` (15 shows) and `data/lineups/2026-feb-mar.json` (28 shows) hold the party data. Fields: `date`, `artist`, `venue`, `area`, `place`, `source`, `verified`.
+- `data/lineups/2027-feb-mar.json` (15 shows) and `data/lineups/2026-feb-mar.json` (28 shows) hold the party data. Fields: `date`, `artist`, `venue`, `area`, `place`, `source`, `verified`, and an optional `note` (research notes; the seed ignores it). `artist` is the clean name a friend reads.
 - `public/assets/hype.js` and `hype.css` run the hype pages. The app shares no code with them.
 - `firebase.json` has hosting only. There is no database, no rules file, no `web/`, no `scripts/`, no `AGENTS.md`.
 - On `origin/main` there are only `.firebaserc`, `.gitignore`, `README.md`, `firebase.json`, `public/index.html`, `design/cover/cover.py` and `design/references/`. The mock, the requirements and the lineup files are in the working folder but not committed. Ticket Trip 0 commits them.

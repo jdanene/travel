@@ -4,7 +4,7 @@
  "shows": [
   {
    "date": "2027-02-01",
-   "artist": "Half Moon Festival (1 Feb; no DJs named; dates from a travel blog, not on the organiser's site yet)",
+   "artist": "Half Moon Festival", "note": "Half Moon Festival (1 Feb; no DJs named; dates from a travel blog, not on the organiser's site yet)",
    "venue": "Half Moon Festival",
    "area": "Ban Tai",
    "place": "Koh Phangan",
@@ -13,7 +13,7 @@
   },
   {
    "date": "2027-02-11",
-   "artist": "MO:DEM Teaser Party Thailand 2027 (psytrance, 11-14 Feb): Highko Retro, Xolotl, Synthetik Chaos, Phobos and more",
+   "artist": "MO:DEM Teaser Party", "note": "MO:DEM Teaser Party Thailand 2027 (psytrance, 11-14 Feb): Highko Retro, Xolotl, Synthetik Chaos, Phobos and more",
    "venue": "Hidden Paradise",
    "area": "Ban Tai",
    "place": "Koh Phangan",
@@ -31,7 +31,7 @@
   },
   {
    "date": "2027-02-13",
-   "artist": "Half Moon Festival (13-14 Feb; no DJs named; dates from a travel blog, not on the organiser's site yet)",
+   "artist": "Half Moon Festival", "note": "Half Moon Festival (13-14 Feb; no DJs named; dates from a travel blog, not on the organiser's site yet)",
    "venue": "Half Moon Festival",
    "area": "Ban Tai",
    "place": "Koh Phangan",
@@ -58,7 +58,7 @@
   },
   {
    "date": "2027-02-22",
-   "artist": "Full Moon Party (no guest DJs named)",
+   "artist": "Full Moon Party", "note": "Full Moon Party (no guest DJs named)",
    "venue": "Haad Rin Beach",
    "area": "Haad Rin",
    "place": "Koh Phangan",
@@ -67,7 +67,7 @@
   },
   {
    "date": "2027-02-25",
-   "artist": "ATMAN Begins Teaser Party (psytrance, 25-27 Feb): Agressive Mood, Maze of Madness, Daash, Psynonima and more",
+   "artist": "ATMAN Begins Teaser Party", "note": "ATMAN Begins Teaser Party (psytrance, 25-27 Feb): Agressive Mood, Maze of Madness, Daash, Psynonima and more",
    "venue": "Lost Jungle",
    "area": "Koh Phangan",
    "place": "Koh Phangan",
@@ -94,7 +94,7 @@
   },
   {
    "date": "2027-02-28",
-   "artist": "Half Moon Festival (28 Feb - 1 Mar; no DJs named; dates from a travel blog, not on the organiser's site yet)",
+   "artist": "Half Moon Festival", "note": "Half Moon Festival (28 Feb - 1 Mar; no DJs named; dates from a travel blog, not on the organiser's site yet)",
    "venue": "Half Moon Festival",
    "area": "Ban Tai",
    "place": "Koh Phangan",
@@ -112,7 +112,7 @@
   },
   {
    "date": "2027-03-14",
-   "artist": "Half Moon Festival (14-15 Mar; no DJs named; dates from a travel blog, not on the organiser's site yet)",
+   "artist": "Half Moon Festival", "note": "Half Moon Festival (14-15 Mar; no DJs named; dates from a travel blog, not on the organiser's site yet)",
    "venue": "Half Moon Festival",
    "area": "Ban Tai",
    "place": "Koh Phangan",
@@ -121,7 +121,7 @@
   },
   {
    "date": "2027-03-22",
-   "artist": "Full Moon Party (no guest DJs named)",
+   "artist": "Full Moon Party", "note": "Full Moon Party (no guest DJs named)",
    "venue": "Haad Rin Beach",
    "area": "Haad Rin",
    "place": "Koh Phangan",
@@ -130,7 +130,7 @@
   },
   {
    "date": "2027-03-29",
-   "artist": "Half Moon Festival (29-30 Mar; no DJs named; dates from a travel blog, not on the organiser's site yet)",
+   "artist": "Half Moon Festival", "note": "Half Moon Festival (29-30 Mar; no DJs named; dates from a travel blog, not on the organiser's site yet)",
    "venue": "Half Moon Festival",
    "area": "Ban Tai",
    "place": "Koh Phangan",

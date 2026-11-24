@@ -10,15 +10,15 @@
     {"date": "2026-02-20", "artist": "Disco Lines", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
     {"date": "2026-02-21", "artist": "Mëstiza", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
     {"date": "2026-02-22", "artist": "Syreeta", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-02-28", "artist": "ANTS (Andrea Oliva, Fleur Shore)", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": true},
+    {"date": "2026-02-28", "artist": "ANTS", "note": "ANTS (Andrea Oliva, Fleur Shore)", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": true},
     {"date": "2026-03-01", "artist": "Mahmut Orhan", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "https://www.savaya.com/new/law-of-the-jungle-2025", "verified": true},
     {"date": "2026-03-07", "artist": "Gorgon City", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "https://www.savaya.com/new/law-of-the-jungle-2025", "verified": true},
     {"date": "2026-03-15", "artist": "Bora Uzer", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "https://www.savaya.com/new/law-of-the-jungle-2025", "verified": true},
-    {"date": "2026-03-21", "artist": "Disko Afrika (DJs not named in source)", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "https://ra.co/events/2392110", "verified": false},
+    {"date": "2026-03-21", "artist": "Disko Afrika", "note": "Disko Afrika (DJs not named in source)", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "https://ra.co/events/2392110", "verified": false},
 
     {"date": "2026-02-06", "artist": "Le Twins", "venue": "Atlas Super Club", "area": "Canggu", "place": "Bali", "source": "owner's list", "verified": false},
 
-    {"date": "2026-02-07", "artist": "Sunset Park residents (Laziovau, Rizkycore)", "venue": "Potato Head", "area": "Seminyak", "place": "Bali", "source": "owner's list", "verified": true},
+    {"date": "2026-02-07", "artist": "Laziovau, Rizkycore", "note": "Sunset Park residents (Laziovau, Rizkycore)", "venue": "Potato Head", "area": "Seminyak", "place": "Bali", "source": "owner's list", "verified": true},
     {"date": "2026-02-19", "artist": "KAFKA, Laziovau, Apri", "venue": "Potato Head", "area": "Seminyak", "place": "Bali", "source": "owner's list", "verified": false},
 
     {"date": "2026-02-14", "artist": "Zai Love & Friends", "venue": "Desa Kitsuné", "area": "Canggu", "place": "Bali", "source": "owner's list", "verified": false},
@@ -28,16 +28,16 @@
 
     {"date": "2026-02-01", "artist": "Sunday Session", "venue": "Single Fin", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
 
-    {"date": "2026-02-02", "artist": "Full Moon Party (guest DJs not named in sources)", "venue": "Full Moon Party, Haad Rin Beach", "area": "Haad Rin", "place": "Koh Phangan", "source": "owner's list", "verified": false},
-    {"date": "2026-03-03", "artist": "Full Moon Party (guest DJs not named in sources)", "venue": "Full Moon Party, Haad Rin Beach", "area": "Haad Rin", "place": "Koh Phangan", "source": "https://pickyourtrail.com/blog/full-moon-party-thailand", "verified": false},
+    {"date": "2026-02-02", "artist": "Full Moon Party", "note": "Full Moon Party (guest DJs not named in sources)", "venue": "Full Moon Party, Haad Rin Beach", "area": "Haad Rin", "place": "Koh Phangan", "source": "owner's list", "verified": false},
+    {"date": "2026-03-03", "artist": "Full Moon Party", "note": "Full Moon Party (guest DJs not named in sources)", "venue": "Full Moon Party, Haad Rin Beach", "area": "Haad Rin", "place": "Koh Phangan", "source": "https://pickyourtrail.com/blog/full-moon-party-thailand", "verified": false},
 
-    {"date": "2026-02-09", "artist": "Halfmoon Festival, 9-10 Feb: Harmony Beach Club pre-party, then Magic Forest (DJs not named in source)", "venue": "Half Moon Festival", "area": "Ban Tai", "place": "Koh Phangan", "source": "https://megatix.in.th/events/halfmoon-festival-9th-10th-february-2026", "verified": false},
-    {"date": "2026-03-10", "artist": "Halfmoon Festival, 10-11 Mar: Sun Diary, T-Gecko, Eros Bilgic, Khainz, Ghost Rider, Blastoyz, Junam", "venue": "Half Moon Festival", "area": "Ban Tai", "place": "Koh Phangan", "source": "https://ra.co/events/2379566", "verified": false},
+    {"date": "2026-02-09", "artist": "Half Moon Festival", "note": "Halfmoon Festival, 9-10 Feb: Harmony Beach Club pre-party, then Magic Forest (DJs not named in source)", "venue": "Half Moon Festival", "area": "Ban Tai", "place": "Koh Phangan", "source": "https://megatix.in.th/events/halfmoon-festival-9th-10th-february-2026", "verified": false},
+    {"date": "2026-03-10", "artist": "Blastoyz, Sun Diary, Khainz", "note": "Halfmoon Festival, 10-11 Mar: Sun Diary, T-Gecko, Eros Bilgic, Khainz, Ghost Rider, Blastoyz, Junam", "venue": "Half Moon Festival", "area": "Ban Tai", "place": "Koh Phangan", "source": "https://ra.co/events/2379566", "verified": false},
 
-    {"date": "2026-02-01", "artist": "Matt Sassari, Sam Supplier, Rob Roar, Graham Gold, Rob Gritton, Bata (live percussion); drum & bass stage: Profile & Fatman D, EJ Kitto, Daddy Nature, Yugo, Woodsy, MC Major G, MC Rizlablu", "venue": "Jungle Experience", "area": "Ban Tai", "place": "Koh Phangan", "source": "https://phangan.events/events/jungle-experience-festival-sun-1-february", "verified": false},
-    {"date": "2026-02-12", "artist": "Goa Jungle by Sun Festival: Cosmosis, The Infinity Project, Sun Project, Roy Mor b2b Ringo, Shtutnik, Idogoa, Nook; swamp stage: Omni, Ni-Tai, Emiri, Eukai, Lugasi, Evolve", "venue": "Jungle Experience", "area": "Ban Tai", "place": "Koh Phangan", "source": "https://phangan.events/events/goa-jungle-by-sun-festival-jungle-experience-feb-12-13", "verified": false},
+    {"date": "2026-02-01", "artist": "Matt Sassari, Sam Supplier, Rob Roar", "note": "Matt Sassari, Sam Supplier, Rob Roar, Graham Gold, Rob Gritton, Bata (live percussion); drum & bass stage: Profile & Fatman D, EJ Kitto, Daddy Nature, Yugo, Woodsy, MC Major G, MC Rizlablu", "venue": "Jungle Experience", "area": "Ban Tai", "place": "Koh Phangan", "source": "https://phangan.events/events/jungle-experience-festival-sun-1-february", "verified": false},
+    {"date": "2026-02-12", "artist": "Goa Jungle by Sun Festival", "note": "Goa Jungle by Sun Festival: Cosmosis, The Infinity Project, Sun Project, Roy Mor b2b Ringo, Shtutnik, Idogoa, Nook; swamp stage: Omni, Ni-Tai, Emiri, Eukai, Lugasi, Evolve", "venue": "Jungle Experience", "area": "Ban Tai", "place": "Koh Phangan", "source": "https://phangan.events/events/goa-jungle-by-sun-festival-jungle-experience-feb-12-13", "verified": false},
 
-    {"date": "2026-03-25", "artist": "Chicago, 1200 Micrograms, Starling, Nevo, Fishi, Tony Gatsby, Jordan Love, Cleo P, Not Zano, Sharina, Assaf Almog, Timo", "venue": "Waterfall Party", "area": "Ban Tai", "place": "Koh Phangan", "source": "https://phangan.events/events/chicago-1200-mics-at-waterfall-festival-koh-phangan", "verified": false}
+    {"date": "2026-03-25", "artist": "1200 Micrograms, Chicago, Starling", "note": "Chicago, 1200 Micrograms, Starling, Nevo, Fishi, Tony Gatsby, Jordan Love, Cleo P, Not Zano, Sharina, Assaf Almog, Timo", "venue": "Waterfall Party", "area": "Ban Tai", "place": "Koh Phangan", "source": "https://phangan.events/events/chicago-1200-mics-at-waterfall-festival-koh-phangan", "verified": false}
   ],
   "nothing_found": [
     "Atlas Beach Club",
