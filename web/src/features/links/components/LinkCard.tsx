@@ -9,6 +9,7 @@ interface LinkCardProps {
   addedBy: string;
   /** Shown to the friend who added it and to an organizer. */
   onRemove?: () => void;
+  onEdit?: () => void;
 }
 
 /**
@@ -21,7 +22,7 @@ interface LinkCardProps {
  * name (case 47).
  * Examples (checked at 390 px): a TikTok with a cover → the cover, its caption, "added by RB", "Remove"
  */
-export function LinkCard({ id, item, addedBy, onRemove }: LinkCardProps) {
+export function LinkCard({ id, item, addedBy, onRemove, onEdit }: LinkCardProps) {
   const [broken, setBroken] = useState(false);
   const site = siteName(item);
   const text = item.note ?? item.title ?? item.url.replace(/^https:\/\/(www\.)?/, "");
@@ -42,6 +43,11 @@ export function LinkCard({ id, item, addedBy, onRemove }: LinkCardProps) {
           </span>
         </span>
       </a>
+      {onEdit && (
+        <button type="button" className="remove" onClick={onEdit} aria-label={`Edit ${text}`}>
+          Edit
+        </button>
+      )}
       {onRemove && (
         <button type="button" className="remove" onClick={onRemove} aria-label={`Remove ${text}`}>
           Remove

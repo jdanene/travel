@@ -9,6 +9,8 @@
     "test:rules": "cd .. && firebase emulators:exec --only database --project demo-travel 'cd web && npx vitest run tests'"
   },
   "dependencies": {
+    "emoji-picker-element": "^1.29.1",
+    "emoji-picker-element-data": "^1.8.0",
     "firebase": "^11.0.2",
     "maplibre-gl": "5.24.0",
     "react": "^18.3.1",

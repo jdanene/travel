@@ -96,7 +96,8 @@ export function DatesModule({ tripId, info, dates, expected, members, memberId, 
           .map(([who]) => ({ id: who, name: name(who) }));
         const adder = option.addedBy === undefined ? null : option.addedBy === memberId ? "you" : initials(name(option.addedBy));
         const othersVoted = Object.keys(answers[id] ?? {}).some((who) => who !== option.addedBy);
-        const removable = !confirmedId && !othersVoted && (isOrganizer || (option.addedBy !== undefined && option.addedBy === memberId));
+        // An organizer removes any option that is not confirmed, votes or not; the adder only while nobody else has voted.
+        const removable = !confirmedId && (isOrganizer || (!othersVoted && option.addedBy !== undefined && option.addedBy === memberId));
         return (
           <article key={id} id={`date-${id}`} className={`opt${id === lead ? " lead" : ""}`} aria-label={weekdayRange(option.from, option.to)}>
             <div className="top">

@@ -136,8 +136,8 @@
         "links": {
           "items": {
             "$linkId": {
-              /* A friend adds a link under its member and removes its own; an organizer removes any. No edits. */
-              ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).exists() && ((!data.exists() && newData.child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val()) || (data.exists() && !newData.exists() && (data.child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true)))",
+              /* A friend adds a link under its member; the adder or an organizer edits its destination and note, or removes it. The address and the adder never change. */
+              ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).exists() && ((!data.exists() && newData.child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val()) || (data.exists() && (data.child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true) && (!newData.exists() || (newData.child('url').val() === data.child('url').val() && newData.child('addedBy').val() === data.child('addedBy').val()))))",
               ".validate": "$linkId.length <= 200 && newData.hasChildren(['url', 'site', 'destination', 'addedBy', 'at']) && root.child('trips').child($tripId).child('info').child('destinations').child(newData.child('destination').val()).exists()",
               "url": { ".validate": "newData.isString() && newData.val().length <= 500 && newData.val().beginsWith('https://')" },
               "site": { ".validate": "newData.isString() && newData.val().matches(/^(instagram|tiktok|other)$/)" },
@@ -162,7 +162,7 @@
           "custom": {
             "$placeId": {
               /* A friend adds a place under its member, anywhere in the world (owner, 24 Nov 2026); its destination is the trip's nearest one, for grouping. The adder or an organizer removes it. No edits. */
-              ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).exists() && ((!data.exists() && newData.child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val()) || (data.exists() && !newData.exists() && (data.child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true)))",
+              ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).exists() && ((!data.exists() && newData.child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val()) || (data.exists() && (data.child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true) && (!newData.exists() || (newData.child('url').val() === data.child('url').val() && newData.child('addedBy').val() === data.child('addedBy').val()))))",
               ".validate": "$placeId.length <= 200 && newData.hasChildren(['name', 'kind', 'destination', 'lat', 'lng', 'addedBy', 'at']) && root.child('trips').child($tripId).child('info').child('destinations').child(newData.child('destination').val()).exists()",
               "name": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60" },
               "kind": { ".validate": "newData.isString() && newData.val().matches(/^(event|food|beach|activity|other)$/)" },
@@ -204,6 +204,17 @@
               /* A member's vote on a poll: the option's index. It can change, or be taken back. */
               ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() === $memberId",
               ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 3 && newData.parent().parent().parent().child('activity').child($id).child('options').child('' + newData.val()).exists()"
+            }
+          }
+        },
+        "activityReactions": {
+          "$id": {
+            /* Deleting a post or a poll takes its emoji with it, by whoever may delete it. */
+            ".write": "auth != null && !newData.exists() && !newData.parent().parent().child('activity').child($id).exists() && (root.child('trips').child($tripId).child('activity').child($id).child('by').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true)",
+            "$memberId": {
+              /* A member's emoji on a Feed line: one each; it can change or be taken off. */
+              ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() === $memberId",
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 24 && root.child('trips').child($tripId).child('activity').child($id).exists()"
             }
           }
         },

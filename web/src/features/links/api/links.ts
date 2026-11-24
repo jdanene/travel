@@ -28,3 +28,15 @@ export function addLink(tripId: string, id: string, item: LinkItem): Promise<Wri
 export function removeLink(tripId: string, id: string): Promise<WriteResult> {
   return write({ [paths.link(tripId, id)]: null });
 }
+
+/**
+ * Changes a link's destination and note. The friend who added it may, and so
+ * may an organizer; the address and the adder stay as they are.
+ * Inputs: the trip, the link id, the destination, and the note ("" clears it).
+ * Output: the write result.
+ * Examples (checked on the emulator): "Edit" on your own card, new note → the card reads the new note on every phone
+ */
+export function editLink(tripId: string, id: string, destination: string, note: string): Promise<WriteResult> {
+  const path = paths.link(tripId, id);
+  return write({ [`${path}/destination`]: destination, [`${path}/note`]: note.trim() ? note.trim().slice(0, 200) : null });
+}
