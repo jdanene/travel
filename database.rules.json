@@ -237,10 +237,14 @@
             "$replyId": {
               /* A reply under any feed line (owner, 24 Nov 2026), under the member's own name, once: no edits. */
               ".write": "auth != null && !data.exists() && newData.child('by').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val()",
-              ".validate": "$replyId.length <= 40 && newData.hasChildren(['by', 'at', 'text']) && root.child('trips').child($tripId).child('activity').child($id).exists()",
+              ".validate": "$replyId.length <= 40 && newData.hasChildren(['by', 'at']) && (newData.hasChild('text') || newData.hasChild('gif')) && root.child('trips').child($tripId).child('activity').child($id).exists()",
               "by": { ".validate": "newData.isString()" },
               "at": { ".validate": "newData.isNumber()" },
               "text": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 500" },
+              /* A GIF or sticker reply: on KLIPY's host only, as a GIF post. */
+              "gif": { ".validate": "newData.isString() && newData.val().length <= 400 && newData.val().matches(/^https:\\/\\/static\\.klipy\\.com\\/[A-Za-z0-9_.\\/-]+$/)" },
+              "gifW": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 4000" },
+              "gifH": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 4000" },
               "$other": { ".validate": false }
             }
           }

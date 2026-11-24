@@ -287,4 +287,11 @@ describe("database rules", () => {
     await assertFails(set(ref(a, paths.activityReply(T, "gone", "r1")), { by: "alice", at: 2, text: "Hi" }));
     await assertSucceeds(update(ref(a), { [paths.activityEntry(T, "in2")]: null, [paths.activityReactions(T, "in2")]: null, [paths.activityReplies(T, "in2")]: null }));
   });
+
+  it("35. takes a GIF reply from KLIPY's host with no words, and refuses one from another host", async () => {
+    const b = db("uid-b");
+    await assertSucceeds(set(ref(db("uid-a"), paths.activityEntry(T, "g3")), { kind: "post", by: "alice", at: 1, text: "Who's in?" }));
+    await assertSucceeds(set(ref(b, paths.activityReply(T, "g3", "r1")), { by: "bob", at: 2, gif: "https://static.klipy.com/ii/a1/b2/c3.webp", gifW: 220, gifH: 220 }));
+    await assertFails(set(ref(b, paths.activityReply(T, "g3", "r2")), { by: "bob", at: 2, gif: "https://evil.example/x.gif" }));
+  });
 });

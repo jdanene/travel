@@ -34,13 +34,18 @@ export function vote(tripId: string, id: string, memberId: MemberId, index: numb
 }
 
 /**
- * Adds a reply under any feed line (a message, a poll or an automatic update), under the member's own name.
- * Inputs: the trip, the post's id, the member, and the reply's text (1 to 500 characters, trimmed).
- * Output: the write result.
- * Examples (checked on the emulator): KA replies "Me!" under RB's post → "1 reply" under it on every phone
+ * Adds a reply under any feed line (a message, a poll or an automatic update), under the member's own name:
+ * words, or a GIF or sticker from KLIPY.
+ * Inputs: the trip, the line's id, the member, and the reply: its text (1 to 500 characters, trimmed),
+ * or a picture on KLIPY's host with its size.
+ * Output: the write result; "refused" for a picture off KLIPY's host or a line that is gone.
+ * Examples (checked on the emulator with two profiles):
+ *   KA replies "Me!" under RB's post        → "1 reply" under it on every phone
+ *   KA picks the "hello" GIF in reply mode → the GIF in that line's thread
  */
-export function reply(tripId: string, id: string, memberId: MemberId, text: string): Promise<WriteResult> {
-  const entry: ActivityReply = { by: memberId, at: Date.now(), text };
+export function reply(tripId: string, id: string, memberId: MemberId, said: string | { url: string; width: number; height: number }): Promise<WriteResult> {
+  const entry: ActivityReply =
+    typeof said === "string" ? { by: memberId, at: Date.now(), text: said } : { by: memberId, at: Date.now(), gif: said.url, gifW: said.width, gifH: said.height };
   return write({ [paths.activityReply(tripId, id, newActivityId(tripId))]: entry });
 }
 

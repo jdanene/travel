@@ -4,10 +4,10 @@ import type { ActivityEntry, ActivityReactions, ActivityReply, MemberId } from "
 import { post, postGif, react, remove, reply, vote } from "../api/activity";
 import type { KlipyItem } from "../lib/klipy";
 import type { Draft } from "../lib/lines";
-import { whenLabels } from "../lib/lines";
+import { lineWords, whenLabels } from "../lib/lines";
 import { reactionKey } from "../lib/reactions";
-import { Composer } from "./Composer";
-import { LineRow, Written, type Viewer } from "./Entries";
+import { Composer, type ReplyTarget } from "./Composer";
+import { LineRow, Written, type ThreadProps, type Viewer } from "./Entries";
 import { ReactionPicker } from "./Pickers";
 import { ReactionRow } from "./ReactionRow";
 import "./Activity.css";
@@ -54,6 +54,12 @@ interface ActivityProps {
  * friend's own post shows at once, marked "Sending…" until the server
  * has it. With just you on the trip, the card says "Just you so far".
  *
+ * Replies use the one message bar, as on Discord: "Reply" on any line puts
+ * the bar in reply mode ("Replying to KA", the line lightly marked, the
+ * keyboard up); sending, words or a GIF, goes into that line's thread,
+ * opens it, and leaves reply mode. × or Escape leaves it too. One thread
+ * is open at a time.
+ *
  * Inputs: the trip id, the activity branch with its votes, replies and
  * emoji, this device's member and organizer mark, the names, the crew's
  * size, and from the shell each line's thumbnail and what tapping it opens.
@@ -62,12 +68,17 @@ interface ActivityProps {
  *   RB sends "Anyone flying from London?" → it lands at the foot at once, "Sending…" for a moment; KA, at the foot, sees it slide in
  *   KA has scrolled up when RB posts      → KA stays put; "New messages" shows; a tap goes to the foot
  *   only you                              → "Just you so far" and the bar
+ *   "Reply" on KA's "joined", send "Welcome!" → KA's thread opens with "Welcome!"; the bar is a plain message bar again
  */
 export function Activity({ tripId, entries, votes, replies, reactions, memberId, isOrganizer, names, crewSize, thumbOf, openerOf }: ActivityProps) {
   const [shown, setShown] = useState(FIRST);
   const [sending, setSending] = useState<ReadonlySet<string>>(new Set());
   const [problem, setProblem] = useState<string | null>(null);
   const [picking, setPicking] = useState<string | null>(null);
+  // The one open thread, and the line the message bar answers (reply mode), by line id.
+  const [thread, setThread] = useState<string | null>(null);
+  const [replyTo, setReplyTo] = useState<string | null>(null);
+  const field = useRef<HTMLTextAreaElement | null>(null);
   const [unseen, setUnseen] = useState(false);
   const [edges, setEdges] = useState({ top: false, foot: false });
   const pickAnchor = useRef<HTMLElement | null>(null);
@@ -175,6 +186,41 @@ export function Activity({ tripId, entries, votes, replies, reactions, memberId,
   };
   const report = (result: { ok: boolean }) => setProblem(result.ok ? null : "That did not save. Try again.");
 
+  // Escape leaves reply mode, unless a panel above the page takes that Escape.
+  useEffect(() => {
+    if (!replyTo) return;
+    const leave = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !document.querySelector("dialog[open]")) setReplyTo(null);
+    };
+    document.addEventListener("keydown", leave);
+    return () => document.removeEventListener("keydown", leave);
+  }, [replyTo]);
+  // A line deleted while the bar answers it ends reply mode.
+  if (replyTo && !entries?.[replyTo]) setReplyTo(null);
+
+  const threadOf = (id: string): ThreadProps => ({
+    replies: replies?.[id],
+    open: thread === id,
+    onOpen: (open) => setThread(open ? id : thread === id ? null : thread),
+    answering: replyTo === id,
+    onReply: () => {
+      // Focus inside the tap, so a phone raises its keyboard; the bar scrolls itself above it.
+      field.current?.focus({ preventScroll: true });
+      setReplyTo(id);
+    },
+  });
+
+  // Sends into the answered line's thread and shows it; on a failure reply mode comes back, as the words do.
+  const sendReply = (said: Parameters<typeof reply>[3]) => {
+    const target = replyTo!;
+    setThread(target);
+    setReplyTo(null);
+    return reply(tripId, target, memberId, said).then((result) => {
+      if (!result.ok) setReplyTo(target);
+      return result;
+    });
+  };
+
   const reactionsOf = (id: string) => (after?: ReactNode) => (
     <ReactionRow
       raw={reactions?.[id]}
@@ -229,10 +275,9 @@ export function Activity({ tripId, entries, votes, replies, reactions, memberId,
                           entry={entry}
                           viewer={viewer}
                           votes={votes?.[id]}
-                          replies={replies?.[id]}
+                          thread={threadOf(id)}
                           sending={sending.has(id)}
                           onVote={(index) => void vote(tripId, id, memberId, index).then(report)}
-                          onReply={(text) => reply(tripId, id, memberId, text)}
                           onDelete={() => void remove(tripId, id).then(report)}
                           reactions={reactionsOf(id)}
                         />
@@ -243,8 +288,7 @@ export function Activity({ tripId, entries, votes, replies, reactions, memberId,
                           viewer={viewer}
                           thumb={thumbOf(entry)}
                           onOpen={openerOf(entry)}
-                          replies={replies?.[id]}
-                          onReply={(text) => reply(tripId, id, memberId, text)}
+                          thread={threadOf(id)}
                           reactions={reactionsOf(id)}
                           onDelete={entry.by === memberId ? () => void remove(tripId, id).then(report) : undefined}
                         />
@@ -272,8 +316,11 @@ export function Activity({ tripId, entries, votes, replies, reactions, memberId,
       )}
       <Composer
         placeholder="Message"
-        onSend={(draft: Draft) => send((id) => post(tripId, id, memberId, draft))}
-        onGif={(item: KlipyItem) => send((id) => postGif(tripId, id, memberId, item.full))}
+        fieldRef={field}
+        replyTo={replyTo && entries?.[replyTo] ? { id: replyTo, label: answerLabel(entries[replyTo], names) } : null}
+        onCancelReply={() => setReplyTo(null)}
+        onSend={(draft: Draft) => (replyTo ? sendReply(draft.text) : send((id) => post(tripId, id, memberId, draft)))}
+        onGif={(item: KlipyItem) => (replyTo ? sendReply(item.full) : send((id) => postGif(tripId, id, memberId, item.full)))}
       />
       <ReactionPicker
         open={picking !== null}
@@ -286,6 +333,24 @@ export function Activity({ tripId, entries, votes, replies, reactions, memberId,
       />
     </section>
   );
+}
+
+/** The longest automatic-line words the reply strip shows before "…". */
+const LABEL_MAX = 40;
+
+/**
+ * Who or what the bar answers, for "Replying to …": the author's name, or
+ * for a line with no author (a found event) its own words, shortened.
+ * Inputs: the line and the names. Output: the label.
+ * Examples (checked on screen):
+ *   KA's message                           → "KA"
+ *   "New event found: Zamna at Phuket, 29 Jan, with a long name" → "New event found: Zamna at Phuket, 29 Ja…"
+ */
+function answerLabel(entry: ActivityEntry, names: Record<MemberId, string>): ReplyTarget["label"] {
+  if (entry.by) return names[entry.by] ?? entry.by;
+  const { lead, rest } = lineWords(entry, "");
+  const words = `${lead} ${rest}`.trim();
+  return words.length > LABEL_MAX ? `${words.slice(0, LABEL_MAX - 1).trimEnd()}…` : words;
 }
 
 /** This device's clock, moved on once a minute, so "2 h ago" and "TODAY" stay true while the page is open. */

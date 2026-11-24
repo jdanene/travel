@@ -16,16 +16,15 @@ interface MessagePickerProps {
   anchor: RefObject<HTMLElement>;
   /** Puts an emoji or emote into the message at the cursor; the panel stays open for more. */
   onEmoji: (choice: EmojiChoice) => void;
-  /** Posts a GIF or sticker as its own message; absent in a reply bar (a reply is words). */
+  /** Sends a GIF or sticker (a message, or a reply in reply mode). */
   onGif?: (item: KlipyItem) => void;
-  /** Render it while the page is idle and keep it, so it opens with no work but the slide (the main message bar). */
-  keep?: boolean;
 }
 
 /**
  * The message bar's emoji panel: Discord's "Emoji | GIFs | Stickers"
  * switch over the emoji grid or KLIPY's grid. With no KLIPY key in the
- * build, or in a reply bar, there is no switch: only Emoji. On a phone it
+ * build there is no switch: only Emoji. It renders while the page is idle
+ * and stays, so it opens with no work but the slide. On a phone it
  * docks where the keyboard would be, under the bar (Drawer, dock).
  *
  * Inputs: open, onClose, the emoji button, and what an emoji or a GIF does.
@@ -34,7 +33,7 @@ interface MessagePickerProps {
  *   tap 😀 in the bar, tap 🔥 → "🔥" goes in at the cursor; the panel stays
  *   GIFs, tap a GIF          → it posts to the feed; the panel closes
  */
-export function MessagePicker({ open, onClose, anchor, onEmoji, onGif, keep = false }: MessagePickerProps) {
+export function MessagePicker({ open, onClose, anchor, onEmoji, onGif }: MessagePickerProps) {
   const tabs: Tab[] = klipyOn && onGif ? ["emoji", "gifs", "stickers"] : ["emoji"];
   const [tab, setTab] = useState<Tab>(tabs.includes(lastTab) ? lastTab : "emoji");
   const choose = (next: Tab) => {
@@ -42,7 +41,7 @@ export function MessagePicker({ open, onClose, anchor, onEmoji, onGif, keep = fa
     setTab(next);
   };
   return (
-    <Drawer open={open} label={tab === "emoji" ? "Emoji" : tab === "gifs" ? "GIFs" : "Stickers"} onClose={onClose} anchor={anchor} focusOnDesk="input[type=search]" dock keep={keep}>
+    <Drawer open={open} label={tab === "emoji" ? "Emoji" : tab === "gifs" ? "GIFs" : "Stickers"} onClose={onClose} anchor={anchor} focusOnDesk="input[type=search]" dock keep>
       {tabs.length > 1 && (
         <div className="seg" role="tablist" aria-label="Emoji, GIFs or stickers">
           {tabs.map((name) => (

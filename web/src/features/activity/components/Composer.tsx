@@ -6,23 +6,26 @@ import { MAX_OPTION, MAX_TEXT, readyDraft, type Draft } from "../lib/lines";
 import { withEmoteTokens, type EmojiChoice } from "../lib/reactions";
 import { MessagePicker } from "./Pickers";
 
-interface ComposerProps {
-  /** The field's placeholder and name: "Message" in the list, "Reply" under a post. */
-  placeholder: string;
-  /** The reply bar: smaller, and with no "+" (a reply is never a poll). */
-  small?: boolean;
-  /** Focus the field when the bar appears (a reply bar opened by a tap). */
-  autoFocus?: boolean;
-  /** Sends the draft. The bar clears before this settles; a failure brings the words back with the reason. */
-  onSend: (draft: Draft) => Promise<WriteResult>;
-  /** Posts a GIF or sticker from the emoji panel; absent in a reply bar. */
-  onGif?: (item: KlipyItem) => Promise<WriteResult>;
-  /** Keeps an unsent reply when its thread folds: the words come back when it opens again. */
-  draftKey?: string;
+/** The line the bar is answering: its id, and who or what it answers ("KA", or an automatic line's words). */
+export interface ReplyTarget {
+  id: string;
+  label: string;
 }
 
-/** Unsent replies, by post, for the page's life: folding a thread never throws words away. */
-const drafts = new Map<string, string>();
+interface ComposerProps {
+  /** The field's placeholder and name: "Message". */
+  placeholder: string;
+  /** Sends the draft: a message, a poll, or in reply mode a reply. The bar clears before this settles; a failure brings the words back with the reason. */
+  onSend: (draft: Draft) => Promise<WriteResult>;
+  /** Sends a GIF or sticker from the emoji panel: a message, or in reply mode a reply. */
+  onGif?: (item: KlipyItem) => Promise<WriteResult>;
+  /** Reply mode: the line answered, or null for a plain message. */
+  replyTo?: ReplyTarget | null;
+  /** Leaves reply mode (the × on the strip). */
+  onCancelReply?: () => void;
+  /** The field, for a caller that must focus it inside a tap ("Reply" on a line), so iOS raises the keyboard. */
+  fieldRef?: React.MutableRefObject<HTMLTextAreaElement | null>;
+}
 
 /** How many option fields a new poll starts with (the mock's Option 1, 2 and 3 (optional)). */
 const FIRST_OPTIONS = 3;
@@ -35,7 +38,12 @@ const FIRST_OPTIONS = 3;
  * turns the message into a question with 2 to 4 options shown above the
  * bar. The emoji button opens the Emoji | GIFs | Stickers panel: an emoji
  * goes in at the cursor (an emote shows as ":name:" and is stored as
- * Discord's <:name:id>), a GIF or sticker posts at once.
+ * Discord's <:name:id>), a GIF or sticker sends at once.
+ *
+ * It is the Feed's only text box. In reply mode a thin strip over the
+ * field says "Replying to KA" with an × to leave; "+" and Poll are hidden;
+ * whatever is sent, words or a GIF, goes into that line's thread. Words
+ * typed stay in the bar when reply mode starts or ends.
  *
  * Sending clears the bar at once and keeps the keyboard up; the line shows
  * in the list straight away (the caller marks it "Sending…"). A failed send
@@ -43,23 +51,17 @@ const FIRST_OPTIONS = 3;
  * the bar. On a phone Return adds a line; with a mouse and keyboard, Enter
  * sends and Shift+Enter adds a line. The field keeps 16 px text, so iOS
  * does not zoom, and it scrolls itself above the keyboard as it opens.
- * The reply bar is the same bar, smaller, with no "+" and no GIFs, and it
- * keeps its words if its thread folds.
  *
- * Inputs: placeholder, small, autoFocus, onSend, onGif and draftKey, as above.
+ * Inputs: placeholder, onSend, onGif, replyTo, onCancelReply and fieldRef, as above.
  * Output: the bar.
- * Examples (checked on the emulator at 375 px and 1650 px):
+ * Examples (checked on the emulator at 390 px and 1650 px):
  *   type "Hi" → the send arrow scales in; Enter on a laptop → the bar clears, the line lands at the foot of the feed
  *   "+", then "Poll" → three option fields slide in above the bar; the field reads "Ask a question"
+ *   replyTo KA's line → "Replying to KA ×" over the field, no "+"; send → the reply lands in KA's thread
  *   😀, then 🔥 → "🔥" at the cursor; the panel stays for more
- *   emulator stopped mid-send → the line waits as "Sending…"; a refused send → the words come back with the reason
  */
-export function Composer({ placeholder, small = false, autoFocus = false, onSend, onGif, draftKey }: ComposerProps) {
-  const [text, setTextState] = useState(() => (draftKey ? drafts.get(draftKey) ?? "" : ""));
-  const setText = (next: string) => {
-    setTextState(next);
-    if (draftKey) drafts.set(draftKey, next);
-  };
+export function Composer({ placeholder, onSend, onGif, replyTo = null, onCancelReply, fieldRef }: ComposerProps) {
+  const [text, setText] = useState("");
   const [picking, setPicking] = useState(false);
   const emojiButton = useRef<HTMLButtonElement>(null);
   // The emotes picked into this message, name to id, so ":name:" is stored as <:name:id> (reactions.ts).
@@ -69,14 +71,13 @@ export function Composer({ placeholder, small = false, autoFocus = false, onSend
   const [options, setOptions] = useState<string[] | null>(null);
   const [menu, setMenu] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const field = useRef<HTMLTextAreaElement>(null);
+  const ownField = useRef<HTMLTextAreaElement | null>(null);
+  const field = fieldRef ?? ownField;
   const form = useRef<HTMLFormElement>(null);
-  const draft = readyDraft({ text: withEmoteTokens(text, emotes.current), options: options ?? undefined });
+  // A reply is words or a GIF, never a poll: in reply mode the poll fields wait, hidden.
+  const polling = options !== null && !replyTo;
+  const draft = readyDraft({ text: withEmoteTokens(text, emotes.current), options: polling ? options : undefined });
   useAboveKeyboard(form, field);
-
-  useEffect(() => {
-    if (autoFocus) field.current?.focus({ preventScroll: true });
-  }, [autoFocus]);
 
   // The menu shuts on Escape and on a tap anywhere else.
   useEffect(() => {
@@ -99,7 +100,7 @@ export function Composer({ placeholder, small = false, autoFocus = false, onSend
     const kept = { text, options, emotes: emotes.current };
     setText("");
     emotes.current = {};
-    setOptions(null);
+    if (polling) setOptions(null);
     setMenu(false);
     setError(null);
     void onSend(draft).then((result) => {
@@ -166,8 +167,8 @@ export function Composer({ placeholder, small = false, autoFocus = false, onSend
   const keepFocus = { onPointerDown: (event: { preventDefault: () => void }) => event.preventDefault(), onMouseDown: (event: { preventDefault: () => void }) => event.preventDefault() };
 
   return (
-    <form ref={form} className={`msg${small ? " small" : ""}`} onSubmit={send}>
-      {!small && (
+    <form ref={form} className="msg" onSubmit={send} data-answering={replyTo?.id}>
+      {!replyTo && (
         <div className={`msg-poll${options ? " open" : ""}`} aria-hidden={!options}>
           <div className="msg-poll-in">
             {options && (
@@ -201,8 +202,18 @@ export function Composer({ placeholder, small = false, autoFocus = false, onSend
           </div>
         </div>
       )}
+      {replyTo && (
+        <div className="msg-reply">
+          <span>
+            Replying to <b>{replyTo.label}</b>
+          </span>
+          <button type="button" className="msg-reply-off" aria-label="Stop replying" onClick={onCancelReply} {...keepFocus}>
+            <Icon name="close" size={16} />
+          </button>
+        </div>
+      )}
       <div className={`msg-bar${draft ? " ready" : ""}`}>
-        {!small && (
+        {!replyTo && (
           <div className="msg-plus-wrap">
             <button
               type="button"
@@ -229,8 +240,8 @@ export function Composer({ placeholder, small = false, autoFocus = false, onSend
             rows={1}
             value={text}
             maxLength={MAX_TEXT}
-            placeholder={options ? "Ask a question" : placeholder}
-            aria-label={options ? "Question" : placeholder}
+            placeholder={polling ? "Ask a question" : replyTo ? "Reply" : placeholder}
+            aria-label={polling ? "Question" : replyTo ? `Reply to ${replyTo.label}` : placeholder}
             enterKeyHint={window.matchMedia?.("(hover: hover) and (pointer: fine)").matches ? "send" : "enter"}
             onChange={(event) => {
               setText(event.target.value);
@@ -271,7 +282,7 @@ export function Composer({ placeholder, small = false, autoFocus = false, onSend
             <path d="M6.5 9.5h.01M10 9.5h.01M13.5 9.5h.01M17 9.5h.01M6.5 12.5h.01M10 12.5h.01M13.5 12.5h.01M17 12.5h.01M8.5 15.25h7" />
           </svg>
         </button>
-        <button type="submit" className="msg-send" aria-label={options ? "Post poll" : "Send"} disabled={!draft} aria-hidden={!draft} tabIndex={draft ? 0 : -1} {...keepFocus}>
+        <button type="submit" className="msg-send" aria-label={polling ? "Post poll" : replyTo ? "Send reply" : "Send"} disabled={!draft} aria-hidden={!draft} tabIndex={draft ? 0 : -1} {...keepFocus}>
           <Icon name="up" size={18} />
         </button>
       </div>
@@ -285,7 +296,6 @@ export function Composer({ placeholder, small = false, autoFocus = false, onSend
         }}
         onEmoji={insert}
         onGif={onGif ? sendGif : undefined}
-        keep={!small}
       />
       {error && (
         <p className="msg-error" role="alert">

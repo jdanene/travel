@@ -269,8 +269,13 @@ export interface Trip {
 /** The emoji on one Feed line, per member: { key: time added }, or one emoji string in the first version's shape. */
 export type ActivityReactions = Record<MemberId, Record<string, number> | string>;
 
+/** A reply under a feed line: words, or a GIF or sticker from KLIPY (then the words are optional). */
 export interface ActivityReply {
   by: MemberId;
   at: number;
-  text: string;
+  text?: string;
+  /** The picture's https address on KLIPY's media host, and its size so the thread keeps its place. */
+  gif?: string;
+  gifW?: number;
+  gifH?: number;
 }

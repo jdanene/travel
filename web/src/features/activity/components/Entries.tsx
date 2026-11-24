@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Face, type Person } from "../../../components/Avatars";
 import { Icon } from "../../../components/Icon";
-import type { WriteResult } from "../../../lib/db";
 import type { ActivityEntry, ActivityReply, MemberId } from "../../../types/trip";
 import { lineWords, tally, whenLabels } from "../lib/lines";
-import { Composer } from "./Composer";
 import { RichText } from "./Glyph";
 
 /** What every entry needs to draw its people and its time. */
@@ -84,22 +82,21 @@ function DeleteAsk({ onDelete, onKeep, note }: { onDelete: () => void; onKeep: (
  * 24 Nov 2026: "only their updates").
  *
  * Inputs: the line's id and entry, the viewer, its thumbnail (or undefined), what a tap
- * does (or undefined), its replies and what replying does, the reactions row (it takes
- * the "Reply" control, as on a message), and what deleting does (absent when this member may not).
+ * does (or undefined), its thread (ThreadProps), the reactions row (it takes the "Reply"
+ * control, as on a message), and what deleting does (absent when this member may not).
  * Output: the row.
  * Examples (checked on screen):
  *   KA's stay line → "KA  2 h ago", "added a place: Cliffside villa" under it, the villa's photo; a tap opens Stay
  *   your own "joined", "…" then "Delete" → the line goes on every phone; the trip still has you
  */
-export function LineRow({ id, entry, viewer, thumb, onOpen, replies, onReply, reactions, onDelete }: { id: string; entry: ActivityEntry; viewer: Viewer; thumb?: string; onOpen?: () => void; replies: Record<string, ActivityReply> | undefined; onReply: (text: string) => Promise<WriteResult>; reactions: (after: ReactNode) => ReactNode; onDelete?: () => void }) {
+export function LineRow({ id, entry, viewer, thumb, onOpen, thread, reactions, onDelete }: { id: string; entry: ActivityEntry; viewer: Viewer; thumb?: string; onOpen?: () => void; thread: ThreadProps; reactions: (after: ReactNode) => ReactNode; onDelete?: () => void }) {
   const [asking, setAsking] = useState(false);
-  const [open, setOpen] = useState(false);
   const block = useRef<HTMLDivElement>(null);
-  useFoldOutside(asking || open, block, () => {
+  useFoldOutside(asking || thread.open, block, thread.answering ? id : null, () => {
     setAsking(false);
-    setOpen(false);
+    thread.onOpen(false);
   });
-  const { control, panel } = useThread(id, viewer, replies, onReply, open, setOpen);
+  const { control, panel } = useThread(viewer, thread);
   const { lead, rest } = lineWords(entry, entry.by ? person(viewer, entry.by).name : "");
   const main = (
     <>
@@ -112,7 +109,7 @@ export function LineRow({ id, entry, viewer, thumb, onOpen, replies, onReply, re
   );
   const mainClass = `row-main${onDelete ? " with-more" : ""}`;
   return (
-    <div className="row" ref={block}>
+    <div className={`row${thread.answering ? " answered" : ""}`} ref={block}>
       <Who viewer={viewer} id={entry.by} />
       <div className="row-body">
         {onOpen ? (
@@ -136,11 +133,11 @@ interface WrittenProps {
   entry: ActivityEntry;
   viewer: Viewer;
   votes: Record<MemberId, number> | undefined;
-  replies: Record<string, ActivityReply> | undefined;
+  /** Its thread: replies, whether it is open, and reply mode. */
+  thread: ThreadProps;
   /** True while this device's post waits for the server. */
   sending: boolean;
   onVote: (index: number) => void;
-  onReply: (text: string) => Promise<WriteResult>;
   onDelete: () => void;
   /** The reactions row; it takes the "Reply" control on its own line. */
   reactions: (after: ReactNode) => ReactNode;
@@ -153,21 +150,21 @@ interface WrittenProps {
  * that keeps its shape while it loads. A poll keeps a quiet box in the
  * card's thin grey, with a bar for each share, the voters' faces and the
  * count; a tap votes or changes the vote. Under it, on the reactions row,
- * "Reply" (or "3 replies") opens the thread in place; a tap or click
- * outside the post, or Escape, folds it, and an unsent reply waits for
- * the next opening. The author and an organizer get a quiet "…" (shown on
+ * "Reply" puts the message bar in reply mode for it, and "3 replies" opens
+ * the thread in place; a tap or click outside the post (the bar counts as
+ * inside while it answers this post), or Escape, folds it. The author and an organizer get a quiet "…" (shown on
  * hover with a mouse, always on a touch screen) that opens "Delete for
  * everyone?".
  *
- * Inputs: the entry and its id, the viewer, its votes and replies, whether
- * it is still sending, what voting, replying and deleting do, and the reactions row.
+ * Inputs: the entry and its id, the viewer, its votes, its thread, whether
+ * it is still sending, what voting and deleting do, and the reactions row.
  * Output: the block.
  * Examples (checked on the emulator with two profiles):
  *   TO's poll, 4 Yes and 1 No, you voted Yes → "Yes" with a check, its bar at 80 %, "5 of 8 voted · tap to change your vote"
- *   "2 replies" tapped, then a tap on the map  → the thread folds; "Reply" again shows the half-written reply
+ *   "2 replies" tapped, then a tap on the map  → the thread folds
+ *   "Reply" tapped                            → "Replying to TO" over the bar, the post lightly marked
  */
-export function Written({ id, entry, viewer, votes, replies, sending, onVote, onReply, onDelete, reactions }: WrittenProps) {
-  const [open, setOpen] = useState(false);
+export function Written({ id, entry, viewer, votes, thread, sending, onVote, onDelete, reactions }: WrittenProps) {
   const [asking, setAsking] = useState(false);
   const block = useRef<HTMLElement>(null);
   const author = entry.by ? person(viewer, entry.by).name : "";
@@ -175,15 +172,15 @@ export function Written({ id, entry, viewer, votes, replies, sending, onVote, on
   const mine = votes?.[viewer.memberId];
   const poll = entry.kind === "poll" && entry.options ? tally(entry.options, votes) : null;
 
-  useFoldOutside(open || asking, block, () => {
-    setOpen(false);
+  useFoldOutside(thread.open || asking, block, thread.answering ? id : null, () => {
+    thread.onOpen(false);
     setAsking(false);
   });
 
-  const { control: replyControl, panel } = useThread(id, viewer, replies, onReply, open, setOpen);
+  const { control: replyControl, panel } = useThread(viewer, thread);
 
   return (
-    <article ref={block} className={`row fp${sending ? " sending" : ""}`} aria-labelledby={`fp-${id}`}>
+    <article ref={block} className={`row fp${sending ? " sending" : ""}${thread.answering ? " answered" : ""}`} aria-labelledby={`fp-${id}`}>
       <Who viewer={viewer} id={entry.by} />
       <div className="row-body">
         <span id={`fp-${id}`} className="row-label">
@@ -226,67 +223,87 @@ export function Written({ id, entry, viewer, votes, replies, sending, onVote, on
   );
 }
 
+/** One line's thread, as the Feed hands it down: the replies, whether it is open, and reply mode. */
+export interface ThreadProps {
+  replies: Record<string, ActivityReply> | undefined;
+  open: boolean;
+  onOpen: (open: boolean) => void;
+  /** True while the message bar answers this line. */
+  answering: boolean;
+  /** Puts the message bar in reply mode for this line (it focuses the field inside the tap). */
+  onReply: () => void;
+}
+
 /**
  * The reply thread under any feed line, a friend's message or an automatic
- * update alike (owner, 24 Nov 2026: "people can reply to updates in the
- * feed not just texts"): the "Reply" control for the reactions row, and,
- * while open, the replies in order with a small message bar under them.
+ * update alike: the control for the reactions row, and, while open, the
+ * replies in order (words, or a GIF drawn smaller than in the feed). There
+ * is no second text box: "Reply" (the control on a line with no replies,
+ * or the last item of an open thread) puts the one message bar in reply
+ * mode, as on Discord (owner, 25 Nov 2026: "why are we using a different
+ * text box to reply?").
  *
- * Inputs: the line's id (it keys the unsent reply), the viewer, the
- * line's replies, what sending a reply does, and the open state with its setter.
+ * Inputs: the viewer and the line's thread.
  * Output: { control, panel }; panel is null while folded.
- * Examples (checked by build and tests only):
- *   no replies          → control "Reply"; open → an empty thread and the bar
- *   KA and RB replied   → control shows both faces and "2 replies"
+ * Examples (checked on the emulator at 390 px):
+ *   no replies        → control "Reply"; a tap → the bar reads "Replying to KA"
+ *   KA and RB replied → control shows both faces and "2 replies"; a tap opens them, "Reply" last
  */
-function useThread(id: string, viewer: Viewer, replies: Record<string, ActivityReply> | undefined, onReply: (text: string) => Promise<WriteResult>, open: boolean, setOpen: (open: boolean) => void) {
-  const thread = Object.entries(replies ?? {}).sort(([, a], [, b]) => a.at - b.at);
-  const repliers = [...new Set(thread.map(([, reply]) => reply.by))];
-  const control = (
-    <button type="button" className="reps" aria-expanded={open} onClick={() => setOpen(!open)}>
-      {thread.length > 0 ? (
-        <>
-          <span className="avs" aria-hidden="true">
-            {repliers.slice(0, 3).map((who) => (
-              <Face key={who} person={person(viewer, who)} className={faceClass(viewer, who)} />
-            ))}
-          </span>
-          {open ? "Hide replies" : `${thread.length} ${thread.length === 1 ? "reply" : "replies"}`}
-        </>
-      ) : (
-        <>
-          <Icon name="chat" size={14} />
-          {open ? "Close" : "Reply"}
-        </>
-      )}
+function useThread(viewer: Viewer, thread: ThreadProps) {
+  const { open, onOpen, onReply } = thread;
+  const list = Object.entries(thread.replies ?? {}).sort(([, a], [, b]) => a.at - b.at);
+  const repliers = [...new Set(list.map(([, reply]) => reply.by))];
+  const replyButton = (label: string) => (
+    <button type="button" className="reps" onClick={onReply}>
+      <Icon name="chat" size={14} />
+      {label}
     </button>
   );
-  const panel = open ? (
-    <div className="fp-replies">
-      {thread.map(([replyId, reply]) => (
-        <div key={replyId} className="rp">
-          <Who viewer={viewer} id={reply.by} />
-          <div className="rp-body">
-            <Head name={person(viewer, reply.by).name} at={reply.at} viewer={viewer} />
-            <RichText className="rp-t" text={reply.text} />
+  const control =
+    list.length > 0 ? (
+      <button type="button" className="reps" aria-expanded={open} onClick={() => onOpen(!open)}>
+        <span className="avs" aria-hidden="true">
+          {repliers.slice(0, 3).map((who) => (
+            <Face key={who} person={person(viewer, who)} className={faceClass(viewer, who)} />
+          ))}
+        </span>
+        {open ? "Hide replies" : `${list.length} ${list.length === 1 ? "reply" : "replies"}`}
+      </button>
+    ) : (
+      replyButton("Reply")
+    );
+  const panel =
+    open && list.length > 0 ? (
+      <div className="fp-replies">
+        {list.map(([replyId, reply]) => (
+          <div key={replyId} className="rp">
+            <Who viewer={viewer} id={reply.by} />
+            <div className="rp-body">
+              <Head name={person(viewer, reply.by).name} at={reply.at} viewer={viewer} />
+              {reply.gif && (
+                <img className="rp-gif" src={reply.gif} alt="GIF" width={reply.gifW} height={reply.gifH} style={reply.gifW && reply.gifH ? { aspectRatio: `${reply.gifW} / ${reply.gifH}` } : undefined} loading="lazy" decoding="async" />
+              )}
+              {reply.text && <RichText className="rp-t" text={reply.text} />}
+            </div>
           </div>
-        </div>
-      ))}
-      <Composer placeholder="Reply" small autoFocus draftKey={id} onSend={(draft) => onReply(draft.text)} />
-    </div>
-  ) : null;
+        ))}
+        {replyButton("Reply")}
+      </div>
+    ) : null;
   return { control, panel };
 }
 
 /**
  * Folds something open (a thread, the delete question) when the friend
  * taps or clicks outside it, or presses Escape. A tap inside, including in
- * a panel opened from inside it, keeps it open.
- * Inputs: whether it is open, the block, and what folding does.
+ * a panel above the page, keeps it open; so does a tap in the message bar
+ * while the bar answers this line.
+ * Inputs: whether it is open, the block, the line's id while the bar answers it (else null), and what folding does.
  * Output: nothing.
- * Examples (checked on screen): thread open, tap the map → it folds; tap a reaction pill on the same post → it stays
+ * Examples (checked on screen): thread open, tap the map → it folds; tap a reaction pill on the same post → it stays;
+ *   answering this line, tap into the bar → it stays
  */
-function useFoldOutside(open: boolean, block: React.RefObject<HTMLElement>, fold: () => void) {
+function useFoldOutside(open: boolean, block: React.RefObject<HTMLElement>, answering: string | null, fold: () => void) {
   const latest = useRef(fold);
   latest.current = fold;
   useEffect(() => {
@@ -300,6 +317,7 @@ function useFoldOutside(open: boolean, block: React.RefObject<HTMLElement>, fold
       const target = event.target as Node;
       // A panel opened from inside the post (the reply bar's emoji) belongs to it; so does any open dialog above the page.
       if (block.current?.contains(target) || (target instanceof Element && target.closest("dialog[open]"))) return;
+      if (answering && target instanceof Element && target.closest(`form[data-answering="${answering}"]`)) return;
       latest.current();
     };
     document.addEventListener("pointerdown", away);
@@ -308,5 +326,5 @@ function useFoldOutside(open: boolean, block: React.RefObject<HTMLElement>, fold
       document.removeEventListener("pointerdown", away);
       document.removeEventListener("keydown", away);
     };
-  }, [open, block]);
+  }, [open, block, answering]);
 }
