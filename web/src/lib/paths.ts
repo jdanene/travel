@@ -53,3 +53,6 @@ export const inMark = (tripId: string, showId: string, memberId: string) =>
 
 /** One saved link. */
 export const link = (tripId: string, linkId: string) => `trips/${tripId}/links/items/${linkId}`;
+
+/** One place a friend put on the map. */
+export const customPlace = (tripId: string, placeId: string) => `trips/${tripId}/places/custom/${placeId}`;

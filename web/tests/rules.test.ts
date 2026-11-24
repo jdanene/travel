@@ -1,5 +1,5 @@
 /**
- * The nine rules tests of Trip 2, against the database emulator. Run with
+ * The rules tests (nine from Trip 2, two for Add to map), against the database emulator. Run with
  * `npm run test:rules` in web/; it starts the emulator, runs this file and
  * stops it. Each test names the rule it proves, in the words of plan
  * section 4.
@@ -15,6 +15,7 @@ const KEY = "Key0123456789abcdefXYZ";
 let env: RulesTestEnvironment;
 
 const db = (uid?: string) => (uid ? env.authenticatedContext(uid) : env.unauthenticatedContext()).database();
+const place = (extra: object) => ({ name: "Sunset bar", kind: "food", destination: "bali", lat: -8.64, lng: 115.14, at: 1, ...extra });
 const show = (extra: object) => ({ destination: "bali", venue: "Savaya", date: "2027-02-13", artist: "Peggy Gou", verified: true, at: 1, ...extra });
 
 beforeAll(async () => {
@@ -96,4 +97,12 @@ describe("database rules", () => {
     await assertSucceeds(update(ref(db("uid-a"), "/"), { [paths.show(T, "f1")]: null, [paths.showIn(T, "f1")]: null }));
     await assertSucceeds(remove(ref(db("uid-o"), paths.show(T, "seed1"))));
   });
+
+  it("10. lets a member put a place on the map under its member, and refuses it under another", async () => {
+    await assertSucceeds(set(ref(db("uid-a"), paths.customPlace(T, "p1")), place({ addedBy: "alice" })));
+    await assertFails(set(ref(db("uid-a"), paths.customPlace(T, "p2")), place({ addedBy: "bob" })));
+  });
+
+  it("11. refuses a place outside the box around its destination", () =>
+    assertFails(set(ref(db("uid-a"), paths.customPlace(T, "p3")), place({ addedBy: "alice", lat: 9.7, lng: 100.0 }))));
 });

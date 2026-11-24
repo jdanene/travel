@@ -1,4 +1,6 @@
+import { placeWord } from "../../features/map/lib/places";
 import { idFromName } from "../../lib/ids";
+import { initials } from "../../lib/initials";
 import { weekdayDate } from "../../lib/format";
 import type { Pin } from "../../types/pin";
 import type { Trip } from "../../types/trip";
@@ -16,12 +18,16 @@ import { datesSettled } from "./modules";
  * Venue pins: one per venue in places/venues. A friend's party at a venue
  * that is not there gets no pin (case 34); its row still shows in Parties.
  *
+ * Friends' places: one per entry in places/custom ("Add to map"), where
+ * the friend put it, with its kind's icon, its link and who added it.
+ *
  * Inputs: trip — the whole trip.
- * Output: the pins, stays first. A venue's card line is its own line (or
+ * Output: the pins, stays first, then venues, then friends' places. A venue's card line is its own line (or
  * its area) and its next show this year; with no show, the area alone.
  * Examples (checked on the emulator):
  *   the seeded trip, dates open  → twelve venue pins, no stay pins
  *   Savaya with a show on 13 Feb → line "Club on the cliffs · next show Sat 13 Feb"
+ *   Kai adds "Sunset bar", Food   → a place pin, line "Food · added by KA"
  */
 export function pins(trip: Trip): Pin[] {
   const areas = trip.places?.areas ?? {};
@@ -59,5 +65,19 @@ export function pins(trip: Trip): Pin[] {
     };
   });
 
-  return [...stays, ...places];
+  const members = trip.crew?.members ?? {};
+  const custom: Pin[] = Object.entries(trip.places?.custom ?? {}).map(([placeId, place]) => ({
+    id: `place:${placeId}`,
+    kind: "place",
+    destination: place.destination,
+    name: place.name,
+    lat: place.lat,
+    lng: place.lng,
+    line: `${placeWord(place.kind)} · added by ${initials(members[place.addedBy]?.name ?? place.addedBy)}`,
+    icon: place.kind,
+    link: place.link,
+    addedBy: place.addedBy,
+  }));
+
+  return [...stays, ...places, ...custom];
 }

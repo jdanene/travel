@@ -9,8 +9,9 @@
  * The first run makes the trip id (20 random characters) and the organizer
  * key, and saves both in local/trip.state.json (local/trip.state.emulator.json
  * with --emulator). Every later run keeps them.
- * Each run replaces info, crew/expected, dates/options and places, and
- * touches nothing else: answers, hearts, stays and shows stay. Everything
+ * Each run replaces info, crew/expected, dates/options, places/areas and
+ * places/venues, and touches nothing else: answers, hearts, stays, shows
+ * and the friends' places (places/custom) stay. Everything
  * goes in one update, so nothing is half written. No step retries.
  */
 import { execFileSync } from "node:child_process";
@@ -75,7 +76,9 @@ const update = {
   [`trips/${tripId}/dates/options`]: Object.fromEntries(
     file.dateOptions.map(({ from, to }) => [`${from}_${to}`, { from, to }]),
   ),
-  [`trips/${tripId}/places`]: { areas: places.areas, venues: places.venues },
+  // Areas and venues only: places/custom holds the friends' own places, which a run must keep.
+  [`trips/${tripId}/places/areas`]: places.areas,
+  [`trips/${tripId}/places/venues`]: places.venues,
   [`tripSecrets/${tripId}/organizerKey`]: { [organizerKey]: true },
 };
 
