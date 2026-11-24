@@ -20,6 +20,7 @@ window.HYPE = (() => {
   const bali = [P("d-uluwatu-cube.jpg", "center", "Savaya"), P("munduk.jpg", "center", "Munduk"), P("kp-beach.jpg", "center", "Koh Phangan"),
     P("ubud.jpg", "center", "Ubud"), P("phra-nang-cave.jpg", "center 70%", "Phra Nang Beach"), P("bali-monkey.jpg", "center 55%", "Uluwatu"),
     P("kp-aerial.jpg", "center", "Koh Phangan"), P("phra-nang.jpg?v=2", "center 60%", "Phra Nang Beach"), P("bali-cliff.jpg", "center", "Uluwatu"),
+    P("phuket-snorkel.jpg", "center 60%", "Phuket"), P("phuket-elephants.jpg", "center 55%", "Phuket"), P("phuket-market.jpg", "center 45%", "Phuket"),
     P("b-beach-club.jpg")];
 
   const clips = [
