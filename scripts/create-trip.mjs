@@ -92,6 +92,7 @@ try {
 }
 
 const site = emulator ? "http://127.0.0.1:5055" : `https://${PROJECT}.web.app`;
-const links = `crew link: ${site}/?t=${tripId}\norganizer link: ${site}/trip/${tripId}?organizer=${organizerKey}\n`;
+// Both links open the splash; its button carries the organizer key into the app.
+const links = `crew link: ${site}/?t=${tripId}\norganizer link: ${site}/?t=${tripId}&organizer=${organizerKey}\n`;
 writeFileSync(emulator ? "local/links.emulator.txt" : "local/links.txt", links);
 process.stdout.write(links);

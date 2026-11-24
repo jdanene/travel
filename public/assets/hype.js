@@ -223,23 +223,40 @@ window.HYPE = (() => {
   }
 
   // Adds the one way from the splash into the trip app. Options 1 and 13 call it; the other options never do.
-  // Inputs: none. It reads the trip id from "?t=" in the address or, failing that, the id this phone remembered.
-  //   An id holds letters, digits, "-" and "_" only; anything else is ignored.
+  // Inputs: none. It reads the trip id from "?t=" in the address or, failing that, the id this phone remembered,
+  //   and the organizer key from "?organizer=", which it takes out of the address at once and keeps in memory only.
+  //   An id holds letters, digits, "-" and "_" only; a key holds the same, 16 to 64 of them, and counts only with
+  //   an id from the address. Anything else is ignored.
   // Output: an "OPEN THE TRIP" link to /trip/<id> at the bottom centre, or nothing when there is no id. The id in the
-  //   address wins and is remembered; blocked storage only means nothing is remembered.
+  //   address wins and is remembered; blocked storage only means nothing is remembered. A tap saves a one-time pass,
+  //   its time, under "travel.splash.<id>" in this tab's sessionStorage; the app spends it on load
+  //   (web/src/app/lib/splash.ts). The tap opens /trip/<id>?organizer=<key> when the splash came with a key.
   // Examples (checked by hand in a 390px window):
   //   /hype/1/?t=abc → the button opens /trip/abc, and a later /hype/13/ on that phone shows it too.
+  //   /?t=abc&organizer=<key> → the address shows /?t=abc; the button opens /trip/abc?organizer=<key>.
   //   /hype/1/?t=bad<id> on a phone that remembers nothing → no button.
   function enter() {
     const valid = id => (id && /^[A-Za-z0-9_-]{1,64}$/.test(id) ? id : null);
-    let id = valid(new URLSearchParams(location.search).get("t"));
+    const q = new URLSearchParams(location.search);
+    let id = valid(q.get("t"));
+    const key = id && /^[A-Za-z0-9_-]{16,64}$/.test(q.get("organizer") || "") ? q.get("organizer") : null;
+    if (q.has("organizer")) {
+      q.delete("organizer");
+      const rest = q.toString();
+      history.replaceState(history.state, "", location.pathname + (rest ? "?" + rest : "") + location.hash);
+    }
     try {
       if (id) localStorage.setItem("travel.trip", id);
       else id = valid(localStorage.getItem("travel.trip"));
     } catch (err) {}
     if (!id) return;
-    const a = document.createElement("a");
-    a.className = "enter"; a.href = "/trip/" + id; a.textContent = "OPEN THE TRIP";
+    const a = document.createElement("a"), to = "/trip/" + id;
+    a.className = "enter"; a.href = to; a.textContent = "OPEN THE TRIP";
+    // The key joins the link only for the tap itself, so the page never shows it, not even on hover.
+    a.addEventListener("click", () => {
+      try { sessionStorage.setItem("travel.splash." + id, String(Date.now())); } catch (err) {}
+      if (key) { a.href = to + "?organizer=" + key; setTimeout(() => { a.href = to; }); }
+    });
     document.body.appendChild(a);
     document.body.classList.add("has-enter");
   }
