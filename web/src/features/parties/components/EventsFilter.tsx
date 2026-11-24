@@ -68,6 +68,16 @@ export function EventsFilterChips({ filter, chips, total, onChoose, onMake }: Ev
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
   const field = useRef<HTMLInputElement>(null);
+  const row = useRef<HTMLDivElement>(null);
+
+  // On a phone the row scrolls: keep the picked chip in sight, a new tag's too.
+  useEffect(() => {
+    const picked = row.current?.querySelector<HTMLElement>('[aria-pressed="true"]');
+    if (!picked || !row.current) return;
+    const box = row.current.getBoundingClientRect();
+    const chip = picked.getBoundingClientRect();
+    if (chip.left < box.left || chip.right > box.right) row.current.scrollLeft += chip.left - box.left - (box.width - chip.width) / 2;
+  }, [filter, chips.length]);
 
   useEffect(() => {
     if (making) field.current?.focus();
@@ -100,7 +110,7 @@ export function EventsFilterChips({ filter, chips, total, onChoose, onMake }: Ev
 
   return (
     <>
-      <div className="pills parties-filter" role="group" aria-label="Which events">
+      <div ref={row} className="pills parties-filter" role="group" aria-label="Which events">
         {chips.map(({ tag, name }) => (
           <button key={tag} type="button" className="pill" aria-pressed={filter === tag} onClick={() => onChoose(tag)}>
             {name}
