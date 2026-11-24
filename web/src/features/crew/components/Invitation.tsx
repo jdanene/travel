@@ -1,21 +1,18 @@
+import { useState } from "react";
 import { FlyerHead } from "../../../components/FlyerHead";
+import { Notice } from "../../../components/Notice";
+import type { WriteResult } from "../../../lib/db";
 import type { Reply, TripInfo } from "../../../types/trip";
-import type { CrewView } from "../api/crew";
-import { repliedLine } from "../lib/crew";
+import { join, saveReply, type CrewView, type Person } from "../api/crew";
+import { JoinSheet } from "./JoinSheet";
+import { repliedLine, REPLIES } from "../lib/crew";
 import "./Invitation.css";
 
-/** The three replies of screen 12/1, in the mock's words. */
-export const REPLIES: Array<{ reply: Reply; label: string }> = [
-  { reply: "in", label: "I'm in" },
-  { reply: "maybe", label: "Maybe" },
-  { reply: "out", label: "Can't" },
-];
-
 interface InvitationProps {
+  tripId: string;
+  uid: string;
   info: TripInfo | undefined;
   crew: CrewView;
-  /** A tap on a reply. */
-  onReply: (reply: Reply) => void;
 }
 
 /**
@@ -23,14 +20,35 @@ interface InvitationProps {
  * buttons. A friend sees the trip before answering and answers in one tap,
  * with no app and no account.
  *
- * Inputs: the trip's info (absent on a half-written trip), the crew view,
- * and what a reply tap does.
+ * The first tap opens "Who are you?"; a friend who already replied changes
+ * the reply in one tap (case 7). The tapped reply shows pressed at once;
+ * the SDK sends it when the connection allows, and flips it back if the
+ * rules refuse it, with the reason above the buttons (case 8).
+ *
+ * Inputs: the trip, this device, the trip's info (absent on a half-written
+ * trip) and the crew view.
  * Output: the invitation. With no note, the quotation is left out (Trip 5,
- * case 5). This device's reply, once given, shows pressed.
+ * case 5).
  * Examples (checked at 390 px against 12/1):
  *   the example trip, 6 of 8 replied → "Bali · Koh Phangan", the note, "I'm in / Maybe / Can't", "6 of 8 replied · no app, no account"
  */
-export function Invitation({ info, crew, onReply }: InvitationProps) {
+export function Invitation({ tripId, uid, info, crew }: InvitationProps) {
+  const [joining, setJoining] = useState<Reply | null>(null);
+  const [failure, setFailure] = useState<WriteResult | null>(null);
+
+  const report = (result: WriteResult) => setFailure(result.ok ? null : result);
+
+  const onReply = (reply: Reply) => {
+    if (crew.memberId && crew.member) void saveReply(tripId, crew.memberId, crew.member.name, reply).then(report);
+    else setJoining(reply);
+  };
+
+  const onPick = (person: Person) => {
+    const reply = joining!;
+    setJoining(null);
+    void join(tripId, uid, person, crew.byId[person.id] ?? null, reply).then(report);
+  };
+
   return (
     <>
       <FlyerHead organizer={crew.organizer} info={info} tall>
@@ -41,6 +59,7 @@ export function Invitation({ info, crew, onReply }: InvitationProps) {
         )}
       </FlyerHead>
       <div className="invite-reply">
+        {failure && !failure.ok && <Notice>{failure.reason === "refused" ? "This was not saved." : "No connection"}</Notice>}
         <div className="seg3" role="group" aria-label="Your reply">
           {REPLIES.map(({ reply, label }) => (
             <button key={reply} type="button" aria-pressed={crew.member?.reply === reply} onClick={() => onReply(reply)}>
@@ -50,6 +69,7 @@ export function Invitation({ info, crew, onReply }: InvitationProps) {
         </div>
         <p className="cap">{repliedLine(crew.expected, crew.byId)} · no app, no account</p>
       </div>
+      <JoinSheet reply={joining} crew={crew} onClose={() => setJoining(null)} onPick={onPick} />
     </>
   );
 }

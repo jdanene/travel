@@ -1,0 +1,14 @@
+/* The bottom sheet of screens 20/5 and 20/8 (.sheet, .grab, .nav, .ib.flat, .field, .pill). */
+.sheet { position: fixed; inset: auto 0 0 0; width: 100%; max-width: 430px; max-height: 88dvh; margin: 0 auto; border: 0; border-radius: 26px 26px 0 0; background: #fff; color: var(--ink); box-shadow: 0 -10px 30px rgba(0,0,0,.12); padding: 10px 20px 36px; overflow-y: auto; }
+.sheet::backdrop { background: rgba(0,0,0,.35); }
+.sheet .grab { width: 40px; height: 5px; border-radius: 3px; background: #dcdcdf; margin: 0 auto 14px; }
+.sheet .nav { display: flex; align-items: center; justify-content: space-between; height: 40px; }
+.sheet .ib { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--soft); }
+.field { display: block; border-radius: 14px; box-shadow: inset 0 0 0 1px #dcdcdf; padding: 10px 14px; margin-bottom: 10px; }
+.field:focus-within { box-shadow: inset 0 0 0 2px var(--acc); }
+.field small { display: block; font-size: 12.5px; color: var(--mut); font-weight: 600; }
+.field input { display: block; width: 100%; border: 0; outline: 0; background: none; font-size: 16px; padding: 0; }
+.field-error { font-size: 13px; color: #b42318; margin: -4px 0 10px 4px; }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 18px; background: var(--soft); font-size: 14px; font-weight: 600; white-space: nowrap; }
+.pill[aria-pressed="true"] { background: var(--ink); color: #fff; }

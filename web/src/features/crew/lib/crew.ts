@@ -1,4 +1,11 @@
-import type { Member, MemberId } from "../../../types/trip";
+import type { Member, MemberId, Reply } from "../../../types/trip";
+
+/** The three replies of screen 12/1, in the mock's words. */
+export const REPLIES: Array<{ reply: Reply; label: string }> = [
+  { reply: "in", label: "I'm in" },
+  { reply: "maybe", label: "Maybe" },
+  { reply: "out", label: "Can't" },
+];
 
 /**
  * Lists the expected friends who have not replied, in the trip file's

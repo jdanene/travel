@@ -1,9 +1,11 @@
 import { Notice } from "../components/Notice";
-import { crewOf } from "../features/crew/api/crew";
+import { crewOf, useOrganizerLink } from "../features/crew/api/crew";
 import { Invitation } from "../features/crew/components/Invitation";
 import { useTrip } from "../lib/useTrip";
 import type { Trip } from "../types/trip";
+import type { ReactNode } from "react";
 import { Home } from "./Home";
+import type { ModuleId } from "./lib/modules";
 
 /**
  * The trip page, kept a thin composition so its layout changes in one
@@ -35,21 +37,52 @@ export function TripPage({ tripId }: { tripId: string }) {
         </Notice>
       );
     case "ready":
-      return <ReadyPage trip={state.trip} uid={state.uid} offline={state.offline} />;
+      return <ReadyPage tripId={tripId} trip={state.trip} uid={state.uid} offline={state.offline} />;
   }
 }
 
-function ReadyPage({ trip, uid, offline }: { trip: Trip; uid: string; offline: boolean }) {
+function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip; uid: string; offline: boolean }) {
   const crew = crewOf(trip, uid);
-  const onReply = () => {}; // Trip 6 opens the join sheet here.
+  const organizerLink = useOrganizerLink(tripId, uid, crew);
 
   return (
     <>
       {offline && <Notice>No connection</Notice>}
+      {organizerLink === "invalid" && <Notice>This organizer link is not valid.</Notice>}
       {/* Before a reply the friend sees the invitation (12/1). A friend who
           can't make it sees it again with that reply pressed, and the modules below. */}
-      {(!crew.member || crew.member.reply === "out") && <Invitation info={trip.info} crew={crew} onReply={onReply} />}
-      {crew.member && <Home trip={trip} memberId={crew.memberId} organizer={crew.organizer} />}
+      {(!crew.member || crew.member.reply === "out") && <Invitation tripId={tripId} uid={uid} info={trip.info} crew={crew} />}
+      {crew.member && (
+        <>
+          {crew.isOrganizer && (
+            <Notice>
+              <b>Organizer view.</b>
+            </Notice>
+          )}
+          <Home trip={trip} memberId={crew.memberId} organizer={crew.organizer} content={moduleSlots(tripId, trip, uid)} />
+        </>
+      )}
     </>
   );
+}
+
+/**
+ * What each module shows when open: one slot per module, so each module's
+ * ticket plugs in here without touching the home page's layout.
+ *
+ * Inputs: the trip id, the trip and this device.
+ * Output: the content for each module; null until its ticket fills it.
+ * Examples: none yet; every slot is empty until Trips 7, 9, 11, 12 and 16.
+ */
+function moduleSlots(tripId: string, trip: Trip, uid: string): Record<ModuleId, ReactNode> {
+  void tripId;
+  void trip;
+  void uid;
+  return {
+    dates: null, // Trip 7: the Dates module.
+    stay: null, // Trip 9: the Stay module.
+    parties: null, // Trip 11: the Parties module.
+    links: null, // Trip 16: the Links module.
+    map: null, // Trip 12: the Map module.
+  };
 }
