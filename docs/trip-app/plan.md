@@ -6,7 +6,7 @@ The Linear project is "Travel · Trip app (design 20)" (P-JDA-48, team JDA). Thi
 
 Build the first version of the trip app: one link opens one page, and that page asks for one thing at a time. A friend picks a name, answers the dates, hearts a stay and says "I'm in" for parties. The organizer confirms the dates and the stays on the same page. A map shows the stays and the venues. The hype splash gets one button that opens the app.
 
-Sources: `docs/requirements.md` section 0, the mock `public/designs/20/index.html`, and `design/app/README.md` (screen table and exceptions).
+Sources: `docs/requirements.md` section 0, the mocks `public/designs/12/index.html` (home page and module frame) and `public/designs/20/index.html` (what is inside a module), and `design/app/README.md` (screen tables and exceptions).
 
 ## 2. Decisions
 
@@ -24,6 +24,8 @@ Sources: `docs/requirements.md` section 0, the mock `public/designs/20/index.htm
 | D10 | A stay has no exact position. Its pin sits at the centre of its area (Uluwatu, Canggu, Haad Rin and so on). | A listing page does not give coordinates. The area is enough to compare places. |
 | D11 | One branch `trip-app` from `origin/main`, one pull request. | Owner's rule: one project, one PR. |
 | D12 | `scripts/ship.sh` is the one deploy command. It is new, and it is the maintained one from now on. | The repo has no deploy script yet. |
+| D13 | The home page is design 12's flyer: the cover photo, the organizer's avatar, the name, the date line, and a stack of equal module buttons that open in place (Dates, Stay, Parties, Links, Map). Inside a module, design 20's content and sheets. | Owner, 23 Nov 2026. One open module at a time keeps one job on the screen. |
+| D14 | Links is a module: a friend pastes an Instagram, TikTok or other link for a destination, and it shows for everyone. Its data is `links/items`; the link reader also reads Instagram and TikTok. | Owner, 23 Nov 2026: the bucket for cool things found online. |
 
 Each was weighed against a second design. D1 against plain files with no build (rejected: nine screens of live state in hand-written DOM code is harder to read than components). D3 against email links (rejected: a step to learn). D7 against one listener per feature (rejected: five loading states for one small page). D8 against typed fields only (rejected: screen 5 shows the listing's name and photo; typed fields stay as the fallback).
 
@@ -49,7 +51,8 @@ Each was weighed against a second design. D1 against plain files with no build (
 | last-year show | A show from the 2026 file. Read only. | "Here is who played this weekend last year:" |
 | in | A member is going to a show. | "I'm in" |
 | confirm | The organizer settles the dates or a destination's stay. | "Confirm these dates", "Confirm this stay" |
-| stage | Where the trip stands: dates, plan or all set. It decides what shows and what is pinned; no section leads. | the page itself |
+| module | One of Dates, Stay, Parties, Links and Map: a button on the home page that opens in place, with its state on the right. | "Dates" · "Tap to answer" |
+| link | One saved Instagram, TikTok or other address for a destination. | a card in Links |
 
 "Place" means two things in the owner's notes (a destination, and a listing). Code never uses it.
 
@@ -63,25 +66,30 @@ Each context is one folder under `web/src/features/`. Each owns one branch of th
 | `dates` | date options, answers, the confirmed option | counts; "Most yes"; who has not answered |
 | `stay` | stay options, hearts, the confirmed stay per destination | one option per listing address; reading a link |
 | `parties` | shows, last-year shows, who is in | the last-year line; "not confirmed"; a friend's own entries |
+| `links` | saved links | one card per address; a friend's own links |
 | `map` | nothing. It draws the pins it is given. | pins that share a spot fan out |
 
-`web/src/app/` is the shell. It owns the route, the stage rule, the pinned lines and the All set summary, because those join several contexts. `web/src/lib/`, `web/src/components/` and `web/src/types/` are shared.
+`web/src/app/` is the shell. It owns the route, the home page, the modules rule and its state lines, and the "All set" line, because those join several contexts. `web/src/lib/`, `web/src/components/` and `web/src/types/` are shared.
 
 Code flows one way: shared → features → app. A feature never imports another feature. What two features need moves to a shared folder. No barrel files. Every folder has a `README.md` that says what it is for, what belongs in it, what does not, and who may import it.
 
 Each rule above is one pure function in the context's `lib/`, with the four-part header (description, inputs, output, examples). Every example is a test.
 
-### The stage rule (`web/src/app/lib/stage.ts`)
+### The modules rule (`web/src/app/lib/modules.ts`)
 
-Dates, Stay and Parties are equals (owner, 23 Nov 2026). The page is a stack of open sections of equal weight: one heading size (screen 2's "Which dates work?"), one gap between sections, no "next" rows, and no section collapses another. The order on screen is fixed and means nothing: Dates, Stay, Parties, then the Map row. The only rule of order: Stay shows after the organizer confirms the dates.
+The home page is a stack of module buttons of equal weight (owner, 23 Nov 2026; D13). The order is fixed and means nothing: Dates, Stay, Parties, Links, Map. All start closed; one is open at a time, and opening one closes the other. A module opens in place, as on screens 12/3 to 12/5.
 
-`stage(trip)` returns where the trip stands. It decides only whether Stay shows, what is pinned and whether the summary shows:
+`modules(trip, memberId)` returns the ordered list of modules to show, each with the state line on the right of its button:
 
-1. `dates` while no date option is confirmed. Dates and Parties show, both open. Stay shows nowhere.
-2. `plan` once the dates are confirmed, until every destination that has a stay option has a confirmed stay. Dates shrinks to its pinned line; Stay and Parties show, both open. With no stay option yet, the stage stays `plan`, so friends can add a place.
-3. `allSet` after that. The All set summary sits at the top, each confirmed stay is a pinned line, and Parties stays open below.
+- **Dates:** "Tap to answer" before the member answers; once the dates are confirmed, the result, "13–23 Feb · confirmed".
+- **Stay:** present only once the dates are confirmed. "7 options · heart one" before a stay is confirmed; then the result per destination, "Cliffside villa · confirmed" (two lines when both destinations have one).
+- **Parties:** "6 shows · I'm in". Open from the start; never settled.
+- **Links:** the count of links. Open from the start.
+- **Map:** opens the map.
 
-Stay is hidden while the dates are not confirmed: no block, no row, no pins, no summary line. Parties never decides the stage and is never settled. A pinned line still opens its section. If the organizer undoes a confirm, the page goes back to the stage the rule gives.
+The only rule of order: the Stay button does not exist until the organizer confirms the dates. If the confirm is undone it disappears again; its options and hearts stay saved (case 42). No stay pins on the map before then.
+
+When the dates and every destination that has a stay option have a confirmed stay, a small line under the title reads "All set". Nothing else changes. There are no stages, no leading block, no "next" rows, no pinned lines and no separate "All set" screen.
 
 ### The last-year rule (`web/src/features/parties/lib/lastYear.ts`)
 
@@ -112,6 +120,8 @@ Paths live in one file, `web/src/lib/paths.ts`. The rules file repeats them; the
     shows     { {showId}: { destination, venue, area?, date, artist, link?, verified, source: "seed"|"friend", addedBy?, at } }
     lastYear  { {showId}: { destination, venue, date, artist } }
     in        { {showId}: { {memberId}: true } }
+  links
+    items     { {linkId}: { url, site: "instagram"|"tiktok"|"other", destination, note?, title?, thumbUrl?, addedBy, at } }
   places
     areas     { {areaId}: { name, destination, lat, lng } }
     venues    { {venueId}: { name, destination, areaId?, lat, lng, line?, onMap? } }
@@ -120,13 +130,14 @@ Paths live in one file, `web/src/lib/paths.ts`. The rules file repeats them; the
   claims       { {uid}: key }    a device writes its own claim; the rules test the key exists
 ```
 
-Ids that must not repeat are made from their content: a member, area or venue id from its name (`web/src/lib/ids.ts`, which the scripts import too); a date option id from its two days; `stayId` from the listing address without its query string; a seeded `showId` from destination, venue, date and artist. Two friends who add the same thing write the same record.
+Ids that must not repeat are made from their content: a member, area or venue id from its name (`web/src/lib/ids.ts`, which the scripts import too); a date option id from its two days; a `linkId` from the link address without its query string; `stayId` from the listing address without its query string; a seeded `showId` from destination, venue, date and artist. Two friends who add the same thing write the same record.
 
 Rules, in words:
 
 - Nobody lists `/trips`. A signed-in device reads one trip when it knows the id.
 - A device writes `crew/devices/{its own uid}` and nothing else there.
 - A device writes an answer, a heart, an "in" mark or a reply only under the member its uid points to.
+- A device adds a link and removes its own; an organizer removes any link.
 - A device adds a stay option or a show with `addedBy` equal to its member. It edits or removes a show only when it added it, or when it is an organizer.
 - Only an organizer writes `dates/confirmed`, `stay/confirmed` and `crew/organizers`. A device becomes an organizer when its claim holds a key that exists.
 - Every write is checked for shape and length. A value outside the shape is refused.
@@ -148,7 +159,7 @@ Read on 23 Nov 2026 with `grep -rn -i` over `docs`, `design` and `public`.
 
 There is no app code yet, so there is nothing to move. The rules for the build:
 
-- One sheet component (`web/src/components/Sheet.tsx`) serves Add a place, Add a party and the join sheet.
+- One sheet component (`web/src/components/Sheet.tsx`) serves Add a place, Add a party, Add a link and the join sheet.
 - One avatar row (`Avatars.tsx`) serves every "who" list: replies, said yes, hearts, in.
 - One notice component (`Notice.tsx`) shows every failure and the organizer line.
 - One write helper (`web/src/lib/db.ts`) wraps every database write and turns a refusal or a lost connection into a message. No feature calls the Firebase SDK directly.
@@ -178,7 +189,7 @@ The number is the case's id. Each ticket lists its own.
 11. Two organizer devices confirm at once: a transaction; the first wins, the second sees the confirmed state.
 12. The organizer confirms an option nobody said yes to: allowed.
 13. An answer points to an option that no longer exists, or holds a wrong value: ignore it.
-14. After the confirm: answers stay readable; the pinned line opens the block.
+14. After the confirm: answers stay readable; the Dates button shows the result and still opens.
 
 **Link reader and stay (Trip 8, Trip 9)**
 15. The text is not an Airbnb or Booking.com link: say "Paste an Airbnb or Booking.com link." and make no call.
@@ -201,13 +212,22 @@ The number is the case's id. Each ticket lists its own.
 30. The artist text is long (the seed has lines of 100 characters): two lines, then cut.
 31. Nobody is in yet: the row says "Be the first in" (screen 7).
 
-**Map and summary (Trip 12, Trip 13)**
+**Map and module states (Trip 12, Trip 13)**
 32. The map tiles do not load: a notice, and the pins as a plain list that opens the same cards.
 33. A stay has an area that is not in `places/areas`: its pin sits at the destination's centre.
 34. A friend's party names a venue that is not in `places/venues`: no pin; the row still shows.
 35. Several pins share one spot: they fan out by a fixed small step.
 36. The organizer confirms while a friend has a sheet open: the sheet stays open; the page changes under it.
-37. The organizer undoes a confirm: the page returns to that stage for everyone.
+37. The organizer undoes a confirm: the module's button goes back to its open state for everyone.
+
+**Links (Trip 16)**
+43. The text is not a link: refuse with the reason; make no call.
+44. Any `https` link is accepted; a host other than Instagram or TikTok saves as site "other".
+45. The same link twice, by one friend or two at once: the id comes from the address, so there is one card; the sheet brings it into view.
+46. The reader fails after three tries: save without a title or a thumbnail.
+47. The thumbnail fails to load: the card shows a tile with the site's name.
+48. A friend removes their own link: it goes for everyone. An organizer removes any link.
+49. No links yet: "No links yet."
 
 **Splash and ship (Trip 14, Trip 15)**
 38. The splash has no trip id (opened without `?t=` and none remembered): it shows no button.
@@ -244,7 +264,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 
 The owner said "take it easy on the test" (23 Nov 2026). This section overrides the "Tests" line of every ticket.
 
-- Keep only the tests that prove the risky rules: the database rules tests, and the header examples of the pure rule functions (`stage`, the last-year rule, the date counts).
+- Keep only the tests that prove the risky rules: the database rules tests, and the header examples of the pure rule functions (`modules`, the last-year rule, the date counts, `linkId`).
 - A header example covers the typical case and the one surprising case. Drop the rest.
 - No tests for UI components, no snapshot tests, no end-to-end tests. Check each screen once by eye at 390 px wide, and write one line per screen in the pull request.
 - Do not chase a flaky test. If a test fails for a reason outside the rule it checks, delete it and say so in the pull request.
@@ -256,7 +276,7 @@ Where they run:
 
 ## 7. Not in this build
 
-Saved TikToks and Reels, the itinerary, club tables, prices, comments, the lineup checker, offline copies, notifications, removing a stay option, adding a date option on the page, and a Directions button. The owner said: "mvp only", "don't add things extra".
+The itinerary, club tables, prices, comments, the lineup checker, offline copies, notifications, removing a stay option, adding a date option on the page, and a Directions button. The owner said: "mvp only", "don't add things extra".
 
 ## 8. Risks
 
@@ -288,11 +308,16 @@ One builder runs the tickets in order on the branch `trip-app`. Trip 8 and Trip 
 | [ ] | Trip 10 · Party data and the last-year rule | 2 | 3 |
 | [ ] | Trip 11 · Parties | 2 | 6, 10 |
 | [ ] | Trip 12 · Map | 3 | 9, 11 |
-| [ ] | Trip 13 · All set summary | 3 | 7, 9, 11 |
+| [ ] | Trip 13 · Module states and the All set line | 1 | 4 |
 | [ ] | Trip 14 · Splash button into the app | 3 | 4 |
-| [ ] | Trip 15 · Ship | 3 | 12, 13, 14 |
+| [ ] | Trip 15 · Ship | 3 | 12, 13, 14, 16 |
+| [ ] | Trip 16 · Links | 3 | 6, 8 |
 
-Milestones: 1 · A friend can join (Trip 0 to 6). 2 · The three goals (Trip 7 to 11). 3 · Map, summary, ship (Trip 12 to 15).
+Milestones: 1 · A friend can join (Trip 0 to 6, and Trip 13). 2 · The three goals (Trip 7 to 11). 3 · Map, Links, splash, ship (Trip 12, 14, 15, 16).
+
+Build order: Trip 13 is built right after Trip 4, because the home page needs it.
+
+Skills rule (owner, 23 Nov 2026): every UI component is built with three UI skills, no exceptions: the Impeccable plugin (`impeccable:impeccable`), agent-skills `frontend-ui-engineering`, and the owner's hci-design method (`design/references/hci-design/SKILL.md` with `references/interaction.md` and `references/ui-patterns.md`). Apply its decision order to each screen and rate each screen "supported", "revise" or "not checked" in the pull request, one line per screen.
 
 Checkpoints: after Trip 6, after Trip 11 and after Trip 14, run every named test and walk the page once on the emulator before going on.
 
@@ -358,7 +383,7 @@ Do not deploy here. Check the rewrite with the hosting emulator.
 
 **Done when.** The hosting emulator serves the app at `/trip/abc` and the hype page at `/`.
 
-**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin; agent-skills `frontend-ui-engineering`.
+**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin (`impeccable:impeccable`); the hci-design method (`design/references/hci-design`); agent-skills `frontend-ui-engineering`.
 
 The edge cases above are the ones found before the build. Find the rest: for every call, every write and every state, ask what happens when it is missing, fails, repeats or races, and record each case you handle in the PR body.
 
@@ -453,8 +478,8 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 **Do.**
 1. `web/src/lib/useTrip.ts` (new): one listener on the trip. It returns loading, not found, no connection, or the trip.
 2. `web/src/lib/db.ts` (new): the one write helper. It turns a refusal or a lost connection into a message. No feature calls the SDK directly.
-3. `web/src/app/lib/stage.ts` (new): `stage(trip)`, the rule in section 3, with the four-part header.
-4. `web/src/app/TripPage.tsx` (new): the header line, then the open sections and the pinned lines the stage calls for. The sections are placeholders until their tickets.
+3. `web/src/app/lib/stage.ts` (new; Trip 13 replaces it with `modules.ts`): the rule of where the trip stands, with the four-part header.
+4. `web/src/app/TripPage.tsx` (new): a thin composition of the page, so its layout changes in one file. The modules are placeholders until their tickets.
 5. `web/src/components/Notice.tsx` (new): one line for a failure or a notice, with an optional "Try again".
 
 **Reuse and refactor.** Every later ticket reads through `useTrip` and writes through `db.ts`. A second listener or a direct SDK call is a finding.
@@ -462,19 +487,19 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 **Edge cases.**
 1. (1) The trip id is not in the database: "This link does not open a trip. Ask the organizer for the link." No retry.
 2. (2) No connection on first load: say so after 5 seconds; the SDK keeps trying.
-3. (9) The trip is half there: `stage` still returns a stage; each block shows its empty state; nothing throws.
+3. (9) The trip is half there: each module shows its empty state; nothing throws.
 4. (36) The trip changes while a sheet is open: the sheet stays; the page updates under it.
-5. (37) A confirm is undone: `stage` returns the earlier stage.
+5. (37) A confirm is undone: the modules go back with it.
 6. A destination has no stay option: it does not keep the trip at `plan` once the others have confirmed stays.
 7. (42) The date confirm is undone: Stay hides again, with its options and hearts kept.
 
 **Failures.** Reads reconnect by themselves. A refused write shows its reason and never retries.
 
-**Tests.** The examples in the header of `stage`: one for each of the three stages, case 42 (the date confirm undone: back to `dates`, Stay hidden), and no stay option yet (still `plan`).
+**Tests.** None here; Trip 13 holds the header examples of `modules`.
 
 **Done when.** With the emulator: a good link shows the frame; a wrong id shows the message; stopping the emulator shows "No connection".
 
-**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin; agent-skills `frontend-ui-engineering`, `test-driven-development`.
+**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin (`impeccable:impeccable`); the hci-design method (`design/references/hci-design`); agent-skills `frontend-ui-engineering`, `test-driven-development`.
 
 The edge cases above are the ones found before the build. Find the rest: for every call, every write and every state, ask what happens when it is missing, fails, repeats or races, and record each case you handle in the PR body.
 
@@ -491,7 +516,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 2. `web/src/features/crew/api/crew.ts` (new): the read side: members, expected names, this device's member.
 3. `web/src/features/crew/components/Invitation.tsx` (new): screen 1. The three buttons do nothing yet (Trip 6).
 4. `web/src/components/Avatars.tsx` (new): a row of initials with a count. Every "who" list in the app uses it.
-5. `TripPage` shows the invitation to a device that has no member, and the sections to one that has.
+5. `TripPage` shows the invitation (screen 12/1) to a device that has no member, and the home page to one that has.
 
 **Reuse and refactor.** `Avatars` is the only place that draws initials.
 
@@ -509,7 +534,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 
 **Done when.** Screen 1 matches the mock at 390 px wide with seed data; the result is in the PR as text.
 
-**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin; agent-skills `frontend-ui-engineering`, `test-driven-development`.
+**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin (`impeccable:impeccable`); the hci-design method (`design/references/hci-design`); agent-skills `frontend-ui-engineering`, `test-driven-development`.
 
 The edge cases above are the ones found before the build. Find the rest: for every call, every write and every state, ask what happens when it is missing, fails, repeats or races, and record each case you handle in the PR body.
 
@@ -534,7 +559,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 2. (5) Two friends tap the same name: both devices point to one member. Allowed.
 3. (6) A typed name is empty or longer than 24 characters: refuse with the reason under the field. A typed name equal to a listed one joins as that member.
 4. (7) A member taps another reply later: it replaces the old one.
-5. The reply is "Can't make it": the member is saved; the page shows the invitation with their reply marked, and the sections below it.
+5. The reply is "Can't make it": the member is saved; the page shows the invitation with their reply marked, and the module buttons below it.
 6. The organizer key is wrong: show "This organizer link is not valid." The friend can still join as a friend.
 7. The organizer opens the link before joining: the join sheet comes first, then the claim.
 8. The connection drops between the tap and the write: the reply shows as sending, then sends; a refusal flips it back with the reason.
@@ -545,7 +570,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 
 **Done when.** With the emulator and two browser profiles: both join, each sees the other's initials, and the second profile can become the first one's member by tapping the name.
 
-**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin; agent-skills `frontend-ui-engineering`.
+**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin (`impeccable:impeccable`); the hci-design method (`design/references/hci-design`); agent-skills `frontend-ui-engineering`.
 
 The edge cases above are the ones found before the build. Find the rest: for every call, every write and every state, ask what happens when it is missing, fails, repeats or races, and record each case you handle in the PR body.
 
@@ -553,36 +578,35 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 
 **Waits on:** Trip 6. **Size:** M.
 
-**Goal.** A friend answers the dates in one tap per option. The organizer confirms one option. The page then pins the dates, and Stay appears.
+**Goal.** A friend answers the dates in one tap per option. The organizer confirms one option. The Dates button then shows the result, and the Stay button appears.
 
-**Design.** Screen 2 (friend), screen 3 (organizer), the pinned line on screen 4. Words: "Which dates work?", "Each includes the Full Moon Party, Mon 22 Feb.", "10 nights · 5 yes · 1 maybe · 1 no", "Most yes", "Yes", "Maybe", "No", "Not answered yet: LC", "Organizer view.", "3 have not answered: RJ, LC, SN", "Pick the dates", "said yes", "Confirm these dates", "13–23 Feb · confirmed". The mock's "next" rows ("Stay · 7 options", "Parties · 6 shows") are not built: Parties is an open section beside Dates, and Stay waits for the confirm (exceptions 9 and 10).
+**Design.** Inside the Dates module (frame 12/3): screen 20/2 (friend) and 20/3 (organizer); the result on the button. Words: "Which dates work?", "Each includes the Full Moon Party, Mon 22 Feb.", "10 nights · 5 yes · 1 maybe · 1 no", "Most yes", "Yes", "Maybe", "No", "Not answered yet: LC", "Organizer view.", "3 have not answered: RJ, LC, SN", "Pick the dates", "said yes", "Confirm these dates", "13–23 Feb · confirmed". The mock's "next" rows ("Stay · 7 options", "Parties · 6 shows") are not built: Parties is an open section beside Dates, and Stay waits for the confirm (exceptions 9 and 10).
 
 **Do.**
 1. `web/src/features/dates/lib/dates.ts` (new): `summary(option, answers)` (nights and counts), `mostYes(options, answers)`, `notAnswered(members, answers)`, with headers.
 2. `web/src/features/dates/api/dates.ts` (new): save an answer; confirm an option in a transaction; undo a confirm.
 3. `web/src/features/dates/components/DatesBlock.tsx` (new): screen 2 for a friend, screen 3 for an organizer.
-4. `web/src/components/PinnedLine.tsx` (new): the settled line of screen 4. It opens the block it stands for.
 
-**Reuse and refactor.** `PinnedLine` serves the confirmed stays too. `Avatars` draws "said yes". There is no `NextRow`: no section is "next" (exception 10).
+**Reuse and refactor.** `Avatars` draws "said yes". There is no `NextRow` and no `PinnedLine` (exception 3).
 
 **Edge cases.**
 1. (10) A member changes an answer: the new one replaces the old; the counts move at once.
 2. (11) Two organizer devices confirm at once: the first wins; the second sees the confirmed state.
 3. (12) The organizer confirms an option with no yes: allowed.
 4. (13) An answer for an option that is gone, or with a wrong value: ignored in every count.
-5. (14) After the confirm: the block opens from the pinned line, shows the counts, and takes no new answers.
+5. (14) After the confirm: the module still opens, shows the counts, and takes no new answers.
 6. Two options tie for most yes: no "Most yes" mark.
-7. There are no date options: the section reads "No dates to vote on yet."; Parties stays open below it.
+7. There are no date options: the module reads "No dates to vote on yet."
 8. Members who replied "Can't make it" are not counted in "not answered".
-9. The organizer opens the pinned line: it shows a way to undo the confirm, with the mock's button style and the words "Change the dates".
+9. The organizer opens the confirmed Dates module: it shows a way to undo the confirm, with the mock's button style and the words "Change the dates".
 
 **Failures.** A refused confirm (the device is not an organizer) shows the reason. The transaction retries against fresh data inside the SDK; nothing else retries.
 
 **Tests.** The header examples of `summary`, `mostYes` (typical, tie, no answers) and `notAnswered` (typical, edge case 8).
 
-**Done when.** Screens 2, 3 and 4's pinned line match the mock at 390 px with seed data; a confirm in one browser profile moves the page in the other.
+**Done when.** The Dates module matches screens 20/2 and 20/3 in the frame of 12/3 at 390 px with seed data; a confirm in one browser profile moves the page in the other.
 
-**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin; agent-skills `frontend-ui-engineering`, `test-driven-development`.
+**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin (`impeccable:impeccable`); the hci-design method (`design/references/hci-design`); agent-skills `frontend-ui-engineering`, `test-driven-development`.
 
 The edge cases above are the ones found before the build. Find the rest: for every call, every write and every state, ask what happens when it is missing, fails, repeats or races, and record each case you handle in the PR body.
 
@@ -628,7 +652,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 
 **Goal.** Friends heart the places they like, add a place by pasting a link, and the organizer confirms one stay for each destination.
 
-**Design.** Screen 4 (friend), 5 (add), 6 (organizer). Words: "Where do we stay?", "Heart the places you like.", "Bali", "Koh Phangan", "Uluwatu · sleeps 10 · added by KA", "Open listing", "Add a place", "Paste an Airbnb or Booking.com link.", "Link", "Add to Bali", "Confirm a stay", "Confirm this stay". The pinned line reads "Cliffside villa · Bali stay".
+**Design.** Screen 4 (friend), 5 (add), 6 (organizer). Words: "Where do we stay?", "Heart the places you like.", "Bali", "Koh Phangan", "Uluwatu · sleeps 10 · added by KA", "Open listing", "Add a place", "Paste an Airbnb or Booking.com link.", "Link", "Add to Bali", "Confirm a stay", "Confirm this stay". The Stay button's result line reads "Cliffside villa · confirmed".
 
 **Do.**
 1. `web/src/features/stay/lib/stay.ts` (new): `stayId(url)` (the address without its query string, made into an id), `isListingLink(text)`, with headers.
@@ -639,7 +663,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 
 The block renders only when dates/confirmed exists (case 42).
 
-**Reuse and refactor.** Uses `Sheet`, `Avatars`, `PinnedLine`. The area list comes from `places/areas`; do not type it again.
+**Reuse and refactor.** Uses `Sheet`, `Avatars`. The area list comes from `places/areas`; do not type it again.
 
 **Edge cases.**
 1. (15) The text is not an Airbnb or Booking.com link: show "Paste an Airbnb or Booking.com link." in the error style and make no call.
@@ -660,7 +684,7 @@ The block renders only when dates/confirmed exists (case 42).
 
 **Done when.** Screens 4, 5 and 6 match the mock at 390 px; with the reader switched off the friend can still add a place.
 
-**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin; agent-skills `frontend-ui-engineering`, `test-driven-development`.
+**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin (`impeccable:impeccable`); the hci-design method (`design/references/hci-design`); agent-skills `frontend-ui-engineering`, `test-driven-development`.
 
 The edge cases above are the ones found before the build. Find the rest: for every call, every write and every state, ask what happens when it is missing, fails, repeats or races, and record each case you handle in the PR body.
 
@@ -735,7 +759,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 
 **Done when.** Screens 7 and 8 match the mock at 390 px with the seeded data; a party added in one browser profile shows in the other as "added by" its initials.
 
-**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin; agent-skills `frontend-ui-engineering`.
+**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin (`impeccable:impeccable`); the hci-design method (`design/references/hci-design`); agent-skills `frontend-ui-engineering`.
 
 The edge cases above are the ones found before the build. Find the rest: for every call, every write and every state, ask what happens when it is missing, fails, repeats or races, and record each case you handle in the PR body.
 
@@ -754,7 +778,7 @@ No stay pins and no stay line while the dates are not confirmed.
 2. `web/src/features/map/lib/fan.ts` (new): `fanOut(pins)` moves pins that share a spot by a fixed small step.
 3. `web/src/features/map/components/TripMap.tsx` (new): the map, the destination switch, the pins. It draws the pins it is given and knows nothing of stays or shows.
 4. `web/src/features/map/components/PinCard.tsx` (new): the open card. Its tap opens the stay card or the venue's rows.
-5. `TripPage`: the map opens from the summary and from a "Map" row at the foot of the page.
+5. `TripPage`: the map opens from the Map module button and from "See on the map ›" in Parties (12/5).
 
 **Reuse and refactor.** The map feature imports no other feature; the app passes the pins in. That is why `pins.ts` is in `app/`.
 
@@ -773,42 +797,38 @@ No stay pins and no stay line while the dates are not confirmed.
 
 **Done when.** Screen 10 matches the mock at 390 px; with the network blocked for the tile host the list shows.
 
-**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin; agent-skills `frontend-ui-engineering`, `test-driven-development`.
+**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin (`impeccable:impeccable`); the hci-design method (`design/references/hci-design`); agent-skills `frontend-ui-engineering`, `test-driven-development`.
 
 The edge cases above are the ones found before the build. Find the rest: for every call, every write and every state, ask what happens when it is missing, fails, repeats or races, and record each case you handle in the PR body.
 
-### Trip 13 · All set summary
+### Trip 13 · Module states and the All set line
 
-**Waits on:** Trip 7, Trip 9, Trip 11. **Size:** S.
+**Waits on:** Trip 4. Built right after Trip 4, because the home page needs it. **Size:** S.
 
-**Goal.** When the dates and every stay are settled, a short summary sits at the top of the page; Parties stays open below it.
+**Goal.** The home page shows the module buttons in their fixed order, each with its state line, and "All set" when the dates and every stay are confirmed.
 
-**Design.** Screen 9. Words: "All set", "Sat 13 – Tue 23 Feb / Dates confirmed by JD", "Cliffside villa with pool / Bali stay confirmed · Uluwatu · sleeps 10", "You're in for 2 parties / Peggy Gou Sat 13 Feb · Full Moon Party Mon 22 Feb".
-
-No stay pins and no stay line while the dates are not confirmed.
+**Design.** Screen 12/2: the home page and the state lines ("Tap to answer", "7 options · heart one", "6 shows · I'm in"). The result lines "13–23 Feb · confirmed" and "Cliffside villa · confirmed". "All set" from screen 20/9. No stay pins and no stay line while the dates are not confirmed.
 
 **Do.**
-1. `web/src/app/lib/summary.ts` (new): `summary(trip, memberId)` returns the cards to show, with the header.
-2. `web/src/app/AllSet.tsx` (new): screen 9. Each card opens its block. The map card opens the map.
+1. `web/src/app/lib/modules.ts` (new, replaces `stage.ts`): `modules(trip, memberId)`, the rule in section 3, with the header.
+2. `web/src/app/TripPage.tsx`: the home page of screen 12/2 built from `modules()`. One module open at a time; all start closed.
 
-**Reuse and refactor.** The summary reads through the features' `lib` functions (`summary` of dates, the confirmed stay, the member's shows). It formats; it decides nothing new.
+**Reuse and refactor.** The state lines read through the features' `lib` functions as they arrive (the date counts, the confirmed stay, the shows). The rule formats; it decides nothing new.
 
 **Edge cases.**
-1. One stay line for each destination with a confirmed stay (exception 3 in `design/app/README.md`).
-2. The member is in for one party: "You're in for 1 party". For many: list the first two, then "+N more".
-3. (37) A confirm is undone: the page leaves "All set" for that stage.
-4. The member is in for no party: the parties card is a plain row, "Who's playing · 6 shows", that scrolls to the Parties section. With one or more: "You're in for N parties". Parties never takes the page out of "All set".
-5. The organizer who confirmed has left the member list: the line reads "Dates confirmed" with no name.
+1. One result line for each destination with a confirmed stay.
+2. (42) The date confirm is undone: the Stay button disappears; its data stays.
+3. (37) A confirm is undone: the button's line goes back to its open state.
+4. The dates are confirmed and nobody has added a place yet: Stay is present, and the trip is not "All set".
+5. The confirmed option no longer exists: the dates count as not confirmed.
 
 **Failures.** None of its own.
 
-**Tests.** The header examples of `summary`: screen 9's case, edge case 2 and edge case 5.
+**Tests.** The header examples of `modules`: before the dates are confirmed (no Stay), after (Stay present), everything confirmed (result lines and "All set").
 
-**Done when.** Screen 9 matches the mock at 390 px.
+**Done when.** Screen 12/2 matches at 390 px with seed data, and a confirm in one browser profile changes the buttons in the other.
 
-**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin; agent-skills `frontend-ui-engineering`, `test-driven-development`.
-
-The edge cases above are the ones found before the build. Find the rest: for every call, every write and every state, ask what happens when it is missing, fails, repeats or races, and record each case you handle in the PR body.
+**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin (`impeccable:impeccable`); the hci-design method (`design/references/hci-design`); agent-skills `frontend-ui-engineering`, `test-driven-development`.
 
 ### Trip 14 · Splash button into the app
 
@@ -839,18 +859,18 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 
 **Done when.** `/?t=abc` lands on option 1 or 13 with the button, and the button opens `/trip/abc`.
 
-**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin; agent-skills `frontend-ui-engineering`.
+**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin (`impeccable:impeccable`); the hci-design method (`design/references/hci-design`); agent-skills `frontend-ui-engineering`.
 
 The edge cases above are the ones found before the build. Find the rest: for every call, every write and every state, ask what happens when it is missing, fails, repeats or races, and record each case you handle in the PR body.
 
 ### Trip 15 · Ship
 
-**Waits on:** Trip 12, Trip 13, Trip 14. **Size:** S.
+**Waits on:** Trip 12, Trip 13, Trip 14, Trip 16. **Size:** S.
 
 **Goal.** The app is live for the crew, and the owner holds two links.
 
 **Do.**
-1. Run the whole flow once on the emulator with two browser profiles, one of them the organizer: join, answer, confirm dates, add a place by link, heart, confirm both stays, "I'm in", add a party, open the map, reach "All set". Write what happened at each step in the PR as text.
+1. Run the whole flow once on the emulator with two browser profiles, one of them the organizer: join, answer, confirm dates, add a place by link, heart, confirm both stays, "I'm in", add a party, add a link, open the map, reach "All set". Write what happened at each step in the PR as text.
 2. Write `local/trip.json`. Use the owner's names and date options if he gave them. If not, use the mock's three date options and an empty name list.
 3. Fill section 5.3 of this plan with the cases the build found, and tick the ticket index.
 4. Mark the pull request ready and say what was not proven (for example, a site that refused the link reader).
@@ -869,5 +889,32 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 **Done when.** The PR is ready, the owner has the one command, and after the deploy the crew link opens the splash and the trip.
 
 **Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; agent-skills `shipping-and-launch`.
+
+The edge cases above are the ones found before the build. Find the rest: for every call, every write and every state, ask what happens when it is missing, fails, repeats or races, and record each case you handle in the PR body.
+
+### Trip 16 · Links
+
+**Waits on:** Trip 6, Trip 8. **Size:** M.
+
+**Goal.** A friend saves a cool Instagram or TikTok find for Bali or Koh Phangan, and everyone sees it in the Links module.
+
+**Design.** The mocks do not draw Links (exception 3). Build it in the module frame of 12/3 and from the Add a place sheet's pattern (20/5). Words: "Links", "Add a link", "Paste an Instagram or TikTok link.", "Link", "Bali", "Koh Phangan", "What is it?", "Save", "added by KA", "No links yet."
+
+**Do.**
+1. `web/src/features/links/lib/links.ts` (new): `linkId(url)` (the address without its query string, made into an id) and `siteOf(url)`, with headers.
+2. `web/src/features/links/api/links.ts` (new): read a link through the reader (three tries: 0 s, 1 s, 3 s); add a link; remove a link.
+3. `web/src/features/links/components/LinksModule.tsx` (new): cards grouped by Bali and Koh Phangan: the thumbnail or the site's name, the note or the title, "added by KA". A tap opens the link in a new tab.
+4. `web/src/features/links/components/AddLinkSheet.tsx` (new): the shared `Sheet` with the Link field, the destination chips, the optional "What is it?" note and "Save".
+5. `database.rules.json`: the `links/items` rules of section 4. `services/link-reader/` also accepts `instagram.com` and `tiktok.com` and returns the title and the photo when it can.
+
+**Edge cases.** Cases 43 to 49.
+
+**Failures.** The reader is free to call. Three tries, then the link saves without a title or a thumbnail. A refused write shows its reason.
+
+**Tests.** The header examples of `linkId` (typical, the same link with a query string).
+
+**Done when.** A link added in one browser profile shows in the other as "added by" its initials; with the reader switched off the link still saves.
+
+**Skills.** agent-skills `incremental-implementation`; `engineering-ethos`; `explain-clearly`; the Impeccable plugin (`impeccable:impeccable`); the hci-design method (`design/references/hci-design`); agent-skills `frontend-ui-engineering`, `test-driven-development`.
 
 The edge cases above are the ones found before the build. Find the rest: for every call, every write and every state, ask what happens when it is missing, fails, repeats or races, and record each case you handle in the PR body.

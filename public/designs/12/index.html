@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
+<title>TRAVEL design 12 · Flyer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script><style>
+:root { --acc: #0d6b5e; --acc-soft: #e6f2ef; --ink: #1c1c1e; --ink2: #3a3a3c; --mut: #6e6e73; --line: #ececee; --soft: #f5f5f4; --bg: #fff; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #f4f3f0; color: var(--ink); font: 400 16px/1.5 "Plus Jakarta Sans", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; }
+svg.i { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.head { max-width: 1300px; margin: 0 auto; padding: 32px 20px 0; }
+.head .crumb { font-size: 14px; color: var(--mut); }
+.head .crumb a { text-decoration: underline; }
+.head h1 { font-size: 34px; font-weight: 700; letter-spacing: -.02em; margin-top: 12px; }
+.head p { font-size: 18px; color: var(--ink2); margin-top: 4px; }
+.screens { display: flex; flex-wrap: wrap; justify-content: center; gap: 48px 36px; max-width: 1340px; margin: 0 auto; padding: 32px 16px 28px; }
+.shot { width: 390px; }
+.shot > figcaption { font-size: 14px; font-weight: 600; color: var(--mut); margin: 0 0 12px 8px; }
+.phone { position: relative; width: 390px; height: 844px; overflow: hidden; background: var(--bg); border-radius: 46px; box-shadow: 0 0 0 1px rgba(0,0,0,.06), 0 24px 60px rgba(0,0,0,.10); }
+.foot { max-width: 900px; margin: 0 auto; padding: 0 16px 48px; font-size: 14px; color: var(--mut); text-align: center; }
+@media (max-width: 480px) { .screens { padding: 20px 0; gap: 36px; } .shot > figcaption { margin-left: 16px; } .phone { border-radius: 0; box-shadow: none; } }
+.sb { position: absolute; top: 0; left: 0; right: 0; height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 6px 30px 0 36px; font: 600 16px/1 -apple-system, "SF Pro Text", sans-serif; z-index: 40; }
+.sb svg { width: 68px; height: 12px; fill: currentColor; }
+.sb.lt { color: #fff; }
+.hi { position: absolute; bottom: 8px; left: 50%; width: 134px; height: 5px; margin-left: -67px; border-radius: 3px; background: var(--ink); z-index: 50; }
+.hi.lt { background: #fff; }
+.scr { position: absolute; top: 50px; left: 0; right: 0; bottom: 0; overflow: hidden; padding: 0 20px; }
+.scr.tb { bottom: 84px; }
+/* type */
+.h1 { font-size: 30px; line-height: 1.15; font-weight: 700; letter-spacing: -.02em; }
+.h2 { font-size: 22px; line-height: 1.25; font-weight: 700; letter-spacing: -.01em; }
+.h3 { font-size: 17px; line-height: 1.3; font-weight: 700; }
+.sub { font-size: 15px; color: var(--mut); }
+.cap { font-size: 13px; color: var(--mut); }
+.sect { font-size: 13px; font-weight: 700; color: var(--mut); letter-spacing: .02em; margin: 22px 0 10px; }
+/* chrome */
+.nav { display: flex; align-items: center; justify-content: space-between; height: 52px; }
+.ib { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+.ib.flat { box-shadow: none; background: var(--soft); }
+.tabbar { position: absolute; left: 0; right: 0; bottom: 0; height: 84px; background: rgba(255,255,255,.96); border-top: 1px solid var(--line); display: grid; padding-top: 9px; z-index: 30; }
+.tabbar a { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; font-weight: 600; color: #8e8e93; }
+.tabbar a svg.i { width: 25px; height: 25px; }
+.tabbar a.on { color: var(--acc); }
+.tabbar a .dot { position: absolute; margin: -2px 0 0 18px; width: 8px; height: 8px; border-radius: 50%; background: #d9480f; }
+/* controls */
+.btn { display: flex; align-items: center; justify-content: center; gap: 8px; height: 54px; border-radius: 14px; background: var(--acc); color: #fff; font-size: 17px; font-weight: 700; }
+.btn.sec { background: var(--soft); color: var(--ink); }
+.btn.sm { height: 42px; font-size: 15px; border-radius: 12px; padding: 0 16px; display: inline-flex; }
+.pill { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 18px; background: var(--soft); font-size: 14px; font-weight: 600; white-space: nowrap; }
+.pill.on { background: var(--ink); color: #fff; }
+.pills { display: flex; gap: 8px; overflow: hidden; }
+.seg3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.seg3 span { height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 15px; font-weight: 600; background: #fff; box-shadow: inset 0 0 0 1px #dcdcdf; }
+.seg3 span.on { background: var(--acc); color: #fff; box-shadow: none; }
+.avs { display: inline-flex; align-items: center; }
+.av { width: 26px; height: 26px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 10.5px; font-weight: 700; color: var(--ink2); background: #e9e6df; border: 2px solid #fff; }
+.avs .av + .av { margin-left: -4px; }
+.av.b { background: #dfe7ea; } .av.c { background: #ece3dd; } .av.d { background: #e4e9df; } .av.you { background: var(--acc); color: #fff; }
+.photo { border-radius: 20px; background: #ddd center / cover no-repeat; }
+.shadow { box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+.tag { display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 10px; border-radius: 13px; font-size: 12.5px; font-weight: 700; background: rgba(255,255,255,.94); color: var(--ink); }
+.tag.acc { background: var(--acc-soft); color: var(--acc); }
+.heart { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 18px; background: #fff; box-shadow: inset 0 0 0 1px #dcdcdf; font-size: 14px; font-weight: 700; }
+.heart.on { background: var(--acc-soft); color: var(--acc); box-shadow: none; }
+.heart.on svg.i { fill: currentColor; }
+.heart svg.i { width: 18px; height: 18px; }
+/* dates */
+.anchor { display: flex; gap: 12px; align-items: center; padding: 14px; border-radius: 18px; background: #faf6ea; margin: 14px 0 16px; }
+.anchor .moon { width: 40px; height: 40px; border-radius: 50%; background: radial-gradient(circle at 38% 38%, #fff8dc, #f1d27a 70%); box-shadow: 0 0 0 5px #f6ecc8; flex: none; }
+.anchor b { display: block; font-size: 15px; }
+.anchor span { font-size: 14px; color: var(--mut); }
+.opt { padding: 16px; border-radius: 20px; background: #fff; box-shadow: inset 0 0 0 1px var(--line), 0 2px 10px rgba(0,0,0,.04); margin-bottom: 12px; }
+.opt.lead { box-shadow: inset 0 0 0 2px var(--acc), 0 6px 18px rgba(13,107,94,.12); }
+.opt .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.opt b { font-size: 18px; letter-spacing: -.01em; }
+.opt .meta { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--mut); margin: 4px 0 12px; }
+.bar { display: flex; height: 6px; border-radius: 3px; overflow: hidden; background: var(--soft); margin: 2px 0 10px; }
+.bar i { display: block; height: 100%; }
+/* stay */
+.scard { margin-bottom: 22px; }
+.scard .photo { position: relative; height: 210px; }
+.scard .photo .tag { position: absolute; top: 12px; left: 12px; }
+.scard .photo .hb { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.94); display: grid; place-items: center; }
+.scard .photo .hb.on { color: var(--acc); }
+.scard .photo .hb.on svg.i { fill: currentColor; }
+.scard .row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-top: 10px; }
+.scard .h3 { font-size: 16.5px; }
+.scard .links { display: flex; gap: 14px; margin-top: 6px; font-size: 14px; font-weight: 700; }
+.scard .links .addp { color: var(--acc); }
+.scard .links .ol { text-decoration: underline; text-underline-offset: 3px; }
+.mini { display: flex; gap: 12px; align-items: center; padding: 10px 0; }
+.mini .photo { width: 78px; height: 78px; border-radius: 16px; flex: none; }
+/* parties */
+.place { font-size: 24px; font-weight: 700; letter-spacing: -.02em; margin: 18px 0 2px; }
+.venue { display: flex; justify-content: space-between; align-items: center; margin: 14px 0 4px; }
+.venue b { font-size: 17px; }
+.prow { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.prow .dt { width: 46px; flex: none; text-align: center; border-radius: 12px; background: var(--soft); padding: 5px 0; }
+.prow .dt small { display: block; font-size: 11.5px; font-weight: 700; color: var(--mut); line-height: 1.2; }
+.prow .dt b { display: block; font-size: 18px; line-height: 1.1; }
+.prow .who { flex: 1; min-width: 0; }
+.prow .who b { display: block; font-size: 16px; font-weight: 700; }
+.prow .who span { font-size: 12.5px; color: var(--mut); }
+.nc { font-size: 12px; font-weight: 600; color: #8a6100; background: #fbf3dc; border-radius: 6px; padding: 1px 6px; margin-left: 4px; white-space: nowrap; }
+.inbtn { display: inline-flex; align-items: center; gap: 4px; height: 34px; padding: 0 12px; border-radius: 17px; font-size: 13.5px; font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--acc); color: var(--acc); white-space: nowrap; }
+.inbtn.on { background: var(--acc); color: #fff; box-shadow: none; }
+.inbtn svg.i { width: 15px; height: 15px; stroke-width: 2.4; }
+.na { border-radius: 16px; background: var(--soft); padding: 12px 14px; margin: 8px 0; }
+.na p { font-size: 13.5px; color: var(--ink2); }
+.na .lr { display: flex; gap: 10px; font-size: 14px; color: #77777c; padding: 3px 0; }
+.na .lr span { width: 74px; flex: none; }
+/* map */
+.lmap { position: absolute; left: 0; right: 0; top: 0; background: #e8eef0; z-index: 0; }
+.leaflet-container { font: inherit !important; background: #e8eef0; }
+.leaflet-control-attribution { font-size: 11px !important; }
+.mk { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px 6px 6px; border-radius: 20px; background: #fff; box-shadow: 0 3px 12px rgba(0,0,0,.2); font: 700 13.5px/1 "Plus Jakarta Sans", sans-serif; color: var(--ink); white-space: nowrap; transform: translate(-50%, -50%); width: max-content; }
+.mk i { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--soft); font-style: normal; font-size: 12px; }
+.mk.on { background: var(--ink); color: #fff; transform: translate(-50%, -50%) scale(1.08); }
+.mk.on i { background: var(--acc); color: #fff; }
+.mk.stay i { background: var(--acc-soft); color: var(--acc); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: #fff; border-radius: 26px 26px 0 0; box-shadow: 0 -10px 30px rgba(0,0,0,.12); padding: 10px 20px 0; z-index: 20; }
+.grab { width: 40px; height: 5px; border-radius: 3px; background: #dcdcdf; margin: 0 auto 14px; }
+.field { border-radius: 14px; box-shadow: inset 0 0 0 1px #dcdcdf; padding: 10px 14px; margin-bottom: 10px; }
+.field small { display: block; font-size: 12.5px; color: var(--mut); font-weight: 600; }
+.field span { font-size: 16px; }
+.field.ph span { color: #a1a1a6; }
+.toast { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 14px; background: var(--ink); color: #fff; font-size: 14px; font-weight: 600; }
+.vid { position: relative; border-radius: 18px; background: #333 center / cover; overflow: hidden; }
+.vid::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,.6)); }
+.vid .pl { position: absolute; left: 50%; top: 42%; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; background: rgba(255,255,255,.9); display: grid; place-items: center; z-index: 2; color: var(--ink); }
+.vid .lab { position: absolute; left: 10px; bottom: 10px; right: 10px; z-index: 2; color: #fff; font-size: 13px; font-weight: 700; }
+
+.fly { position: absolute; inset: 0; background: #faf7f2; }
+.fly .hero { height: 330px; background-size: cover; background-position: center; border-radius: 0 0 30px 30px; }
+.fly .nm { text-align: center; margin-top: -40px; position: relative; }
+.fly .nm .av { width: 72px; height: 72px; font-size: 20px; border-width: 4px; }
+.fb { display: block; border-radius: 18px; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.06), inset 0 0 0 1px #ece6dc; padding: 16px 18px; margin-bottom: 12px; }
+.fb .r { display: flex; justify-content: space-between; align-items: center; }
+.fb b { font-size: 18px; }
+.fb .st { font-size: 14px; color: var(--mut); }
+.fb.open { box-shadow: 0 10px 28px rgba(0,0,0,.08), inset 0 0 0 2px var(--acc); }
+</style></head>
+<body><svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+<symbol id="bed" viewBox="0 0 24 24"><path d="M3 19v-8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8M3 15h18M7 9V6.5A1.5 1.5 0 0 1 8.5 5h7A1.5 1.5 0 0 1 17 6.5V9"/></symbol>
+<symbol id="music" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></symbol>
+<symbol id="map" viewBox="0 0 24 24"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6z"/><path d="M9 4v14M15 6v14"/></symbol>
+<symbol id="play" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M10 8.5l5 3.5-5 3.5z"/></symbol>
+<symbol id="home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/></symbol>
+<symbol id="heart" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.6 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></symbol>
+<symbol id="back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+<symbol id="close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+<symbol id="check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+<symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+<symbol id="ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+<symbol id="dir" viewBox="0 0 24 24"><path d="M4 20v-6a4 4 0 0 1 4-4h11M15 6l4 4-4 4"/></symbol>
+<symbol id="link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+<symbol id="pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+<symbol id="star" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.8 6.8 19.6l1-5.8L3.5 9.7l5.9-.9z"/></symbol>
+<symbol id="sbi" viewBox="0 0 68 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/><path d="M27 4.2a9 9 0 0 1 12 0l-1.3 1.4a7 7 0 0 0-9.4 0zM29.5 6.9a5.5 5.5 0 0 1 7 0l-1.3 1.4a3.6 3.6 0 0 0-4.4 0zM33 12l-1.9-2.1a2.6 2.6 0 0 1 3.8 0z"/><rect x="44.5" y=".5" width="20" height="11" rx="3" fill="none" stroke="currentColor" stroke-opacity=".45"/><rect x="46.5" y="2.5" width="14" height="7" rx="1.5"/><path d="M66 4v4a2 2 0 0 0 0-4z" opacity=".45"/></symbol>
+</svg>
+<header class="head"><p class="crumb"><a href="../">All designs</a></p><h1>12 · Flyer</h1><p>One tall flyer: photo, name, date, and three big buttons that open in place.</p></header>
+<main class="screens"><figure class="shot"><figcaption>1 · Invitation: the flyer</figcaption><div class="phone"><div class="fly"><div class="sb lt"><b>9:41</b><svg><use href="#sbi"/></svg></div><div class="hero" style="height:420px;background-image:url(https://travel-ca8f9-media.s3.us-east-2.amazonaws.com/public/site/bali-cliff.jpg);background-position:center 35%"></div><div class="nm"><span class="avs"><span class="avs"><span class="av d">JD</span></span></span><p class="h1" style="margin-top:8px">Bali · Koh Phangan</p><p class="sub">February 2027 · Full Moon Party 22 Feb</p><p style="font-size:16px;color:var(--ink2);margin:12px 24px 18px">“Ten days of sun and Savaya, then the full moon.” — JD</p></div><div style="padding:0 20px"><div class="seg3"><span class="on" style="height:52px">I'm in</span><span style="height:52px">Maybe</span><span style="height:52px">Can't</span></div><p class="cap" style="text-align:center;margin-top:12px">6 of 8 replied · no app, no account</p></div></div><i class="hi"></i></div></figure><figure class="shot"><figcaption>2 · Home: three buttons</figcaption><div class="phone"><div class="fly"><div class="sb lt"><b>9:41</b><svg><use href="#sbi"/></svg></div><div class="hero" style="background-image:url(https://travel-ca8f9-media.s3.us-east-2.amazonaws.com/public/site/bali-cliff.jpg);background-position:center 35%"></div><div class="nm"><span class="avs"><span class="avs"><span class="av d">JD</span></span></span><p class="h1" style="margin-top:8px">Bali · Koh Phangan</p><p class="sub">February 2027 · Full Moon Party 22 Feb</p></div><div style="padding:20px 20px 0"><a class="fb"><div class="r"><span style="display:flex;gap:10px;align-items:center"><svg class="i" style=""><use href="#cal"/></svg><b>Dates</b></span><span class="st">Tap to answer</span></div></a><a class="fb"><div class="r"><span style="display:flex;gap:10px;align-items:center"><svg class="i" style=""><use href="#bed"/></svg><b>Stay</b></span><span class="st">7 options · heart one</span></div></a><a class="fb"><div class="r"><span style="display:flex;gap:10px;align-items:center"><svg class="i" style=""><use href="#music"/></svg><b>Parties</b></span><span class="st">6 shows · I'm in</span></div></a></div></div><i class="hi"></i></div></figure><figure class="shot"><figcaption>3 · Dates, opened in place</figcaption><div class="phone"><div class="fly"><div class="sb lt"><b>9:41</b><svg><use href="#sbi"/></svg></div><div class="hero" style="background-image:url(https://travel-ca8f9-media.s3.us-east-2.amazonaws.com/public/site/bali-cliff.jpg);background-position:center 35%"></div><div class="nm"><span class="avs"><span class="avs"><span class="av d">JD</span></span></span><p class="h1" style="margin-top:8px">Bali · Koh Phangan</p><p class="sub">February 2027 · Full Moon Party 22 Feb</p></div><div style="padding:20px 20px 0"><div class="fb open"><div class="r"><span style="display:flex;gap:10px;align-items:center"><svg class="i" style=""><use href="#cal"/></svg><b>Dates</b></span><svg class="i" style="width:18px;height:18px;color:#8e8e93"><use href="#close"/></svg></div><div style="margin-top:12px"><div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line)"><div><b style="font-size:15.5px">Sat 13 – Tue 23 Feb</b><p class="cap">5 yes</p></div><div class="seg3" style="width:170px"><span class="on" style="height:36px;font-size:13.5px">Yes</span><span class="" style="height:36px;font-size:13.5px">Maybe</span><span class="" style="height:36px;font-size:13.5px">No</span></div></div><div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line)"><div><b style="font-size:15.5px">Tue 16 – Thu 25 Feb</b><p class="cap">3 yes</p></div><div class="seg3" style="width:170px"><span class="" style="height:36px;font-size:13.5px">Yes</span><span class="" style="height:36px;font-size:13.5px">Maybe</span><span class="" style="height:36px;font-size:13.5px">No</span></div></div><div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line)"><div><b style="font-size:15.5px">Fri 19 Feb – Mon 1 Mar</b><p class="cap">2 yes</p></div><div class="seg3" style="width:170px"><span class="" style="height:36px;font-size:13.5px">Yes</span><span class="" style="height:36px;font-size:13.5px">Maybe</span><span class="" style="height:36px;font-size:13.5px">No</span></div></div></div></div><a class="fb"><div class="r"><span style="display:flex;gap:10px;align-items:center"><svg class="i" style=""><use href="#bed"/></svg><b>Stay</b></span><span class="st">7 options · heart one</span></div></a><a class="fb"><div class="r"><span style="display:flex;gap:10px;align-items:center"><svg class="i" style=""><use href="#music"/></svg><b>Parties</b></span><span class="st">6 shows · I'm in</span></div></a></div></div><i class="hi"></i></div></figure><figure class="shot"><figcaption>4 · Stay, opened in place</figcaption><div class="phone"><div class="fly"><div class="sb"><b>9:41</b><svg><use href="#sbi"/></svg></div><div style="padding:60px 20px 0"><a class="fb"><div class="r"><span style="display:flex;gap:10px;align-items:center"><svg class="i" style=""><use href="#cal"/></svg><b>Dates</b></span><span class="st">Tap to answer</span></div></a><div class="fb open"><div class="r"><span style="display:flex;gap:10px;align-items:center"><svg class="i" style=""><use href="#bed"/></svg><b>Stay</b></span><svg class="i" style="width:18px;height:18px;color:#8e8e93"><use href="#close"/></svg></div><div style="margin-top:12px"><div class="photo" style="height:170px;background-image:url(https://travel-ca8f9-media.s3.us-east-2.amazonaws.com/public/site/bali-cliff.jpg);background-position:center 35%"></div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px"><div><b style="font-size:16px">Cliffside villa with pool</b><p class="cap">Uluwatu · sleeps 10 · Open listing</p></div><span class="heart on"><svg class="i" style=""><use href="#heart"/></svg>3</span></div><p class="cap" style="margin-top:8px">1 of 7 · swipe for the next · paste a link to add</p></div></div><a class="fb"><div class="r"><span style="display:flex;gap:10px;align-items:center"><svg class="i" style=""><use href="#music"/></svg><b>Parties</b></span><span class="st">6 shows · I'm in</span></div></a></div></div><i class="hi"></i></div></figure><figure class="shot"><figcaption>5 · Parties, opened in place</figcaption><div class="phone"><div class="fly"><div class="sb"><b>9:41</b><svg><use href="#sbi"/></svg></div><div style="padding:60px 20px 0"><a class="fb"><div class="r"><span style="display:flex;gap:10px;align-items:center"><svg class="i" style=""><use href="#cal"/></svg><b>Dates</b></span><span class="st">Tap to answer</span></div></a><a class="fb"><div class="r"><span style="display:flex;gap:10px;align-items:center"><svg class="i" style=""><use href="#bed"/></svg><b>Stay</b></span><span class="st">7 options · heart one</span></div></a><div class="fb open"><div class="r"><span style="display:flex;gap:10px;align-items:center"><svg class="i" style=""><use href="#music"/></svg><b>Parties</b></span><svg class="i" style="width:18px;height:18px;color:#8e8e93"><use href="#close"/></svg></div><div style="margin-top:8px"><div class="prow"><div class="dt"><small>Sat</small><b>13</b><small>Feb</small></div><div class="who"><b>Peggy Gou</b><div style="display:flex;align-items:center;gap:6px;margin-top:3px"><span class="avs"><span class="av ">TO</span><span class="av b">KA</span><span class="av c">MB</span><span class="av you">RB</span></span><span>4 in</span></div></div><span class="inbtn on"><svg class="i" style=""><use href="#check"/></svg>I'm in</span></div><div class="prow"><div class="dt"><small>Mon</small><b>22</b><small>Feb</small></div><div class="who"><b>Full Moon Party</b><div style="display:flex;align-items:center;gap:6px;margin-top:3px"><span class="avs"><span class="av ">TO</span><span class="av b">KA</span><span class="av c">MB</span><span class="av d">RJ</span></span><span>6 in</span></div></div><span class="inbtn on"><svg class="i" style=""><use href="#check"/></svg>I'm in</span></div><div class="prow"><div class="dt"><small>Sat</small><b>20</b><small>Feb</small></div><div class="who"><b>Franky Rizardo</b><div style="display:flex;align-items:center;gap:6px;margin-top:3px"><span class="avs"><span class="av ">TO</span><span class="av b">DE</span></span><span>2 in</span></div></div><span class="inbtn">I'm in</span></div><p class="cap" style="margin-top:8px;color:var(--acc);font-weight:700">See on the map ›</p></div></div></div></div><i class="hi"></i></div></figure><figure class="shot"><figcaption>6 · Map</figcaption><div class="phone"><div class="lmap" id="m1" style="top:0px;height:844px;" data-c="-8.86,115.105" data-z="13" data-mk='[[-8.843, 115.123, "Savaya", "on", "\u266a"], [-8.8291, 115.0849, "Uluwatu temple", "", "\u25c6"], [-8.818, 115.1, "Cliffside villa", "stay", "\u2302"]]'></div><div class="sb"><b>9:41</b><svg><use href="#sbi"/></svg></div><div style="position:absolute;top:58px;left:20px;right:20px;display:flex;gap:8px;z-index:25"><span class="pill on" style="box-shadow:0 2px 8px rgba(0,0,0,.15)">Bali</span><span class="pill" style="background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15)">Koh Phangan</span></div><section class="sheet" style="bottom:0;padding-bottom:36px"><div class="grab"></div><div style="display:flex;gap:14px;align-items:center"><div class="photo" style="width:84px;height:84px;border-radius:18px;flex:none;background-image:url(https://travel-ca8f9-media.s3.us-east-2.amazonaws.com/public/site/d-uluwatu-cube.jpg);background-position:center"></div><div><p class="h2">Savaya</p><p class="sub">Club · Uluwatu · next: Sat 13 Feb</p><div style="display:flex;align-items:center;gap:6px;margin-top:4px"><span class="avs"><span class="av ">TO</span><span class="av b">KA</span><span class="av c">MB</span><span class="av you">RB</span></span><span class="cap">4 in on 13 Feb</span></div></div></div><a class="btn" style="margin-top:16px">See shows</a></section><i class="hi"></i></div></figure></main>
+<p class="foot">Stay photos are Bali and Koh Phangan scenery standing in for listing photos. Shows come from the lineup files checked 23 Nov 2026; friends appear as initials.</p>
+<script>
+(function () { function fit() { var s = Math.min(1, document.documentElement.clientWidth / 390); document.querySelectorAll('.phone').forEach(function (p) { p.style.zoom = s < 1 ? s : ''; }); } addEventListener('resize', fit); fit(); })();
+document.querySelectorAll('.lmap').forEach(function (el) {
+  var c = el.dataset.c.split(',').map(Number), mk = JSON.parse(el.dataset.mk);
+  var m = L.map(el, { zoomControl: false, attributionControl: true, dragging: false, scrollWheelZoom: false }).setView(c, +el.dataset.z);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(m);
+  m.attributionControl.setPrefix(false);
+  mk.forEach(function (p) {
+    L.marker([p[0], p[1]], { icon: L.divIcon({ className: '', html: '<span class="mk ' + p[3] + '"><i>' + p[4] + '</i>' + p[2] + '</span>', iconSize: [0, 0] }) }).addTo(m);
+  });
+});
+</script>
+</body></html>

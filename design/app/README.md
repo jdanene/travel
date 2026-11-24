@@ -1,42 +1,52 @@
 # App design: handoff
 
-The design is law. Where a ticket or a later document disagrees with the mock, the mock wins. The exceptions are in this file only.
+The design is law. Where a ticket or a later document disagrees with the mocks, the mocks win. The exceptions are in this file only.
 
 ## What to read, in this order
 
 1. `docs/requirements.md`, section 0 only. Sections 1 to 15 are the backlog. Do not build them.
-2. `public/designs/20/index.html`: design 20, "The page moves forward". Live copy: https://travel-ca8f9.web.app/designs/20/
-3. `docs/trip-app/plan.md`: the domain model, the data contract, the edge cases and the ticket order.
+2. `public/designs/12/index.html`: design 12, "Flyer". It fixes the home page and the frame of every module. Live copy: https://travel-ca8f9.web.app/designs/12/
+3. `public/designs/20/index.html`: design 20, "The page moves forward". It fixes what is inside a module: the date options, the stay cards, the party list, the sheets and the map card. Live copy: https://travel-ca8f9.web.app/designs/20/
+4. `docs/trip-app/plan.md`: the domain model, the data contract, the edge cases and the ticket order.
 
-The mock holds ten phone screens. All ten sit on line 183 of the file, so tickets name a screen by its number.
+All screens of design 12 sit on line 166 of its file; all screens of design 20 sit on line 183 of its file. Tickets name a screen as "12/3" or "20/5".
+
+### Design 12: the home page and the module frame
 
 | Screen | Caption in the mock | What it fixes |
 |---|---|---|
-| 1 | (a) Invitation: dates open | The trip before a reply, the three reply buttons, who replied |
-| 2 | (a) Dates lead | Date options, Yes / Maybe / No, counts, the two "next" rows |
-| 3 | (a) Organizer: confirm the dates | The organizer notice, who said yes, the confirm button |
-| 4 | (b) Dates pinned; Stay leads | The pinned line, the stay cards, hearts, Add a place |
-| 5 | (b) Add a place by link | The Add a place sheet |
-| 6 | (b) Organizer: confirm the stay | Confirm this stay |
-| 7 | (c) Stay pinned; Parties lead | Who's playing: place, venue, date, artist, the last-year line, I'm in |
-| 8 | (c) Add a party | The Add a party sheet |
-| 9 | (d) All set: the summary | The summary cards |
-| 10 | Map, opened from the summary | The map, the pins, the open card |
+| 12/1 | Invitation: the flyer | The flyer before a reply: photo, organizer's avatar, name, date line, the note, "I'm in / Maybe / Can't", "6 of 8 replied · no app, no account" |
+| 12/2 | Home: three buttons | The home page: the cover photo, the organizer's avatar, "Bali · Koh Phangan", the date line, a stack of equal module buttons with their state on the right |
+| 12/3 | Dates, opened in place | A module opened in place: the accent ring, the close icon, the content below the title |
+| 12/4 | Stay, opened in place | The same frame for Stay |
+| 12/5 | Parties, opened in place | The same frame for Parties, and "See on the map ›" |
+| 12/6 | Map | The map, the Bali / Koh Phangan switch, the pin card |
 
-Content, order, words and icons come from the mock. Use its words exactly: grep the mock for a string before you type it.
+### Design 20: what is inside a module
 
-## Exceptions to the mock
+Where 12 and 20 differ inside a module, 20 wins, fitted into 12's module frame.
 
-1. **Stays and photos are examples.** The stays in the mock are made up, and their photos are scenery. The app shows what friends add.
+| Screen | Caption in the mock | What it fixes inside a module |
+|---|---|---|
+| 20/2 | (a) Dates lead | Date options, Yes / Maybe / No, counts, "Most yes", who has not answered |
+| 20/3 | (a) Organizer: confirm the dates | The organizer notice, who said yes, "Confirm these dates" |
+| 20/4 | (b) Dates pinned; Stay leads | The stay cards, hearts, "Add a place" |
+| 20/5 | (b) Add a place by link | The Add a place sheet |
+| 20/6 | (b) Organizer: confirm the stay | "Confirm this stay" |
+| 20/7 | (c) Stay pinned; Parties lead | Who's playing: place, venue, date, artist, the last-year line, "I'm in" |
+| 20/8 | (c) Add a party | The Add a party sheet |
+| 20/10 | Map, opened from the summary | The pins and the open card |
+
+Content, order, words and icons come from the mocks. Use their words exactly: grep the mock for a string before you type it.
+
+## Exceptions to the mocks
+
+1. **Stays and photos are examples.** The stays in the mocks are made up, and their photos are scenery. The app shows what friends add.
 2. **The crew is an example.** The initials JD, TO, KA, MB, DE, SN, RJ, LC and RB are sample friends.
-3. **One pinned stay line for each destination.** Screens 7 and 9 show one line, for Bali. The app shows a line for each destination that has a confirmed stay.
-4. **A value the link reader cannot read becomes an input.** On screen 5 the name, the area and "sleeps" come from the link. When the reader fails or a value is missing, the same position holds an input for that value.
+3. **Modules are equals.** Dates, Stay, Parties, Links and Map are module buttons of equal weight, in a fixed order that means nothing. One module is open at a time; opening one closes the other; all start closed. Stay exists only after the organizer confirms the dates. A settled module shows its result on its button ("13–23 Feb · confirmed", "Cliffside villa · confirmed"). Links is a module the mocks do not draw, built from the Add a place sheet's pattern. When the dates and every stay are confirmed, a small line under the title reads "All set". (Owner, 23 Nov 2026.)
+4. **A value the link reader cannot read becomes an input.** On screen 20/5 the name, the area and "sleeps" come from the link. When the reader fails or a value is missing, the same position holds an input for that value.
 5. **No Directions button.** The owner removed it on 23 Nov 2026. Do not add it back.
-6. **The game-cover style stays on the hype pages.** The app uses the mock's clean look only.
-
-7. **Words for states the mock does not draw.** The mock shows the happy path. These strings are new and are fixed here: the join sheet "Who are you?", "Your name", "Already replied"; the empty states "No dates to vote on yet.", "No places yet.", "Nothing announced yet.", "No pins yet."; the organizer's undo "Change the dates", "Change the stay"; the failures "This link does not open a trip. Ask the organizer for the link.", "No connection", "This organizer link is not valid.", "Try again"; the edit actions "Edit", "Remove"; the splash button "OPEN THE TRIP".
-8. **A Map row at the foot of the page.** The mock opens the map from the summary only. Before "All set" there is no summary, so the page ends with one row, "Map", that opens it.
-9. **Stay waits for the dates.** Screen 2 shows a Stay "next" row before the dates are confirmed. The app shows no Stay row until the dates are confirmed. (Owner, 23 Nov 2026.)
-10. **Dates, Stay and Parties are equals.** The mock shows one block leading and the others pinned or "next". The app shows open sections of equal weight. The only rule of order: Stay does not show until the dates are confirmed. A settled section shrinks to its pinned line. (Owner, 23 Nov 2026.)
+6. **The game-cover style stays on the hype pages.** The app uses the mocks' clean look only.
+7. **Words for states the mocks do not draw.** The mocks show the happy path. These strings are new and are fixed here: the join sheet "Who are you?", "Your name", "Already replied"; the empty states "No dates to vote on yet.", "No places yet.", "Nothing announced yet.", "No pins yet.", "No links yet."; the organizer's undo "Change the dates", "Change the stay"; the failures "This link does not open a trip. Ask the organizer for the link.", "No connection", "This organizer link is not valid.", "Try again"; the edit actions "Edit", "Remove"; the splash button "OPEN THE TRIP"; the Links module "Links", "Add a link", "Paste an Instagram or TikTok link.", "What is it?", "Save".
 
 Record a new exception here, in the same commit as the code that makes it.
