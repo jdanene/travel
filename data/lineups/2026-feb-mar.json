@@ -1,5 +1,5 @@
 {
- "checked": "2026-11-23",
+ "checked": "2026-11-24",
  "window": "2026-01-01 to 2026-03-31; January comes from the owner's list and only feeds \"Last season:\"",
  "shows": [
   {
@@ -814,12 +814,1347 @@
    "source": "owner's list",
    "verified": true,
    "note": "Hungover Vol. 2, daytime"
+  },
+  {
+   "date": "2026-02-13",
+   "artist": "People of the Sun",
+   "note": "Named party; poster lists Flip, Deefo, Cl1nk",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/february-13-2026",
+   "verified": true
+  },
+  {
+   "date": "2026-02-15",
+   "artist": "Loco Dice",
+   "note": "Law of the Jungle poster also lists Djammin",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/february-15-2026",
+   "verified": true
+  },
+  {
+   "date": "2026-03-06",
+   "artist": "Full Moon",
+   "note": "Full Moon party; poster: Atsou, Economou, Frankie Lluc, Le Croque, Mirai",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/march-6-2026",
+   "verified": true
+  },
+  {
+   "date": "2026-03-08",
+   "artist": "Themba",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/march-8-2026",
+   "verified": true
+  },
+  {
+   "date": "2026-03-13",
+   "artist": "The Grand Totem",
+   "note": "Poster: Jose' Experience, Stay Golden, Evangelos, Yetty, Dreammysoulander, Oz.me",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/march-13-2026",
+   "verified": true
+  },
+  {
+   "date": "2026-03-14",
+   "artist": "Carlita",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/march-14-2026",
+   "verified": true
+  },
+  {
+   "date": "2026-03-20",
+   "artist": "Economou b2b Cl1nk, Paul Mondot b2b Deefo, Tina Colada b2b Sara Siu",
+   "note": "Savaya Friday",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/march-20-2026",
+   "verified": true
+  },
+  {
+   "date": "2026-03-22",
+   "artist": "Alan Dixon",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/march-22-2026",
+   "verified": true
+  },
+  {
+   "date": "2026-03-27",
+   "artist": "People of the Sun",
+   "note": "Named party; poster lists Flip, Deefo, Cl1nk",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/march-27-2026",
+   "verified": true
+  },
+  {
+   "date": "2026-03-28",
+   "artist": "Aaron Sevilla",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/march-28-2026",
+   "verified": true
+  },
+  {
+   "date": "2026-03-29",
+   "artist": "Awen",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/march-29-2026",
+   "verified": true
+  },
+  {
+   "date": "2026-02-28",
+   "artist": "Novak",
+   "note": "Red Fox Saturday's",
+   "venue": "Desa Kitsuné",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "https://www.desakitsune.com/events/red-fox-saturdays-1",
+   "verified": true
+  },
+  {
+   "date": "2026-03-13",
+   "artist": "Claptone",
+   "note": "Savaya × Desa night",
+   "venue": "Desa Kitsuné",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "https://www.desakitsune.com/events/claptone",
+   "verified": true
+  },
+  {
+   "date": "2026-03-14",
+   "artist": "Celeb., Alar",
+   "note": "Red Fox Saturday's",
+   "venue": "Desa Kitsuné",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "https://www.desakitsune.com/events/red-fox-saturdays-2",
+   "verified": true
+  },
+  {
+   "date": "2026-02-12",
+   "artist": "Dan Harris, Danoz Direct, Yu Yang",
+   "venue": "Klymax",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260211071638/https://klymax.co/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-13",
+   "artist": "D.Tiffany, Bagvs",
+   "venue": "Klymax",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260211071638/https://klymax.co/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-14",
+   "artist": "Gero",
+   "venue": "Klymax",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260211071638/https://klymax.co/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-19",
+   "artist": "Kafka, Laziovau, Apri",
+   "venue": "Klymax",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260214194224/https://klymax.co/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-20",
+   "artist": "Ones, Danny",
+   "venue": "Klymax",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260214194224/https://klymax.co/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-21",
+   "artist": "Mad Professor, Dreadsmad",
+   "venue": "Klymax",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260214194224/https://klymax.co/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-22",
+   "artist": "Mad Professor (listening session)",
+   "note": "5-7 pm listening session, on Potato Head's site",
+   "venue": "Klymax",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "https://seminyak.potatohead.co/experience/listening-session-with-mad-professor",
+   "verified": true
+  },
+  {
+   "date": "2026-02-26",
+   "artist": "Sattle, Greybox",
+   "venue": "Klymax",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260223032231/https://klymax.co/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-27",
+   "artist": "Mislav, Gero",
+   "venue": "Klymax",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260223032231/https://klymax.co/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-28",
+   "artist": "Joey F, Seabass",
+   "venue": "Klymax",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260223032231/https://klymax.co/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-13",
+   "artist": "A Guy Called Gerald, Archie",
+   "venue": "Klymax",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260309053853/https://klymax.co/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-14",
+   "artist": "Luma, Gero",
+   "venue": "Klymax",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260309053853/https://klymax.co/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-20",
+   "artist": "Gibs, Josh Ganly, Dan.B",
+   "venue": "Klymax",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260319132210/https://klymax.co/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-21",
+   "artist": "Dee Diggs, Todaysrenaissance",
+   "venue": "Klymax",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260319132210/https://klymax.co/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-14",
+   "artist": "Whisnu Santika",
+   "note": "I'll Be Yours Tour; with Rey Putra, Cosmo Kent, MC DRWE",
+   "venue": "Atlas Super Club",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260209055854/https://web.atlasbeachfest.com/super-club/event/ill-be-yours-tour-whisnu",
+   "verified": true
+  },
+  {
+   "date": "2026-02-19",
+   "artist": "Atsy",
+   "venue": "Atlas Super Club",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260219122335/https://atlasbeachfest.com/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-21",
+   "artist": "SOMA – Enter the Atlas",
+   "note": "Day party, DJs not named; site data says Super Club, one stray link says Beach House",
+   "venue": "Atlas Super Club",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260219122335/https://atlasbeachfest.com/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-25",
+   "artist": "Trizha Harun",
+   "venue": "Atlas Super Club",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260219122335/https://atlasbeachfest.com/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-28",
+   "artist": "Dasboyy",
+   "venue": "Atlas Super Club",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260226085422/https://web.atlasbeachfest.com/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-01",
+   "artist": "DNA",
+   "venue": "Atlas Super Club",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260226085422/https://web.atlasbeachfest.com/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-13",
+   "artist": "Yugi",
+   "venue": "Atlas Super Club",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260312221713/https://web.atlasbeachfest.com/super-club/event",
+   "verified": true
+  },
+  {
+   "date": "2026-03-29",
+   "artist": "SYBER Takeover",
+   "note": "Tye Turner, Smooth Brain Girly, TKYO, Nenshin",
+   "venue": "Atlas Super Club",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260316150037/https://atlasbeachfest.com/super-club/event/syber-takeover",
+   "verified": true
+  },
+  {
+   "date": "2026-03-13",
+   "artist": "A Guy Called Gerald (listening session)",
+   "note": "5-7 pm listening session",
+   "venue": "Potato Head",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "https://seminyak.potatohead.co/experience/listening-session-with-a-guy-called-gerald",
+   "verified": true
+  },
+  {
+   "date": "2026-02-21",
+   "artist": "Vybz Intel, Daisy, Ronald",
+   "note": "Sunset at La Brisa; also Farouki",
+   "venue": "La Brisa",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260215165520/https://labrisa-bali.com/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-20",
+   "artist": "Girls Don't Sync",
+   "note": "Together Group × Basement Love × PNNY; also White Pepper",
+   "venue": "La Brisa",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260310055158/https://labrisa-bali.com/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-14",
+   "artist": "Sunset Party of the Week: Valentine's Day Edition",
+   "note": "DJs not named",
+   "venue": "El Kabron",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://web.archive.org/web/20260207165025/https://elkabron.com/events/Saturday-Valentine's-Day-Edition-February-14",
+   "verified": true
+  },
+  {
+   "date": "2026-02-23",
+   "artist": "Half Moon Festival",
+   "note": "23-24 Feb: Harmony Beach Club pre-party, then Magic Forest (DJs not named)",
+   "venue": "Half Moon Festival",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://megatix.in.th/events/halfmoon-festival-23th-24th-february-2026",
+   "verified": true
+  },
+  {
+   "date": "2026-03-25",
+   "artist": "Half Moon Festival",
+   "note": "25-26 Mar: Harmony Beach Club pre-party, then Magic Forest (DJs not named)",
+   "venue": "Half Moon Festival",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://megatix.in.th/events/halfmoon-festival-25th-26th-march-2026",
+   "verified": true
+  },
+  {
+   "date": "2026-02-05",
+   "artist": "Mo:Dem Teaser Party",
+   "note": "5-7 Feb, psytrance; 35 acts, none billed as headliner",
+   "venue": "Hidden Paradise",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/modem-teaser-party/",
+   "verified": false
+  },
+  {
+   "date": "2026-03-07",
+   "artist": "Hypogeo, Kromagon, Tromo",
+   "note": "Free Earth Festival, 7-8 Mar: Zenon Records and Sonic Loom showcases",
+   "venue": "Hidden Paradise",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/free-earth-festival-sacred-moon-phangan/",
+   "verified": false
+  },
+  {
+   "date": "2026-03-02",
+   "artist": "P.O.U., Sacred Beat, Roma Dawkins",
+   "note": "Also Taz Jacks, Rob Gritton b2b Barragh Casey; drum & bass stage: Sublow Hz, Mista-C, MAE",
+   "venue": "Jungle Experience",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://jungle-experience.com/jungle-experience-festival-2nd-march/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-15",
+   "artist": "Ounio, Green Nuns of the Revolution, Dickster",
+   "note": "Goa Jungle by Sun Festival",
+   "venue": "Jungle Experience",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/goa-jungle-by-sun-festival/",
+   "verified": false
+  },
+  {
+   "date": "2026-03-25",
+   "artist": "Atmos, Sonic Species, Lyra",
+   "note": "Anahata Night",
+   "venue": "Jungle Experience",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/anahata-night-jungle-experience/",
+   "verified": false
+  },
+  {
+   "date": "2026-02-04",
+   "artist": "Nata, Boyonic, K-Paul",
+   "venue": "Waterfall Party",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/waterfall-festival-04-feb/",
+   "verified": false
+  },
+  {
+   "date": "2026-02-11",
+   "artist": "Nata, Boyonic, K-Paul",
+   "venue": "Waterfall Party",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/waterfall-festival-3/",
+   "verified": false
+  },
+  {
+   "date": "2026-02-18",
+   "artist": "Alle Farben, Nata, Boyonic",
+   "venue": "Waterfall Party",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/waterfall-festival-with-alle-farben/",
+   "verified": false
+  },
+  {
+   "date": "2026-02-25",
+   "artist": "Chicago (1200 Micrograms), Artifex, Highdra",
+   "venue": "Waterfall Party",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/chicago-1200-micrograms-at-waterfall-festival-feb-25/",
+   "verified": false
+  },
+  {
+   "date": "2026-03-01",
+   "artist": "Boyonic, Nata, Vima",
+   "venue": "Waterfall Party",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/waterfall-festival-01-march-2026/",
+   "verified": false
+  },
+  {
+   "date": "2026-03-05",
+   "artist": "Boyonic, Nata, Vima",
+   "venue": "Waterfall Party",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/waterfall-festival-05-march-2026/",
+   "verified": false
+  },
+  {
+   "date": "2026-03-18",
+   "artist": "Alle Farben, Bank Waterfall, Boyonic",
+   "venue": "Waterfall Party",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/waterfall-festival-18-march-2026/",
+   "verified": false
+  },
+  {
+   "date": "2026-03-31",
+   "artist": "Alle Farben, Dava Di Toma, Boyonic",
+   "venue": "Waterfall Party",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/waterfall-festival-31-march/",
+   "verified": false
+  },
+  {
+   "date": "2026-02-01",
+   "artist": "Sébastien Léger b2b Roy Rosenfeld",
+   "note": "Lost Miracle",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260114042020/https://phuket.cafedelmar.com/events/lost-miracle-sebastien-legar-b2b-roy-rosenfold-cafe-del-mar-phuket-feb1",
+   "verified": true
+  },
+  {
+   "date": "2026-02-04",
+   "artist": "David Mayer",
+   "note": "Club Room",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260207163828/https://phuket.cafedelmar.com/events/david-mayer-cafe-del-mar-phuket-feb4",
+   "verified": true
+  },
+  {
+   "date": "2026-02-05",
+   "artist": "Nic Fanciulli",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260204162222/https://phuket.cafedelmar.com/events/nic-fanciulli-cafe-del-mar-phuket-feb5",
+   "verified": true
+  },
+  {
+   "date": "2026-02-06",
+   "artist": "Sven Väth",
+   "note": "Club Room afterparty: Bushwacka!",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260207163953/https://phuket.cafedelmar.com/events/sven-vath-cafe-del-mar-phuket-feb6",
+   "verified": true
+  },
+  {
+   "date": "2026-02-08",
+   "artist": "Sunbios",
+   "note": "Club Room",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260207162614/https://phuket.cafedelmar.com/events/sunbios-cafe-del-mar-phuket-feb08",
+   "verified": true
+  },
+  {
+   "date": "2026-02-11",
+   "artist": "Aiwaska",
+   "note": "Club Room",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260207174337/https://phuket.cafedelmar.com/events/aiwaska-cafe-del-mar-phuket-feb11",
+   "verified": true
+  },
+  {
+   "date": "2026-02-12",
+   "artist": "Argy",
+   "note": "Club Room after: Nakadia",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260207175052/https://phuket.cafedelmar.com/events/argy-cafe-del-mar-phuket-feb12",
+   "verified": true
+  },
+  {
+   "date": "2026-02-13",
+   "artist": "Airsand & TuraniQa",
+   "note": "Club Room",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260315114907/https://phuket.cafedelmar.com/events/airsand-turaniqa-feb13",
+   "verified": true
+  },
+  {
+   "date": "2026-02-14",
+   "artist": "Odyssey for Lovers",
+   "note": "Odyssey Festival, Valentine's Day",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260207172625/https://phuket.cafedelmar.com/events/odyssey-festival-cafe-del-mar-phuket-feb-14",
+   "verified": true
+  },
+  {
+   "date": "2026-02-15",
+   "artist": "Yamil",
+   "note": "Club Room",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260315112421/https://phuket.cafedelmar.com/events/yamil-feb15",
+   "verified": true
+  },
+  {
+   "date": "2026-02-18",
+   "artist": "Sundancer",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260315114954/https://phuket.cafedelmar.com/events/sundancer-feb18",
+   "verified": true
+  },
+  {
+   "date": "2026-02-19",
+   "artist": "Stephan Bodzin",
+   "note": "Club Room after: A Friend of Marcus",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260315105304/https://phuket.cafedelmar.com/events/stephan-bodzin-cafe-del-mar-phuket-feb19",
+   "verified": true
+  },
+  {
+   "date": "2026-02-20",
+   "artist": "Maga, Emanuel Satie",
+   "note": "Scenarios, Club Room",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260315120319/https://phuket.cafedelmar.com/events/scenarios",
+   "verified": true
+  },
+  {
+   "date": "2026-02-26",
+   "artist": "Claptone",
+   "note": "Club Room after: Diego San Diego",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260207165318/https://phuket.cafedelmar.com/events/claptone-cafe-del-mar-phuketeb-feb26",
+   "verified": true
+  },
+  {
+   "date": "2026-02-27",
+   "artist": "Simone Vitullo, New Man",
+   "note": "Go Deeva Records, Club Room",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260315110641/https://phuket.cafedelmar.com/events/go-deeva-feb27",
+   "verified": true
+  },
+  {
+   "date": "2026-03-04",
+   "artist": "Soberboy b2b Moon's Voyager",
+   "note": "Club Room",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260315112320/https://phuket.cafedelmar.com/events/soberboy-b2b-moons-voyager",
+   "verified": true
+  },
+  {
+   "date": "2026-03-06",
+   "artist": "Made By Pete",
+   "note": "Club Room",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260315115039/https://phuket.cafedelmar.com/events/madebypete-cafe-del-mar-phuket-mar06",
+   "verified": true
+  },
+  {
+   "date": "2026-03-08",
+   "artist": "Sunbios",
+   "note": "Club Room",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260312225856/https://phuket.cafedelmar.com/events/sunbios-cafe-del-mar-phuket-mar08",
+   "verified": true
+  },
+  {
+   "date": "2026-03-13",
+   "artist": "Dixon",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260312040319/https://phuket.cafedelmar.com/events/dixon-mar13",
+   "verified": true
+  },
+  {
+   "date": "2026-03-14",
+   "artist": "Odyssey Crew",
+   "note": "Izotov, Prana Flow, 8Miracle",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260312040319/https://phuket.cafedelmar.com/events/odyssey-crew-cafe-del-mar-phuket-mar14",
+   "verified": true
+  },
+  {
+   "date": "2026-03-18",
+   "artist": "Bora Uzer",
+   "note": "Club Room",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260312040320/https://phuket.cafedelmar.com/events/bora-uzer-cafe-del-mar-phuket-mar18",
+   "verified": true
+  },
+  {
+   "date": "2026-03-20",
+   "artist": "Laolu",
+   "note": "Club Room",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260312040320/https://phuket.cafedelmar.com/events/laolu-cafe-del-mar-phuket-mar20",
+   "verified": true
+  },
+  {
+   "date": "2026-03-21",
+   "artist": "Caiiro",
+   "note": "Club Room",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260312040320/https://phuket.cafedelmar.com/events/caiiro",
+   "verified": true
+  },
+  {
+   "date": "2026-03-25",
+   "artist": "Notre Dame",
+   "note": "Club Room",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260312040320/https://phuket.cafedelmar.com/events/notre-dame-mar25",
+   "verified": true
+  },
+  {
+   "date": "2026-03-27",
+   "artist": "Enoo Napa",
+   "note": "Club Room",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260312040320/https://phuket.cafedelmar.com/events/enoo-napa-cafe-del-mar-phuket-mar27",
+   "verified": true
+  },
+  {
+   "date": "2026-03-28",
+   "artist": "Konvex",
+   "note": "Club Room",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260312040321/https://phuket.cafedelmar.com/events/konvex-mar28",
+   "verified": true
+  },
+  {
+   "date": "2026-02-06",
+   "artist": "WAFF",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260219085952/https://www.illuzionphuket.com/event/waff/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-13",
+   "artist": "Syreeta",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260307031640/https://www.illuzionphuket.com/event/syreeta-2/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-14",
+   "artist": "Melon Bomb",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260219103643/https://www.illuzionphuket.com/event/melon-bomb/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-05",
+   "artist": "Fat Tony",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260307021042/https://www.illuzionphuket.com/event/fat-tony/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-06",
+   "artist": "House of Mince",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260307020857/https://www.illuzionphuket.com/event/house-of-mince/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-12",
+   "artist": "Wade",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260418061957/https://www.illuzionphuket.com/event/wade/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-14",
+   "artist": "Ozzie Guven",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260418080606/https://www.illuzionphuket.com/event/ozzie-guven/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-20",
+   "artist": "Alan Dixon",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260418075039/https://www.illuzionphuket.com/event/alan-dixon/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-22",
+   "artist": "Central Cee",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260219090026/https://www.illuzionphuket.com/event/central-cee/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-28",
+   "artist": "Toni Varga",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260418074938/https://www.illuzionphuket.com/event/toni-varga-2/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-29",
+   "artist": "David Morales",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260418072720/https://www.illuzionphuket.com/event/david-morales/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-04",
+   "artist": "Jewel Kid",
+   "venue": "Armania Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260114192600/https://www.barfunkphuket.com/events/jewel-kid-at-armania-phuket-2/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-06",
+   "artist": "Sam Supplier",
+   "venue": "Armania Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260212091956/https://www.barfunkphuket.com/events/sam-supplier-at-armania-phuket/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-14",
+   "artist": "Riva Starr",
+   "venue": "Armania Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260114195454/https://www.barfunkphuket.com/events/riva-starr-at-armania-phuket-2/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-20",
+   "artist": "Lexlay",
+   "venue": "Armania Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260114200813/https://www.barfunkphuket.com/events/lexlay-at-armania-phuket/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-27",
+   "artist": "Zamna Soundsystem",
+   "note": "DJs not named",
+   "venue": "Armania Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260212090951/https://www.barfunkphuket.com/events/zamna-at-armania-phuket/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-28",
+   "artist": "The Element",
+   "venue": "Armania Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260212095920/https://www.barfunkphuket.com/events/the-element-at-armania-phuket/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-06",
+   "artist": "Elmer Dado & Gruppo Tribale",
+   "venue": "Armania Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260315024921/https://www.barfunkphuket.com/events/elmer-dado-gruppo-tribale-at-armania-phuket-3/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-18",
+   "artist": "Ron Poe",
+   "venue": "Armania Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://web.archive.org/web/20260315015051/https://www.barfunkphuket.com/events/ron-poe-at-armania-phuket-7/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-13",
+   "artist": "Carlita",
+   "venue": "Yona Beach Club",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://www.timeout.com/phuket/things-to-do/tear-up-the-dance-floor-with-carlita-at-yona-beach-club",
+   "verified": false
+  },
+  {
+   "date": "2026-02-02",
+   "artist": "Alec Monopoly",
+   "venue": "Maya Beach Club",
+   "area": "Bang Tao",
+   "place": "Phuket",
+   "source": "https://megatix.in.th/events/alec-monopoly-maya-beach-club-phuket-020226",
+   "verified": true
+  },
+  {
+   "date": "2026-02-08",
+   "artist": "John Meida",
+   "venue": "Maya Beach Club",
+   "area": "Bang Tao",
+   "place": "Phuket",
+   "source": "https://megatix.in.th/events/john-meida-sat-7-feb-maya-beach-club-phuket",
+   "verified": true
+  },
+  {
+   "date": "2026-02-09",
+   "artist": "Jonas Blue",
+   "venue": "Maya Beach Club",
+   "area": "Bang Tao",
+   "place": "Phuket",
+   "source": "https://megatix.in.th/events/jonas-blue-maya-beach-club-phuket-020226",
+   "verified": true
+  },
+  {
+   "date": "2026-02-11",
+   "artist": "Qwartz",
+   "venue": "Maya Beach Club",
+   "area": "Bang Tao",
+   "place": "Phuket",
+   "source": "https://megatix.in.th/events/qwartz-wed-11-february-maya-beach-club-phuket",
+   "verified": true
+  },
+  {
+   "date": "2026-02-16",
+   "artist": "Kiko Franco",
+   "venue": "Maya Beach Club",
+   "area": "Bang Tao",
+   "place": "Phuket",
+   "source": "https://megatix.in.th/events/kiko-franco-mon-23-feb-maya-beach-club-phuket",
+   "verified": true
+  },
+  {
+   "date": "2026-02-18",
+   "artist": "Mëstiza",
+   "note": "Sacro by Mëstiza",
+   "venue": "Maya Beach Club",
+   "area": "Bang Tao",
+   "place": "Phuket",
+   "source": "https://megatix.in.th/events/mestiza-maya-beach-club-phuket-180226",
+   "verified": true
+  },
+  {
+   "date": "2026-02-28",
+   "artist": "Grossomoddo",
+   "venue": "Maya Beach Club",
+   "area": "Bang Tao",
+   "place": "Phuket",
+   "source": "https://megatix.in.th/events/grossomoddo-sat-28-efb-maya-beach-club-phuket",
+   "verified": true
+  },
+  {
+   "date": "2026-03-04",
+   "artist": "Fenix Barella",
+   "venue": "Maya Beach Club",
+   "area": "Bang Tao",
+   "place": "Phuket",
+   "source": "https://megatix.in.th/events/fenix-barella-wed-4-mar-maya-beach-club-phuket-copy",
+   "verified": true
+  },
+  {
+   "date": "2026-03-07",
+   "artist": "Demayä",
+   "venue": "Maya Beach Club",
+   "area": "Bang Tao",
+   "place": "Phuket",
+   "source": "https://megatix.in.th/events/demaya-sat-7-mar-maya-beach-club-phuket",
+   "verified": true
+  },
+  {
+   "date": "2026-03-14",
+   "artist": "Kashovski",
+   "venue": "Maya Beach Club",
+   "area": "Bang Tao",
+   "place": "Phuket",
+   "source": "https://megatix.in.th/events/kashovski-sat-14-mar-maya-beach-club-phuket",
+   "verified": true
+  },
+  {
+   "date": "2026-03-19",
+   "artist": "Nicolas Monier",
+   "venue": "Maya Beach Club",
+   "area": "Bang Tao",
+   "place": "Phuket",
+   "source": "https://www.timeout.com/phuket/things-to-do/big-it-up-with-nicolas-monier-at-maya-beach-club",
+   "verified": false
+  },
+  {
+   "date": "2026-02-07",
+   "artist": "Nash D",
+   "note": "Astrolab",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://taogroup.com/event/07-02-26-astrolab-marquee-singapore/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-13",
+   "artist": "DJ Zippy",
+   "note": "Utopia",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://taogroup.com/event/13-02-26-utopia-marquee-singapore/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-21",
+   "artist": "FVDER",
+   "note": "Hypersonic",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://taogroup.com/event/21-02-26-hypersonic-marquee-singapore/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-27",
+   "artist": "MR J",
+   "note": "Wonderland",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://taogroup.com/event/27-02-26-wonderland-marquee-singapore/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-06",
+   "artist": "SEVENTEEN Themed Party",
+   "note": "K-pop night, DJs not named",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://taogroup.com/event/06-03-26-seventeen-themed-party-marquee-singapore/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-07",
+   "artist": "DJ Siena",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://taogroup.com/event/07-03-26-dj-siena-featuring-siena-girls-marquee-singapore/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-13",
+   "artist": "Sarah de Warren",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://taogroup.com/event/13-03-26-sarah-de-warren-marquee-singapore/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-14",
+   "artist": "Nash D",
+   "note": "Astrolab",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://taogroup.com/event/14-03-26-astrolab-marquee-singapore-2/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-18",
+   "artist": "Central Cee",
+   "note": "Live Yours official after party",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://taogroup.com/event/18-03-26-live-yours-official-after-party-hosted-by-central-cee-marquee-singapore/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-20",
+   "artist": "MR J",
+   "note": "Wonderland",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://taogroup.com/event/20-03-26-wonderland-marquee-singapore-2/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-21",
+   "artist": "Zippy, FVDER",
+   "note": "A press listing named MATTN for this night",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://taogroup.com/event/21-03-26-zippy-and-fvder-marquee-singapore/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-27",
+   "artist": "Nifra",
+   "note": "Supported by Yufo",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://taogroup.com/event/27-03-26-nifra-supported-by-yufo-marquee-singapore/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-28",
+   "artist": "FVDER",
+   "note": "Hypersonic",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://taogroup.com/event/28-03-26-hypersonic-marquee-singapore/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-17",
+   "artist": "Shlømo",
+   "venue": "Zouk",
+   "area": "Clarke Quay",
+   "place": "Singapore",
+   "source": "https://web.archive.org/web/20260113155524/https://zoukgroup.com/singapore/zouk/event/EVE109748600020260217/shl-mo/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-20",
+   "artist": "DJ Rattle",
+   "note": "Sin City",
+   "venue": "Zouk",
+   "area": "Clarke Quay",
+   "place": "Singapore",
+   "source": "https://web.archive.org/web/20260113144221/https://zoukgroup.com/singapore/zouk/event/EVE109748600020260220/sin-city/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-28",
+   "artist": "BLINK",
+   "venue": "Zouk",
+   "area": "Clarke Quay",
+   "place": "Singapore",
+   "source": "https://web.archive.org/web/20260129002317/https://zoukgroup.com/singapore/zouk/event/EVE109748600020260228/blink/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-07",
+   "artist": "DJ Sally",
+   "venue": "Zouk",
+   "area": "Clarke Quay",
+   "place": "Singapore",
+   "source": "https://web.archive.org/web/20260210122249/https://zoukgroup.com/singapore/zouk/event/EVE109748600020260307/dj-sally/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-12",
+   "artist": "Capital Preview Night",
+   "note": "Capital reopening after renovation, DJs not named",
+   "venue": "Zouk",
+   "area": "Clarke Quay",
+   "place": "Singapore",
+   "source": "https://web.archive.org/web/20260303125555/https://zoukgroup.com/singapore/capital/event/EVE109749000020260312/preview-night/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-13",
+   "artist": "DJ Rattle",
+   "note": "Sin City",
+   "venue": "Zouk",
+   "area": "Clarke Quay",
+   "place": "Singapore",
+   "source": "https://web.archive.org/web/20260223134523/https://zoukgroup.com/singapore/zouk/event/EVE109748600020260313/sin-city/",
+   "verified": true
+  },
+  {
+   "date": "2026-03-21",
+   "artist": "Onlynumbers",
+   "venue": "Zouk",
+   "area": "Clarke Quay",
+   "place": "Singapore",
+   "source": "https://web.archive.org/web/20260216122320/https://zoukgroup.com/singapore/zouk/event/EVE109748600020260321/onlynumbers/",
+   "verified": true
+  },
+  {
+   "date": "2026-02-06",
+   "artist": "Nic Fanciulli",
+   "venue": "CÉ LA VI",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://web.archive.org/web/20260206191850/https://sg.celavi.com/events/ce-la-vi-pres-nic-fanciulli",
+   "verified": true
+  },
+  {
+   "date": "2026-02-14",
+   "artist": "Finders Keepers",
+   "note": "Valentine's singles party, DJs not named",
+   "venue": "CÉ LA VI",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://web.archive.org/web/20260206200815/https://sg.celavi.com/whatson",
+   "verified": true
+  },
+  {
+   "date": "2026-02-21",
+   "artist": "Richard Grey",
+   "note": "Disco Reloaded",
+   "venue": "CÉ LA VI",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://web.archive.org/web/20260206193058/https://sg.celavi.com/events/disco-reloaded-with-richard-grey",
+   "verified": true
+  },
+  {
+   "date": "2026-02-28",
+   "artist": "Fred Canal",
+   "venue": "CÉ LA VI",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://web.archive.org/web/20260206195640/https://sg.celavi.com/events/fred-canal",
+   "verified": true
+  },
+  {
+   "date": "2026-03-07",
+   "artist": "Adassiya",
+   "note": "La Vie en Bleu sunset party",
+   "venue": "CÉ LA VI",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://web.archive.org/web/20260226093818/https://sg.celavi.com/whatson",
+   "verified": true
+  },
+  {
+   "date": "2026-03-14",
+   "artist": "Lazykay",
+   "venue": "CÉ LA VI",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://web.archive.org/web/20260311224919/https://sg.celavi.com/events/ce-la-vi-pres-lazykay",
+   "verified": true
+  },
+  {
+   "date": "2026-03-21",
+   "artist": "Watch Her Bern",
+   "venue": "CÉ LA VI",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://thehoneycombers.com/singapore/event/house-pulse-watch-her-bern/",
+   "verified": false
+  },
+  {
+   "date": "2026-03-28",
+   "artist": "AN!KA",
+   "venue": "CÉ LA VI",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://sg.celavi.com/events/ce-la-vi-pres-an-ka",
+   "verified": true
   }
  ],
  "nothing_found": [
-  "FINNS",
-  "Ulu Cliffhouse (closed for renovation through January and February 2026; open again in 2026)",
-  "Zumana (opened 19 August 2026)",
-  "La Brisa"
+  "Atlas Beach Club (its own events page listed no Beach Club nights in Feb-Mar 2026; Yugi and SYBER Takeover were at Atlas Super Club)",
+  "FINNS Beach Club (archived pages show only the generic daily party; no named acts)",
+  "Single Fin (guest DJs posted on Instagram only)",
+  "Mrs Sippy (only weekly Saturday listings on a third-party site, with the same DJ line every week)",
+  "Ulu Cliffhouse (closed for renovation; reopened in April 2026)",
+  "Café del Mar Bali (its past-events list jumps from 31 Dec 2025 to 20 Jun 2026)",
+  "El Kabron (only weekly house parties with no DJs named; the Valentine's edition is listed)",
+  "Haad Rin Beach (no source names Full Moon guest DJs)",
+  "Eden Garden (Instagram and Facebook only)",
+  "Lost Jungle (no 2026 events listed)",
+  "XANA Beach Club (site gone; no archive or ticket pages)",
+  "Baba Beach Club (only CircoLoco in January)",
+  "Zumana (opened 19 August 2026)"
  ]
 }
