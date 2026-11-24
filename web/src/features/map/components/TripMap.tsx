@@ -11,7 +11,7 @@ import type { Pin } from "../../../types/pin";
 import type { MemberId, PlaceKind } from "../../../types/trip";
 import { addPlace, removePlace } from "../api/places";
 import { BASEMAP_SOURCE, BASEMAP_STYLE, softenBasemap } from "../lib/basemap";
-import { groupByScreen } from "../lib/fan";
+import { groupLabel, groupPins } from "../lib/fan";
 import { AddPlaceForm } from "./AddPlaceForm";
 import { PinCard } from "./PinCard";
 import "./TripMap.css";
@@ -67,37 +67,44 @@ interface TripMapProps {
 }
 
 /**
- * The map: the one fancy thing in the app. A switch between the
- * destinations, a calm vector basemap (OpenFreeMap Positron in the app's
- * colours), a white pill pin for each stay and venue, and a card for the
- * pin tapped; the open pin fills with the accent. The camera flies to a
- * destination and to an opened pin, and jumps instead when the device asks
- * for reduced motion. It draws the pins it is given and knows nothing
- * of stays or shows. Pins whose labels would overlap at the current zoom
- * show as one count pin ("3 pins") that lists them; zooming in splits it.
+ * The map: the one fancy thing in the app. Every pin of the trip at once
+ * (owner, 24 Nov 2026: "If I zoom out on the map to see Thailand, the
+ * Philippines and Bali, I expect all the events to show too"), on a calm
+ * vector basemap (OpenFreeMap Positron in the app's colours): a white pill
+ * pin for each stay, venue and friend's place, and a card for the pin
+ * tapped; the open pin fills with the accent. The destination chips and
+ * "All" only move the camera: a chip fits its destination's pins, "All"
+ * fits every pin; no pin ever hides. Pins whose labels would overlap at the
+ * current zoom show as one count pin: "12 in Bali" when it holds a whole
+ * destination, else "3 pins". A tap on a count pin zooms in until it
+ * splits; pins on one spot list under the map instead. The camera flies,
+ * and jumps when the device asks for reduced motion. It draws the pins it
+ * is given and knows nothing of stays or shows.
  *
  * Inputs: the trip, the destinations with their centres, the pins, this
  * member and whether it is an organizer, what a tap on the card does, and a
  * pin to start on (the show sheet's "See on the map"). Only the first value
  * of focus counts; the map is mounted afresh each time its module opens.
- * Output: the map. Pins that collide group (case 35). Switching
- * destination closes the card. A destination with no pins says "No pins
- * yet." "Add to map" puts a friend's place on the map: a search for the
+ * Output: the map. Pins that collide group (case 35). A chip closes the
+ * card. A destination with no pins says "No pins yet." Opening a pin in
+ * another destination flies there and moves the chip. "Add to map" puts a
+ * friend's place on the map: a search for the
  * place by name ("Search for a place"), anywhere in the world, matches
  * near the trip first; a pick drops a crosshair pin there, fills the name
  * and flies to it; "Can't find it? Tap the map instead" leaves tapping, and
  * a tap anywhere on the map moves the pin. The pin drags. The place groups
  * under the trip's nearest destination; when that is another one, the
- * switch moves to it and the camera stays on the new pin. The fields under
- * the map save it; "Cancel" or switching
- * destination ends adding. The new pin shows at once, with its card open;
+ * chip moves to it and the camera stays on the new pin. The fields under
+ * the map save it; "Cancel" or a chip ends adding. The new pin shows at
+ * once, with its card open;
  * with no connection it shows here and reaches the others when the connection
  * is back. When no tile has loaded after 8 seconds, or the device cannot draw
  * the map (no WebGL), a notice and a plain list of the pins replace the
  * map; the list opens the same cards (case 32).
- * Examples (checked at 390 px against 12/6 and 20/10):
- *   Bali → "Bali", "Koh Phangan · 1 pin", the big Bali venues; a tap on Savaya opens its card
- *   Add to map, "single fin", pick "Single Fin · Pecatu, Indonesia", Food, Add → its pin and card "Food · added by KA"
+ * Examples (checked at 375 and 1650 px against the live trip):
+ *   opens on Bali → "Bali", "Koh Phangan · N pins", …, "All · N pins"; Bali's pins, Savaya among them
+ *   "All", or pinch out to Thailand and Bali → one count pin per destination, "N in Bali", "N in Koh Phangan"
+ *   a tap on "N in Bali" → the camera fits Bali and the pins split
  *   focus "venue:haad-rin-beach" → Koh Phangan, zoomed on Haad Rin Beach, its card open
  */
 /** A map made ahead of time, waiting out of sight; TripMap moves it in when the Map module opens. */
@@ -184,9 +191,22 @@ export function warmMap(centre: { lat: number; lng: number }): void {
   watchTiles(parked);
 }
 
+/** The chip that fits the camera to every pin of the trip. */
+const ALL = "all";
+
+/** The most names a count pin's tooltip lists before "and 7 more". */
+const TITLE_NAMES = 5;
+
+/** The bounds around some places, for cameraForBounds. */
+const around = (spots: Array<{ lat: number; lng: number }>) =>
+  spots.reduce((bounds, spot) => bounds.extend([spot.lng, spot.lat]), new maplibregl.LngLatBounds([spots[0].lng, spots[0].lat], [spots[0].lng, spots[0].lat]));
+
+/** Whether pins sit on one spot (venues at their area's centre, every stay), so no zoom splits them. */
+const oneSpot = (spots: Pin[]) => spots.every((spot) => Math.abs(spot.lat - spots[0].lat) < 1e-4 && Math.abs(spot.lng - spots[0].lng) < 1e-4);
+
 export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onOpen, focus }: TripMapProps) {
   const start = useRef(pins.find((pin) => pin.id === focus));
-  const [destination, setDestination] = useState(start.current?.destination ?? destinations[0]?.id ?? "");
+  const [view, setView] = useState(start.current?.destination ?? destinations[0]?.id ?? "");
   const [selected, setSelected] = useState<string | null>(start.current?.id ?? null);
   const [group, setGroup] = useState<string[] | null>(null);
   const [tilesFailed, setTilesFailed] = useState(false);
@@ -198,13 +218,23 @@ export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onO
   const box = useRef<HTMLDivElement>(null);
   const map = useRef<MapLibreMap | null>(null);
   const markers = useRef<Marker[]>([]);
-  const framed = useRef<{ destination: string; count: number } | null>(null);
+  const framed = useRef(false);
   const aim = useRef<Marker | null>(null);
+  const row = useRef<HTMLDivElement>(null);
 
-  const here = useMemo(() => pins.filter((pin) => pin.destination === destination), [pins, destination]);
-  const count = (id: string) => pins.filter((pin) => pin.destination === id).length;
-  const chosen = here.find((pin) => pin.id === selected) ?? null;
-  const centre = destinations.find((candidate) => candidate.id === destination);
+  // Every pin of the trip, in the switch's order of destinations, so a whole destination groups as one.
+  const ordered = useMemo(() => {
+    const rank = new Map(destinations.map((place, index) => [place.id, index]));
+    return [...pins].sort((a, b) => (rank.get(a.destination) ?? destinations.length) - (rank.get(b.destination) ?? destinations.length));
+  }, [pins, destinations]);
+  const totals = useMemo(() => {
+    const counted: Record<string, number> = {};
+    for (const pin of pins) counted[pin.destination] = (counted[pin.destination] ?? 0) + 1;
+    return counted;
+  }, [pins]);
+  const count = (id: string) => (id === ALL ? pins.length : (totals[id] ?? 0));
+  const chosen = pins.find((pin) => pin.id === selected) ?? null;
+  const centre = destinations.find((candidate) => candidate.id === view) ?? destinations[0];
 
   useEffect(() => {
     if (!box.current || !centre) return;
@@ -236,64 +266,73 @@ export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onO
       clearTimeout(timer);
       resized.disconnect();
       map.current = null;
+      framed.current = false;
       for (const marker of markers.current) marker.remove();
       markers.current = [];
       // Kept for the next opening, out of sight, so the Map opens at once every time.
       park().append(kept.el);
       parked = kept;
     };
-    // The map is made once; the camera effect below follows the destination.
+    // The map is made once; the chips and the pins move the camera.
   }, []);
 
-  useEffect(() => {
+  /**
+   * Fits the camera to a destination's pins, or to every pin for "All"; a
+   * destination with no pins shows its centre. Pins outside stay on the map.
+   */
+  const frame = (target: string, duration: number) => {
     const current = map.current;
-    if (!current || !centre) return;
-    // A pin added or removed here keeps the camera where the friend is looking.
-    const last = framed.current;
-    if (last && last.destination === destination && last.count > 0) return void (framed.current = { destination, count: here.length });
-    // The show sheet's "See on the map" starts centred on its venue.
-    const target = here.find((pin) => pin.id === start.current?.id);
-    const camera = target
-      ? { center: [target.lng, target.lat] as [number, number], zoom: 15 }
-      : here.length > 1
-        ? current.cameraForBounds(
-            here.reduce((bounds, pin) => bounds.extend([pin.lng, pin.lat]), new maplibregl.LngLatBounds([here[0].lng, here[0].lat], [here[0].lng, here[0].lat])),
-            { padding: 56, maxZoom: 14 },
-          )
-        : { center: here[0] ? ([here[0].lng, here[0].lat] as [number, number]) : ([centre.lng, centre.lat] as [number, number]), zoom: here.length ? 14 : 10 };
-    if (!camera) return;
-    // The first frame jumps; switching destination flies.
-    move(current, camera, last ? 1600 : 0);
-    framed.current = { destination, count: here.length };
-    // Frame when the destination changes, or when its first pins arrive; not when a pin is selected, added or removed.
-  }, [destination, here.length]);
+    if (!current) return;
+    const inside = target === ALL ? pins : pins.filter((pin) => pin.destination === target);
+    const spots: Array<{ lat: number; lng: number }> = inside.length ? inside : destinations.filter((place) => target === ALL || place.id === target);
+    if (spots.length === 0) return;
+    const camera =
+      spots.length > 1
+        ? current.cameraForBounds(around(spots), { padding: target === ALL ? { top: 48, bottom: 48, left: 88, right: 88 } : 56, maxZoom: 14 })
+        : { center: [spots[0].lng, spots[0].lat] as [number, number], zoom: inside.length ? 14 : 10 };
+    if (camera) move(current, camera, duration);
+  };
 
-  /** Draws the pins at the current zoom: a pin alone as itself, colliding pins as one count pin. */
+  // The first frame, once the pins are in: on the focus pin (the show sheet's "See on the map"), else the destination.
+  useEffect(() => {
+    if (!map.current || framed.current || pins.length === 0) return;
+    framed.current = true;
+    const target = pins.find((pin) => pin.id === focus);
+    if (!target) return frame(view, 0);
+    setView(target.destination);
+    setSelected(target.id);
+    move(map.current, { center: [target.lng, target.lat], zoom: 15 }, 0);
+  }, [pins.length > 0]);
+
+  /** Draws every pin at the current zoom: a pin alone as itself, colliding pins as one count pin. */
   const draw = useCallback(() => {
     const current = map.current;
     if (!current) return;
     for (const marker of markers.current) marker.remove();
-    const byId = new Map(here.map((pin) => [pin.id, pin]));
-    const points = here.map((pin) => ({ id: pin.id, ...current.project([pin.lng, pin.lat]) }));
-    markers.current = groupByScreen(points).map((found) => {
-      const first = byId.get(found.ids[0])!;
-      const many = found.ids.length > 1;
-      const on = found.ids.includes(selected ?? "");
+    const byId = new Map(ordered.map((pin) => [pin.id, pin]));
+    const points = ordered.map((pin) => ({ id: pin.id, destination: pin.destination, ...current.project([pin.lng, pin.lat]) }));
+    markers.current = groupPins(points).map((found) => {
+      const members = found.ids.map((id) => byId.get(id)!);
+      const first = members[0];
+      const many = members.length > 1;
+      const names = members.map((pin) => pin.name);
+      const title = names.length > TITLE_NAMES ? `${names.slice(0, TITLE_NAMES).join(", ")} and ${names.length - TITLE_NAMES} more` : names.join(", ");
       const element = pinElement({
         glyph: glyph(many ? "other" : first.kind === "place" ? (first.icon ?? "other") : first.kind),
-        label: many ? `${found.ids.length} pins` : pinLabel(first.name),
-        title: many ? found.ids.map((id) => byId.get(id)!.name).join(", ") : first.name,
+        label: many ? groupLabel(members.map((pin) => pin.destination), totals, destinations) : pinLabel(first.name),
+        title,
         many,
-        on,
+        on: found.ids.includes(selected ?? ""),
       });
       element.addEventListener("click", (event) => {
         event.stopPropagation();
-        if (many) setGroup(found.ids);
+        if (many) zoomInto(members);
         else open(first);
       });
-      return new maplibregl.Marker({ element, anchor: "center" }).setLngLat([first.lng, first.lat]).addTo(current);
+      // A count pin sits at the middle of its pins.
+      return new maplibregl.Marker({ element, anchor: "center" }).setLngLat(many ? current.unproject([found.x, found.y]) : [first.lng, first.lat]).addTo(current);
     });
-  }, [here, selected]);
+  }, [ordered, totals, destinations, selected, view]);
 
   useEffect(() => {
     const current = map.current;
@@ -304,6 +343,15 @@ export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onO
       current.off("moveend", draw);
     };
   }, [draw]);
+
+  // On a phone the chips scroll sideways: keep the picked one in sight, as the Events chips do.
+  useEffect(() => {
+    const picked = row.current?.querySelector<HTMLElement>('[aria-pressed="true"]');
+    if (!picked || !row.current) return;
+    const box = row.current.getBoundingClientRect();
+    const chip = picked.getBoundingClientRect();
+    if (chip.left < box.left || chip.right > box.right) row.current.scrollLeft += chip.left - box.left - (box.width - chip.width) / 2;
+  }, [view]);
 
   /** Puts the new place's pin at a spot, anywhere in the world. */
   const placeAt = useCallback(({ lat, lng }: { lat: number; lng: number }) => setSpot({ lat: Math.round(lat * 1e5) / 1e5, lng: Math.round(lng * 1e5) / 1e5 }), []);
@@ -369,15 +417,12 @@ export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onO
   const add = (place: { name: string; kind: PlaceKind; link?: string; description?: string; photo?: string }) => {
     if (!spot || !memberId) return;
     const id = newPlaceId();
-    const home = nearestDestination(destinations, spot) ?? destination;
+    const home = nearestDestination(destinations, spot) ?? view;
     void addPlace(tripId, id, { ...place, destination: home, lat: spot.lat, lng: spot.lng, addedBy: memberId, at: Date.now() }).then(report);
     stopPlacing();
     setGroup(null);
     setSelected(`place:${id}`);
-    if (home !== destination) {
-      framed.current = { destination: home, count: 1 };
-      setDestination(home);
-    }
+    if (home !== view) setView(home);
     const current = map.current;
     if (current) move(current, { center: [spot.lng, spot.lat], zoom: Math.max(current.getZoom(), 15) }, 900);
   };
@@ -388,22 +433,44 @@ export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onO
   };
   const removable = (pin: Pin) => pin.kind === "place" && memberId !== null && (pin.addedBy === memberId || isOrganizer);
 
-  /** Opens a pin's card and brings the pin to the middle, close enough that it stands alone. */
+  /**
+   * Opens a pin's card and brings the pin to the middle, close enough that
+   * it stands alone; a pin in another destination flies there and moves the switch.
+   */
   const open = (pin: Pin) => {
     setGroup(null);
     setSelected(pin.id);
+    const far = pin.destination !== view;
+    setView(pin.destination);
     const current = map.current;
-    if (current) move(current, { center: [pin.lng, pin.lat], zoom: Math.max(current.getZoom(), 14) }, 900);
+    if (current) move(current, { center: [pin.lng, pin.lat], zoom: Math.max(current.getZoom(), 14) }, far ? 1600 : 900);
   };
 
+  /**
+   * A tap on a count pin: the camera fits its pins, which splits it; pins on
+   * one spot, or too close for any zoom to split, are listed under the map instead.
+   */
+  const zoomInto = (members: Pin[]) => {
+    const current = map.current;
+    if (!current) return;
+    const camera = oneSpot(members) ? undefined : current.cameraForBounds(around(members), { padding: 64, maxZoom: 16 });
+    if (!camera || (camera.zoom ?? 0) - current.getZoom() < 0.5) return setGroup(members.map((pin) => pin.id));
+    setGroup(null);
+    const home = members[0].destination;
+    if (members.every((pin) => pin.destination === home)) setView(home);
+    move(current, camera, 900);
+  };
+
+  /** A chip: the camera fits that destination, or every pin for "All". No pin hides. */
   const choose = (id: string) => {
     stopPlacing();
-    start.current = undefined;
-    setDestination(id);
+    setView(id);
     setSelected(null);
     setGroup(null);
+    frame(id, 1600);
   };
-  const listed = group ? here.filter((pin) => group.includes(pin.id)) : [];
+  const listed = group ? ordered.filter((pin) => group.includes(pin.id)) : [];
+  const inView = count(view);
   const hint = !placing ? null : spot ? "Drag the pin to move it." : tapping ? "Tap the map where it is." : null;
   /** Suggestions lean toward what the map shows, else the destination's centre. */
   const near = () => {
@@ -413,29 +480,29 @@ export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onO
 
   return (
     <>
-      <div className="pills map-pills" role="group" aria-label="Destination">
-        {destinations.map((place) => (
-          <button key={place.id} type="button" className="pill" aria-pressed={place.id === destination} onClick={() => choose(place.id)}>
-            {place.id === destination ? place.name : `${place.name} · ${count(place.id)} ${count(place.id) === 1 ? "pin" : "pins"}`}
+      <div ref={row} className="pills map-pills" role="group" aria-label="Destination">
+        {[...destinations, { id: ALL, name: "All" }].map((place) => (
+          <button key={place.id} type="button" className="pill" aria-pressed={place.id === view} onClick={() => choose(place.id)}>
+            {place.id === view ? place.name : `${place.name} · ${count(place.id)} ${count(place.id) === 1 ? "pin" : "pins"}`}
           </button>
         ))}
       </div>
       {tilesFailed && <Notice>No connection</Notice>}
       {failure && !failure.ok && <Notice>{failure.reason === "refused" ? "This was not saved." : "No connection"}</Notice>}
-      {placing && <PlaceSearch key={destination} near={near} region={destinations} onPick={pick} onTapInstead={tapInstead} />}
+      {placing && <PlaceSearch key={view} near={near} region={destinations} onPick={pick} onTapInstead={tapInstead} />}
       {hint && (
         <p className="map-hint" role="status">
           {hint}
         </p>
       )}
-      <div className={`map-box${placing ? " placing" : ""}`} hidden={tilesFailed} role="region" aria-label={`Map of ${centre?.name ?? ""}`}>
+      <div className={`map-box${placing ? " placing" : ""}`} hidden={tilesFailed} role="region" aria-label={view === ALL ? "Map of the trip" : `Map of ${centre?.name ?? ""}`}>
         {/* MapLibre owns this element's classes, so React sets none on it. */}
         <div className="map-gl" ref={box} />
       </div>
-      {here.length === 0 && !placing && <p className="sub" style={{ marginTop: 10 }}>No pins yet.</p>}
+      {inView === 0 && !placing && <p className="sub" style={{ marginTop: 10 }}>No pins yet.</p>}
       {(tilesFailed || listed.length > 0) && (
         <div className="pin-list">
-          {(tilesFailed ? here : listed).map((pin) => (
+          {(tilesFailed ? ordered : listed).map((pin) => (
             <button key={pin.id} type="button" aria-pressed={pin.id === selected} onClick={() => open(pin)}>
               {pin.name}
             </button>

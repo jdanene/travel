@@ -1,5 +1,4 @@
 import { placeWord } from "../../features/map/lib/places";
-import { eventsList, tripTags, type EventsFilter } from "../../features/parties/lib/tags";
 import { venueKey } from "../../features/parties/lib/shows";
 import { idFromName } from "../../lib/ids";
 import { initials } from "../../lib/initials";
@@ -9,32 +8,34 @@ import type { Trip } from "../../types/trip";
 import { datesSettled } from "./modules";
 
 /**
- * Every pin of the trip's map in one list: the stay options and the party
- * venues. It lives in app/ because it joins stay, parties and places; the
- * map feature only draws what it is given.
+ * Every pin of the trip's map in one list, for every destination at once:
+ * the stay options, the venues with an event this season, and friends'
+ * places. The map holds them all and only moves its camera between
+ * destinations; it never hides a pin. It lives in app/ because it joins
+ * stay, parties and places; the map feature only draws what it is given.
  *
  * Stay pins: one per stay option, at the centre of its area, because a
  * listing gives no exact position (D10); an unknown area puts the pin at
  * the destination's centre (case 33). None while the dates are not
- * confirmed (exception 3). Trip 9 adds the Stay module that a stay card opens.
- * Venue pins: one per venue of places/venues that the Events list keeps
- * under the filter: the venues of the events it shows, the big venues with
- * nothing announced under Big nights, or every venue under "All".
- * A friend's party at another venue gets no pin (case 34); its row still
- * shows in Events.
- *
+ * confirmed (exception 3).
+ * Venue pins: one per venue of places/venues with at least one event this
+ * season (parties/shows), whatever its tags; the Events filter does not
+ * touch the map (owner, 24 Nov 2026: "If I zoom out on the map to see
+ * Thailand, the Philippines and Bali, I expect all the events to show
+ * too"). A venue with only last-season lines gets no pin. A friend's party
+ * at another venue gets no pin (case 34); its row still shows in Events.
  * Friends' places: one per entry in places/custom ("Add to map"), where
  * the friend put it, with its kind's icon, its link and who added it.
  *
- * Inputs: trip — the whole trip; filter — the Events filter, a tag or "all".
+ * Inputs: trip — the whole trip.
  * Output: the pins, stays first, then venues, then friends' places. A venue's card line is its own line (or
- * its area) and its next show this year; with no show, the area alone.
- * Examples (checked on the emulator):
- *   the seeded trip, dates open, "big" → seven venue pins (the Big nights venues), no stay pins
- *   Savaya with a show on 13 Feb → line "Club on the cliffs · next show Sat 13 Feb"
- *   Kai adds "Sunset bar", Food   → a place pin, line "Food · added by KA"
+ * its area) and its next show this season.
+ * Examples (each is a test in pins.test.ts):
+ *   Savaya with a show on 13 Feb, Klymax with none → one venue pin, Savaya, line "Club on the cliffs · next show Sat 13 Feb"
+ *   a stay option before the dates are confirmed    → no stay pin; after → a pin at its area's centre
+ *   Kai adds "Sunset bar", Food                     → a place pin, line "Food · added by KA", even with no event anywhere
  */
-export function pins(trip: Trip, filter: EventsFilter): Pin[] {
+export function pins(trip: Trip): Pin[] {
   const areas = trip.places?.areas ?? {};
   const venues = trip.places?.venues ?? {};
   const destinations = trip.info?.destinations ?? {};
@@ -50,28 +51,18 @@ export function pins(trip: Trip, filter: EventsFilter): Pin[] {
     }
   }
 
+  // Each venue's first event this season, by venueKey().
   const nextShow = new Map<string, string>();
   for (const show of Object.values(trip.parties?.shows ?? {})) {
-    const id = idFromName(show.venue);
-    if (!nextShow.has(id) || show.date < nextShow.get(id)!) nextShow.set(id, show.date);
+    const key = venueKey(show.destination, show.venue);
+    if (!nextShow.has(key) || show.date < nextShow.get(key)!) nextShow.set(key, show.date);
   }
 
-  // The venues the Events list keeps under the filter.
-  const known = Object.values(venues).map((venue) => ({ name: venue.name, destination: venue.destination }));
-  const listed = new Set(eventsList(trip.parties?.shows ?? {}, known, filter, tripTags(trip)).flatMap((group) => group.venues.map((venue) => venue.key)));
-  const shown = Object.entries(venues).filter(([, venue]) => listed.has(venueKey(venue.destination, venue.name)));
-  const places: Pin[] = shown.map(([venueId, venue]) => {
+  const places: Pin[] = Object.entries(venues).flatMap(([venueId, venue]) => {
+    const next = nextShow.get(venueKey(venue.destination, venue.name));
+    if (!next) return [];
     const where = venue.line ?? (venue.areaId ? areas[venue.areaId]?.name : undefined) ?? destinations[venue.destination]?.name ?? "";
-    const next = nextShow.get(venueId);
-    return {
-      id: `venue:${venueId}`,
-      kind: "venue",
-      destination: venue.destination,
-      name: venue.name,
-      lat: venue.lat,
-      lng: venue.lng,
-      line: next ? `${where} · next show ${weekdayDate(next)}` : where,
-    };
+    return [{ id: `venue:${venueId}`, kind: "venue" as const, destination: venue.destination, name: venue.name, lat: venue.lat, lng: venue.lng, line: `${where} · next show ${weekdayDate(next)}` }];
   });
 
   const members = trip.crew?.members ?? {};
