@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { allSet, modules } from "./modules";
+import { modules } from "./modules";
 
 // The header examples of modules() and allSet(), one test each.
 const options = { o1: { from: "2027-02-13", to: "2027-02-23" } };
-const confirmedDates = { options, confirmed: { optionId: "o1", by: "jd", at: 1 } };
-const villa = { destination: "bali", url: "https://www.airbnb.com/rooms/1", name: "Cliffside villa", area: "Uluwatu", addedBy: "ka", at: 1 };
 
 describe("modules", () => {
   it("counts events on the Events button", () => {
