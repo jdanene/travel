@@ -66,12 +66,12 @@ video { pointer-events: none; }
 /* The WASTED card, in grey. The part of the photo from the face down to the taped arm always fits the panel,
    whatever the panel's shape, so the drip is in view. --w is that part's width (it is 898 by 760 of an 898 by 1100 photo). */
 .wst { container-type: size; background: #000; overflow: hidden; }
-.wst > * { --w: min(100cqw, 118.2cqh); }
+.wst > * { --w: min(100cqw, calc(var(--k, 118.2) * 1cqh)); }
 .wst .wst-bg { filter: grayscale(1) blur(16px) brightness(.4); transform: scale(1.15); }
-.wst .wst-ph { inset: auto; left: 50%; top: 50%; width: var(--w); height: calc(var(--w) * 1.225); transform: translate(-50%, -54.5%);
+.wst .wst-ph { inset: auto; left: 50%; top: 50%; width: var(--w); height: calc(var(--w) * var(--ar, 1.225)); transform: translate(-50%, var(--cy, -54.5%));
   background-size: 100% 100%; filter: grayscale(1) contrast(1.1) brightness(.85); }
 /* The words sit on the shirt, between the face and the arm. */
-.wst .wst-t { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; transform: translateY(calc(var(--w) * .12)); }
+.wst .wst-t { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; transform: translateY(calc(var(--w) * var(--ty, .12))); }
 .wst .wasted { font-size: calc(var(--w) * .17); -webkit-text-stroke-width: .035em; text-shadow: .04em .05em 0 #000; }
 .wst .water { font-size: calc(var(--w) * .036); -webkit-text-stroke-width: .06em; text-shadow: .08em .08em 0 #000; }
 

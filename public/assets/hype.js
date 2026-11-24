@@ -34,13 +34,20 @@ window.HYPE = (() => {
   ];
   const reel = V("reel2.mp4", "", "center 68%");   // every clip, cut together
   // The friend on the drip. It shows the whole photo so the drip line and the taped arm are always in view.
-  const wasted = { kind: "img", src: B + "wasted.jpg", pos: "center", wasted: true };
+  // A gag card: a grey photo with two lines of words. k, ar, cy and ty frame the part of the photo that must stay in view
+  // (see .wst in hype.css): k = 100 x photo width / height of that part, ar = photo height / width,
+  // cy = the part's centre down the photo in percent, ty = how far below centre the words sit, in card widths.
+  const wasted = { kind: "img", src: B + "wasted.jpg", pos: "center", wasted: true,
+    card: { big: "WASTED", small: "DRINK WATER THIS TIME", k: 118.2, ar: 1.225, cy: 54.5, ty: .12 } };
+  const pause = { kind: "img", src: B + "pause.jpg", pos: "center",
+    card: { big: "PAUSE", small: "AS A GROWN MAN SHOULD YOU...", k: 163, ar: 1.333, cy: 52, ty: .25 } };
   // Named places lead, with the crew's photos between them, so every slideshow reaches them early.
   const named = bali.filter(b => b.label), stills = [];
   for (let k = 0; k < named.length; k++) { stills.push(named[k]); if (ours[k]) stills.push(ours[k]); }
   stills.push(...bali.filter(b => !b.label));
   const photos = [];
   for (let k = 0; k < Math.max(clips.length, stills.length); k++) { if (clips[k]) photos.push(clips[k]); if (stills[k]) photos.push(stills[k]); }
+  photos.splice(Math.floor(photos.length / 2), 0, pause);
   photos.push(wasted);   // one picture among the rest; on a wall it lands on a random panel, never the title
 
   // Build a filling element for a photo or a clip.
@@ -60,11 +67,13 @@ window.HYPE = (() => {
       e.addEventListener("loadeddata", kick); e.addEventListener("canplay", kick);
       e.addEventListener("ended", () => { e.currentTime = 0; kick(); });
       if (opts.sound && item.music) e.dataset.sound = "1";
-    } else if (item.wasted) {
+    } else if (item.card) {
       e = document.createElement("div");
       e.className = "wst";
       e.innerHTML = '<div class="fill wst-bg"></div><div class="fill wst-ph"></div>' +
-        '<div class="wst-t"><div class="wasted">WASTED</div><div class="water">DRINK WATER THIS TIME</div></div>';
+        `<div class="wst-t"><div class="wasted">${item.card.big}</div><div class="water">${item.card.small}</div></div>`;
+      const c = item.card;
+      e.style.cssText = `--k:${c.k};--ar:${c.ar};--cy:-${c.cy}%;--ty:${c.ty}`;
       e.querySelectorAll(".fill").forEach(n => { if (opts.lazy) n.dataset.bg = item.src; else n.style.backgroundImage = `url(${item.src})`; });
       e.dataset.long = "1";
     } else {
@@ -174,7 +183,7 @@ window.HYPE = (() => {
     let shown = new Set();
     const take = k => {
       const busy = new Set(cur.filter(c => c).map(scene));
-      const ok = it => !busy.has(scene(it)) && !(it.wasted && tiles[k].classList.contains("t"));
+      const ok = it => !busy.has(scene(it)) && !(it.card && tiles[k].classList.contains("t"));
       let options = free.filter(it => ok(it) && !shown.has(it));
       if (!options.length) { shown = new Set(cur.filter(c => c)); options = free.filter(ok); }   // a new round
       if (!options.length) return null;

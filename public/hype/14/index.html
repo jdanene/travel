@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>TRAVEL</title>
-<link rel="stylesheet" href="/assets/hype.css?v=11">
+<link rel="stylesheet" href="/assets/hype.css?v=12">
 <style>
   #stage { position: fixed; inset: -20px; }
   #stage .layer { transition: none; }
@@ -27,13 +27,13 @@
     <div class="state"><div class="passed">PASSED</div></div>
     <div class="state"><div class="title">TRAVEL</div><div class="dest">Bali · Koh Phangan · Feb 2027<br><span class="ctry">(Indonesia, Thailand)</span></div></div>
   </div>
-<script src="/assets/hype.js?v=14"></script>
+<script src="/assets/hype.js?v=15"></script>
 <script>
   const H = HYPE, stage = document.getElementById("stage"), center = document.querySelector(".center");
   const items = H.mix(), layers = items.map(it => H.el(it, "layer", { lazy: true }));
   layers.forEach(l => stage.append(l));
   // The WASTED card carries its own words, so the big words step aside while it shows.
-  H.cycle(layers, 2500, i => center.classList.toggle("off", !!items[i].wasted));
+  H.cycle(layers, 2500, i => center.classList.toggle("off", !!items[i].card));
   H.cycle([...document.querySelectorAll(".state")], 2600, () => {
     stage.classList.remove("shake"); void stage.offsetWidth; stage.classList.add("shake");
   });
