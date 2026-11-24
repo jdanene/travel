@@ -81,19 +81,19 @@
 .show-ways .btn { height: 3rem; font-size: 0.9688rem; }
 .show-link-text { margin-top: 0.625rem; overflow-wrap: anywhere; user-select: all; }
 .show-by { margin-top: 0.75rem; text-align: center; }
-.show-detail .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
-/* The organizer's "Tags" beside a venue's name, and the Tags sheet (owner, 24 Nov 2026). */
-.venue-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; }
-.venue-head .venue { min-width: 0; }
-.venue-tags { flex: none; min-height: 2.75rem; margin: 0.375rem -0.5rem 0 0; padding: 0 0.5rem; font-size: 0.8125rem; font-weight: 700; color: var(--acc-ink); }
-@media (hover: hover) { .venue-tags:hover { text-decoration: underline; text-underline-offset: 0.1875rem; } }
-.tags-lead { margin: 0.25rem 0 0.25rem; }
-.tags-problem { margin: 0.5rem 0 0; }
-.tags-head { font-size: 0.8125rem; font-weight: 700; color: var(--mut); margin: 1.125rem 0 0.5rem; }
-.tags-sheet .pill svg.i { width: 0.875rem; height: 0.875rem; stroke-width: 2.4; }
-.tags-sheet .pill.tag-on { background: var(--acc); color: var(--on-acc); }
-.tags-new { display: flex; gap: 0.5rem; align-items: stretch; margin-top: 1.25rem; }
+/* An event's tags (owner, 24 Nov 2026): grey labels on the row, and the "Tags" part of the show sheet. */
+.row-tags { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.25rem; }
+.row-tags .sr-only, .show-detail .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.tag-label { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.7188rem; font-weight: 600; line-height: 1.35; color: var(--mut); background: var(--soft); border-radius: 0.375rem; padding: 1px 0.375rem; }
+.event-tags { margin-top: 1rem; padding-top: 0.25rem; border-top: 1px solid var(--line); }
+.event-tags .tag-label { font-size: 0.8125rem; padding: 0.25rem 0.625rem; border-radius: 0.875rem; }
+.tags-problem { margin: 0.25rem 0 0.5rem; }
+.tags-head { font-size: 0.8125rem; font-weight: 700; color: var(--mut); margin: 0.875rem 0 0.5rem; }
+.event-tags .pills { margin-bottom: 0; }
+.event-tags .pill svg.i { width: 0.875rem; height: 0.875rem; stroke-width: 2.4; }
+.event-tags .pill.tag-on { background: var(--acc); color: var(--on-acc); }
+.tags-new { display: flex; gap: 0.5rem; align-items: stretch; margin-top: 1rem; }
 .tags-new .field { flex: 1; min-width: 0; margin-bottom: 0; }
 .tags-new .tags-add { width: auto; height: auto; padding: 0 1.25rem; }
-.tags-sheet .field-error { margin-top: 0.5rem; }
+.event-tags .field-error { margin-top: 0.5rem; }

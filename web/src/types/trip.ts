@@ -121,6 +121,8 @@ export interface Parties {
   in?: Record<string, Record<MemberId, true>>;
   /** When the events check last ran, and the member whose device claimed it. */
   lastCheck?: { at: number; by: MemberId };
+  /** Each event's tags: { showId: { tag: true } }; any member adds or removes one. */
+  showTags?: Record<string, Record<string, true>>;
 }
 
 export interface LinkItem {
@@ -156,7 +158,7 @@ export interface Venue {
   line?: string;
   /** false when the venue is not on OpenStreetMap and sits at its area's centre. */
   onMap?: boolean;
-  /** true for one of the owner's big nights (data/places.json); create-trip seeds it as the "big" tag (places/tags). */
+  /** true for one of the owner's big nights (data/places.json); seed-parties gives its events the "big" tag once, and with no event it shows under Big nights. */
   big?: boolean;
 }
 
@@ -184,8 +186,6 @@ export interface Places {
   venues?: Record<string, Venue>;
   /** Friends' places, written from phones (places/custom). */
   custom?: Record<string, CustomPlace>;
-  /** Each venue's tags, set by an organizer: { venueId: { tag: true } }. */
-  tags?: Record<string, Record<string, true>>;
   /** Each tag's name: { big: "Big nights" }. */
   tagNames?: Record<string, string>;
 }

@@ -14,6 +14,8 @@ interface ShowRowProps {
   /** The name of the friend who added it, for "added by KA"; undefined for a seeded show. */
   addedByName?: string;
   canEdit: boolean;
+  /** The names of the event's tags to show as small grey labels; the picked filter's tag is left out, as its chip already says it. */
+  tags: string[];
   onIn: (isIn: boolean) => void;
   onEdit: () => void;
   /** Opens the show sheet. */
@@ -38,13 +40,15 @@ interface ShowRowProps {
  * nobody is in reads "Be the first in" (case 31); an unconfirmed one
  * carries "not confirmed" right under the artist, so a cut never hides it.
  * A weekly show's tile reads "Every / Sun" and screen readers hear "Every
- * Sunday".
+ * Sunday". The event's tags sit under the about line as small grey labels,
+ * all but the picked filter's.
  * Examples (checked at 375 px and 1650 px against screen 7):
  *   Peggy Gou, 4 in, RB in  → Sat 13 Feb tile, four initials, "4 in", "I'm in" filled
  *   a party KA added        → "1 in · added by KA"
+ *   under "Big nights", Peggy Gou tagged Big nights and Rooftop → one grey "Rooftop" label
  *   Single Fin's Sunday Session → "Every / Sun" tile; a tap on the tile opens the sheet
  */
-export function ShowRow({ show, going, you, addedByName, canEdit, onIn, onEdit, onOpen }: ShowRowProps) {
+export function ShowRow({ show, going, you, addedByName, canEdit, tags, onIn, onEdit, onOpen }: ShowRowProps) {
   const isIn = you !== null && going.some((person) => person.id === you);
   const count = going.length ? `${going.length} in` : "Be the first in";
   const by = addedByName ? ` · added by ${initials(addedByName)}` : "";
@@ -58,6 +62,16 @@ export function ShowRow({ show, going, you, addedByName, canEdit, onIn, onEdit, 
           {show.artist}
         </button>
         {show.about && <p className="about">{show.about}</p>}
+        {tags.length > 0 && (
+          <p className="row-tags">
+            <span className="sr-only">Tags: </span>
+            {tags.map((name) => (
+              <span key={name} className="tag-label">
+                {name}
+              </span>
+            ))}
+          </p>
+        )}
         <div className="meta">
           {show.verified === false && <span className="nc">not confirmed</span>}
           <Avatars people={going} you={you} max={4} />

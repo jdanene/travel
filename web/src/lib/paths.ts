@@ -85,8 +85,11 @@ export const phones = (tripId: string) => `tripSecrets/${tripId}/phones`;
 /** The trip's text count for one day (yyyy-mm-dd, UTC); the sender (services/travel-texts) adds one per text sent. */
 export const textLog = (tripId: string, day: string) => `tripSecrets/${tripId}/textLog/${day}`;
 
-/** One tag on one venue; only an organizer writes it. */
-export const venueTag = (tripId: string, venueId: string, tag: string) => `trips/${tripId}/places/tags/${venueId}/${tag}`;
+/** One tag on one event; any member adds or removes it. */
+export const showTag = (tripId: string, showId: string, tag: string) => `trips/${tripId}/parties/showTags/${showId}/${tag}`;
 
-/** A tag's name; only an organizer writes it. */
+/** Every tag on one event; removed with the event. */
+export const showTags = (tripId: string, showId: string) => `trips/${tripId}/parties/showTags/${showId}`;
+
+/** A tag's name; any member makes a new one, and it never changes. */
 export const tagName = (tripId: string, tag: string) => `trips/${tripId}/places/tagNames/${tag}`;

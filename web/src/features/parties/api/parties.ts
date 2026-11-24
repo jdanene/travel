@@ -68,7 +68,7 @@ export function editShow(tripId: string, id: string, current: Show, draft: Party
 }
 
 /**
- * Removes a show and its "in" marks in one write, so no mark is left
+ * Removes a show, its "in" marks and its tags in one write, so no mark is left
  * pointing at nothing (case 29).
  *
  * Inputs: the trip id and the show's id.
@@ -76,7 +76,7 @@ export function editShow(tripId: string, id: string, current: Show, draft: Party
  * Examples (checked on the emulator): ka removes her party → { ok: true }; its marks go with it
  */
 export function removeShow(tripId: string, id: string): Promise<WriteResult> {
-  return write({ [paths.show(tripId, id)]: null, [paths.showIn(tripId, id)]: null });
+  return write({ [paths.show(tripId, id)]: null, [paths.showIn(tripId, id)]: null, [paths.showTags(tripId, id)]: null });
 }
 
 /** The draft as stored: trimmed, with no about or link field when it is empty. */
@@ -94,21 +94,20 @@ function fields(draft: PartyDraft) {
 }
 
 /**
- * Puts a tag on a venue, or takes it off. A new tag's name goes in the
- * same write, so a tag never exists without its name. Only an organizer's
- * write is accepted.
+ * Puts a tag on an event, or takes it off. A new tag's name goes in the
+ * same write, so a tag never exists without its name. Any member's write
+ * is accepted; a device that has not joined is refused.
  *
- * Inputs: the trip id, the venue's id in places/venues, the tag's slug,
- * whether the venue carries it, and the name of a tag the trip does not
- * have yet.
- * Output: the write's result; "refused" on a friend's device.
+ * Inputs: the trip id, the event's showId, the tag's slug, whether the
+ * event carries it, and the name of a tag the trip does not have yet.
+ * Output: the write's result.
  * Examples (checked on the emulator):
- *   setVenueTag(t, "savaya", "big", false)                  → { ok: true }; Savaya leaves Big nights
- *   setVenueTag(t, "klymax", "rooftop", true, "Rooftop")     → { ok: true }; a "Rooftop" chip appears
+ *   setShowTag(t, peggyGou, "big", false)                → { ok: true }; Peggy Gou leaves Big nights
+ *   setShowTag(t, peggyGou, "rooftop", true, "Rooftop")  → { ok: true }; a "Rooftop" chip appears
  */
-export function setVenueTag(tripId: string, venueId: string, tag: string, on: boolean, newName?: string): Promise<WriteResult> {
+export function setShowTag(tripId: string, showId: string, tag: string, on: boolean, newName?: string): Promise<WriteResult> {
   return write({
-    [paths.venueTag(tripId, venueId, tag)]: on ? true : null,
+    [paths.showTag(tripId, showId, tag)]: on ? true : null,
     ...(newName ? { [paths.tagName(tripId, tag)]: newName } : {}),
   });
 }

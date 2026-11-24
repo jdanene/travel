@@ -12,15 +12,12 @@
  * Each run replaces info (each field by its own path, so info/inviteTitle,
  * which an organizer sets in the "Invite" sheet, stays; absent, the page and
  * the link preview use the default), crew/expected, places/areas,
- * places/venues (each with its `big` tag from data/places.json, plan D18),
+ * places/venues (each with its `big` flag from data/places.json, plan D18;
+ * seed-parties turns it into the events' "big" tag, D19),
  * its own organizer key (the keys organizers add on the page stay)
  * and the admin list (tripSecrets/{tripId}/admins, from the
  * file's `admins`),
- * writes each starting date option by its own path, seeds the venue tags
- * (places/tags: "big", named "Big nights", on each venue data/places.json
- * marks `big`) only while the trip has neither places/tags nor
- * places/tagNames, so an organizer's tag edits survive every later run,
- * and touches nothing else: the options friends added with "Add dates", answers, hearts, stays,
+ * writes each starting date option by its own path, and touches nothing else: the options friends added with "Add dates", answers, hearts, stays,
  * shows and the friends' places (places/custom) stay. A starting option
  * taken out of the trip file stays in the database; the organizer removes
  * it on the page. Removing an email from `admins` stops it making new
@@ -64,35 +61,6 @@ function randomId(length) {
 
 const databaseEnv = () => (emulator ? { ...process.env, FIREBASE_DATABASE_EMULATOR_HOST: "127.0.0.1:9000" } : process.env);
 
-/**
- * Whether the trip already has places/tags or places/tagNames. The emulator
- * is read over its REST address, because the CLI's database:get there
- * misses the app's namespace (as in stamp-preview.mjs). A read that fails or
- * does not answer in JSON stops the run, so a doubtful run never seeds over
- * the organizer's tags.
- */
-async function hasTags() {
-  const read = async (path) => {
-    let said;
-    try {
-      if (emulator) {
-        const response = await fetch(`http://127.0.0.1:9000${path}.json?shallow=true&ns=${PROJECT}-default-rtdb`, {
-          headers: { Authorization: "Bearer owner" },
-          signal: AbortSignal.timeout(60_000),
-        });
-        if (!response.ok) throw new Error(`the emulator answered ${response.status}`);
-        said = await response.text();
-      } else {
-        said = execFileSync("firebase", ["database:get", path, "--shallow", "--project", PROJECT], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], timeout: 60_000 });
-      }
-      return JSON.parse(said) !== null;
-    } catch (error) {
-      stop(`could not read ${path}; nothing was changed.\n${String(error.stderr || error.message).trim()}\nIf the Firebase CLI is not signed in, run: firebase login`);
-    }
-  };
-  return (await read(`/trips/${tripId}/places/tags`)) || (await read(`/trips/${tripId}/places/tagNames`));
-}
-
 const file = readJson(TRIP_FILE);
 const problems = validateTripFile(file, idFromName);
 if (problems.length) stop(`${TRIP_FILE} is not right:\n  - ${problems.join("\n  - ")}`);
@@ -134,14 +102,6 @@ const update = {
     ? Object.fromEntries(file.admins.map((email) => [emailKey(email.trim()), true]))
     : null,
 };
-
-// The venue tags are the organizer's once they exist (owner, 24 Nov 2026); a read that fails stops the run, so
-// a doubtful run never writes over them.
-if (!(await hasTags())) {
-  const big = Object.entries(places.venues).filter(([, venue]) => venue.big === true);
-  update[`trips/${tripId}/places/tags`] = Object.fromEntries(big.map(([venueId]) => [venueId, { big: true }]));
-  update[`trips/${tripId}/places/tagNames`] = { big: "Big nights" };
-}
 
 const updateFile = "local/trip.update.json";
 writeFileSync(updateFile, JSON.stringify(update));

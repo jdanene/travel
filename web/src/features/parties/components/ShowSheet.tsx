@@ -4,6 +4,8 @@ import { Sheet } from "../../../components/Sheet";
 import { initials } from "../../../lib/initials";
 import { eventLink, whenLine } from "../lib/detail";
 import type { ListedShow } from "../lib/shows";
+import { EventTags } from "./EventTags";
+import type { WriteResult } from "../../../lib/db";
 
 interface ShowSheetProps {
   /** The show to describe; undefined while closed. */
@@ -19,6 +21,11 @@ interface ShowSheetProps {
   onIn: (isIn: boolean) => void;
   /** Closes the sheet and opens the Map on the venue; absent when the venue has no place on the map. */
   onSeeMap?: () => void;
+  /** The event's tags, and every tag the trip has named (tag → name). */
+  tags: string[];
+  tagNames: Record<string, string>;
+  /** Puts a tag on the event or takes it off; absent on a device that has not joined. */
+  onTag?: (tag: string, on: boolean, newName?: string) => Promise<WriteResult>;
   onClose: () => void;
 }
 
@@ -26,10 +33,12 @@ interface ShowSheetProps {
  * The show sheet: everything a friend needs to decide on one event, in the
  * shared Sheet (a bottom sheet on a phone, a centred dialog from 900 px).
  * Who is playing, in full; what it is; when and where; who is in and the
- * "I'm in" button; then the two ways out, the map and the event's own page.
+ * "I'm in" button; then the two ways out, the map and the event's own page;
+ * then the event's tags, which any member adds or removes (EventTags).
  *
  * Inputs: the show, its place line and venue line, who is in, this member,
- * the adder's name, and what "I'm in", "See on the map" and closing do.
+ * the adder's name, its tags and the trip's tag names, and what "I'm in",
+ * "See on the map", a tag and closing do.
  * Output: the sheet. "Event page" opens an https link in a new tab; any
  * other link shows as plain text; no link, no button. No position, no map
  * button. There is no Directions button (exception 5).
@@ -38,15 +47,15 @@ interface ShowSheetProps {
  *   Single Fin's Sunday Session → "Every Sunday from 7 Feb"
  *   tap "I'm in" → the button fills here and on the row at once
  */
-export function ShowSheet({ show, where, venueLine, going, you, addedByName, onIn, onSeeMap, onClose }: ShowSheetProps) {
+export function ShowSheet({ show, onClose, ...rest }: ShowSheetProps) {
   return (
     <Sheet open={show !== undefined} title={show?.artist ?? ""} onClose={onClose}>
-      {show && <ShowDetail show={show} where={where} venueLine={venueLine} going={going} you={you} addedByName={addedByName} onIn={onIn} onSeeMap={onSeeMap} />}
+      {show && <ShowDetail show={show} {...rest} />}
     </Sheet>
   );
 }
 
-function ShowDetail({ show, where, venueLine, going, you, addedByName, onIn, onSeeMap }: Omit<ShowSheetProps, "onClose"> & { show: ListedShow }) {
+function ShowDetail({ show, where, venueLine, going, you, addedByName, onIn, onSeeMap, tags, tagNames, onTag }: Omit<ShowSheetProps, "onClose"> & { show: ListedShow }) {
   const isIn = you !== null && going.some((person) => person.id === you);
   const link = eventLink(show.link);
 
@@ -102,6 +111,7 @@ function ShowDetail({ show, where, venueLine, going, you, addedByName, onIn, onS
         </div>
       )}
       {link?.kind === "text" && <p className="cap show-link-text">{link.text}</p>}
+      <EventTags showId={show.id} tags={tags} names={tagNames} onChange={onTag} />
       {addedByName && <p className="cap show-by">added by {initials(addedByName)}</p>}
     </div>
   );

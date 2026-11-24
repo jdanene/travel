@@ -69,8 +69,8 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
   useEventCheck(tripId, trip, crew.member ? crew.memberId : null);
   useWarmMap(trip);
   const [photoOpen, setPhotoOpen] = useState(false);
-  // The Events filter is the map's too: both show the picked tag's venues (owner, 24 Nov 2026).
-  const events = useEventsFilter(tagChips(tripTags(trip.places)));
+  // The Events filter is the map's too: the map draws the venues the list keeps (owner, 24 Nov 2026).
+  const events = useEventsFilter(tagChips(tripTags(trip)));
   const you = crew.memberId && crew.member ? { id: crew.memberId, name: crew.member.name } : undefined;
 
   return (

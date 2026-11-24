@@ -1,4 +1,4 @@
-import { pickFilter, shownUnder, tagChips, tripTags } from "../../features/parties/lib/tags";
+import { eventShown, pickFilter, tagChips, tripTags } from "../../features/parties/lib/tags";
 import { dayRange } from "../../lib/format";
 import type { MemberId, Trip } from "../../types/trip";
 
@@ -56,9 +56,8 @@ export function allSet(trip: Trip): boolean {
  * Output: the modules to show. A settled module's line is its result:
  * "13–23 Feb · confirmed", "Cliffside villa · confirmed" (one line per
  * destination with a confirmed stay). Events reads "15 events · I'm in",
- * counting what the list shows by default: the events at venues tagged
- * Big nights and every friend's event (all events when no venue carries
- * Big nights).
+ * counting what the list shows by default: the events tagged Big nights
+ * and every friend's event (all events when nothing carries Big nights).
  * Examples (each is a test in modules.test.ts):
  *   dates open                → Dates "Tap to answer", Events, Links, Map; no Stay
  *   dates confirmed           → Dates "13–23 Feb · confirmed", Stay "1 option · heart one", …
@@ -76,9 +75,9 @@ export function modules(trip: Trip, memberId: MemberId | null): Module[] {
 }
 
 function eventsLine(trip: Trip): string {
-  const tags = tripTags(trip.places);
+  const tags = tripTags(trip);
   const filter = pickFilter(null, tagChips(tags));
-  const total = Object.values(trip.parties?.shows ?? {}).filter((show) => shownUnder(filter, show, tags)).length;
+  const total = Object.entries(trip.parties?.shows ?? {}).filter(([id, show]) => eventShown(filter, id, show, tags)).length;
   return total ? `${count(total, "event")} · I'm in` : "Nothing announced yet.";
 }
 

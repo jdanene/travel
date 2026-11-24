@@ -43,11 +43,11 @@ interface EventsFilterChipsProps {
 
 /**
  * The quiet control at the top of the Events list: one chip per tag the
- * venues carry ("Big nights" first), then "All · 27", the picked one
+ * events carry ("Big nights" first), then "All · 27", the picked one
  * filled. Screen readers hear "All 27".
  *
  * Inputs: the filter, the tag chips, how many events the trip has, and what a tap does.
- * Output: the chips; "All" alone when no venue carries a tag.
+ * Output: the chips; the list draws none when no event carries a tag.
  * Examples (checked on the emulator at 375 px and 1650 px):
  *   first visit        → "Big nights" filled, "Rooftop", "All · 27" outlined
  *   tap "All"          → "All · 27" filled, every venue listed

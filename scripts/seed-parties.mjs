@@ -22,6 +22,14 @@
  * is then its first night, which must fall on that day. note holds research
  * notes and is not written.
  *
+ * Starting tags (plan D19): each show at a venue data/places.json marks
+ * `big` gets the "big" tag (parties/showTags/{showId}/big) once, when it
+ * has no tags and the seed has never tagged it; parties/tagSeeded/{showId}
+ * records that it did. So a tag a friend took off stays off on every later
+ * run, and friends' own events start with no tags. Both are read before
+ * the write; a read that fails stops the run, so a doubtful run never
+ * tags over anyone's edits.
+ *
  * Both files are checked before anything is written. A missing file, a file
  * that is not JSON, or a show with a missing or wrong field stops the script
  * with the file and the entry named. Everything goes in one update, so
@@ -39,13 +47,14 @@ register(
       'export async function resolve(s, c, next) { try { return await next(s, c); } catch (e) { if (s.startsWith(".") && !s.endsWith(".ts")) return next(s + ".ts", c); throw e; } }',
     ),
 );
-const { showId } = await import("../web/src/features/parties/lib/shows.ts");
+const { showId, venueKey } = await import("../web/src/features/parties/lib/shows.ts");
 const { EVENTS_WINDOW, inEventsWindow } = await import("../web/src/features/parties/lib/window.ts");
 
 const PROJECT = "travel-ca8f9";
 const TRIP_FILE = "local/trip.json";
 const THIS_YEAR = "data/lineups/2027-feb-mar.json";
 const LAST_YEAR = "data/lineups/2026-feb-mar.json";
+const PLACES_FILE = "data/places.json";
 
 const emulator = process.argv.includes("--emulator");
 // The emulator keeps its own id and key, so the live trip never reuses ones a test run printed.
@@ -122,6 +131,41 @@ for (const [id, { destination, venue, date, artist }] of Object.entries(lastYear
   update[`trips/${tripId}/parties/lastYear/${id}`] = { destination, venue, date, artist };
 }
 
+/**
+ * The keys of one database node (a shallow read), or none when it is
+ * empty. The emulator is read over its REST address, because the CLI's
+ * database:get there misses the app's namespace (as in stamp-preview.mjs).
+ * A read that fails or does not answer in JSON stops the run.
+ */
+function keysOf(path) {
+  let said;
+  try {
+    if (emulator) {
+      said = execFileSync("curl", ["-sf", "--max-time", "60", "-H", "Authorization: Bearer owner", `http://127.0.0.1:9000${path}.json?shallow=true&ns=${PROJECT}-default-rtdb`], { encoding: "utf8" });
+    } else {
+      said = execFileSync("firebase", ["database:get", path, "--shallow", "--project", PROJECT], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], timeout: 60_000 });
+    }
+    return new Set(Object.keys(JSON.parse(said) ?? {}));
+  } catch (error) {
+    stop(`could not read ${path}; nothing was changed.\n${String(error.stderr || error.message).trim()}\nIf the Firebase CLI is not signed in, run: firebase login`);
+  }
+}
+
+const bigVenues = new Set(
+  Object.values(readJson(PLACES_FILE).venues ?? {})
+    .filter((venue) => venue.big === true)
+    .map((venue) => venueKey(venue.destination, venue.name)),
+);
+const tagged = keysOf(`/trips/${tripId}/parties/showTags`);
+const seeded = keysOf(`/trips/${tripId}/parties/tagSeeded`);
+let bigTagged = 0;
+for (const [id, show] of Object.entries(thisYear.records)) {
+  if (!bigVenues.has(venueKey(show.destination, show.venue)) || tagged.has(id) || seeded.has(id)) continue;
+  update[`trips/${tripId}/parties/showTags/${id}/big`] = true;
+  update[`trips/${tripId}/parties/tagSeeded/${id}`] = true;
+  bigTagged++;
+}
+
 const updateFile = "local/parties.update.json";
 writeFileSync(updateFile, JSON.stringify(update));
 try {
@@ -136,4 +180,4 @@ try {
 
 const shows = Object.keys(thisYear.records).length;
 const before = Object.keys(lastYear.records).length;
-console.log(`seed-parties: wrote ${shows} shows and ${before} last-year shows${emulator ? " to the emulator" : ""}.`);
+console.log(`seed-parties: wrote ${shows} shows and ${before} last-year shows, and tagged ${bigTagged} Big nights${emulator ? " in the emulator" : ""}.`);
