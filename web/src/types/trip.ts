@@ -70,7 +70,13 @@ export interface Dates {
 }
 
 export interface StayOption {
-  destination: DestinationId;
+  /** Set when the city is one of the trip's destinations; a place in any other city has none. */
+  destination?: DestinationId;
+  /** The city the friend gave (owner, 24 Nov 2026: any city); older places have only a destination. */
+  city?: string;
+  /** The nights the friend has in mind, as days (YYYY-MM-DD); optional. */
+  from?: string;
+  to?: string;
   url: string;
   name: string;
   area: string;

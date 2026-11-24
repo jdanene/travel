@@ -1,6 +1,7 @@
 import { Avatars, type Person } from "../../../components/Avatars";
 import { Icon } from "../../../components/Icon";
 import { idFromName } from "../../../lib/ids";
+import { dayRange, nights } from "../../../lib/format";
 import { initials } from "../../../lib/initials";
 import type { StayOption } from "../../../types/trip";
 import { scenery } from "./scenery";
@@ -13,19 +14,16 @@ interface StayCardProps {
   hearted: Person[];
   you: string;
   onHeart: (on: boolean) => void;
-  /** Shown to an organizer while the destination has no confirmed stay. */
-  onConfirm?: () => void;
 }
 
 /**
  * One stay option, as an Airbnb-style card (exception 10): a large photo
  * with rounded corners and the heart with its count over the photo's
  * corner; then the name, one line of facts, "Open listing" with who hearted
- * it, and, for the organizer, a full-width "Confirm this stay". The words
- * and the order are those of 20/4 and 20/6.
+ * it. The facts carry the dates when the friend gave them.
  *
- * Inputs: the option, who added it, who hearted it, this member, what a
- * heart tap does, and the organizer's confirm.
+ * Inputs: the option, who added it, who hearted it, this member, and what a
+ * heart tap does.
  * Output: the card, with the id "stay-<id>" so the page can bring it into
  * view (case 17). A long name takes two lines, then is cut (case 11); the
  * facts take one line. A photo that fails to load gives way to the area's
@@ -33,12 +31,12 @@ interface StayCardProps {
  * per row in the desktop column.
  * Examples (checked on the emulator at 375 px and 1650 px):
  *   → photo with heart 3 on its corner, "Cliffside villa with pool", "Uluwatu · sleeps 10 · added by KA", "Open listing" and KA TO MB
- *   organizer, stay open → the same, with "Confirm this stay" across the card on one line
  */
-export function StayCard({ id, option, addedBy, hearted, you, onHeart, onConfirm }: StayCardProps) {
+export function StayCard({ id, option, addedBy, hearted, you, onHeart }: StayCardProps) {
   const on = hearted.some((person) => person.id === you);
-  const fallback = scenery(idFromName(option.area), option.destination);
-  const facts = [option.area, option.sleeps ? `sleeps ${option.sleeps}` : null, `added by ${initials(addedBy)}`].filter(Boolean).join(" · ");
+  const fallback = scenery(idFromName(option.area), option.destination ?? "");
+  const dates = option.from ? (option.to ? `${dayRange(option.from, option.to)} · ${nights(option.from, option.to)} nights` : `from ${dayRange(option.from, option.from)}`) : null;
+  const facts = [option.area, dates, option.sleeps ? `sleeps ${option.sleeps}` : null, `added by ${initials(addedBy)}`].filter(Boolean).join(" · ");
   return (
     <article className="srw" id={`stay-${id}`}>
       <div className="srw-photo">
@@ -64,11 +62,6 @@ export function StayCard({ id, option, addedBy, hearted, you, onHeart, onConfirm
         </a>
         <Avatars people={hearted} you={you} />
       </div>
-      {onConfirm && (
-        <button type="button" className="btn sm" onClick={onConfirm}>
-          Confirm this stay
-        </button>
-      )}
     </article>
   );
 }

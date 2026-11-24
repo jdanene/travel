@@ -100,8 +100,12 @@
           "options": {
             "$stayId": {
               ".write": "auth != null && !data.exists() && newData.child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val()",
-              ".validate": "$stayId.length <= 200 && newData.hasChildren(['destination', 'url', 'name', 'area', 'addedBy', 'at']) && root.child('trips').child($tripId).child('info').child('destinations').child(newData.child('destination').val()).exists()",
+              /* A place sits in any city (owner, 24 Nov 2026); a destination is set only when the city is one of the trip's. Its dates are optional. */
+              ".validate": "$stayId.length <= 200 && newData.hasChildren(['url', 'name', 'area', 'addedBy', 'at']) && (!newData.child('destination').exists() || root.child('trips').child($tripId).child('info').child('destinations').child(newData.child('destination').val()).exists()) && (!newData.child('to').exists() || (newData.child('from').exists() && newData.child('from').val() <= newData.child('to').val()))",
               "destination": { ".validate": "newData.isString()" },
+              "city": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60" },
+              "from": { ".validate": "newData.isString() && newData.val().matches(/^20[0-9][0-9]-[01][0-9]-[0-3][0-9]$/)" },
+              "to": { ".validate": "newData.isString() && newData.val().matches(/^20[0-9][0-9]-[01][0-9]-[0-3][0-9]$/)" },
               "url": { ".validate": "newData.isString() && newData.val().length <= 500 && newData.val().beginsWith('https://')" },
               "name": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120" },
               "area": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 60" },

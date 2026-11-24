@@ -9,6 +9,8 @@ import { scenery } from "./scenery";
 interface AddPlaceSheetProps {
   open: boolean;
   destinations: Array<{ id: string; name: string }>;
+  /** Every city to offer: the destinations, then the cities friends added. */
+  cities: string[];
   areas: Area[];
   /** The ids already in the list, to catch a duplicate before any call. */
   known: string[];
@@ -23,7 +25,8 @@ interface AddPlaceSheetProps {
 type Reading = { state: "idle" } | { state: "reading"; url: string } | { state: "read"; url: string; found: ReadLink | null };
 
 /**
- * Add a place (20/5): paste a link, pick the destination, check what the
+ * Add a place (20/5): paste a link, pick the city or type a new one, give
+ * the dates if you have them, check what the
  * reader found, and add it. When the reader finds nothing (Booking.com
  * always), the same positions hold inputs for the name, the area and
  * "sleeps"; that is a normal path, not a failure (exception 4).
@@ -33,28 +36,32 @@ type Reading = { state: "idle" } | { state: "reading"; url: string } | { state: 
  * Output: the sheet. Text that is not an Airbnb or Booking.com link gets
  * "Paste an Airbnb or Booking.com link." and no call (case 15). A listing
  * already in the list closes the sheet and brings its card into view.
- * "Add to Bali" works with a name alone; the area then defaults to the
- * destination, and the pin sits at its centre.
+ * "Add to Bali" works with a name alone. Any city is allowed (owner, 24
+ * Nov 2026); the dates are optional, and check-out is never before check-in.
  * Examples (checked on the emulator against the deployed reader):
  *   an Airbnb room       → its photo, name, "area · sleeps N · added by you", "Add to Bali"
  *   a Booking.com hotel  → "Add the name and area.", the Name, Area and Sleeps inputs
  */
-export function AddPlaceSheet({ open, destinations, areas, known, memberId, onClose, onAdd, onShow }: AddPlaceSheetProps) {
+export function AddPlaceSheet({ open, destinations, cities, areas, known, memberId, onClose, onAdd, onShow }: AddPlaceSheetProps) {
   const [text, setText] = useState("");
-  const [destination, setDestination] = useState(destinations[0]?.id ?? "");
+  const [city, setCity] = useState(cities[0] ?? "");
+  const [typing, setTyping] = useState(false);
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
   const [reading, setReading] = useState<Reading>({ state: "idle" });
   const [name, setName] = useState("");
-  const [area, setArea] = useState("");
   const [sleeps, setSleeps] = useState("");
   const [saving, setSaving] = useState(false);
 
   const url = listingLink(text);
+  const place = city.trim().slice(0, 60);
+  const destination = destinations.find((candidate) => idFromName(candidate.name) === idFromName(place))?.id;
   const here = areas.filter((candidate) => candidate.destination === destination);
+  const datesOk = !to || (from !== "" && from <= to);
   const found = reading.state === "read" ? reading.found : null;
   const readArea = found?.area && here.find((candidate) => idFromName(candidate.name) === idFromName(found.area!))?.name;
-  const place = destinations.find((candidate) => candidate.id === destination)?.name ?? "";
   const finalName = (found?.name ?? name).trim().slice(0, 120);
-  const finalArea = (readArea ?? area) || place;
+  const finalArea = readArea || place;
   const typedSleeps = Number.parseInt(sleeps, 10);
   const finalSleeps = found?.sleeps ?? (typedSleeps >= 1 && typedSleeps <= 50 ? typedSleeps : undefined);
 
@@ -62,7 +69,9 @@ export function AddPlaceSheet({ open, destinations, areas, known, memberId, onCl
     setText("");
     setReading({ state: "idle" });
     setName("");
-    setArea("");
+    setTyping(false);
+    setFrom("");
+    setTo("");
     setSleeps("");
     setSaving(false);
   };
@@ -88,16 +97,19 @@ export function AddPlaceSheet({ open, destinations, areas, known, memberId, onCl
   };
 
   const add = async () => {
-    if (!url || !finalName) return;
+    if (!url || !finalName || !place || !datesOk) return;
     setSaving(true);
     const id = stayId(url.href);
     const option: StayOption = {
-      destination,
+      ...(destination ? { destination } : {}),
+      city: place,
       url: url.href,
       name: finalName,
       area: finalArea.slice(0, 60),
       addedBy: memberId,
       at: Date.now(),
+      ...(from ? { from } : {}),
+      ...(from && to ? { to } : {}),
       ...(finalSleeps ? { sleeps: finalSleeps } : {}),
       ...(found?.photoUrl ? { photoUrl: found.photoUrl } : {}),
     };
@@ -120,17 +132,58 @@ export function AddPlaceSheet({ open, destinations, areas, known, memberId, onCl
           Paste an Airbnb or Booking.com link.
         </p>
       )}
-      <div className="pills" role="group" aria-label="Destination" style={{ margin: "4px 0 14px" }}>
-        {destinations.map((candidate) => (
-          <button key={candidate.id} type="button" className="pill" aria-pressed={candidate.id === destination} onClick={() => setDestination(candidate.id)}>
-            {candidate.name}
+      <div className="pills" role="group" aria-label="City" style={{ margin: "4px 0 10px" }}>
+        {cities.map((candidate) => (
+          <button
+            key={candidate}
+            type="button"
+            className="pill"
+            aria-pressed={!typing && idFromName(candidate) === idFromName(place)}
+            onClick={() => {
+              setTyping(false);
+              setCity(candidate);
+            }}
+          >
+            {candidate}
           </button>
         ))}
+        <button
+          type="button"
+          className="pill"
+          aria-pressed={typing}
+          onClick={() => {
+            setTyping(true);
+            setCity("");
+          }}
+        >
+          + City
+        </button>
       </div>
+      {typing && (
+        <label className="field">
+          <small>City</small>
+          <input value={city} onChange={(event) => setCity(event.target.value)} maxLength={60} autoFocus autoComplete="off" />
+        </label>
+      )}
+      <div className="stay-dates">
+        <label className="field">
+          <small>Check-in</small>
+          <input type="date" value={from} onChange={(event) => setFrom(event.target.value)} />
+        </label>
+        <label className="field">
+          <small>Check-out</small>
+          <input type="date" value={to} min={from || undefined} onChange={(event) => setTo(event.target.value)} />
+        </label>
+      </div>
+      {!datesOk && (
+        <p className="field-error" role="alert">
+          Check-out is after check-in.
+        </p>
+      )}
       {reading.state === "reading" && <div className="place-preview" aria-busy="true" aria-label="Reading the link" />}
       {reading.state === "read" && (
         <>
-          <img className="place-preview" src={found?.photoUrl ?? scenery(idFromName(finalArea), destination)} alt="" />
+          <img className="place-preview" src={found?.photoUrl ?? scenery(idFromName(finalArea), destination ?? "")} alt="" />
           {found?.name ? (
             <p className="h3" style={{ marginTop: 10 }}>
               {found.name}
@@ -138,7 +191,7 @@ export function AddPlaceSheet({ open, destinations, areas, known, memberId, onCl
           ) : (
             <>
               <p className="sub" style={{ margin: "10px 0 8px" }}>
-                Add the name and area.
+                Add the name.
               </p>
               <label className="field">
                 <small>Name</small>
@@ -146,34 +199,19 @@ export function AddPlaceSheet({ open, destinations, areas, known, memberId, onCl
               </label>
             </>
           )}
-          <div className={readArea && found?.sleeps ? "" : "add-facts"}>
-            {readArea ? null : (
-              <label className="field">
-                <small>Area</small>
-                <select value={area} onChange={(event) => setArea(event.target.value)}>
-                  <option value="">{place}</option>
-                  {here.map((candidate) => (
-                    <option key={candidate.name} value={candidate.name}>
-                      {candidate.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-            {found?.sleeps ? null : (
-              <label className="field">
-                <small>Sleeps</small>
-                <input value={sleeps} onChange={(event) => setSleeps(event.target.value)} inputMode="numeric" />
-              </label>
-            )}
-          </div>
+          {found?.sleeps ? null : (
+            <label className="field">
+              <small>Sleeps</small>
+              <input value={sleeps} onChange={(event) => setSleeps(event.target.value)} inputMode="numeric" />
+            </label>
+          )}
           <p className="sub" style={{ fontSize: 14 }}>
             {[finalArea, finalSleeps ? `sleeps ${finalSleeps}` : null, "added by you"].filter(Boolean).join(" · ")}
           </p>
         </>
       )}
-      <button type="button" className="btn" style={{ marginTop: 14 }} disabled={!url || !finalName || saving || reading.state === "reading"} onClick={() => void add()}>
-        Add to {place}
+      <button type="button" className="btn" style={{ marginTop: 14 }} disabled={!url || !finalName || !place || !datesOk || saving || reading.state === "reading"} onClick={() => void add()}>
+        {place ? `Add to ${place}` : "Add"}
       </button>
     </Sheet>
   );

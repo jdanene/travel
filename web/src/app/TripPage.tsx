@@ -203,7 +203,6 @@ function moduleSlots(
         areas={Object.values(trip.places?.areas ?? {})}
         names={Object.fromEntries(crew.members.map((member) => [member.id, member.name]))}
         memberId={crew.memberId}
-        isOrganizer={crew.isOrganizer}
       />
     ), // Trip 9: the Stay module.
     parties: (

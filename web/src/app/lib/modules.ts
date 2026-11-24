@@ -41,7 +41,7 @@ export function allSet(trip: Trip): boolean {
   if (!datesSettled(trip)) return false;
   const options = Object.values(trip.stay?.options ?? {});
   const confirmed = trip.stay?.confirmed ?? {};
-  return options.length > 0 && options.every((option) => confirmed[option.destination] !== undefined);
+  return options.length > 0 && options.every((option) => option.destination === undefined || confirmed[option.destination] !== undefined);
 }
 
 /**
@@ -94,13 +94,6 @@ function datesLine(trip: Trip, memberId: MemberId | null): string {
 }
 
 function stayLines(trip: Trip): string[] {
-  const options = trip.stay?.options ?? {};
-  const confirmed = trip.stay?.confirmed ?? {};
-  const lines = Object.values(confirmed)
-    .map((choice) => options[choice.stayId]?.name)
-    .filter((name): name is string => name !== undefined)
-    .map((name) => `${name} · confirmed`);
-  const waiting = Object.values(options).filter((option) => confirmed[option.destination] === undefined).length;
-  if (waiting > 0) lines.push(`${count(waiting, "option")} · heart one`);
-  return lines.length ? lines : ["No places yet."];
+  const total = Object.keys(trip.stay?.options ?? {}).length;
+  return [total ? `${count(total, "place")} · heart one` : "No places yet."];
 }

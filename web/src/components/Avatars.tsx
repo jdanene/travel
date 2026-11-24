@@ -34,19 +34,19 @@ export function usePhoto(id: string): string | undefined {
 export function Face({ person, className }: { person: Person; className: string }) {
   const photo = useContext(Photos)[person.id];
   return (
-    <span className={`av ${className}${photo ? " has-photo" : ""}`}>
+    <span className={`av ${className} ${tone(person.id)}${photo ? " has-photo" : ""}`}>
       {photo ? <img src={photo} alt="" draggable={false} /> : initials(person.name)}
     </span>
   );
 }
 
-/** The mock's four avatar tones; a friend keeps one tone everywhere. */
-const TONES = ["", "b", "c", "d"];
+/** Six GTA-poster colours for a friend with no photo (owner, 24 Nov 2026); a friend keeps one everywhere. */
+const TONES = ["g1", "g2", "g3", "g4", "g5", "g6"];
 
 export function tone(id: string): string {
   let sum = 0;
-  for (const char of id) sum = (sum + char.charCodeAt(0)) % TONES.length;
-  return TONES[sum];
+  for (const char of id) sum = (sum * 31 + char.charCodeAt(0)) % 997;
+  return TONES[sum % TONES.length];
 }
 
 export interface Person {

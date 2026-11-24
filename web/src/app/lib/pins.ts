@@ -44,10 +44,10 @@ export function pins(trip: Trip): Pin[] {
   if (datesSettled(trip)) {
     for (const [stayId, option] of Object.entries(trip.stay?.options ?? {})) {
       const area = Object.values(areas).find((candidate) => idFromName(candidate.name) === idFromName(option.area));
-      const centre = area ?? destinations[option.destination];
+      const centre = area ?? (option.destination ? destinations[option.destination] : undefined);
       if (centre?.lat === undefined || centre.lng === undefined) continue;
       const facts = [option.area, option.sleeps ? `sleeps ${option.sleeps}` : null].filter(Boolean).join(" · ");
-      stays.push({ id: `stay:${stayId}`, kind: "stay", destination: option.destination, name: option.name, lat: centre.lat, lng: centre.lng, line: facts });
+      stays.push({ id: `stay:${stayId}`, kind: "stay", destination: option.destination ?? area?.destination ?? "", name: option.name, lat: centre.lat, lng: centre.lng, line: facts });
     }
   }
 
