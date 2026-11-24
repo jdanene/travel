@@ -1,6 +1,7 @@
 import { Notice } from "../components/Notice";
 import { crewOf, useOrganizerLink, type CrewView } from "../features/crew/api/crew";
 import { Invitation } from "../features/crew/components/Invitation";
+import { repliedLine } from "../features/crew/lib/crew";
 import { DatesModule } from "../features/dates/components/DatesModule";
 import { StayModule } from "../features/stay/components/StayModule";
 import { LinksModule } from "../features/links/components/LinksModule";
@@ -60,7 +61,13 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
       {(!crew.member || crew.member.reply === "out") && <Invitation tripId={tripId} uid={uid} info={trip.info} crew={crew} />}
       {crew.member && (
         <>
-          <Home trip={trip} memberId={crew.memberId} organizer={crew.organizer} content={(openModule) => moduleSlots(tripId, trip, crew, openModule)} />
+          <Home
+            trip={trip}
+            memberId={crew.memberId}
+            organizer={crew.organizer}
+            replied={repliedLine(crew.expected, crew.byId)}
+            content={(openModule) => moduleSlots(tripId, trip, crew, openModule)}
+          />
         </>
       )}
     </>
