@@ -1,0 +1,19 @@
+/* Inside the Stay module: the rows of 20/4 (.srw, .heart), and the sheet of 20/5. */
+.srw { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.srw .photo { width: 72px; height: 72px; border-radius: 14px; flex: none; object-fit: cover; background: #ddd; }
+.srw .body { flex: 1; min-width: 0; }
+.srw b { font-size: 15px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.25; }
+.srw .l { font-size: 13px; font-weight: 700; margin-top: 2px; }
+.srw .l a { text-decoration: underline; text-underline-offset: 3px; color: var(--ink2); }
+.srw .btn.sm { margin-top: 8px; width: auto; display: inline-flex; }
+.heart { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 10px; border-radius: 18px; background: #fff; box-shadow: inset 0 0 0 1px #dcdcdf; font-size: 14px; font-weight: 700; flex: none; }
+.heart svg { width: 18px; height: 18px; }
+.heart[aria-pressed="true"] { background: var(--acc-soft); color: var(--acc); box-shadow: none; }
+.heart[aria-pressed="true"] svg { fill: currentColor; }
+.stay-done { display: flex; align-items: center; gap: 6px; font-size: 14.5px; color: var(--acc); margin: 4px 0 6px; }
+.stay-done b { color: var(--ink); }
+.stay-add { margin-top: 12px; }
+.place-preview { height: 140px; width: 100%; border-radius: 20px; object-fit: cover; background: #ddd; display: block; }
+.place-preview[aria-busy="true"] { background: var(--soft); }
+.field select { display: block; width: 100%; border: 0; outline: 0; background: none; font-size: 16px; padding: 0; color: inherit; }
+.add-facts { display: grid; grid-template-columns: 1fr 110px; gap: 8px; }

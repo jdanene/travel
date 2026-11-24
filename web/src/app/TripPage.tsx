@@ -2,6 +2,7 @@ import { Notice } from "../components/Notice";
 import { crewOf, useOrganizerLink, type CrewView } from "../features/crew/api/crew";
 import { Invitation } from "../features/crew/components/Invitation";
 import { DatesModule } from "../features/dates/components/DatesModule";
+import { StayModule } from "../features/stay/components/StayModule";
 import type { MapDestination } from "../features/map/components/TripMap";
 import { pins } from "./lib/pins";
 import { useTrip } from "../lib/useTrip";
@@ -89,7 +90,17 @@ function moduleSlots(tripId: string, trip: Trip, crew: CrewView, openModule: (id
         isOrganizer={crew.isOrganizer}
       />
     ), // Trip 7: the Dates module.
-    stay: null, // Trip 9: the Stay module.
+    stay: crew.memberId && (
+      <StayModule
+        tripId={tripId}
+        stay={trip.stay}
+        destinations={Object.entries(trip.info?.destinations ?? {}).map(([id, place]) => ({ id, name: place.name }))}
+        areas={Object.values(trip.places?.areas ?? {})}
+        names={Object.fromEntries(crew.members.map((member) => [member.id, member.name]))}
+        memberId={crew.memberId}
+        isOrganizer={crew.isOrganizer}
+      />
+    ), // Trip 9: the Stay module.
     parties: null, // Trip 11: the Parties module.
     links: null, // Trip 16: the Links module.
     map: (
@@ -100,7 +111,7 @@ function moduleSlots(tripId: string, trip: Trip, crew: CrewView, openModule: (id
           onOpen={(pin) => openModule(pin.kind === "stay" ? "stay" : "parties")}
         />
       </Suspense>
-    ), // Trip 12: the Map module. Stay pins come from pins(); Trip 9 fills the Stay module a stay card opens.
+    ), // Trip 12: the Map module. A stay card opens Stay; a venue card opens Parties.
   };
 }
 
