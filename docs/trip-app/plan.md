@@ -156,7 +156,7 @@ Rules, in words:
 
 ### The events check (owner, 23 Nov 2026)
 
-"Check what's available now, and any time someone logs in." When a friend who has joined opens the trip, the app claims `parties/lastCheck` in a transaction, but only when the last check is 12 hours old or more; the phone whose claim lands asks the link reader (`GET ?check=events`) and writes each event the trip does not list yet. The reader reads only schema.org Event data on each club's own site (`services/link-reader/event-sources.mjs`; README there lists every club and why it is or is not read). Show ids come from `showId()`, so a seeded show is not added again. The organizer has "Check for new events" at the foot of the Events module. This replaces the Haiku design of requirements 5.2b for now: no AI model, no key, and no Cloud Functions.
+"Check what's available now, and any time someone logs in." When a friend who has joined opens the trip, the app claims `parties/lastCheck` in a transaction, but only when the last check is 24 hours old or more (the owner: "once a day"); the phone whose claim lands asks the link reader (`GET ?check=events`) and writes each event the trip does not list yet. The reader reads only schema.org Event data on each club's own site (`services/link-reader/event-sources.mjs`; README there lists every club and why it is or is not read). Show ids come from `showId()`, so a seeded show is not added again. The organizer has "Check for new events" at the foot of the Events module. This replaces the Haiku design of requirements 5.2b for now: no AI model, no key, and no Cloud Functions.
 
 ## 5. Audits (create-a-project, section 10)
 
