@@ -1,7 +1,8 @@
 /**
  * Writes the party lineups into the trip: data/lineups/2027-feb-mar.json
  * into parties/shows and data/lineups/2026-feb-mar.json into
- * parties/lastYear, for the trip in local/trip.state.json.
+ * parties/lastYear, for the trip in local/trip.state.json
+ * (local/trip.state.emulator.json with --emulator).
  *
  * Usage, from the repo root: node scripts/seed-parties.mjs [--emulator]
  *   --emulator  writes to the database emulator (127.0.0.1:9000).
@@ -38,11 +39,12 @@ const { showId } = await import("../web/src/features/parties/lib/shows.ts");
 
 const PROJECT = "travel-ca8f9";
 const TRIP_FILE = "local/trip.json";
-const STATE_FILE = "local/trip.state.json";
 const THIS_YEAR = "data/lineups/2027-feb-mar.json";
 const LAST_YEAR = "data/lineups/2026-feb-mar.json";
 
 const emulator = process.argv.includes("--emulator");
+// The emulator keeps its own id and key, so the live trip never reuses ones a test run printed.
+const STATE_FILE = emulator ? "local/trip.state.emulator.json" : "local/trip.state.json";
 
 function stop(message) {
   console.error(`seed-parties: ${message}`);

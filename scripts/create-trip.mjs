@@ -7,7 +7,8 @@
  *               links to the hosting emulator.
  *
  * The first run makes the trip id (20 random characters) and the organizer
- * key, and saves both in local/trip.state.json. Every later run keeps them.
+ * key, and saves both in local/trip.state.json (local/trip.state.emulator.json
+ * with --emulator). Every later run keeps them.
  * Each run replaces info, crew/expected, dates/options and places, and
  * touches nothing else: answers, hearts, stays and shows stay. Everything
  * goes in one update, so nothing is half written. No step retries.
@@ -20,10 +21,11 @@ import { validateTripFile } from "./trip-file.mjs";
 
 const PROJECT = "travel-ca8f9";
 const TRIP_FILE = "local/trip.json";
-const STATE_FILE = "local/trip.state.json";
 const PLACES_FILE = "data/places.json";
 
 const emulator = process.argv.includes("--emulator");
+// The emulator keeps its own id and key, so the live trip never reuses ones a test run printed.
+const STATE_FILE = emulator ? "local/trip.state.emulator.json" : "local/trip.state.json";
 
 function stop(message) {
   console.error(`create-trip: ${message}`);
