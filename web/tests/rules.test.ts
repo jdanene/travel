@@ -132,9 +132,8 @@ describe("database rules", () => {
     await assertSucceeds(update(ref(db("uid-b"), "/"), { [paths.dateOption(T, id)]: null, [paths.optionAnswers(T, id)]: null }));
   });
 
-  it("15. refuses an option outside the season, or with To before From", async () => {
+  it("15. refuses an option with To before From", async () => {
     const a = db("uid-a");
-    await assertFails(set(ref(a, paths.dateOption(T, "2027-03-28_2027-04-02")), { from: "2027-03-28", to: "2027-04-02", addedBy: "alice", at: 1 }));
     await assertFails(set(ref(a, paths.dateOption(T, "2027-02-20_2027-02-10")), { from: "2027-02-20", to: "2027-02-10", addedBy: "alice", at: 1 }));
   });
 
@@ -209,17 +208,10 @@ describe("database rules", () => {
     await assertFails(remove(ref(db("uid-o"), day)));
   });
 
-  it("26. takes a show from 25 Jan to 31 Mar 2027 and refuses 24 Jan and 1 Apr", async () => {
-    const a = db("uid-a");
-    const on = (id: string, date: string) => set(ref(a, paths.show(T, id)), show({ source: "friend", addedBy: "alice", artist: "Zamna", date }));
-    await assertSucceeds(on("j1", "2027-01-25"));
-    await assertSucceeds(on("j2", "2027-01-31"));
-    await assertSucceeds(on("m1", "2027-03-31"));
-    await assertFails(on("j0", "2027-01-24"));
-    await assertFails(on("a1", "2027-04-01"));
-  });
 
   it("27. lets any member tag an event and name a new tag, with a short slug and name, and refuses a device that has not joined", async () => {
+    // Any day is a show's day (owner, 24 Nov 2026: "no restrictions"); this one is in January.
+    await assertSucceeds(set(ref(db("uid-a"), paths.show(T, "j1")), show({ source: "friend", addedBy: "alice", date: "2027-01-10" })));
     const x = db("uid-x");
     await assertFails(set(ref(x, paths.showTag(T, "j1", "big")), true));
     await assertFails(set(ref(x, paths.tagName(T, "x")), "X"));

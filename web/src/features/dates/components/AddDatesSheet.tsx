@@ -16,7 +16,7 @@ interface AddDatesSheetProps {
 
 /**
  * "Add dates": a friend's own range, in the pattern of the Add a party
- * sheet (20/8). Two native date inputs, From and To, held to the season,
+ * sheet (20/8). Two native date inputs, From and To, any day,
  * and "Add". Add checks both fields first and puts the reason under the
  * wrong one; the typed days stay.
  *
@@ -28,15 +28,15 @@ interface AddDatesSheetProps {
  *   From 18 Feb, To 24 Feb, Add          → the sheet closes; "Thu 18 – Wed 24 Feb" shows, sorted by its start, "added by you"
  *   From 13 Feb, To 10 Feb, Add          → "Pick a day on or after From." under To
  */
-export function AddDatesSheet({ open, season, onClose, onAdd }: AddDatesSheetProps) {
+export function AddDatesSheet({ open, onClose, onAdd }: AddDatesSheetProps) {
   return (
     <Sheet open={open} title="Add dates" onClose={onClose}>
-      {open && <DatesForm season={season} onAdd={onAdd} />}
+      {open && <DatesForm onAdd={onAdd} />}
     </Sheet>
   );
 }
 
-function DatesForm({ season, onAdd }: Pick<AddDatesSheetProps, "season" | "onAdd">) {
+function DatesForm({ onAdd }: Pick<AddDatesSheetProps, "onAdd">) {
   const [draft, setDraft] = useState({ from: "", to: "" });
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
   const [saving, setSaving] = useState(false);
@@ -48,7 +48,7 @@ function DatesForm({ season, onAdd }: Pick<AddDatesSheetProps, "season" | "onAdd
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    const found = checkDates(draft, season);
+    const found = checkDates(draft);
     setErrors(found);
     const first = (["from", "to"] as Field[]).find((field) => found[field]);
     if (first) return document.getElementById(`dates-${first}`)?.focus();
@@ -65,8 +65,7 @@ function DatesForm({ season, onAdd }: Pick<AddDatesSheetProps, "season" | "onAdd
           id={`dates-${name}`}
           type="date"
           value={draft[name]}
-          min={name === "to" && draft.from ? draft.from : season.from}
-          max={season.to}
+          min={name === "to" && draft.from ? draft.from : undefined}
           aria-invalid={errors[name] ? true : undefined}
           aria-describedby={errors[name] ? `dates-${name}-error` : undefined}
           onChange={(event) => set(name, event.target.value)}

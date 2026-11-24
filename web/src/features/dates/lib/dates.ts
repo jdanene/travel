@@ -1,5 +1,5 @@
-import { dayMonth, nights } from "../../../lib/format";
-import type { Answer, DateOption, Member, MemberId, TripInfo } from "../../../types/trip";
+import { nights } from "../../../lib/format";
+import type { Answer, DateOption, Member, MemberId } from "../../../types/trip";
 
 const ANSWERS: readonly Answer[] = ["yes", "maybe", "no"];
 const isAnswer = (value: unknown): value is Answer => ANSWERS.includes(value as Answer);
@@ -83,19 +83,18 @@ export function notAnswered(
  * Checks the two days of "Add dates" before anything is written, and says
  * what is wrong next to the field that is wrong, so the typed days stay.
  *
- * Inputs: draft — the two fields as typed, "YYYY-MM-DD" or empty; season —
- * the first and last day of the trip's season.
+ * Inputs: draft — the two fields as typed, "YYYY-MM-DD" or empty. Any day
+ * may be picked (owner, 24 Nov 2026: "no restrictions").
  * Output: a reason per wrong field; empty when the dates can be added.
  * Examples (tests in dates.test.ts):
  *   13–23 Feb        → {}
  *   To 10 Feb, From 13 Feb → { to: "Pick a day on or after From." }
  */
-export function checkDates(draft: { from: string; to: string }, season: TripInfo["season"]): Partial<Record<"from" | "to", string>> {
-  const outside = `Pick a day from ${dayMonth(season.from)} to ${dayMonth(season.to)}.`;
-  const inSeason = (day: string) => /^\d{4}-\d{2}-\d{2}$/.test(day) && day >= season.from && day <= season.to;
+export function checkDates(draft: { from: string; to: string }): Partial<Record<"from" | "to", string>> {
+  const real = (day: string) => /^\d{4}-\d{2}-\d{2}$/.test(day);
   const found: Partial<Record<"from" | "to", string>> = {};
-  if (!inSeason(draft.from)) found.from = outside;
-  if (!inSeason(draft.to)) found.to = outside;
+  if (!real(draft.from)) found.from = "Pick a day.";
+  if (!real(draft.to)) found.to = "Pick a day.";
   else if (!found.from && draft.to < draft.from) found.to = "Pick a day on or after From.";
   return found;
 }

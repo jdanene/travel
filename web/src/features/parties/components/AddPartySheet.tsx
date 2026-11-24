@@ -1,11 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { Sheet } from "../../../components/Sheet";
-import { dayMonth } from "../../../lib/format";
 import { initials } from "../../../lib/initials";
 import { nearestDestination, type PlaceHit, type Spot } from "../../../lib/placeSearch";
 import type { Show } from "../../../types/trip";
 import type { PartyDraft } from "../api/parties";
-import { EVENTS_WINDOW, inEventsWindow } from "../lib/window";
 import { VenueField } from "./VenueField";
 
 type Field = "venue" | "date" | "artist" | "about" | "link";
@@ -139,7 +137,7 @@ function PartyForm({ editing, destinations, venues, yourName, onSave, onRemove }
           )
         }
       />
-      {field("date", "Date", <input {...described("date")} type="date" value={draft.date} min={EVENTS_WINDOW.from} max={EVENTS_WINDOW.to} onChange={(e) => set("date", e.target.value)} />)}
+      {field("date", "Date", <input {...described("date")} type="date" value={draft.date} onChange={(e) => set("date", e.target.value)} />)}
       {field("artist", "Who is playing", <input {...described("artist")} value={draft.artist} maxLength={200} autoComplete="off" onChange={(e) => set("artist", e.target.value)} />)}
       {field("about", "What is it? (optional)", <input {...described("about")} value={draft.about} maxLength={120} autoComplete="off" onChange={(e) => set("about", e.target.value)} />)}
       {field(
@@ -163,16 +161,15 @@ function PartyForm({ editing, destinations, venues, yourName, onSave, onRemove }
 
 /**
  * Checks a draft before it is saved, so a refusal never reaches the rules.
- * Inputs: the draft; its date must lie in EVENTS_WINDOW. Output: a reason per wrong field;
+ * Inputs: the draft; its date may be any day. Output: a reason per wrong field;
  * none when the draft can be saved.
  * Examples (checked on screen): empty venue → { venue: "Add the venue." }
  */
 function problems(draft: PartyDraft): Partial<Record<Field, string>> {
   const found: Partial<Record<Field, string>> = {};
   if (!draft.venue.trim()) found.venue = "Add the venue.";
-  if (!inEventsWindow(draft.date)) {
-    found.date = `Pick a day from ${dayMonth(EVENTS_WINDOW.from)} to ${dayMonth(EVENTS_WINDOW.to)}.`;
-  }
+  // Any day (owner, 24 Nov 2026: "no restrictions"); only an empty date is refused.
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(draft.date)) found.date = "Pick a day.";
   if (!draft.artist.trim()) found.artist = "Add who is playing.";
   const link = draft.link.trim();
   if (link && !isAddress(link)) found.link = "Paste a link that starts with https://";

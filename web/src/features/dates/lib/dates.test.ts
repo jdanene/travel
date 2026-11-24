@@ -30,13 +30,12 @@ describe("date counts", () => {
     expect(notAnswered({}, { rb: { name: "RB", reply: "out", at: 1 } }, { a: option }, {})).toEqual([]);
   });
 
-  const season = { from: "2027-02-01", to: "2027-03-31" };
 
   it("checkDates accepts two days in the season", () => {
-    expect(checkDates({ from: "2027-02-13", to: "2027-02-23" }, season)).toEqual({});
+    expect(checkDates({ from: "2027-02-13", to: "2027-02-23" })).toEqual({});
   });
 
   it("checkDates refuses a To before From, next to To", () => {
-    expect(checkDates({ from: "2027-02-13", to: "2027-02-10" }, season)).toEqual({ to: "Pick a day on or after From." });
+    expect(checkDates({ from: "2027-02-13", to: "2027-02-10" })).toEqual({ to: "Pick a day on or after From." });
   });
 });
