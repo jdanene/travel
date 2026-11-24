@@ -29,8 +29,8 @@ export interface TripInfo {
   season: { from: string; to: string };
   /** The day every date option includes: the Full Moon Party, 2027-02-22. */
   anchor: { name: string; date: string };
-  /** Each destination with its centre on the map. */
-  destinations: Record<DestinationId, { name: string; lat?: number; lng?: number }>;
+  /** Each destination with its centre on the map and its country ("Indonesia"); the country may be missing on an older trip. */
+  destinations: Record<DestinationId, { name: string; country?: string; lat?: number; lng?: number }>;
 }
 
 export interface Member {
@@ -166,6 +166,8 @@ export interface Venue {
   onMap?: boolean;
   /** true for one of the owner's big nights (data/places.json); seed-parties gives its events the "big" tag once, and with no event it shows under Big nights. */
   big?: boolean;
+  /** The venue's picture from its own website (its link-preview image), https only; absent means no picture. */
+  photoUrl?: string;
 }
 
 /** What a friend's place on the map is; each has its own pin icon. */

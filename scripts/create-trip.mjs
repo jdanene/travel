@@ -9,10 +9,12 @@
  * The first run makes the trip id (20 random characters) and the organizer
  * key, and saves both in local/trip.state.json (local/trip.state.emulator.json
  * with --emulator). Every later run keeps them.
+ * Each destination takes its centre and its country ("Indonesia", for
+ * "Bali, Indonesia") from data/places.json.
  * Each run replaces info (each field by its own path, so info/inviteTitle,
  * which an organizer sets in the "Invite" sheet, stays; absent, the page and
  * the link preview use the default), crew/expected, places/areas,
- * places/venues (each with its `big` flag from data/places.json, plan D18;
+ * places/venues (each with its `big` flag and its `photoUrl` from data/places.json, plan D18;
  * seed-parties turns it into the events' "big" tag, D19),
  * its own organizer key (the keys organizers add on the page stay)
  * and the admin list (tripSecrets/{tripId}/admins, from the
@@ -66,9 +68,12 @@ const problems = validateTripFile(file, idFromName);
 if (problems.length) stop(`${TRIP_FILE} is not right:\n  - ${problems.join("\n  - ")}`);
 
 const places = readJson(PLACES_FILE);
-// Each destination needs its centre for the map; a new one is added to data/places.json first.
+// Each destination needs its centre for the map, and its country; a new one is added to data/places.json first.
 const noCentre = Object.keys(file.destinations).filter((id) => typeof places.destinations?.[id]?.lat !== "number");
 if (noCentre.length) stop(`${PLACES_FILE} has no centre for ${noCentre.join(", ")}; add it under "destinations".`);
+// The page names each destination with its country, "Bali, Indonesia" (owner, 24 Nov 2026).
+const noCountry = Object.keys(file.destinations).filter((id) => typeof places.destinations[id].country !== "string" || !places.destinations[id].country.trim());
+if (noCountry.length) stop(`${PLACES_FILE} has no country for ${noCountry.join(", ")}; add "country" under "destinations".`);
 mkdirSync("local", { recursive: true });
 const state = existsSync(STATE_FILE) ? readJson(STATE_FILE) : { tripId: randomId(20), organizerKey: randomId(24) };
 writeFileSync(STATE_FILE, JSON.stringify(state, null, 2) + "\n");

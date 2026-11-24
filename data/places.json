@@ -1,19 +1,23 @@
 {
- "source": "Positions from OpenStreetMap, read with the Nominatim search on 23 and 24 Nov 2026. A venue with \"big\": true is one of the owner's big nights (owner, 24 Nov 2026); the Events list and the map show those by default. A venue with \"onMap\": false is not on OpenStreetMap; it sits at its area's centre, or at the island's centre when the lineup gives no area. Marquee is not on OpenStreetMap either; it sits at The Shoppes at Marina Bay Sands, the mall that holds it.",
+ "source": "Positions from OpenStreetMap, read with the Nominatim search on 23 and 24 Nov 2026. A venue with \"big\": true is one of the owner's big nights (owner, 24 Nov 2026); the Events list and the map show those by default. A venue with \"onMap\": false is not on OpenStreetMap; it sits at its area's centre, or at the island's centre when the lineup gives no area. Marquee is not on OpenStreetMap either; it sits at The Shoppes at Marina Bay Sands, the mall that holds it. photoUrl is the venue's link-preview picture (og:image) or the main photo on its own website, read on 24 Nov 2026; a venue without one has no website picture that loads.",
  "destinations": {
   "bali": {
+   "country": "Indonesia",
    "lat": -8.45572,
    "lng": 115.27043
   },
   "kohPhangan": {
+   "country": "Thailand",
    "lat": 9.73495,
    "lng": 100.03057
   },
   "phuket": {
+   "country": "Thailand",
    "lat": 7.97908,
    "lng": 98.33552
   },
   "singapore": {
+   "country": "Singapore",
    "lat": 1.28992,
    "lng": 103.85191
   }
@@ -148,7 +152,8 @@
    "lat": -8.84641,
    "lng": 115.14065,
    "line": "Club on the cliffs",
-   "big": true
+   "big": true,
+   "photoUrl": "https://cdn.prod.website-files.com/5fbc914db82f653793c3875e/60278b1ef2efac7c85ea1df3_savaya-url.jpg"
   },
   "single-fin": {
    "name": "Single Fin",
@@ -156,7 +161,8 @@
    "areaId": "uluwatu",
    "lat": -8.81501,
    "lng": 115.08892,
-   "line": "Bar on the cliff over the surf break"
+   "line": "Bar on the cliff over the surf break",
+   "photoUrl": "https://www.singlefinbali.com/wp-content/uploads/2024/06/hero-homepage.webp"
   },
   "ulu-cliffhouse": {
    "name": "Ulu Cliffhouse",
@@ -164,7 +170,8 @@
    "areaId": "uluwatu",
    "lat": -8.81407,
    "lng": 115.09152,
-   "line": "Pool club on the cliff"
+   "line": "Pool club on the cliff",
+   "photoUrl": "https://images.squarespace-cdn.com/content/v1/6a3b4988b2721d3f0e4bdcbd/0ab3a49b-950e-4fd3-9c42-24c165d82b39/ulucliffhouse_1784110313_3941725251876226838_5404708135.jpg"
   },
   "el-kabron": {
    "name": "El Kabron",
@@ -172,7 +179,8 @@
    "areaId": "uluwatu",
    "lat": -8.80194,
    "lng": 115.11741,
-   "line": "Cliff-top club with sunset parties"
+   "line": "Cliff-top club with sunset parties",
+   "photoUrl": "https://elkabron.com/El-Kabron-Bali-Luxury-Party-Beach-Club-Oceanfront-Restaraunt-Uluwatu.webp"
   },
   "atlas-beach-club": {
    "name": "Atlas Beach Club",
@@ -182,7 +190,8 @@
    "lng": 115.1436,
    "onMap": false,
    "line": "Beach club with guest DJs",
-   "big": true
+   "big": true,
+   "photoUrl": "https://atlasbeachfest.com/images/beach-club/about.webp"
   },
   "atlas-super-club": {
    "name": "Atlas Super Club",
@@ -191,7 +200,8 @@
    "lat": -8.66432,
    "lng": 115.13907,
    "line": "Nightclub beside Atlas Beach Club",
-   "big": true
+   "big": true,
+   "photoUrl": "https://atlasbeachfest.com/images/cta/super-club.png"
   },
   "desa-kitsune": {
    "name": "Desa Kitsuné",
@@ -201,7 +211,8 @@
    "lng": 115.1436,
    "onMap": false,
    "line": "Garden club with house DJs",
-   "big": true
+   "big": true,
+   "photoUrl": "https://desakitsune.com/icons/richlink.jpg"
   },
   "cafe-del-mar-bali": {
    "name": "Café del Mar Bali",
@@ -210,7 +221,8 @@
    "lat": -8.6399,
    "lng": 115.1436,
    "onMap": false,
-   "line": "Beach club with a large pool"
+   "line": "Beach club with a large pool",
+   "photoUrl": "https://cafedelmarbali.co.id/pulpies/images/data/seo.webp"
   },
   "finns-beach-club": {
    "name": "FINNS Beach Club",
@@ -219,7 +231,8 @@
    "lat": -8.6399,
    "lng": 115.1436,
    "onMap": false,
-   "line": "Large beach club with DJs every day"
+   "line": "Large beach club with DJs every day",
+   "photoUrl": "https://finnsbeachclub.com/wp-content/uploads/2023/11/Copy-of-2026.04.18_Absolut_Brand_Activation_Drone_Shoot_FJR_-2-1-Large.jpeg"
   },
   "la-brisa": {
    "name": "La Brisa",
@@ -227,7 +240,8 @@
    "areaId": "canggu",
    "lat": -8.65458,
    "lng": 115.12481,
-   "line": "Driftwood beach club"
+   "line": "Driftwood beach club",
+   "photoUrl": "https://labrisa-bali.com/wp-content/uploads/2025/04/LB-Venue-JM050325-7-scaled.jpg"
   },
   "potato-head": {
    "name": "Potato Head",
@@ -236,7 +250,8 @@
    "lat": -8.67941,
    "lng": 115.14996,
    "line": "Beach club with a pool",
-   "big": true
+   "big": true,
+   "photoUrl": "https://cdn.potatohead.co/article_thumb3_6edf9dd7a1.jpg"
   },
   "klymax": {
    "name": "Klymax",
@@ -245,7 +260,8 @@
    "lat": -8.67907,
    "lng": 115.14988,
    "line": "Late-night club",
-   "big": true
+   "big": true,
+   "photoUrl": "https://api.klymax.co/uploads/XX_HERO_IMAGE_PH_09709_34ec616afb.jpg"
   },
   "mrs-sippy": {
    "name": "Mrs Sippy",
@@ -253,7 +269,8 @@
    "areaId": "seminyak",
    "lat": -8.67961,
    "lng": 115.15123,
-   "line": "Pool club with a high dive"
+   "line": "Pool club with a high dive",
+   "photoUrl": "https://backend.mrssippybali.com/uploads/Website_Banner_04_2020_a87f1c6a72.jpg"
   },
   "haad-rin-beach": {
    "name": "Haad Rin Beach",
@@ -262,7 +279,8 @@
    "lat": 9.67667,
    "lng": 100.06808,
    "line": "Beach of the Full Moon Party",
-   "big": true
+   "big": true,
+   "photoUrl": "https://fullmoonparty-thailand.com/assets/photos/welcome-to-the-full-moon-party.webp"
   },
   "eden-garden": {
    "name": "Eden Garden",
@@ -278,7 +296,8 @@
    "areaId": "ban-tai",
    "lat": 9.71454,
    "lng": 100.02814,
-   "line": "Jungle festival every two weeks"
+   "line": "Jungle festival every two weeks",
+   "photoUrl": "https://static.wixstatic.com/media/94d41a_edc6224f537a4e45831f13bc5cbb3017~mv2.jpg/v1/fill/w_1280,h_670,al_c/94d41a_edc6224f537a4e45831f13bc5cbb3017~mv2.jpg"
   },
   "hidden-paradise": {
    "name": "Hidden Paradise",
@@ -294,7 +313,8 @@
    "areaId": "ban-tai",
    "lat": 9.71299,
    "lng": 100.03276,
-   "line": "Jungle party with two stages"
+   "line": "Jungle party with two stages",
+   "photoUrl": "https://jungle-experience.com/wp-content/uploads/2024/06/JE-05.24_WEB_016.jpg"
   },
   "waterfall-party": {
    "name": "Waterfall Party",
@@ -318,7 +338,8 @@
    "lat": 7.96209,
    "lng": 98.28432,
    "line": "Beach club between Kamala and Surin beaches",
-   "big": true
+   "big": true,
+   "photoUrl": "https://cdn.prod.website-files.com/675969a2220618a361236fac/6a4c79738c44b95a055b2318_website%20graph%20image.avif"
   },
   "illuzion-phuket": {
    "name": "Illuzion Phuket",
@@ -327,7 +348,8 @@
    "lat": 7.89369,
    "lng": 98.2978,
    "line": "Large nightclub on Bangla Road",
-   "big": true
+   "big": true,
+   "photoUrl": "https://www.illuzionphuket.com/wp-content/uploads/2020/06/Illuzion-Club-Phuket-Party-Events-1.jpg"
   },
   "armania-phuket": {
    "name": "Armania Phuket",
@@ -337,7 +359,8 @@
    "lng": 98.2988,
    "onMap": false,
    "line": "Nightclub on Bangla Road",
-   "big": true
+   "big": true,
+   "photoUrl": "https://www.barfunkphuket.com/app/uploads/2025/06/64.jpg"
   },
   "yona-beach-club": {
    "name": "Yona Beach Club",
@@ -356,7 +379,8 @@
    "lat": 7.99582,
    "lng": 98.29164,
    "line": "Beach club on Bang Tao Beach",
-   "big": true
+   "big": true,
+   "photoUrl": "https://www.mayaphuket.com/og-v2.png"
   },
   "xana-beach-club": {
    "name": "XANA Beach Club",
@@ -375,7 +399,8 @@
    "lng": 98.2744,
    "onMap": false,
    "line": "Beach club on Natai Beach in Phang Nga, north of Phuket",
-   "big": true
+   "big": true,
+   "photoUrl": "https://www.babaphuket.com/images/og-image/main.jpg"
   },
   "marquee": {
    "name": "Marquee",
@@ -384,7 +409,8 @@
    "lat": 1.28402,
    "lng": 103.85887,
    "line": "Nightclub in the Marina Bay Sands mall",
-   "big": true
+   "big": true,
+   "photoUrl": "https://taogroup.com/wp-content/uploads/2024/07/Tao-Group-Marquee-MBS28-scaled.jpg"
   },
   "ce-la-vi": {
    "name": "CÉ LA VI",
@@ -393,7 +419,8 @@
    "lat": 1.28462,
    "lng": 103.86093,
    "line": "Club lounge on the roof of Marina Bay Sands",
-   "big": true
+   "big": true,
+   "photoUrl": "https://cdn.prod.website-files.com/69895520b5015c9e81c9e590/69962860c42d3f838997b669_67d15ae1eb6039959ed6ee56_MBS-drone-2.webp"
   },
   "zouk": {
    "name": "Zouk",
@@ -402,7 +429,8 @@
    "lat": 1.29067,
    "lng": 103.84602,
    "line": "Large club by the river at Clarke Quay",
-   "big": true
+   "big": true,
+   "photoUrl": "https://zoukgroup.com/singapore/wp-content/uploads/sites/2/2026/07/zouk_dj_dance_floor_crowd.jpg"
   },
   "yeden-gardens": {
    "name": "Yeden Gardens",
@@ -419,7 +447,8 @@
    "areaId": "patong",
    "lat": 7.89495,
    "lng": 98.2988,
-   "line": "Beach club on Patong Beach (pin is approximate)"
+   "line": "Beach club on Patong Beach (pin is approximate)",
+   "photoUrl": "https://barracuda-r2.tumwebsme.com/cms/DAY_001_FINAL_HIGHRESRecovered-copy-1024x702.webp"
   },
   "stayfly": {
    "name": "Stayfly",
@@ -427,7 +456,8 @@
    "areaId": "wok-tum",
    "lat": 9.7432,
    "lng": 99.9902,
-   "line": "Venue in Wok Tum that hosts the Awakenest festival (pin is approximate)"
+   "line": "Venue in Wok Tum that hosts the Awakenest festival (pin is approximate)",
+   "photoUrl": "https://stayflystudio.com/landing/studio/stayfly-og.jpg"
   }
  }
 }
