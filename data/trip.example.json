@@ -1,18 +1,36 @@
 {
   "name": "Bali · Koh Phangan",
   "summary": "Uluwatu and Canggu, then Haad Rin. Dates and stay are being voted.",
-  "note": "Ten days of sun and Savaya, then the full moon. Say you will come.",
   "noteBy": "JD",
-  "season": { "from": "2027-02-01", "to": "2027-03-31" },
-  "anchor": { "name": "Full Moon Party", "date": "2027-02-22" },
+  "season": {
+    "from": "2027-02-01",
+    "to": "2027-03-31"
+  },
+  "anchor": {
+    "name": "Full Moon Party",
+    "date": "2027-02-22"
+  },
   "destinations": {
-    "bali": { "name": "Bali" },
-    "kohPhangan": { "name": "Koh Phangan" }
+    "bali": {
+      "name": "Bali"
+    },
+    "kohPhangan": {
+      "name": "Koh Phangan"
+    }
   },
   "dateOptions": [
-    { "from": "2027-02-13", "to": "2027-02-23" },
-    { "from": "2027-02-16", "to": "2027-02-25" },
-    { "from": "2027-02-19", "to": "2027-03-01" }
+    {
+      "from": "2027-02-13",
+      "to": "2027-02-23"
+    },
+    {
+      "from": "2027-02-16",
+      "to": "2027-02-25"
+    },
+    {
+      "from": "2027-02-19",
+      "to": "2027-03-01"
+    }
   ],
   "crew": [],
   "admins": []
