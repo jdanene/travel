@@ -1,6 +1,7 @@
 import { Notice } from "../components/Notice";
-import { crewOf, useOrganizerLink } from "../features/crew/api/crew";
+import { crewOf, useOrganizerLink, type CrewView } from "../features/crew/api/crew";
 import { Invitation } from "../features/crew/components/Invitation";
+import { DatesModule } from "../features/dates/components/DatesModule";
 import { useTrip } from "../lib/useTrip";
 import type { Trip } from "../types/trip";
 import type { ReactNode } from "react";
@@ -54,12 +55,7 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
       {(!crew.member || crew.member.reply === "out") && <Invitation tripId={tripId} uid={uid} info={trip.info} crew={crew} />}
       {crew.member && (
         <>
-          {crew.isOrganizer && (
-            <Notice>
-              <b>Organizer view.</b>
-            </Notice>
-          )}
-          <Home trip={trip} memberId={crew.memberId} organizer={crew.organizer} content={moduleSlots(tripId, trip, uid)} />
+          <Home trip={trip} memberId={crew.memberId} organizer={crew.organizer} content={moduleSlots(tripId, trip, crew)} />
         </>
       )}
     </>
@@ -70,16 +66,23 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
  * What each module shows when open: one slot per module, so each module's
  * ticket plugs in here without touching the home page's layout.
  *
- * Inputs: the trip id, the trip and this device.
+ * Inputs: the trip id, the trip and the crew view of this device.
  * Output: the content for each module; null until its ticket fills it.
- * Examples: none yet; every slot is empty until Trips 7, 9, 11, 12 and 16.
+ * Examples (checked on screen): the Dates slot holds the Dates module.
  */
-function moduleSlots(tripId: string, trip: Trip, uid: string): Record<ModuleId, ReactNode> {
-  void tripId;
-  void trip;
-  void uid;
+function moduleSlots(tripId: string, trip: Trip, crew: CrewView): Record<ModuleId, ReactNode> {
   return {
-    dates: null, // Trip 7: the Dates module.
+    dates: crew.memberId && (
+      <DatesModule
+        tripId={tripId}
+        info={trip.info}
+        dates={trip.dates}
+        expected={crew.expected}
+        members={crew.byId}
+        memberId={crew.memberId}
+        isOrganizer={crew.isOrganizer}
+      />
+    ), // Trip 7: the Dates module.
     stay: null, // Trip 9: the Stay module.
     parties: null, // Trip 11: the Parties module.
     links: null, // Trip 16: the Links module.
