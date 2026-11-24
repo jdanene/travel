@@ -28,6 +28,7 @@ Sources: `docs/requirements.md` section 0, the mocks `public/designs/12/index.ht
 | D14 | Links is a module: a friend pastes an Instagram, TikTok or other link for a destination, and it shows for everyone. Its data is `links/items`; the link reader also reads Instagram and TikTok. | Owner, 23 Nov 2026: the bucket for cool things found online. |
 | D15 | The organizer may also sign in with Google. A verified email on the trip's admin list (`admins` in `local/trip.json`, written by `create-trip` to `tripSecrets/{tripId}/admins`) makes that device an organizer, on any device. Google is linked to the device's anonymous account, so its uid and member stay; on a second device the Google account's uid is used, and the device picks its name under "Already replied". The organizer link keeps working. | Owner: "My email will be admin". One link on one device was easy to lose. |
 | D16 | Any friend adds a date option with "Add dates" (From, To, inside 1 Feb to 31 Mar 2027). It shows for everyone at once, sorted by its first day, with "added by" on it and the adder's Yes. An option need not include 22 Feb, and nothing on the Dates module points at it. The organizer still confirms one option. | Owner, 24 Nov 2026: "there should be an option to create your own date interval, and that interval then shows for everyone else." Three fixed options were too restrictive. A range per friend with a computed best stretch was weighed and dropped by the owner for this. |
+| D17 | The splash comes first. A load of `/trip/<tripId>` opens the trip only straight after a tap on the splash's "OPEN THE TRIP", which saves a one-time pass (sessionStorage, one key per trip, spent on load, good for a minute); any other load, a refresh too, goes to `/?t=<tripId>`, keeping `organizer=<key>`, and the button carries the key in. Both links open the splash. | Owner, 23 Nov 2026: "I should not be able to get to the admin page without going through the splash." "If I refresh it should go back to the splash." |
 
 Each was weighed against a second design. D1 against plain files with no build (rejected: nine screens of live state in hand-written DOM code is harder to read than components). D3 against email links (rejected: a step to learn). D7 against one listener per feature (rejected: five loading states for one small page). D8 against typed fields only (rejected: screen 5 shows the listing's name and photo; typed fields stay as the fallback).
 
@@ -245,6 +246,10 @@ The number is the case's id. Each ticket lists its own.
 39. The id on the splash is wrong: the app's own "not a trip" page answers (case 1).
 40. `ship.sh` fails part way (rules sent, hosting not): it stops and names the step. A second run is safe: every step replaces, none appends.
 41. The Lambda deploy fails or the AWS sign-in has expired: `ship.sh --with-reader` stops and prints the sign-in command. The app still works; case 16 covers a missing reader.
+55. A load of `/trip/<tripId>` without a fresh pass from the splash's button (a refresh, a typed link, the old organizer link, a new tab, Back from another site): it goes to `/?t=<tripId>`, keeping `organizer=<key>`. The splash takes the key out of the address bar and keeps it in memory for the button.
+56. The key holds a character outside letters, digits, `-` and `_`, or is shorter than 16 or longer than 64: the splash ignores it and the friend enters as a friend.
+57. The phone blocks sessionStorage: the app lets the tab in, so the friend is never trapped between the splash and the app.
+58. Two tabs: each tab goes through the splash on every load; the pass lives in one tab and is spent once. The device's sign-in and member stay, so after the button the friend lands straight on the trip, and an organizer stays an organizer without the key.
 
 ### 5.4 The retry story
 
@@ -452,7 +457,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 2. `data/places.json` (new, committed): the areas (Uluwatu, Canggu, Seminyak, Ubud, Munduk; Haad Rin, Ban Tai, Thong Sala, Srithanu) with a centre each; the centre of each destination; every venue named in the two lineup files, with its area and position. Take positions from OpenStreetMap and name the source in the file.
 3. `scripts/create-trip.mjs` (new): reads `local/trip.json`, checks it, and writes `info`, `crew/expected`, `dates/options` and `places` with the Firebase CLI. The first run makes the trip id (20 random characters) and the organizer key, writes the key under `/tripSecrets`, and saves both in `local/trip.state.json`. It prints and saves in `local/links.txt`:
    - crew link: `https://travel-ca8f9.web.app/?t=<tripId>`
-   - organizer link: `https://travel-ca8f9.web.app/trip/<tripId>?organizer=<key>`
+   - organizer link: `https://travel-ca8f9.web.app/?t=<tripId>&organizer=<key>` (the splash first, D17; the old `/trip/<tripId>?organizer=<key>` still works and goes through the splash)
 4. `--emulator` writes to the emulator.
 
 `local/` is git-ignored. No real name, id or key is committed.
