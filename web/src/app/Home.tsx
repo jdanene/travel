@@ -6,6 +6,9 @@ import type { Trip } from "../types/trip";
 import { allSet, modules, type ModuleId } from "./lib/modules";
 import "./Home.css";
 
+/** How long a module takes to open or shut: Home.css's .fb-fold transition. */
+const FOLD_MS = 220;
+
 /** Each module's name and icon on its button (12/2). */
 const LOOK: Record<ModuleId, { name: string; icon: IconName }> = {
   dates: { name: "Dates", icon: "cal" },
@@ -43,33 +46,77 @@ interface HomeProps {
  * dates and every stay are confirmed. From 900 px up the flyer sits in a
  * sticky left column and the modules in the right one. An opened module
  * scrolls to the top of the window, unless its top is already near there.
+ * A module eases open and shut in about 220 ms (its body fades, the close
+ * mark turns in); closing one while opening another runs together, and the
+ * scroll aims where the opened module will stand once both finish. With
+ * prefers-reduced-motion it opens and shuts at once.
  * Examples (checked on the emulator at 375 px against 12/2 and 12/3, and at 1650 px):
  *   dates open      → Dates "Tap to answer", Events, Links, Map; no Stay
- *   tap "Dates"     → Dates opens with the accent ring at the top of the window; tap again, or another module, and it closes
+ *   tap "Dates"     → Dates eases open at the top of the window; tap again, or another module, and it eases shut
+ *   Dates open, tap "Map" → Dates folds as Map unfolds; Map ends at the top of the window, the warm map already drawn
  *   1650 px         → the flyer on the left, the module buttons on the right
  */
 export function Home({ trip, memberId, organizer, you, onYou, replied, content }: HomeProps) {
   const [open, setOpen] = useState<ModuleId | null>(null);
+  // The fold that stands open (one frame behind `open`, so the browser draws it shut first), and the one still closing.
+  const [shownId, setShownId] = useState<ModuleId | null>(null);
+  const [leaving, setLeaving] = useState<ModuleId | null>(null);
   const shown = modules(trip, memberId);
   const openId = shown.some((module) => module.id === open) ? open : null;
-  const filled = content?.(setOpen) ?? {};
   const sections = useRef<Partial<Record<ModuleId, HTMLElement | null>>>({});
-
   const list = useRef<HTMLDivElement>(null);
+  const leaveTimer = useRef<number>();
+  useEffect(() => () => window.clearTimeout(leaveTimer.current), []);
+
+  const toggle = (id: ModuleId | null) => {
+    if (id === open) return;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setLeaving(still ? null : open);
+    if (still) setShownId(id);
+    setOpen(id);
+    // The closing body goes once its fold is shut; a timer, since transitionend never comes in a hidden tab.
+    window.clearTimeout(leaveTimer.current);
+    if (!still && open) leaveTimer.current = window.setTimeout(() => setLeaving(null), FOLD_MS + 40);
+  };
+  const filled = content?.(toggle) ?? {};
+
+  useEffect(() => {
+    const fold = openId && sections.current[openId]?.querySelector<HTMLElement>(".fb-fold");
+    if (fold) void fold.offsetHeight; // Draw the fold shut once, so the switch to open eases.
+    setShownId(openId);
+  }, [openId]);
 
   useEffect(() => {
     const section = openId && sections.current[openId];
     const below = list.current;
     if (below) below.style.paddingBottom = "";
     if (!section || !below) return;
-    const top = section.getBoundingClientRect().top;
-    if (top >= 0 && top < window.innerHeight * 0.2) return;
-    // A module near the end of the page needs room below it to reach the top of the window.
+    // The page as it will stand once the folds finish: the closing module gives back its body.
+    const closing = leaving && leaving !== openId ? sections.current[leaving]?.querySelector<HTMLElement>(".fb-fold") : null;
+    const shrink = closing?.getBoundingClientRect().height ?? 0;
+    const shrinkAbove = closing && closing.compareDocumentPosition(section) & Node.DOCUMENT_POSITION_FOLLOWING ? shrink : 0;
+    const top = section.getBoundingClientRect().top - shrinkAbove;
+    // Already near the top once the folds finish: stay, but keep the page long enough to hold this place.
+    const near = top >= 0 && top < window.innerHeight * 0.2;
     const margin = parseFloat(getComputedStyle(section).scrollMarginTop) || 0;
-    const room = window.scrollY + top - margin + window.innerHeight - document.documentElement.scrollHeight;
-    if (room > 0) below.style.paddingBottom = `${room + parseFloat(getComputedStyle(below).paddingBottom || "0")}px`;
-    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    section.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
+    const target = near ? window.scrollY : window.scrollY + top - margin;
+    // A module near the end of the page needs room below it to reach the top of the window. While the folds move,
+    // the page is never shorter than with the closing body gone and the opening one at its present height; the room
+    // is measured again once they finish, so no extra space stays below.
+    const makeRoom = () => {
+      below.style.paddingBottom = "";
+      const closingNow = closing?.isConnected ? closing.getBoundingClientRect().height : 0;
+      const room = target + window.innerHeight - (document.documentElement.scrollHeight - closingNow);
+      if (room > 0) below.style.paddingBottom = `${room + parseFloat(getComputedStyle(below).paddingBottom || "0")}px`;
+    };
+    makeRoom();
+    const settle = window.setTimeout(makeRoom, FOLD_MS + 60);
+    if (!near) {
+      const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: target, behavior: still ? "auto" : "smooth" });
+    }
+    return () => window.clearTimeout(settle);
+    // Measured once per opening; `leaving` is set in the same tap.
   }, [openId]);
 
   return (
@@ -80,15 +127,21 @@ export function Home({ trip, memberId, organizer, you, onYou, replied, content }
       <div className="modules" ref={list}>
         {shown.map(({ id, lines }) => {
           const isOpen = id === openId;
+          const drawn = isOpen || id === leaving;
           return (
-            <section key={id} ref={(node) => void (sections.current[id] = node)} className={`fb${isOpen ? " open" : ""}`} aria-labelledby={`fb-${id}`}>
+            <section
+              key={id}
+              ref={(node) => void (sections.current[id] = node)}
+              className={`fb${isOpen ? " open" : ""}${isOpen && shownId === id ? " shown" : ""}`}
+              aria-labelledby={`fb-${id}`}
+            >
               <button
                 type="button"
                 id={`fb-${id}`}
                 className="fb-head"
                 aria-expanded={isOpen}
                 aria-controls={`fb-body-${id}`}
-                onClick={() => setOpen(isOpen ? null : id)}
+                onClick={() => toggle(isOpen ? null : id)}
               >
                 <span className="fb-name">
                   <Icon name={LOOK[id].icon} />
@@ -106,9 +159,11 @@ export function Home({ trip, memberId, organizer, you, onYou, replied, content }
                   </span>
                 )}
               </button>
-              {isOpen && (
-                <div className="fb-body" id={`fb-body-${id}`}>
-                  {filled[id]}
+              {drawn && (
+                <div className="fb-fold" id={`fb-body-${id}`}>
+                  <div className="fb-fold-in">
+                    <div className="fb-body">{filled[id]}</div>
+                  </div>
                 </div>
               )}
             </section>

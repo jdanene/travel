@@ -25,3 +25,19 @@
 .check-events { display: flex; flex-wrap: wrap; align-items: center; gap: 0 0.75rem; margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid var(--line); }
 .check-now { min-height: 2.75rem; padding: 0 1rem; border-radius: 0.75rem; font-size: 0.9375rem; font-weight: 700; }
 .check-now:disabled { opacity: .5; cursor: default; }
+/* A module eases open and shut in place (owner, 24 Nov 2026): the fold's row grows from 0fr to 1fr, so its height
+   follows the content with no measuring, and the body fades in with it. */
+.fb-fold { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 220ms cubic-bezier(0.16, 1, 0.3, 1), opacity 220ms ease-out; }
+.fb.shown .fb-fold { grid-template-rows: 1fr; opacity: 1; }
+.fb-fold-in { min-height: 0; overflow: hidden; }
+.fb-head .close svg { animation: fb-turn 220ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.fb-state { animation: fb-fade 220ms ease-out both; }
+@keyframes fb-turn { from { transform: rotate(-90deg); opacity: 0; } }
+@keyframes fb-fade { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .fb-fold { transition: none; }
+  .fb-head .close svg, .fb-state { animation: none; }
+}
+/* The scroll to an opened module is aimed where it will stand once the folds finish; the browser's scroll anchoring
+   would shift the page again as a module above it shuts. */
+.modules { overflow-anchor: none; }
