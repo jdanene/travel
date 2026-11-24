@@ -171,4 +171,10 @@ describe("database rules", () => {
     await assertSucceeds(set(ref(db("uid-o"), paths.inviteTitle(T)), "Bali & Koh Phangan 2027"));
     await assertFails(set(ref(db("uid-o"), paths.inviteTitle(T)), "x".repeat(61)));
   });
+
+  it("22. lets an organizer add an organizer key, never a friend, and never over one", async () => {
+    await assertFails(set(ref(db("uid-a"), paths.organizerKey(T, "FriendKey0123456789abcde")), true));
+    await assertSucceeds(set(ref(db("uid-o"), paths.organizerKey(T, "CoOrgKey0123456789abcdef")), true));
+    await assertFails(set(ref(db("uid-o"), paths.organizerKey(T, KEY)), null));
+  });
 });

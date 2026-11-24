@@ -13,8 +13,10 @@
    * dates/options, parties/lastYear, places, tripSecrets/organizerKey and
    * tripSecrets/admins with admin rights, so no rule below lets a phone
    * write them. The exceptions are places/custom, a friend's place from
-   * "Add to map", and info/inviteTitle, which an organizer sets with
-   * "Edit invite" and create-trip leaves alone.
+   * "Add to map"; info/inviteTitle, which an organizer sets with
+   * "Edit invite" and create-trip leaves alone; and a new
+   * tripSecrets/organizerKey entry, which an organizer adds with
+   * "Add an organizer" and create-trip keeps.
    */
   "rules": {
     "trips": {
@@ -213,6 +215,14 @@
 
     "tripSecrets": {
       "$tripId": {
+        "organizerKey": {
+          "$key": {
+            /* An organizer makes a new organizer link ("Add an organizer"): create only, never over a key, never a removal.
+               No rule lets a phone read a key, so no device can list them. */
+            ".write": "auth != null && !data.exists() && root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true",
+            ".validate": "newData.val() === true && $key.matches(/^[A-Za-z0-9_-]{16,64}$/)"
+          }
+        },
         "claims": {
           "$uid": {
             /* A device writes its own claim; only a key that exists is accepted. */

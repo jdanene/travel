@@ -10,7 +10,7 @@ import "./EditInvite.css";
 
 /**
  * "Edit invite": the organizer's quiet text link at the foot of the trip
- * page, where a friend sees "Organizer sign-in". It opens the sheet "Invite
+ * page, after "Invite friends", where a friend sees "Organizer sign-in". It opens the sheet "Invite
  * title": one field with the title, a live preview of the link as Messages
  * and WhatsApp show it ("You're invited to “…”. Tap here to access"), and
  * Save. Friends never see it: the page renders it for an organizer only.
@@ -64,11 +64,9 @@ export function EditInvite({ tripId, info }: { tripId: string; info: TripInfo | 
 
   return (
     <>
-      <div className="organizer-foot">
-        <button type="button" className="organizer-link" onClick={start}>
-          Edit invite
-        </button>
-      </div>
+      <button type="button" className="organizer-link" onClick={start}>
+        Edit invite
+      </button>
       <Sheet open={open} title="Invite title" onClose={() => setOpen(false)}>
         <form className="invite-title-form" onSubmit={(event) => void submit(event)} noValidate>
           <label className="field">

@@ -15,6 +15,24 @@ export const DEFAULT_INVITE_TITLE = "Indonesia/Thailand Trip 2027";
 /** The longest title the rules accept. */
 export const MAX_INVITE_TITLE = 60;
 
+/** The live site; every link the organizer shares opens here, as scripts/create-trip.mjs prints them. */
+export const SITE = "https://travel-ca8f9.web.app";
+
+/**
+ * Makes the links "Invite friends" hands out: the crew link, and with a
+ * key, an organizer link. Both open the splash, as the links of
+ * scripts/create-trip.mjs do.
+ *
+ * Inputs: tripId — the trip; key — an organizer key, or none for the crew link.
+ * Output: the link.
+ * Examples (each is a test in invite.test.ts):
+ *   inviteLink("abc")        → "https://travel-ca8f9.web.app/?t=abc"
+ *   inviteLink("abc", "K1")  → "https://travel-ca8f9.web.app/?t=abc&organizer=K1"
+ */
+export function inviteLink(tripId: string, key?: string): string {
+  return `${SITE}/?t=${tripId}${key ? `&organizer=${key}` : ""}`;
+}
+
 /**
  * Makes the line a link preview shows, from the invite title. The Edit
  * invite sheet shows it as the friend will read it; the stamp script
