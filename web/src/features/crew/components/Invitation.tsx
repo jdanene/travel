@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Face, tone } from "../../../components/Avatars";
+import { Face } from "../../../components/Avatars";
 import { FlyerHead } from "../../../components/FlyerHead";
 import { Notice } from "../../../components/Notice";
 import type { WriteResult } from "../../../lib/db";
@@ -110,7 +110,7 @@ export function Invitation({ tripId, uid, info, crew }: InvitationProps) {
               {crew.members.map((member) => (
                 <li key={member.id}>
                   <button type="button" onClick={() => onComeBack(member.id)}>
-                    <Face person={member} className={tone(member.id)} />
+                    <Face person={member} className="" />
                     <span>{member.name}</span>
                   </button>
                 </li>

@@ -1,4 +1,4 @@
-import { Face, tone, usePhoto, type Person } from "../components/Avatars";
+import { Face, usePhoto, type Person } from "../components/Avatars";
 import { Icon } from "../components/Icon";
 import { Sheet } from "../components/Sheet";
 import { crewCounts, type CrewList, type CrewRow } from "./lib/crewList";
@@ -52,7 +52,7 @@ export function CrewTitle({ list, you, onYou, onSee }: CrewTitleProps) {
               </span>
             </button>
           ) : (
-            <Face key={row.id} person={row} className={tone(row.id)} />
+            <Face key={row.id} person={row} className="" />
           ),
         )}
       </span>
@@ -104,7 +104,7 @@ export function CrewSheet({ open, list, youId, onClose }: { open: boolean; list:
             ) : (
               rows.map((row) => (
                 <div key={row.id} className="pr">
-                  <Face person={row} className={row.id === youId ? "you" : tone(row.id)} />
+                  <Face person={row} className={row.id === youId ? "you" : ""} />
                   <span>
                     <b>{row.id === youId ? "You" : row.name}</b>
                     {row.line && <small>{row.line}</small>}
