@@ -38,7 +38,7 @@
 /* Every line has one shape: face | name and time on one line, then the content, then the emoji row. */
 .row { display: grid; grid-template-columns: 2.25rem minmax(0, 1fr); column-gap: 0.75rem; padding: 0.375rem 0; }
 .row > .av { width: 2.25rem; height: 2.25rem; font-size: 0.6875rem; margin-top: 0.125rem; }
-.feedcard .av { color: #3a3a3c; border-color: var(--page); } /* the card remaps --ink2 to light; initials stay dark on their light circle */
+.feedcard .av { border-color: var(--page); } /* each face carries its own GTA colour and text colour (Avatars.css) */
 .row > .av { border-width: 0; }
 .av.sys { background: var(--on-page); color: #111; }
 .row-body { min-width: 0; }

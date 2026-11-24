@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { modules } from "./modules";
 
 // The header examples of modules() and allSet(), one test each.
-const options = { o1: { from: "2027-02-13", to: "2027-02-23" } };
 
 describe("modules", () => {
   it("counts events on the Events button", () => {
