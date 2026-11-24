@@ -82,7 +82,7 @@ export function Activity({ tripId, entries, votes, replies, memberId, isOrganize
   let lastDay = "";
   return (
     <section className="feedcard" aria-labelledby="activity-title">
-      <h2 id="activity-title">Activity</h2>
+      <h2 id="activity-title">Feed</h2>
       <Composer placeholder="Message" onSend={send} />
       {problem && (
         <p className="msg-error" role="alert">

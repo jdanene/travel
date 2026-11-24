@@ -22,7 +22,7 @@ interface HomeProps {
   memberId: string | null;
   /** The crew in the title block (mock 5): faces, counts and "See the crew". */
   crew?: ReactNode;
-  /** The first card, above the module buttons: the Activity list. It gets openModule, so a line can open its module. */
+  /** The Feed card, below the module buttons. It gets openModule, so a line can open its module. */
   lead?: (openModule: (id: ModuleId) => void) => ReactNode;
   /**
    * What each module shows when open; each module's ticket fills it in.
@@ -124,7 +124,6 @@ export function Home({ trip, memberId, crew, lead, content }: HomeProps) {
         {allSet(trip) && <p className="cap all-set">All set</p>}
       </FlyerHead>
       <div className="modules" ref={list}>
-        {lead?.(toggle)}
         {shown.map(({ id, lines }) => {
           const isOpen = id === openId;
           const drawn = isOpen || id === leaving;
@@ -169,6 +168,8 @@ export function Home({ trip, memberId, crew, lead, content }: HomeProps) {
             </section>
           );
         })}
+        {/* The feed sits below the modules, after Map (owner, 24 Nov 2026). */}
+        {lead?.(toggle)}
       </div>
     </div>
   );

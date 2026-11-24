@@ -124,7 +124,7 @@ button.fl:active { background: var(--soft); }
 /* Activity is an outline on the charcoal page, not a white card (owner, 24 Nov 2026).
    The card remaps the ink tokens to the page's light ones, so every line inside follows. */
 .feedcard {
-  background: transparent; border-color: rgba(244, 241, 234, 0.55); color: var(--on-page);
+  background: transparent; border-width: 1px; border-color: rgba(244, 241, 234, 0.55); color: var(--on-page);
   --ink: var(--on-page); --ink2: var(--on-page); --mut: var(--on-page-mut);
   --line: rgba(244, 241, 234, 0.14); --soft: rgba(244, 241, 234, 0.1); --edge: rgba(244, 241, 234, 0.6);
   --acc: #f4f1ea; --on-acc: #111;
