@@ -75,10 +75,12 @@ Each rule above is one pure function in the context's `lib/`, with the four-part
 
 `stage(trip, memberId)` returns the block that leads:
 
-1. `dates` while no date option is confirmed.
-2. `stay` while a destination that has a stay option has no confirmed stay.
+1. `dates` while no date option is confirmed; Parties shows as a "next" row and opens.
+2. `stay` once the dates are confirmed, while a destination that has a stay option has no confirmed stay.
 3. `parties` while the member is in for no show.
 4. `allSet` after that.
+
+Stay is hidden while the dates are not confirmed: no block, no row, no pins, no summary line.
 
 A settled block shrinks to its pinned line and still opens. A later block shows as a "next" row and opens too (screen 2). A friend can therefore heart a stay before the dates are confirmed. If the organizer undoes a confirm, the page goes back to that stage.
 
@@ -170,6 +172,7 @@ The number is the case's id. Each ticket lists its own.
 7. A member changes the reply: the new one replaces the old.
 8. No expected names in the trip file: the join sheet shows only the field, and the page says "N replied" without "not yet".
 9. The trip record is half there (no `info`, or no `dates/options`): each block shows its empty state; nothing throws.
+42. The organizer undoes the date confirm: Stay hides again; its options and hearts stay saved and return on the next confirm.
 
 **Dates (Trip 7)**
 10. A member changes an answer: the new one replaces the old.
@@ -277,7 +280,7 @@ One builder runs the tickets in order on the branch `trip-app`. Trip 8 and Trip 
 | [x] | Trip 1 · App shell and ship script | 1 | 0 |
 | [x] | Trip 2 · Database, sign-in and rules | 1 | 1 |
 | [x] | Trip 3 · Create a trip | 1 | 2 |
-| [ ] | Trip 4 · Load the trip and pick the stage | 1 | 3 |
+| [x] | Trip 4 · Load the trip and pick the stage | 1 | 3 |
 | [ ] | Trip 5 · Invitation and who replied | 1 | 4 |
 | [ ] | Trip 6 · Reply with a name | 1 | 5 |
 | [ ] | Trip 7 · Dates | 2 | 6 |
@@ -464,10 +467,11 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 4. (36) The trip changes while a sheet is open: the sheet stays; the page updates under it.
 5. (37) A confirm is undone: `stage` returns the earlier stage.
 6. A destination has no stay option: it does not hold the page at the stay stage.
+7. (42) The date confirm is undone: Stay hides again, with its options and hearts kept.
 
 **Failures.** Reads reconnect by themselves. A refused write shows its reason and never retries.
 
-**Tests.** The examples in the header of `stage`: one for each of the four stages, edge case 5 and edge case 6.
+**Tests.** The examples in the header of `stage`: one for each of the four stages, edge case 6, and case 42 (the date confirm undone: back to `dates`, Stay hidden).
 
 **Done when.** With the emulator: a good link shows the frame; a wrong id shows the message; stopping the emulator shows "No connection".
 
@@ -552,7 +556,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 
 **Goal.** A friend answers the dates in one tap per option. The organizer confirms one option. The page then pins the dates and moves on.
 
-**Design.** Screen 2 (friend), screen 3 (organizer), the pinned line on screen 4. Words: "Which dates work?", "Each includes the Full Moon Party, Mon 22 Feb.", "10 nights · 5 yes · 1 maybe · 1 no", "Most yes", "Yes", "Maybe", "No", "Not answered yet: LC", "Organizer view.", "3 have not answered: RJ, LC, SN", "Pick the dates", "said yes", "Confirm these dates", "13–23 Feb · confirmed". The "next" rows read "Stay · 7 options" and "Parties · 6 shows" with "next".
+**Design.** Screen 2 (friend), screen 3 (organizer), the pinned line on screen 4. Words: "Which dates work?", "Each includes the Full Moon Party, Mon 22 Feb.", "10 nights · 5 yes · 1 maybe · 1 no", "Most yes", "Yes", "Maybe", "No", "Not answered yet: LC", "Organizer view.", "3 have not answered: RJ, LC, SN", "Pick the dates", "said yes", "Confirm these dates", "13–23 Feb · confirmed". The "next" row reads "Parties · 6 shows" with "next". There is no Stay row before the dates are confirmed (exception 9).
 
 **Do.**
 1. `web/src/features/dates/lib/dates.ts` (new): `summary(option, answers)` (nights and counts), `mostYes(options, answers)`, `notAnswered(members, answers)`, with headers.
@@ -634,6 +638,8 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 3. `web/src/features/stay/components/StayBlock.tsx` (new): the two lists, and the organizer's view of screen 6.
 4. `web/src/features/stay/components/StayCard.tsx` (new): photo, name, the line of facts, "Open listing", who hearted, the heart with its count.
 5. `web/src/features/stay/components/AddPlaceSheet.tsx` (new): screen 5.
+
+The block renders only when dates/confirmed exists (case 42).
 
 **Reuse and refactor.** Uses `Sheet`, `Avatars`, `PinnedLine`, `NextRow`. The area list comes from `places/areas`; do not type it again.
 
@@ -743,6 +749,8 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 
 **Design.** Screen 10. Words: "Bali", "Koh Phangan · 3 pins", and the card "Savaya / Club on the cliffs · next show Sat 13 Feb". The mock loads Leaflet with OpenStreetMap tiles (lines 7 and 8).
 
+No stay pins and no stay line while the dates are not confirmed.
+
 **Do.**
 1. `web/src/app/lib/pins.ts` (new): `pins(trip)` builds one list from stay options (at their area's centre) and venues, with the header.
 2. `web/src/features/map/lib/fan.ts` (new): `fanOut(pins)` moves pins that share a spot by a fixed small step.
@@ -778,6 +786,8 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 **Goal.** When everything is settled the page leads with a short summary.
 
 **Design.** Screen 9. Words: "All set", "Sat 13 – Tue 23 Feb / Dates confirmed by JD", "Cliffside villa with pool / Bali stay confirmed · Uluwatu · sleeps 10", "You're in for 2 parties / Peggy Gou Sat 13 Feb · Full Moon Party Mon 22 Feb".
+
+No stay pins and no stay line while the dates are not confirmed.
 
 **Do.**
 1. `web/src/app/lib/summary.ts` (new): `summary(trip, memberId)` returns the cards to show, with the header.

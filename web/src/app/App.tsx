@@ -1,29 +1,29 @@
-import { useEffect } from "react";
-import { signIn } from "../lib/firebase";
+import { Notice } from "../components/Notice";
+import { TripPage } from "./TripPage";
 
 /**
  * The app's one route, /trip/<tripId>. It reads the trip id from the address
- * and draws the page frame around it.
+ * and draws the page frame around the trip page.
  *
  * Inputs: none. The address bar is the input; the hosting rewrite sends every
  * /trip/** path here.
- * Output: the page frame at phone width with the header line. With no id
- * (/trip/), the frame still shows; the trip page says what is wrong.
- * Examples (checked on screen, not in a test):
- *   /trip/abc  → the frame with "Bali · Koh Phangan · Feb 2027"
- *   /trip/     → the same frame, empty
+ * Output: the page frame at phone width. With no id (/trip/) the frame says
+ * the link does not open a trip.
+ * Examples (checked on the emulator):
+ *   /trip/<id>  → the trip page
+ *   /trip/, or an id with other characters (/trip/a%2Fb)
+ *               → "This link does not open a trip. Ask the organizer for the link."
  */
 export function App() {
-  // Sign in on load; Trip 4 moves this behind the trip listener.
-  useEffect(() => {
-    void signIn();
-  }, []);
-
-  const tripId = /^\/trip\/([^/?#]+)/.exec(window.location.pathname)?.[1] ?? null;
+  const tripId = /^\/trip\/([A-Za-z0-9_-]+)\/?$/.exec(window.location.pathname)?.[1] ?? null;
 
   return (
-    <main className="frame" data-trip={tripId ?? undefined}>
-      <p className="cap headline">Bali · Koh Phangan · Feb 2027</p>
+    <main className="frame">
+      {tripId ? (
+        <TripPage tripId={tripId} />
+      ) : (
+        <Notice>This link does not open a trip. Ask the organizer for the link.</Notice>
+      )}
     </main>
   );
 }

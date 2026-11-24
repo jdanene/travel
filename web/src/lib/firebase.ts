@@ -49,7 +49,9 @@ const SIGN_IN_WAITS_MS = [0, 1000, 2000];
 
 /**
  * Signs this device in anonymously, so the rules can tell one phone from
- * another. A device that signed in before keeps its uid; the SDK stores it.
+ * another. A device that signed in before keeps its uid: the SDK restores
+ * it from storage, and this waits for that, because signing in before the
+ * restore ends would make a new device and lose its member.
  *
  * Inputs: none.
  * Output: the device's uid, or, after three failed tries, the reason as the
@@ -60,6 +62,7 @@ const SIGN_IN_WAITS_MS = [0, 1000, 2000];
  *   emulator stopped  → { ok: false, reason: "auth/network-request-failed" } after about 3 s
  */
 export async function signIn(): Promise<SignInResult> {
+  await auth.authStateReady();
   if (auth.currentUser) return { ok: true, uid: auth.currentUser.uid };
 
   let reason = "unknown";
