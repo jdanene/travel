@@ -146,8 +146,8 @@ window.HYPE = (() => {
       b.innerHTML = live ? on : off;
       b.setAttribute("aria-label", live ? "Turn sound off" : "Turn sound on");
     };
-    // The page has nothing else to tap, so the first tap anywhere turns the music on.
-    document.addEventListener("pointerdown", e => { if (!live && !b.contains(e.target)) b.click(); }, { once: true });
+    // The first tap anywhere turns the music on, except a tap on the sound button itself or on the way into the trip.
+    document.addEventListener("pointerdown", e => { if (!live && !e.target.closest(".snd, .enter")) b.click(); }, { once: true });
   }
 
   // Two cuts of the same footage count as one scene, so they never show side by side.
@@ -205,6 +205,28 @@ window.HYPE = (() => {
     return v;
   }
 
+  // Adds the one way from the splash into the trip app. Options 1 and 13 call it; the other options never do.
+  // Inputs: none. It reads the trip id from "?t=" in the address or, failing that, the id this phone remembered.
+  //   An id holds letters, digits, "-" and "_" only; anything else is ignored.
+  // Output: an "OPEN THE TRIP" link to /trip/<id> at the bottom centre, or nothing when there is no id. The id in the
+  //   address wins and is remembered; blocked storage only means nothing is remembered.
+  // Examples (checked by hand in a 390px window):
+  //   /hype/1/?t=abc → the button opens /trip/abc, and a later /hype/13/ on that phone shows it too.
+  //   /hype/1/?t=bad<id> on a phone that remembers nothing → no button.
+  function enter() {
+    const valid = id => (id && /^[A-Za-z0-9_-]{1,64}$/.test(id) ? id : null);
+    let id = valid(new URLSearchParams(location.search).get("t"));
+    try {
+      if (id) localStorage.setItem("travel.trip", id);
+      else id = valid(localStorage.getItem("travel.trip"));
+    } catch (err) {}
+    if (!id) return;
+    const a = document.createElement("a");
+    a.className = "enter"; a.href = "/trip/" + id; a.textContent = "OPEN THE TRIP";
+    document.body.appendChild(a);
+    document.body.classList.add("has-enter");
+  }
+
   // Small link back to the list of options.
   function back(n) {
     const d = document.createElement("div");
@@ -217,5 +239,5 @@ window.HYPE = (() => {
   ["touchstart", "pointerdown", "scroll"].forEach(ev => document.addEventListener(ev, kickAll, { passive: true }));
   document.addEventListener("visibilitychange", () => { if (!document.hidden) kickAll(); });
 
-  return { B, ours, club, beach, bali, photos, clips, reel, wasted, el, wake, cycle, mix, board, bed, sound, back };
+  return { B, ours, club, beach, bali, photos, clips, reel, wasted, el, wake, cycle, mix, board, bed, sound, enter, back };
 })();

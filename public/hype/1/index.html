@@ -40,7 +40,7 @@
   const H = HYPE;
   // Every panel, the title panel too, cycles through every clip and photo; no two panels show the same one.
   H.board(["t", "a", "c", "d", "g", "e", "w"].map(id => document.getElementById(id)), H.photos, 4000);
-  H.bed(); H.sound();
+  H.bed(); H.sound(); H.enter();
 </script>
 </body>
 </html>
