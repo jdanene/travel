@@ -75,3 +75,6 @@ video { pointer-events: none; }
 .wst .wasted { font-size: calc(var(--w) * .17); -webkit-text-stroke-width: .035em; text-shadow: .04em .05em 0 #000; }
 .wst .water { font-size: calc(var(--w) * .036); -webkit-text-stroke-width: .06em; text-shadow: .08em .08em 0 #000; }
 
+
+/* The countries, in brackets under the destinations. */
+.dest .ctry { font-size: .72em; }
