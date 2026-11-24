@@ -3,7 +3,7 @@ import { Avatars } from "../../../components/Avatars";
 import { Icon } from "../../../components/Icon";
 import { Notice } from "../../../components/Notice";
 import type { WriteResult } from "../../../lib/db";
-import { dayRange, weekdayDate, weekdayRange } from "../../../lib/format";
+import { dayRange, weekdayRange } from "../../../lib/format";
 import { initials } from "../../../lib/initials";
 import type { Answer, Dates, Member, MemberId, TripInfo } from "../../../types/trip";
 import { dateOptionId } from "../../../lib/ids";
@@ -32,8 +32,7 @@ interface DatesModuleProps {
  * The Dates module, open in place (frame 12/3, content 20/2 and 20/3).
  * A friend answers each option in one tap and sees the counts move, and
  * adds their own range with "Add dates"; it shows for everyone at once,
- * sorted by its first day, with "added by" on it. An option that holds the
- * Full Moon Party carries the moon mark. The organizer also sees who said
+ * sorted by its first day, with "added by" on it. The organizer also sees who said
  * yes, who has not answered, and confirms one option; after the confirm
  * the module still opens, shows the counts and takes no new answers or
  * dates, and the organizer can undo it.
@@ -45,7 +44,7 @@ interface DatesModuleProps {
  * nobody else has voted on it and it is not confirmed.
  * Examples (checked on the emulator at 375 px and 1650 px against 20/2 and 20/3, in the frame of 12/3):
  *   a friend      → option cards, "Most yes" on the lead, Yes / Maybe / No, "Add dates", "Not answered yet: LC"
- *   KA adds 18–24 Feb → a card "Thu 18 – Wed 24 Feb", "… · added by KA", the moon mark, KA's Yes, on every phone
+ *   KA adds 18–24 Feb → a card "Thu 18 – Wed 24 Feb", "… · added by KA", KA's Yes, on every phone
  *   an organizer  → "Organizer view. 3 have not answered: RJ, LC, SN", who said yes, "Confirm these dates"
  */
 export function DatesModule({ tripId, info, dates, expected, members, memberId, isOrganizer }: DatesModuleProps) {
@@ -60,7 +59,6 @@ export function DatesModule({ tripId, info, dates, expected, members, memberId, 
   const lead = confirmedId ?? mostYes(options, answers);
   const missing = notAnswered(expected, members, options, answers);
   const name = (id: MemberId) => members[id]?.name ?? expected[id] ?? id;
-  const anchor = info?.anchor;
 
   const show = (id: string) =>
     requestAnimationFrame(() => document.getElementById(`date-${id}`)?.scrollIntoView({ behavior: "smooth", block: "center" }));
@@ -81,19 +79,13 @@ export function DatesModule({ tripId, info, dates, expected, members, memberId, 
           <b>Organizer view.</b> {missing.length} have not answered: {missing.map((person) => initials(person.name)).join(", ")}
         </Notice>
       )}
-      {confirmedId ? (
+      {confirmedId && (
         <p className="dates-done">
           <Icon name="check" size={16} />
           <span>
             <b>{dayRange(options[confirmedId].from, options[confirmedId].to)}</b> · confirmed
           </span>
         </p>
-      ) : (
-        anchor && (
-          <p className="sub" style={{ marginBottom: 12 }}>
-            The {anchor.name} is {weekdayDate(anchor.date)}.
-          </p>
-        )
       )}
       {ids.length === 0 && <p className="sub">No dates to vote on yet.</p>}
       {ids.map((id) => {
@@ -105,7 +97,6 @@ export function DatesModule({ tripId, info, dates, expected, members, memberId, 
         const adder = option.addedBy === undefined ? null : option.addedBy === memberId ? "you" : initials(name(option.addedBy));
         const othersVoted = Object.keys(answers[id] ?? {}).some((who) => who !== option.addedBy);
         const removable = !confirmedId && !othersVoted && (isOrganizer || (option.addedBy !== undefined && option.addedBy === memberId));
-        const fullMoon = anchor !== undefined && option.from <= anchor.date && anchor.date <= option.to;
         return (
           <article key={id} id={`date-${id}`} className={`opt${id === lead ? " lead" : ""}`} aria-label={weekdayRange(option.from, option.to)}>
             <div className="top">
@@ -116,12 +107,6 @@ export function DatesModule({ tripId, info, dates, expected, members, memberId, 
                   {`${counts.nights}\u00a0nights · ${counts.yes}\u00a0yes · ${counts.maybe}\u00a0maybe · ${counts.no}\u00a0no`}
                   {adder && ` · added\u00a0by\u00a0${adder}`}
                 </p>
-                {fullMoon && (
-                  <p className="moon">
-                    <Icon name="moon" size={14} />
-                    {anchor.name}
-                  </p>
-                )}
               </div>
               {id === lead && !confirmedId && <span className="tag acc">Most yes</span>}
             </div>
@@ -179,7 +164,7 @@ export function DatesModule({ tripId, info, dates, expected, members, memberId, 
           Change the dates
         </button>
       )}
-      {info && <AddDatesSheet open={adding} info={info} onClose={() => setAdding(false)} onAdd={add} />}
+      {info && <AddDatesSheet open={adding} season={info.season} onClose={() => setAdding(false)} onAdd={add} />}
     </>
   );
 }

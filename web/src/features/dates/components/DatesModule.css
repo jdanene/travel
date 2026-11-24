@@ -11,8 +11,6 @@
 .dates-done { display: flex; align-items: center; gap: 0.375rem; font-size: 0.9062rem; margin-bottom: 0.75rem; color: var(--acc); }
 .dates-done b { color: var(--ink); }
 .dates-missing { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem; }
-.opt .moon { display: flex; align-items: center; gap: 0.3125rem; font-size: 0.8125rem; font-weight: 600; color: var(--acc); margin: -0.25rem 0 0.5rem; }
-.opt .moon svg.i { stroke-width: 2; }
 .opt-actions { display: flex; align-items: center; gap: 0.75rem; }
 .opt-actions .btn.sm { flex: 1; }
 .opt-actions .remove { flex: none; margin: 0.375rem -0.25rem -0.375rem auto; font-size: 0.8125rem; font-weight: 700; color: var(--mut); text-decoration: underline; text-underline-offset: 3px; padding: 0.5rem 0.25rem; }

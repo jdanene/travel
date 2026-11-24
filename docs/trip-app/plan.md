@@ -26,7 +26,7 @@ Sources: `docs/requirements.md` section 0, the mocks `public/designs/12/index.ht
 | D12 | `scripts/ship.sh` is the one deploy command. It is new, and it is the maintained one from now on. | The repo has no deploy script yet. |
 | D13 | The home page is design 12's flyer: the cover photo, the organizer's avatar, the name, the date line, and a stack of equal module buttons that open in place (Dates, Stay, Parties, Links, Map). Inside a module, design 20's content and sheets. | Owner, 23 Nov 2026. One open module at a time keeps one job on the screen. |
 | D14 | Links is a module: a friend pastes an Instagram, TikTok or other link for a destination, and it shows for everyone. Its data is `links/items`; the link reader also reads Instagram and TikTok. | Owner, 23 Nov 2026: the bucket for cool things found online. |
-| D16 | Any friend adds a date option with "Add dates" (From, To, inside 1 Feb to 31 Mar 2027). It shows for everyone at once, sorted by its first day, with "added by" on it and the adder's Yes. An option need not include 22 Feb; one that does carries a moon mark and "Full Moon Party". The organizer still confirms one option. | Owner, 24 Nov 2026: "there should be an option to create your own date interval, and that interval then shows for everyone else." Three fixed options were too restrictive. A range per friend with a computed best stretch was weighed and dropped by the owner for this. |
+| D16 | Any friend adds a date option with "Add dates" (From, To, inside 1 Feb to 31 Mar 2027). It shows for everyone at once, sorted by its first day, with "added by" on it and the adder's Yes. An option need not include 22 Feb, and nothing on the Dates module points at it. The organizer still confirms one option. | Owner, 24 Nov 2026: "there should be an option to create your own date interval, and that interval then shows for everyone else." Three fixed options were too restrictive. A range per friend with a computed best stretch was weighed and dropped by the owner for this. |
 
 Each was weighed against a second design. D1 against plain files with no build (rejected: nine screens of live state in hand-written DOM code is harder to read than components). D3 against email links (rejected: a step to learn). D7 against one listener per feature (rejected: five loading states for one small page). D8 against typed fields only (rejected: screen 5 shows the listing's name and photo; typed fields stay as the fallback).
 
@@ -195,7 +195,7 @@ The number is the case's id. Each ticket lists its own.
 50. Add dates with a day missing or outside 1 Feb to 31 Mar: "Pick a day from 1 Feb to 31 Mar." under that field; To before From: "Pick a day on or after From." under To. The typed days stay.
 51. Add dates with a range that is listed already (by one friend or two at once): no new option; the friend's vote on it is set to Yes and the card is brought into view. Two friends adding the same new range at once: the first write wins, the second is refused and shows "This was not saved."
 52. The adder removes their option: it and its answers go for everyone. Remove shows only while nobody else voted and it is not confirmed; an organizer may remove any such option, the starting ones too.
-53. An option that holds 22 Feb shows the moon mark and "Full Moon Party"; one that does not is still allowed.
+53. An option that leaves out 22 Feb is allowed and looks like any other; the Dates module does not mention the Full Moon Party (owner, 24 Nov 2026).
 54. Re-running create-trip writes each starting option by its own path, so friends' options and all answers stay. A starting option taken out of the trip file stays; the organizer removes it on the page.
 
 **Link reader and stay (Trip 8, Trip 9)**
@@ -583,7 +583,7 @@ The edge cases above are the ones found before the build. Find the rest: for eve
 
 ### Trip 7 · Dates
 
-**Changed by D16 (24 Nov 2026):** friends add their own options with "Add dates" (cases 50 to 54), and the line above the options reads "The Full Moon Party is Mon 22 Feb." with a moon mark on each option that holds it. The rest of this ticket stands.
+**Changed by D16 (24 Nov 2026):** friends add their own options with "Add dates" (cases 50 to 54), and the line "Each includes the Full Moon Party, Mon 22 Feb." is gone; options are plain ranges. The rest of this ticket stands.
 
 **Waits on:** Trip 6. **Size:** M.
 
