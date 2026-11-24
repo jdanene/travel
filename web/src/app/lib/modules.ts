@@ -1,3 +1,4 @@
+import { bigVenues, shownUnder } from "../../features/parties/lib/big";
 import { dayRange } from "../../lib/format";
 import type { MemberId, Trip } from "../../types/trip";
 
@@ -54,7 +55,9 @@ export function allSet(trip: Trip): boolean {
  * memberId — this device's member, or null before a reply.
  * Output: the modules to show. A settled module's line is its result:
  * "13–23 Feb · confirmed", "Cliffside villa · confirmed" (one line per
- * destination with a confirmed stay). Events reads "15 events · I'm in".
+ * destination with a confirmed stay). Events reads "15 events · I'm in",
+ * counting what the list shows by default: the big venues' events and
+ * every friend's event.
  * Examples (each is a test in modules.test.ts):
  *   dates open                → Dates "Tap to answer", Events, Links, Map; no Stay
  *   dates confirmed           → Dates "13–23 Feb · confirmed", Stay "1 option · heart one", …
@@ -72,7 +75,8 @@ export function modules(trip: Trip, memberId: MemberId | null): Module[] {
 }
 
 function eventsLine(trip: Trip): string {
-  const total = Object.keys(trip.parties?.shows ?? {}).length;
+  const big = bigVenues(trip.places?.venues);
+  const total = Object.values(trip.parties?.shows ?? {}).filter((show) => shownUnder("big", show, big)).length;
   return total ? `${count(total, "event")} · I'm in` : "Nothing announced yet.";
 }
 

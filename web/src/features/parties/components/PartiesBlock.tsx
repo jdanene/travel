@@ -6,10 +6,12 @@ import type { WriteResult } from "../../../lib/db";
 import { idFromName } from "../../../lib/ids";
 import type { MemberId, Trip } from "../../../types/trip";
 import { addShow, editShow, removeShow, setIn, type PartyDraft } from "../api/parties";
+import { bigVenues, eventsList, shownUnder } from "../lib/big";
 import { areaShown, placeLine, placeOf, type MapPlace } from "../lib/detail";
 import { lastSeason, lastYearLines } from "../lib/lastYear";
 import { byPlaceVenueDate, venueKey, type KnownVenue, type ListedShow } from "../lib/shows";
 import { AddPartySheet } from "./AddPartySheet";
+import { EventsFilterChips, useEventsFilter } from "./EventsFilter";
 import { LastSeason, LastYearLine } from "./LastYearLine";
 import { ShowRow } from "./ShowRow";
 import { ShowSheet } from "./ShowSheet";
@@ -36,6 +38,9 @@ interface PartiesBlockProps {
  * ones first, then by date), with the last-year line where a weekend is
  * empty and "Last season:" under a venue with nothing announced. Open from
  * the start; it never waits on the dates. A tap on a show opens its sheet.
+ * At the top, "Big nights" and "All · 27": by default the list holds the
+ * big venues and every friend's event (lib/big.ts); the device remembers
+ * the choice. Without a big venue in the trip the chips are not drawn.
  *
  * Inputs: the trip id, the trip from the one listener, this device's
  * member and organizer mark, and a way to open the map.
@@ -45,7 +50,8 @@ interface PartiesBlockProps {
  * already put the data back. A show removed while its sheet is open closes
  * the sheet with "This event was removed."
  * Examples (checked on the emulator at 375 px and 1650 px):
- *   the seeded trip  → Bali: Mrs Sippy … Savaya, then the venues with nothing announced; Koh Phangan: Eden Garden, Half Moon Festival, … Haad Rin Beach with the Full Moon Party
+ *   the seeded trip  → "Big nights" picked; Bali: Savaya, then Atlas Beach Club … Potato Head with nothing announced; Koh Phangan: Haad Rin Beach with the Full Moon Party
+ *   tap "All · 27"   → Bali: Mrs Sippy … Savaya, then the venues with nothing announced; Koh Phangan: Eden Garden, Half Moon Festival, … Haad Rin Beach
  *   tap "Peggy Gou"  → the show sheet; "See on the map" opens the Map on Savaya with its card open
  *   tap "I'm in"     → filled at once, "1 in" with your initials, on the row and in the sheet
  */
@@ -53,6 +59,9 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap }: 
   const [sheet, setSheet] = useState<SheetState>(null);
   const [detail, setDetail] = useState<string | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
+  const [filter, setFilter] = useEventsFilter();
+  // The row a friend's "Add" found already listed; scrolled to once it is drawn.
+  const [rowToShow, setRowToShow] = useState<string | null>(null);
   const viewer = { memberId, isOrganizer };
   const shows = trip.parties?.shows ?? {};
   const marks = trip.parties?.in ?? {};
@@ -68,8 +77,9 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap }: 
     destination: venue.destination,
     area: venue.areaId ? areas[venue.areaId]?.name : undefined,
   }));
-  const groups = byPlaceVenueDate(shows, known);
-  const lines = lastYearLines(Object.values(shows), lastYear, season);
+  const big = bigVenues(trip.places?.venues);
+  const groups = eventsList(shows, known, filter, big);
+  const lines = lastYearLines(Object.values(shows), lastYear, season).filter((line) => shownUnder(filter, line, big));
   const editing = sheet?.mode === "edit" ? shows[sheet.id] : undefined;
   const opened: ListedShow | undefined = detail && shows[detail] ? { ...shows[detail], id: detail } : undefined;
 
@@ -98,13 +108,21 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap }: 
   const setInFor = (id: string) => (isIn: boolean) => viewer.memberId && run(setIn(tripId, id, viewer.memberId, isIn));
   const areaOf = (show: ListedShow) => show.area ?? areas[placeOf(show, trip.places)?.areaId ?? ""]?.name;
 
-  const showRow = (id: string) => {
-    setSheet(null);
+  // After the render that draws the row: under "Big nights" a listed show at another venue first needs "All".
+  useEffect(() => {
+    if (!rowToShow) return;
     requestAnimationFrame(() => {
-      const row = document.getElementById(`show-${id}`);
+      const row = document.getElementById(`show-${rowToShow}`);
       row?.scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
       row?.focus({ preventScroll: true });
     });
+    setRowToShow(null);
+  }, [rowToShow]);
+
+  const showRow = (id: string) => {
+    setSheet(null);
+    if (shows[id] && !shownUnder(filter, shows[id], big)) setFilter("all");
+    setRowToShow(id);
   };
 
   const save = (draft: PartyDraft) => {
@@ -123,7 +141,10 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap }: 
 
   const destinations = Object.entries(destinationNames).map(([id, { name }]) => ({ id, name }));
   const canAdd = viewer.memberId !== null && destinations.length > 0;
-  const openedPlace = opened ? placeOf(opened, trip.places) : null;
+  // The map draws big venues only (app/lib/pins.ts), so a show at another venue has no pin to open on.
+  const found = opened ? placeOf(opened, trip.places) : null;
+  const openedPlace =
+    opened && found && (found.kind !== "venue" || shownUnder("big", { destination: opened.destination, venue: opened.venue }, big)) ? found : null;
 
   return (
     <div className="parties">
@@ -137,6 +158,7 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap }: 
           </button>
         )}
       </div>
+      {big.size > 0 && <EventsFilterChips filter={filter} total={Object.keys(shows).length} onChoose={setFilter} />}
       {groups.length === 0 && <p className="sub parties-empty">Nothing announced yet.</p>}
       {groups.map(({ destination, venues: venueGroups }) => (
         <section key={destination} aria-labelledby={`place-${destination}`}>
@@ -210,7 +232,7 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap }: 
         open={sheet !== null && (sheet.mode === "add" || editing !== undefined)}
         editing={editing}
         destinations={destinations}
-        venues={venuesByDestination(trip, groups)}
+        venues={venuesByDestination(trip, byPlaceVenueDate(shows, known))}
         season={season}
         yourName={viewer.memberId ? (members[viewer.memberId]?.name ?? viewer.memberId) : ""}
         onClose={() => setSheet(null)}

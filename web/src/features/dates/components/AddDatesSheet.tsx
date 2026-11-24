@@ -1,3 +1,4 @@
+import { nights, stayLength } from "../../../lib/format";
 import { useState, type FormEvent } from "react";
 import { Sheet } from "../../../components/Sheet";
 import type { TripInfo } from "../../../types/trip";
@@ -85,6 +86,9 @@ function DatesForm({ season, onAdd }: Pick<AddDatesSheetProps, "season" | "onAdd
         {field("from", "From")}
         {field("to", "To")}
       </div>
+      {draft.from && draft.to && draft.to >= draft.from && (
+        <p className="cap" aria-live="polite">{stayLength(nights(draft.from, draft.to))}</p>
+      )}
       <button type="submit" className="btn" style={{ marginTop: 6 }} disabled={saving} aria-busy={saving}>
         Add
       </button>

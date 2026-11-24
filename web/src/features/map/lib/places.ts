@@ -20,6 +20,9 @@ export const PLACE_NAME_MAX = 60;
 const BOXES: Record<DestinationId, Box> = {
   bali: { lat: [-9.0, -8.0], lng: [114.4, 115.8] },
   kohPhangan: { lat: [9.6, 9.85], lng: [99.9, 100.15] },
+  // Phuket and Natai Beach in Phang Nga, across the bridge to the north.
+  phuket: { lat: [7.7, 8.4], lng: [98.2, 98.5] },
+  singapore: { lat: [1.15, 1.48], lng: [103.6, 104.1] },
 };
 
 /**

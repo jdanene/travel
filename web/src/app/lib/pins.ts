@@ -1,4 +1,5 @@
 import { placeWord } from "../../features/map/lib/places";
+import { bigVenues, shownUnder } from "../../features/parties/lib/big";
 import { idFromName } from "../../lib/ids";
 import { initials } from "../../lib/initials";
 import { weekdayDate } from "../../lib/format";
@@ -15,8 +16,10 @@ import { datesSettled } from "./modules";
  * listing gives no exact position (D10); an unknown area puts the pin at
  * the destination's centre (case 33). None while the dates are not
  * confirmed (exception 3). Trip 9 adds the Stay module that a stay card opens.
- * Venue pins: one per venue in places/venues. A friend's party at a venue
- * that is not there gets no pin (case 34); its row still shows in Parties.
+ * Venue pins: one per big venue in places/venues, the default of the
+ * Events list (owner, 24 Nov 2026; every venue when the trip tags none).
+ * A friend's party at another venue gets no pin (case 34); its row still
+ * shows in Events.
  *
  * Friends' places: one per entry in places/custom ("Add to map"), where
  * the friend put it, with its kind's icon, its link and who added it.
@@ -25,7 +28,7 @@ import { datesSettled } from "./modules";
  * Output: the pins, stays first, then venues, then friends' places. A venue's card line is its own line (or
  * its area) and its next show this year; with no show, the area alone.
  * Examples (checked on the emulator):
- *   the seeded trip, dates open  → twelve venue pins, no stay pins
+ *   the seeded trip, dates open  → seven venue pins (the big venues), no stay pins
  *   Savaya with a show on 13 Feb → line "Club on the cliffs · next show Sat 13 Feb"
  *   Kai adds "Sunset bar", Food   → a place pin, line "Food · added by KA"
  */
@@ -51,7 +54,9 @@ export function pins(trip: Trip): Pin[] {
     if (!nextShow.has(id) || show.date < nextShow.get(id)!) nextShow.set(id, show.date);
   }
 
-  const places: Pin[] = Object.entries(venues).map(([venueId, venue]) => {
+  const big = bigVenues(venues);
+  const shown = Object.entries(venues).filter(([, venue]) => shownUnder("big", { destination: venue.destination, venue: venue.name }, big));
+  const places: Pin[] = shown.map(([venueId, venue]) => {
     const where = venue.line ?? (venue.areaId ? areas[venue.areaId]?.name : undefined) ?? destinations[venue.destination]?.name ?? "";
     const next = nextShow.get(venueId);
     return {
