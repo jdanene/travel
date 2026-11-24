@@ -106,31 +106,38 @@ export function placeOf(show: { destination: DestinationId; venue: string }, pla
  * adds nothing.
  *
  * Inputs: venue — the venue as listed; area — the show's or the venue's
- * area, if any; destination — the destination's name.
+ * area, if any; destination — the destination's name, with or without its country.
  * Output: the area, trimmed, or undefined when it adds nothing.
  * Examples (each is a test in detail.test.ts):
  *   areaShown("Savaya", "Uluwatu", "Bali")                  → "Uluwatu"
  *   areaShown("Lost Jungle", "Koh Phangan", "Koh Phangan")  → undefined
+ *   areaShown("Lost Jungle", "Koh Phangan", "Koh Phangan, Thailand")  → undefined
  */
 export function areaShown(venue: string, area: string | undefined, destination: string): string | undefined {
   const trimmed = area?.trim();
-  if (!trimmed || trimmed === destination || venue.toLowerCase().includes(trimmed.toLowerCase())) return undefined;
+  if (!trimmed || trimmed === destination || destination.startsWith(`${trimmed}, `) || venue.toLowerCase().includes(trimmed.toLowerCase())) return undefined;
   return trimmed;
 }
 
 /**
  * The show sheet's place line: the venue, then the area and the
- * destination, as the owner wrote it ("Savaya · Uluwatu, Bali").
+ * destination with its country, as the owner wrote it ("Savaya · Uluwatu,
+ * Bali, Indonesia"). An area from the place search already names its
+ * country ("Haad Khuat, Thailand"), so it stands alone: the event may lie
+ * far from the destination it lists under.
  *
- * Inputs: as areaShown().
- * Output: "venue · area, destination", or "venue · destination" when the
- * area adds nothing.
+ * Inputs: as areaShown(); destination is named with its country (lib/place.ts).
+ * Output: "venue · area, destination", "venue · area" for an area with its
+ * country, or "venue · destination" when the area adds nothing.
  * Examples (each is a test in detail.test.ts):
- *   placeLine("Savaya", "Uluwatu", "Bali")                                     → "Savaya · Uluwatu, Bali"
- *   placeLine("Full Moon Party, Haad Rin Beach", "Haad Rin", "Koh Phangan")    → "Full Moon Party, Haad Rin Beach · Koh Phangan"
+ *   placeLine("Savaya", "Uluwatu", "Bali, Indonesia")                                   → "Savaya · Uluwatu, Bali, Indonesia"
+ *   placeLine("Full Moon Party, Haad Rin Beach", "Haad Rin", "Koh Phangan, Thailand")   → "Full Moon Party, Haad Rin Beach · Koh Phangan, Thailand"
+ *   placeLine("Bottle Beach 1", "Haad Khuat, Thailand", "Koh Phangan, Thailand")         → "Bottle Beach 1 · Haad Khuat, Thailand"
  */
 export function placeLine(venue: string, area: string | undefined, destination: string): string {
-  return `${venue} · ${[areaShown(venue, area, destination), destination].filter(Boolean).join(", ")}`;
+  const shown = areaShown(venue, area, destination);
+  if (shown?.includes(", ")) return `${venue} · ${shown}`;
+  return `${venue} · ${[shown, destination].filter(Boolean).join(", ")}`;
 }
 
 /** What the sheet does with a show's link. */

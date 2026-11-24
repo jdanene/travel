@@ -1,23 +1,29 @@
 import { useState, type FormEvent } from "react";
+import { DateField } from "../../../components/Calendar";
 import { Sheet } from "../../../components/Sheet";
-import { dayMonth } from "../../../lib/format";
+import { isDay } from "../../../lib/calendar";
 import { initials } from "../../../lib/initials";
-import { nearestDestination, type PlaceHit, type Spot } from "../../../lib/placeSearch";
+import { nearestDestination, type Spot } from "../../../lib/placeSearch";
 import type { Show } from "../../../types/trip";
 import type { PartyDraft } from "../api/parties";
-import { EVENTS_WINDOW, inEventsWindow } from "../lib/window";
+import type { VenueSpot, VenueSuggestion } from "../lib/venues";
 import { VenueField } from "./VenueField";
 
-type Field = "venue" | "date" | "artist" | "about" | "link";
+type Field = "venue" | "destination" | "date" | "artist" | "about" | "link";
+
+/** The longest area the rules take on a show. */
+const AREA_MAX = 60;
 
 interface AddPartySheetProps {
   open: boolean;
   /** The show being edited; absent when adding. */
   editing?: Show;
-  /** Each destination's id, name and centre, in the order of the pills. */
+  /** Each destination's id, its name with its country ("Bali, Indonesia") and its centre. */
   destinations: Array<{ id: string; name: string; lat?: number; lng?: number }>;
-  /** The venues the Venue field suggests first, per destination: the trip's venues, friends' venues and friends' places on the map. */
-  venues: Record<string, string[]>;
+  /** Every venue the trip knows, in every destination: the trip's clubs, friends' venues and friends' places on the map. */
+  venues: VenueSpot[];
+  /** The month the calendar opens on: the trip season's first month. */
+  startMonth?: string;
   /** This device's member name, for "added by KA". */
   yourName: string;
   onClose: () => void;
@@ -26,25 +32,30 @@ interface AddPartySheetProps {
 }
 
 /**
- * Screen 20/8, "Add an event": the destination, the venue, the date, who is
- * playing, an optional "What is it?" line and an optional link. The Venue
- * field suggests the destination's known places first, then any place in
- * the world from the place search (VenueField). A known pick is that
- * place; a search pick also puts a pin on the map when the event is saved,
- * and moves the destination to the trip's nearest one, so the event and its
- * pin group together. Typed words with no pick are the venue, with no pin.
+ * Screen 20/8, "Add an event", search first (owner, 24 Nov 2026: "like
+ * google not have preselected"; "how do users add a venue???"). The sheet
+ * opens on one search field with the caret in it and no place preselected;
+ * it lists the trip's clubs in every destination, each with its place
+ * (VenueField). The pick says where the event lists: a known venue keeps
+ * its destination; a place from the search goes to the trip's nearest
+ * destination and gets a pin on the map when the event is saved, with its
+ * area and country kept on the event; 'Add "…" as a new venue' asks
+ * "Where is it?" with the destinations as pills, none picked. Then the
+ * date on the shared calendar, any day of any year, opening on the season's
+ * first month; who is playing; an optional "What is it?" line and link.
  * The same sheet edits an event, with "Remove" at its foot.
  *
  * Inputs: whether it is open, the show being edited (if any), the
- * destinations and known venues, this member's name, and what
- * saving, removing and closing do.
+ * destinations and known venues, the calendar's first month, this
+ * member's name, and what saving, removing and closing do.
  * Output: the sheet. Save checks every field first and puts the reason
  * under the field (case 27); the typed values stay.
- * Examples (checked at 390 px against screen 8):
- *   add, Koh Phangan, type "Haad Rin pier", Sat 20 Feb, "Boat party" → Save; the row reads "added by KA", no pin
- *   add, Bali, pick "Single Fin" → the event lists under Single Fin and opens the Map on its pin
- *   add, Bali, "bottle beach", pick "Bottle Beach 1 · Haad Khuat, Thailand" → Koh Phangan; Save adds the event and its pin
- *   date 2027-01-24 → "Pick a day from 25 Jan to 31 Mar." under Date (lib/window.ts)
+ * Examples (checked on the emulator at 375 px and 1650 px):
+ *   open → caret in "Search for a venue or place"; Savaya · Bali, Indonesia first
+ *   pick "Single Fin" → "Lists under Bali, Indonesia"; the event lists under Single Fin
+ *   "bottle beach", pick "Bottle Beach 1 · Haad Khuat, Thailand" → "Lists under Koh Phangan, Thailand"; Save adds the event and its pin
+ *   'Add "Haad Rin pier" as a new venue', Save → "Pick where it is." under the pills
+ *   Date, tap "Previous month" → January 2027; 24 Jan saves
  */
 export function AddPartySheet(props: AddPartySheetProps) {
   return (
@@ -54,61 +65,69 @@ export function AddPartySheet(props: AddPartySheetProps) {
   );
 }
 
-function PartyForm({ editing, destinations, venues, yourName, onSave, onRemove }: AddPartySheetProps) {
+function PartyForm({ editing, destinations, venues, startMonth, yourName, onSave, onRemove }: AddPartySheetProps) {
   const [draft, setDraft] = useState<PartyDraft>({
-    destination: editing?.destination ?? destinations[0]?.id ?? "",
+    destination: editing?.destination ?? "",
     venue: editing?.venue ?? "",
     date: editing?.date ?? "",
     artist: editing?.artist ?? "",
     about: editing?.about ?? "",
     link: editing?.link ?? "",
   });
-  const offered = venues[draft.destination] ?? [];
+  /** true after 'Add "…" as a new venue': the friend says where it is. */
+  const [asking, setAsking] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
-  const set = (field: Exclude<keyof PartyDraft, "spot">, value: string) => {
+  const set = (field: "date" | "artist" | "about" | "link", value: string) => {
     setDraft((current) => ({ ...current, [field]: value }));
-    setErrors((current) => ({ ...current, [field === "destination" ? "venue" : field]: undefined }));
+    setErrors((current) => ({ ...current, [field]: undefined }));
   };
-  // A pin belongs to the place picked: new words or another destination drop it, and the words stay.
-  const chooseDestination = (id: string) => setDraft((current) => ({ ...current, destination: id, spot: undefined }));
+  const placeOf = (id: string) => destinations.find((destination) => destination.id === id)?.name ?? id;
+  // New words are a new search: the pick, its place, pin and area go, and the words stay.
   const type = (words: string) => {
-    setDraft((current) => ({ ...current, venue: words, spot: undefined }));
-    setErrors((current) => ({ ...current, venue: undefined }));
+    setDraft((current) => ({ ...current, venue: words, destination: "", spot: undefined, area: "" }));
+    setAsking(false);
+    setErrors((current) => ({ ...current, venue: undefined, destination: undefined }));
   };
-  const pickVenue = (venue: string, hit?: PlaceHit) => {
-    setDraft((current) => ({
-      ...current,
-      venue,
-      ...(hit ? { destination: nearestDestination(destinations, hit) ?? current.destination, spot: { lat: hit.lat, lng: hit.lng } } : { spot: undefined }),
-    }));
-    setErrors((current) => ({ ...current, venue: undefined }));
+  const pickVenue = (line: VenueSuggestion) => {
+    const next: Pick<PartyDraft, "venue" | "destination" | "spot" | "area"> =
+      line.kind === "known"
+        ? { venue: line.venue.name, destination: line.venue.destination, spot: undefined, area: "" }
+        : line.kind === "place"
+          ? { venue: line.hit.name, destination: nearestDestination(destinations, line.hit) ?? "", spot: { lat: line.hit.lat, lng: line.hit.lng }, area: (line.hit.area ?? "").slice(0, AREA_MAX) }
+          : { venue: line.name, destination: "", spot: undefined, area: "" };
+    setDraft((current) => ({ ...current, ...next }));
+    setAsking(next.destination === "");
+    setErrors((current) => ({ ...current, venue: undefined, destination: undefined }));
+  };
+  const chooseDestination = (id: string) => {
+    setDraft((current) => ({ ...current, destination: id }));
+    setErrors((current) => ({ ...current, destination: undefined }));
   };
   const region: Spot[] = destinations.flatMap(({ lat, lng }) => (typeof lat === "number" && typeof lng === "number" ? [{ lat, lng }] : []));
-  const near = (): Spot => {
-    const centre = destinations.find((destination) => destination.id === draft.destination);
-    return typeof centre?.lat === "number" && typeof centre.lng === "number" ? { lat: centre.lat, lng: centre.lng } : (region[0] ?? { lat: 0, lng: 0 });
-  };
+  const near = (): Spot => region[0] ?? { lat: 0, lng: 0 };
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const found = problems(draft);
+    const found = problems(draft, asking);
     setErrors(found);
-    const first = (["venue", "date", "artist", "about", "link"] as Field[]).find((field) => found[field]);
+    const first = (["venue", "destination", "date", "artist", "about", "link"] as Field[]).find((field) => found[field]);
     if (first) return event.currentTarget.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
     onSave(draft);
   };
 
+  const errorLine = (name: Field) =>
+    errors[name] && (
+      <p id={`party-${name}-error`} className="field-error" role="alert">
+        {errors[name]}
+      </p>
+    );
   const field = (name: Field, label: string, input: JSX.Element) => (
     <>
       <label className="field">
         <small>{label}</small>
         {input}
       </label>
-      {errors[name] && (
-        <p id={`party-${name}-error`} className="field-error" role="alert">
-          {errors[name]}
-        </p>
-      )}
+      {errorLine(name)}
     </>
   );
   const described = (name: Field) => ({ name, "aria-invalid": errors[name] !== undefined, "aria-describedby": errors[name] ? `party-${name}-error` : undefined });
@@ -116,30 +135,31 @@ function PartyForm({ editing, destinations, venues, yourName, onSave, onRemove }
   return (
     <form className="party-sheet" onSubmit={submit} noValidate>
       {!editing && <p className="sub party-sheet-lead">It joins the list for everyone, with your initials.</p>}
-      <div className="pills" role="group" aria-label="Destination">
-        {destinations.map((destination) => (
-          <button key={destination.id} type="button" className="pill" aria-pressed={draft.destination === destination.id} onClick={() => chooseDestination(destination.id)}>
-            {destination.name}
-          </button>
-        ))}
-      </div>
-      <VenueField
-        {...described("venue")}
-        value={draft.venue}
-        known={offered}
-        near={near}
-        region={region}
-        onType={type}
-        onPick={pickVenue}
-        error={
-          errors.venue && (
-            <p id="party-venue-error" className="field-error" role="alert">
-              {errors.venue}
-            </p>
-          )
-        }
-      />
-      {field("date", "Date", <input {...described("date")} type="date" value={draft.date} min={EVENTS_WINDOW.from} max={EVENTS_WINDOW.to} onChange={(e) => set("date", e.target.value)} />)}
+      <VenueField {...described("venue")} value={draft.venue} known={venues} placeOf={placeOf} near={near} region={region} onType={type} onPick={pickVenue} autoFocus={!editing} error={errorLine("venue")} />
+      {draft.destination && !asking && <p className="cap venue-where">Lists under {placeOf(draft.destination)}</p>}
+      {asking && (
+        <div className="venue-ask">
+          <p id="party-where" className="cap">
+            Where is it?
+          </p>
+          <div className="pills" role="group" aria-labelledby="party-where">
+            {destinations.map((destination, at) => (
+              <button
+                key={destination.id}
+                type="button"
+                className="pill"
+                aria-pressed={draft.destination === destination.id}
+                {...(at === 0 ? described("destination") : {})}
+                onClick={() => chooseDestination(destination.id)}
+              >
+                {destination.name}
+              </button>
+            ))}
+          </div>
+          {errorLine("destination")}
+        </div>
+      )}
+      <DateField {...described("date")} label="Date" placeholder="Pick a day" from={draft.date} startMonth={startMonth} onPick={(day) => set("date", day)} error={errorLine("date")} />
       {field("artist", "Who is playing", <input {...described("artist")} value={draft.artist} maxLength={200} autoComplete="off" onChange={(e) => set("artist", e.target.value)} />)}
       {field("about", "What is it? (optional)", <input {...described("about")} value={draft.about} maxLength={120} autoComplete="off" onChange={(e) => set("about", e.target.value)} />)}
       {field(
@@ -163,16 +183,22 @@ function PartyForm({ editing, destinations, venues, yourName, onSave, onRemove }
 
 /**
  * Checks a draft before it is saved, so a refusal never reaches the rules.
- * Inputs: the draft; its date must lie in EVENTS_WINDOW. Output: a reason per wrong field;
- * none when the draft can be saved.
- * Examples (checked on screen): empty venue → { venue: "Add the venue." }
+ * Inputs: the draft; asking — whether the sheet asks "Where is it?". Any
+ * real day is a date (owner, 24 Nov 2026: "don't restrict the calendar").
+ * Output: a reason per wrong field; none when the draft can be saved.
+ * Examples (checked on screen):
+ *   empty venue                          → { venue: "Add the venue." }
+ *   typed words, nothing picked          → { venue: "Pick a line from the list." }
+ *   a new venue, no place picked         → { destination: "Pick where it is." }
  */
-function problems(draft: PartyDraft): Partial<Record<Field, string>> {
+function problems(draft: PartyDraft, asking: boolean): Partial<Record<Field, string>> {
   const found: Partial<Record<Field, string>> = {};
   if (!draft.venue.trim()) found.venue = "Add the venue.";
-  if (!inEventsWindow(draft.date)) {
-    found.date = `Pick a day from ${dayMonth(EVENTS_WINDOW.from)} to ${dayMonth(EVENTS_WINDOW.to)}.`;
+  else if (!draft.destination) {
+    if (asking) found.destination = "Pick where it is.";
+    else found.venue = "Pick a line from the list.";
   }
+  if (!isDay(draft.date)) found.date = "Pick a day.";
   if (!draft.artist.trim()) found.artist = "Add who is playing.";
   const link = draft.link.trim();
   if (link && !isAddress(link)) found.link = "Paste a link that starts with https://";

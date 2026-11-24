@@ -17,6 +17,8 @@ export interface PartyDraft {
   link: string;
   /** Where the venue is, when it was picked from the place search; it gets a pin. */
   spot?: Spot;
+  /** The picked place's area and country from the search ("Haad Khuat, Thailand"); "" drops the show's area, absent keeps it. */
+  area?: string;
 }
 
 /**
@@ -89,7 +91,9 @@ export function addShow(tripId: string, trip: Trip, draft: PartyDraft, memberId:
  * Examples (checked on the emulator): ka edits her own party → { ok: true }
  */
 export function editShow(tripId: string, trip: Trip, id: string, current: Show, draft: PartyDraft, memberId: MemberId): Promise<WriteResult> {
-  const { source, verified, addedBy, at, area, weekly } = current;
+  const { source, verified, addedBy, at, weekly } = current;
+  // A new pick says the area ("" for none); with no new pick the show keeps its own.
+  const area = draft.area === undefined ? current.area : undefined;
   const show: Show = { ...fields(draft), source, verified, at, ...(addedBy ? { addedBy } : {}), ...(area ? { area } : {}), ...(weekly ? { weekly } : {}) };
   return write({ [paths.show(tripId, id)]: show, ...newPin(tripId, trip, draft, memberId) });
 }
@@ -130,13 +134,15 @@ export async function removeShow(tripId: string, id: string): Promise<WriteResul
   return result;
 }
 
-/** The draft as stored: trimmed, with no about or link field when it is empty. */
+/** The draft as stored: trimmed, with no about, link or area field when it is empty. */
 function fields(draft: PartyDraft) {
   const about = draft.about.trim();
   const link = draft.link.trim();
+  const area = draft.area?.trim();
   return {
     destination: draft.destination,
     venue: draft.venue.trim(),
+    ...(area ? { area } : {}),
     date: draft.date,
     artist: draft.artist.trim(),
     ...(about ? { about } : {}),

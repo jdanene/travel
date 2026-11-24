@@ -4,6 +4,7 @@ import { Icon } from "../../../components/Icon";
 import { Notice } from "../../../components/Notice";
 import type { WriteResult } from "../../../lib/db";
 import { idFromName } from "../../../lib/ids";
+import { placeName } from "../../../lib/place";
 import type { MemberId, Trip } from "../../../types/trip";
 import { addShow, editShow, removeShow, makeTag, setIn, setShowTag, type PartyDraft } from "../api/parties";
 import { byTagName, eventShown, eventsList, tagChips, tripTags, type EventsFilter } from "../lib/tags";
@@ -16,6 +17,8 @@ import { EventsFilterChips } from "./EventsFilter";
 import { LastSeason, LastYearLine } from "./LastYearLine";
 import { ShowRow } from "./ShowRow";
 import { ShowSheet } from "./ShowSheet";
+import { VenueIcon } from "./VenueIcon";
+import type { VenueSpot } from "../lib/venues";
 import "./Parties.css";
 
 type SheetState = { mode: "add" } | { mode: "edit"; id: string } | null;
@@ -35,7 +38,8 @@ interface PartiesBlockProps {
 
 /**
  * The Events module (code: parties), opened in place (12/5) with the
- * content of screen 20/7: "Who's playing", then each destination, every venue the trip knows, and its shows (weekly
+ * content of screen 20/7: "Who's playing", then each destination named with its country ("Bali, Indonesia"),
+ * every venue the trip knows with its picture as its icon when it has one, and its shows (weekly
  * ones first, then by date), with the last-year line where a weekend is
  * empty and "Last season:" under a venue with nothing announced. Open from
  * the start; it never waits on the dates. A tap on a show opens its sheet.
@@ -55,7 +59,7 @@ interface PartiesBlockProps {
  * already put the data back. A show removed while its sheet is open closes
  * the sheet with "This event was removed."
  * Examples (checked on the emulator at 375 px and 1650 px):
- *   the seeded trip  → "Big nights" picked; Bali: Savaya, then Atlas Beach Club … Potato Head with nothing announced; Koh Phangan: Haad Rin Beach with the Full Moon Party
+ *   the seeded trip  → "Big nights" picked; Bali, Indonesia: Savaya with its picture, then Atlas Beach Club … Potato Head with nothing announced; Koh Phangan: Haad Rin Beach with the Full Moon Party
  *   tap "All · 27"   → Bali: Mrs Sippy … Savaya, then the venues with nothing announced; Koh Phangan: Eden Garden, Half Moon Festival, … Haad Rin Beach
  *   tap "Peggy Gou"  → the show sheet; "See on the map" opens the Map on Savaya with its card open
  *   tap "I'm in"     → filled at once, "1 in" with your initials, on the row and in the sheet
@@ -72,7 +76,9 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
   const marks = trip.parties?.in ?? {};
   const members = trip.crew?.members ?? {};
   const destinationNames = trip.info?.destinations ?? {};
-  const nameOf = (id: string) => destinationNames[id]?.name ?? id;
+  // Every place is named with its country: "Bali, Indonesia" (owner, 24 Nov 2026).
+  const nameOf = (id: string) => (destinationNames[id] ? placeName(destinationNames[id].name, destinationNames[id].country) : id);
+  const photoOf = new Map(Object.values(trip.places?.venues ?? {}).map((venue) => [venueKey(venue.destination, venue.name), venue.photoUrl]));
   const areas = trip.places?.areas ?? {};
   const lastYear = Object.values(trip.parties?.lastYear ?? {});
 
@@ -152,7 +158,7 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
     setSheet(null);
   };
 
-  const destinations = Object.entries(destinationNames).map(([id, { name, lat, lng }]) => ({ id, name, lat, lng }));
+  const destinations = Object.entries(destinationNames).map(([id, { lat, lng }]) => ({ id, name: nameOf(id), lat, lng }));
   const canAdd = viewer.memberId !== null && destinations.length > 0;
   // The map pins every venue with an event this season, whatever the filter (app/lib/pins.ts), so an event's venue is on it.
   const openedPlace = opened ? placeOf(opened, trip.places) : null;
@@ -197,9 +203,12 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
             return (
               <div key={venue.key} className="venue-group">
                 <h4 className="venue">
-                  <b>{venue.name}</b>
-                  {area && <span className="sub"> · {area}</span>}
-                  {line && <span className="venue-line">{line}</span>}
+                  <VenueIcon url={photoOf.get(venue.key)} />
+                  <span className="venue-name">
+                    <b>{venue.name}</b>
+                    {area && <span className="sub"> · {area}</span>}
+                    {line && <span className="venue-line">{line}</span>}
+                  </span>
                 </h4>
                 {venue.shows.length === 0 && <LastSeason shows={lastSeason(destination, venue.name, lastYear)} />}
                 {items.map(({ line: weekend, show }) =>
@@ -257,7 +266,8 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
         open={sheet !== null && (sheet.mode === "add" || editing !== undefined)}
         editing={editing}
         destinations={destinations}
-        venues={venuesByDestination(trip, byPlaceVenueDate(shows, known))}
+        venues={knownVenues(trip, byPlaceVenueDate(shows, known))}
+        startMonth={trip.info?.season?.from?.slice(0, 7)}
         yourName={viewer.memberId ? (members[viewer.memberId]?.name ?? viewer.memberId) : ""}
         onClose={() => setSheet(null)}
         onSave={save}
@@ -272,28 +282,34 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
 }
 
 /**
- * The names Add an event offers for "Venue", per destination: the trip's
- * venues, the venues friends' events already name, and the places friends
- * put on the map (places/custom, which may be missing), each name once,
- * by name.
+ * The venues Add an event's search offers before anything is typed, in
+ * every destination: the trip's clubs (places/venues) first, by
+ * destination and name, then the venues friends' events already name and
+ * the places friends put on the map (places/custom, which may be missing),
+ * by name. Each venue once per destination.
  *
  * Inputs: the trip and the list's groups.
- * Output: { destinationId: names }.
- * Examples (checked on screen): Bali → "Atlas Beach Club", …, "Single Fin", "Ulu Cliffhouse"
+ * Output: the venues, in that order.
+ * Examples (checked on screen): Atlas Beach Club … Ulu Cliffhouse (Bali), Eden Garden … (Koh Phangan), then friends' places
  */
-function venuesByDestination(trip: Trip, groups: ReturnType<typeof byPlaceVenueDate>): Record<string, string[]> {
+function knownVenues(trip: Trip, groups: ReturnType<typeof byPlaceVenueDate>): VenueSpot[] {
+  const order = Object.keys(trip.info?.destinations ?? {});
+  const byName = (a: VenueSpot, b: VenueSpot) => a.name.localeCompare(b.name, "en", { sensitivity: "base" });
+  const clubs = Object.values(trip.places?.venues ?? {})
+    .map((venue): VenueSpot => ({ name: venue.name.trim(), destination: venue.destination, club: true, ...(venue.photoUrl ? { photoUrl: venue.photoUrl } : {}) }))
+    .sort((a, b) => order.indexOf(a.destination) - order.indexOf(b.destination) || byName(a, b));
   const custom = Object.values((trip.places as { custom?: Record<string, { name?: unknown; destination?: unknown }> } | undefined)?.custom ?? {});
-  const all = [
-    ...Object.values(trip.places?.venues ?? {}).map((venue) => ({ destination: venue.destination, name: venue.name })),
+  const others = [
     ...groups.flatMap((group) => group.venues.map((venue) => ({ destination: group.destination, name: venue.name }))),
     ...custom.flatMap((place) => (typeof place?.name === "string" && typeof place.destination === "string" ? [{ destination: place.destination, name: place.name }] : [])),
-  ];
-  const byDestination: Record<string, Map<string, string>> = {};
-  for (const { destination, name } of all) {
-    const names = (byDestination[destination] ??= new Map());
-    if (!names.has(idFromName(name))) names.set(idFromName(name), name.trim());
-  }
-  return Object.fromEntries(
-    Object.entries(byDestination).map(([destination, names]) => [destination, [...names.values()].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }))]),
-  );
+  ]
+    .map(({ destination, name }): VenueSpot => ({ name: name.trim(), destination, club: false }))
+    .sort(byName);
+  const seen = new Set<string>();
+  return [...clubs, ...others].filter((venue) => {
+    const key = `${venue.destination}|${idFromName(venue.name)}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }

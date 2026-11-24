@@ -9,16 +9,21 @@ describe("areaShown", () => {
 
   it("drops an area that only repeats the destination", () => {
     expect(areaShown("Lost Jungle", "Koh Phangan", "Koh Phangan")).toBeUndefined();
+    expect(areaShown("Lost Jungle", "Koh Phangan", "Koh Phangan, Thailand")).toBeUndefined();
   });
 });
 
 describe("placeLine", () => {
   it("joins venue, area and destination", () => {
-    expect(placeLine("Savaya", "Uluwatu", "Bali")).toBe("Savaya · Uluwatu, Bali");
+    expect(placeLine("Savaya", "Uluwatu", "Bali, Indonesia")).toBe("Savaya · Uluwatu, Bali, Indonesia");
   });
 
   it("leaves out an area the venue's name already holds", () => {
-    expect(placeLine("Full Moon Party, Haad Rin Beach", "Haad Rin", "Koh Phangan")).toBe("Full Moon Party, Haad Rin Beach · Koh Phangan");
+    expect(placeLine("Full Moon Party, Haad Rin Beach", "Haad Rin", "Koh Phangan, Thailand")).toBe("Full Moon Party, Haad Rin Beach · Koh Phangan, Thailand");
+  });
+
+  it("lets a searched area with its country stand alone", () => {
+    expect(placeLine("Bottle Beach 1", "Haad Khuat, Thailand", "Koh Phangan, Thailand")).toBe("Bottle Beach 1 · Haad Khuat, Thailand");
   });
 });
 
