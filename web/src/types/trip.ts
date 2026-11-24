@@ -50,9 +50,13 @@ export interface Confirmation {
   at: number;
 }
 
+/** One range of days the crew votes on. The organizer's starting options have no adder. */
 export interface DateOption {
   from: string;
   to: string;
+  /** The member who added it with "Add dates". */
+  addedBy?: MemberId;
+  at?: number;
 }
 
 export interface Dates {

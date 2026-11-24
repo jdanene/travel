@@ -9,9 +9,10 @@
    *                  trips/$tripId/crew/devices/<auth.uid>
    *   "an organizer" a device listed under trips/$tripId/crew/organizers
    *
-   * The scripts in scripts/ write info, crew/expected, dates/options,
-   * parties/lastYear, places, tripSecrets/organizerKey and tripSecrets/admins
-   * with admin rights, so no rule below lets a phone write them.
+   * The scripts in scripts/ write info, crew/expected, the starting
+   * dates/options, parties/lastYear, places, tripSecrets/organizerKey and
+   * tripSecrets/admins with admin rights, so no rule below lets a phone
+   * write them.
    */
   "rules": {
     "trips": {
@@ -46,11 +47,27 @@
         },
 
         "dates": {
+          "options": {
+            "$optionId": {
+              /* A friend adds an option under its member, never over one that exists; the adder or an organizer removes one that is not confirmed. The page offers Remove only while nobody else has voted on it. */
+              ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() !== null && ((!data.exists() && newData.child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val()) || (data.exists() && !newData.exists() && (data.child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true) && root.child('trips').child($tripId).child('dates').child('confirmed').child('optionId').val() !== $optionId))",
+              /* The season is fixed: 1 Feb to 31 Mar 2027 (owner). The id is the two days, so one range is one option. */
+              ".validate": "newData.hasChildren(['from', 'to', 'addedBy', 'at']) && newData.child('from').val() <= newData.child('to').val() && $optionId === newData.child('from').val() + '_' + newData.child('to').val()",
+              "from": { ".validate": "newData.isString() && newData.val().matches(/^2027-(02-(0[1-9]|1[0-9]|2[0-8])|03-(0[1-9]|[12][0-9]|3[01]))$/)" },
+              "to": { ".validate": "newData.isString() && newData.val().matches(/^2027-(02-(0[1-9]|1[0-9]|2[0-8])|03-(0[1-9]|[12][0-9]|3[01]))$/)" },
+              "addedBy": { ".validate": "newData.isString() && newData.val().length <= 40" },
+              "at": { ".validate": "newData.isNumber()" },
+              "$other": { ".validate": false }
+            }
+          },
           "answers": {
             "$optionId": {
+              /* Removing an option takes its answers with it, in the same write, by whoever may remove the option. */
+              ".write": "auth != null && !newData.exists() && !newData.parent().parent().child('options').child($optionId).exists() && (root.child('trips').child($tripId).child('dates').child('options').child($optionId).child('addedBy').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true)",
               "$memberId": {
                 ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() === $memberId",
-                ".validate": "newData.isString() && newData.val().matches(/^(yes|maybe|no)$/) && root.child('trips').child($tripId).child('dates').child('options').child($optionId).exists()"
+                /* newData, not root: an option and its adder's Yes arrive in one write. */
+                ".validate": "newData.isString() && newData.val().matches(/^(yes|maybe|no)$/) && newData.parent().parent().parent().child('options').child($optionId).exists()"
               }
             }
           },

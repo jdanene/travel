@@ -1,4 +1,5 @@
 import { write, writeOnce, type WriteResult } from "../../../lib/db";
+import { dateOptionId } from "../../../lib/ids";
 import * as paths from "../../../lib/paths";
 import type { Answer, MemberId } from "../../../types/trip";
 
@@ -11,6 +12,38 @@ import type { Answer, MemberId } from "../../../types/trip";
  */
 export function saveAnswer(tripId: string, optionId: string, memberId: MemberId, answer: Answer): Promise<WriteResult> {
   return write({ [paths.answer(tripId, optionId, memberId)]: answer });
+}
+
+/**
+ * Adds a date option from "Add dates", for everyone, with the adder's vote
+ * set to Yes, in one write, so the option never shows without its first
+ * yes. The id comes from the two days, so a range that is listed already
+ * adds nothing: the friend's vote on it is set to Yes instead.
+ * Inputs: the trip, the two days (checked by checkDates first), the
+ * adder's member, and whether that option exists already.
+ * Output: the write result.
+ * Examples (checked on the emulator):
+ *   KA adds 18–24 Feb   → dates/options/2027-02-18_2027-02-24 { from, to, addedBy: "ka", at } and answers/…/ka = "yes"
+ *   RB adds 13–23 Feb, listed already → answers/2027-02-13_2027-02-23/rb = "yes"; no new option
+ */
+export function addOption(tripId: string, from: string, to: string, memberId: MemberId, listed: boolean): Promise<WriteResult> {
+  const id = dateOptionId(from, to);
+  const vote = { [paths.answer(tripId, id, memberId)]: "yes" };
+  if (listed) return write(vote);
+  return write({ [paths.dateOption(tripId, id)]: { from, to, addedBy: memberId, at: Date.now() }, ...vote });
+}
+
+/**
+ * Removes a date option and its answers in one write. The page offers it
+ * to the adder and to an organizer only while nobody but the adder has
+ * voted on it and it is not the confirmed option; the rules hold the
+ * last two (adder or organizer, not confirmed).
+ * Inputs: the trip and the option.
+ * Output: the write result.
+ * Examples (checked on the emulator): KA removes 18–24 Feb → the option and its "yes" go for everyone
+ */
+export function removeOption(tripId: string, optionId: string): Promise<WriteResult> {
+  return write({ [paths.dateOption(tripId, optionId)]: null, [paths.optionAnswers(tripId, optionId)]: null });
 }
 
 /**
