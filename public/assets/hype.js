@@ -256,24 +256,25 @@ window.HYPE = (() => {
     a.addEventListener("click", event => {
       try { sessionStorage.setItem("travel.splash." + id, String(Date.now())); } catch (err) {}
       const href = key ? to + "?organizer=" + key : to;
-      // A plain click rolls the smoke in, then opens the trip under it; reduced motion, or a click that
-      // opens a new tab, opens it at once.
-      const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (still || event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) {
+      // A plain click starts the load at once and fades the splash to the trip's charcoal while it loads;
+      // where the browser has view transitions it cross-fades into the trip instead. Reduced motion: a plain cut.
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) {
         if (key) { a.href = href; setTimeout(() => { a.href = to; }); }
         return;
       }
       event.preventDefault();
       a.classList.add("pressed");
-      smoke();
-      setTimeout(() => location.assign(href), 400);
+      if (!("onpagereveal" in window)) document.body.classList.add("leaving");
+      location.assign(href);
     });
+    // Back from the trip may restore this page as it was left: lift the fade and the pressed button.
+    addEventListener("pageshow", () => { document.body.classList.remove("leaving"); a.classList.remove("pressed"); });
     document.body.appendChild(a);
     document.body.classList.add("has-enter");
     warm(to);
   }
 
-  // Readies the trip app while the splash plays, so the tap finds it cached: the smoke's stylesheet, the app's
+  // Readies the trip app while the splash plays, so the tap finds it cached: the app's
   // script and stylesheet (their built names read from /app/index.html) as prefetches, which
   // the browser keeps for the next page even under "no-cache", and early connections to Firebase.
   // Inputs: to — the trip's path. Output: nothing; every failure is silent, and the tap then loads the app as before.
@@ -286,7 +287,6 @@ window.HYPE = (() => {
       Object.assign(l, extra || {});
       document.head.appendChild(l);
     };
-    link("stylesheet", "/assets/smoke.css");
     ["https://travel-ca8f9-default-rtdb.firebaseio.com", "https://identitytoolkit.googleapis.com", "https://www.googleapis.com"]
       .forEach(host => link("preconnect", host, { crossOrigin: "anonymous" }));
     fetch("/app/index.html").then(r => (r.ok ? r.text() : "")).then(html => {
@@ -296,13 +296,6 @@ window.HYPE = (() => {
     }).catch(() => {});
   }
 
-  // Rolls the smoke over the splash (assets/smoke.css); the app's page opens covered by the same smoke.
-  function smoke() {
-    const s = document.createElement("div");
-    s.className = "smoke in"; s.setAttribute("aria-hidden", "true");
-    s.innerHTML = "<i></i><i></i><i></i><i></i><i></i><i></i>";
-    document.body.appendChild(s);
-  }
 
   // Small link back to the list of options.
   function back(n) {

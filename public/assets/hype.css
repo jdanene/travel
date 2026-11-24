@@ -78,3 +78,13 @@ video { pointer-events: none; }
 
 /* The countries, in brackets under the destinations. */
 .dest .ctry { font-size: .72em; }
+
+/* The way into the trip fades the splash to the trip's charcoal (about 250 ms) while the trip loads; browsers with
+   cross-document view transitions cross-fade instead. Reduced motion: no fade. */
+@view-transition { navigation: auto; }
+body.leaving::after { content: ""; position: fixed; inset: 0; z-index: 100; background: #23211f; animation: leave 250ms ease-out both; pointer-events: none; }
+@keyframes leave { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  body.leaving::after { animation: none; }
+}

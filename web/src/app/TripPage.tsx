@@ -17,7 +17,6 @@ import type { Trip } from "../types/trip";
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { CheckEventsLine, useEventCheck, type EventCheck } from "./CheckEvents";
 import { Home } from "./Home";
-import { clearSmoke } from "./lib/smoke";
 import type { ModuleId } from "./lib/modules";
 
 /**
@@ -36,10 +35,6 @@ import type { ModuleId } from "./lib/modules";
  */
 export function TripPage({ tripId }: { tripId: string }) {
   const state = useTrip(tripId);
-  // The smoke from the splash clears once there is something to show: the trip, or why it cannot be shown.
-  useEffect(() => {
-    if (state.status !== "loading") clearSmoke();
-  }, [state.status]);
 
   switch (state.status) {
     case "loading":

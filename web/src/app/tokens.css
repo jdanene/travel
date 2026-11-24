@@ -79,3 +79,8 @@ svg.i { width: 1.375rem; height: 1.375rem; fill: none; stroke: currentColor; str
 .fb, .sheet, .notice { color: var(--ink); }
 .flyer .cap, .flyer .sub, .invite-reply .cap { color: var(--on-page-mut); }
 .flyer :focus-visible, .invite-reply :focus-visible, .organizer-foot :focus-visible { outline-color: var(--acc); }
+
+/* The trip fades in as soon as it is drawn (owner, 24 Nov 2026: "just make it a smooth transition"). */
+.frame > :not([aria-busy]) { animation: app-in 200ms ease-out both; }
+@keyframes app-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .frame > * { animation: none; } }
