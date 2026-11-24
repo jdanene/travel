@@ -12,7 +12,8 @@
  * Each run replaces info (each field by its own path, so info/inviteTitle,
  * which an organizer sets with "Edit invite", stays; absent, the page and
  * the link preview use the default), crew/expected, places/areas,
- * places/venues and the admin list (tripSecrets/{tripId}/admins, from the
+ * places/venues (each with its `big` tag from data/places.json, plan D18)
+ * and the admin list (tripSecrets/{tripId}/admins, from the
  * file's `admins`),
  * writes each starting date option by its own path, and touches nothing
  * else: the options friends added with "Add dates", answers, hearts, stays,
@@ -62,6 +63,9 @@ const problems = validateTripFile(file, idFromName);
 if (problems.length) stop(`${TRIP_FILE} is not right:\n  - ${problems.join("\n  - ")}`);
 
 const places = readJson(PLACES_FILE);
+// Each destination needs its centre for the map; a new one is added to data/places.json first.
+const noCentre = Object.keys(file.destinations).filter((id) => typeof places.destinations?.[id]?.lat !== "number");
+if (noCentre.length) stop(`${PLACES_FILE} has no centre for ${noCentre.join(", ")}; add it under "destinations".`);
 mkdirSync("local", { recursive: true });
 const state = existsSync(STATE_FILE) ? readJson(STATE_FILE) : { tripId: randomId(20), organizerKey: randomId(24) };
 writeFileSync(STATE_FILE, JSON.stringify(state, null, 2) + "\n");

@@ -156,6 +156,8 @@ export interface Venue {
   line?: string;
   /** false when the venue is not on OpenStreetMap and sits at its area's centre. */
   onMap?: boolean;
+  /** true for one of the owner's big nights (data/places.json); the Events list and the map show these by default. */
+  big?: boolean;
 }
 
 /** What a friend's place on the map is; each has its own pin icon. */

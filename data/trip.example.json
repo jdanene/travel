@@ -16,6 +16,12 @@
     },
     "kohPhangan": {
       "name": "Koh Phangan"
+    },
+    "phuket": {
+      "name": "Phuket"
+    },
+    "singapore": {
+      "name": "Singapore"
     }
   },
   "dateOptions": [

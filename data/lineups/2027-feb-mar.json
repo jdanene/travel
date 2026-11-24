@@ -54,10 +54,12 @@
    "date": "2027-02-07",
    "weekly": "sun",
    "artist": "Sunday Day Party",
+   "about": "A Sunday afternoon party on the cliff top at El Kabron, Uluwatu, with DJs and live sax and violin from 2 pm.",
+   "note": "The venue's Sunday Day Party page: starts at 2 pm, weekend DJ sets with live saxophone and violin",
    "venue": "El Kabron",
    "area": "Uluwatu",
    "place": "Bali",
-   "source": "https://www.elkabron.com/events",
+   "source": "https://www.elkabron.com/sunday-party",
    "verified": false
   },
   {

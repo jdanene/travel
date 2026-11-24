@@ -94,9 +94,9 @@ interface TripMapProps {
  * the map (no WebGL), a notice and a plain list of the pins replace the
  * map; the list opens the same cards (case 32).
  * Examples (checked at 390 px against 12/6 and 20/10):
- *   Bali → "Bali", "Koh Phangan · 6 pins", the Bali venues; a tap on Savaya opens its card
+ *   Bali → "Bali", "Koh Phangan · 1 pin", the big Bali venues; a tap on Savaya opens its card
  *   Add to map, "single fin", pick "Single Fin · Pecatu", Food, Add → its pin and card "Food · added by KA"
- *   focus "venue:eden-garden" → Koh Phangan, zoomed on Eden Garden, its card open
+ *   focus "venue:haad-rin-beach" → Koh Phangan, zoomed on Haad Rin Beach, its card open
  */
 /** A map made ahead of time, waiting out of sight; TripMap moves it in when the Map module opens. */
 interface Held {
@@ -419,7 +419,7 @@ export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onO
       <div className="pills map-pills" role="group" aria-label="Destination">
         {destinations.map((place) => (
           <button key={place.id} type="button" className="pill" aria-pressed={place.id === destination} onClick={() => choose(place.id)}>
-            {place.id === destination ? place.name : `${place.name} · ${count(place.id)} pins`}
+            {place.id === destination ? place.name : `${place.name} · ${count(place.id)} ${count(place.id) === 1 ? "pin" : "pins"}`}
           </button>
         ))}
       </div>
