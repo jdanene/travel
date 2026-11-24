@@ -102,6 +102,8 @@ export async function checkEvents(sources = SOURCES) {
  *
  * Examples (the saved pages are in fixtures/; events.test.mjs runs each):
  *   readEvents(<fixtures/savaya-event.html>)    → [{ name: "PEGGY GOU", date: "2027-02-13" }]
+ *   readEvents(<fixtures/illuzion-events.html>) → [{ name: "TIMMY TRUMPET", date: "2026-11-27" }, … 7 nights to 21 Dec]
+ *   readEvents(<fixtures/zouk-events.html>)     → [{ name: "TGIW", date: "2026-11-25" }, … 10 nights to 2 Dec]
  *   readEvents(<fixtures/savaya-calendar.html>) → []   (the calendar only links to the nights)
  *   readEvents('<script type="application/ld+json">{"@graph":[{"@type":"MusicEvent","name":"Fisher &amp; Friends","startDate":"2027-03-13T22:00:00+08:00"},{"@type":"Event","name":"No date"}]}</script>')
  *     → [{ name: "Fisher & Friends", date: "2027-03-13" }]

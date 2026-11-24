@@ -12,7 +12,7 @@ export type CheckResult = { status: "ran"; added: number } | { status: "skipped"
 export interface EventCheck {
   result: CheckResult | null;
   running: boolean;
-  /** The organizer's "Check for new events": runs now, whatever the 12-hour rule says. */
+  /** The organizer's "Check for new events": runs now, whatever the once-a-day rule says. */
   checkNow: () => void;
 }
 
@@ -68,7 +68,7 @@ async function runCheck(tripId: string, tripNow: () => Trip, memberId: MemberId,
   type LastCheck = NonNullable<Parties["lastCheck"]>;
   const claim = await writeIf<LastCheck>(paths.lastCheck(tripId), (current) => {
     const lastAt = typeof current?.at === "number" ? current.at : undefined;
-    // "Check now" ignores the 12 hours, but lastCheck still only moves forward.
+    // "Check now" ignores the 24 hours, but lastCheck still only moves forward.
     const due = force ? lastAt === undefined || now > lastAt : checkIsDue(lastAt, now);
     return due ? { at: now, by: memberId } : undefined;
   });

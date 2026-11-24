@@ -68,7 +68,7 @@ const CHECK_TIMEOUT_MS = 20_000;
 
 /**
  * Asks the reader to check the clubs' own event pages. One try: the check
- * runs in the background, and the next one is twelve hours away.
+ * runs in the background, and the next one is a day away.
  *
  * Output: the events the reader found (at most 100) and the clubs it could
  * not read, or null when the reader is not set up, cannot be reached, takes

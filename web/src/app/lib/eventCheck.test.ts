@@ -5,10 +5,11 @@ import { CHECK_EVERY_MS, checkIsDue, newShows } from "./eventCheck";
 const now = Date.UTC(2026, 10, 23, 12);
 
 describe("checkIsDue", () => {
-  it("is due with no last check, and 12 hours after the last", () => {
+  it("is due with no last check, and 24 hours after the last, not 23", () => {
+    expect(CHECK_EVERY_MS).toBe(24 * 3_600_000);
     expect(checkIsDue(undefined, now)).toBe(true);
-    expect(checkIsDue(now - CHECK_EVERY_MS, now)).toBe(true);
-    expect(checkIsDue(now - CHECK_EVERY_MS + 1, now)).toBe(false);
+    expect(checkIsDue(now - 24 * 3_600_000, now)).toBe(true);
+    expect(checkIsDue(now - 23 * 3_600_000, now)).toBe(false);
   });
 
   it("is not due when the last check is ahead of this clock", () => {

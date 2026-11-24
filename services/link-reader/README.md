@@ -30,7 +30,7 @@ A small AWS Lambda that reads a pasted link for the trip app (plan D8), and chec
 
 It reads only schema.org Event data (JSON-LD), the form clubs publish for search engines: no page layouts, no AI model, no key. A night named "Special guest" or "TBA", or a name the club gives three or more nights in the season (a house night, a sunset session), is left out. It opens only the clubs' own hosts (`event-sources.mjs`), six pages at a time, 6 seconds and 512 KB each, with the same redirect rule as a read; it opens no new page after 10 seconds. A second call within 10 minutes gets the first call's answer, so the public URL cannot make the function hammer a club.
 
-### The clubs (each club's own site, checked from a Mac on 23 Nov 2026)
+### The clubs (each club's own site, checked from a Mac on 23 Nov 2026; Phuket and Singapore added the same day)
 
 | Club | Source address | Events? |
 |---|---|---|
@@ -48,13 +48,23 @@ It reads only schema.org Event data (JSON-LD), the form clubs publish for search
 | Waterfall Party | none found | No site of its own (waterfallparty.com answers 404). |
 | Hidden Paradise | none found | No site of its own. |
 | Lost Jungle | none found | No site of its own. |
+| Illuzion Phuket | https://www.illuzionphuket.com/events/list/ | Yes. The list of coming nights carries one schema.org Event per night (7 today, to 21 Dec 2026). |
+| Café del Mar Phuket | https://phuket.cafedelmar.com/events | No. The list links to one page per night, but those pages have no event data. |
+| Maya Beach Club | none found | No site of its own: mayabeachclubphuket.com sends to Instagram, and mayaphuket.com is a hotel. |
+| XANA Beach Club | none found | No site of its own: xanabeachclub.com sends to another business, which answers 521. |
+| Yona Beach Club | https://www.yonabeach.com/ | No. It blocks the request (403). |
+| Armania Phuket | none found | No site found. |
+| Baba Beach Club | https://www.babanatai.com/ | No. It answers with a login page. |
+| Marquee | https://taogroup.com/venues/marquee-singapore/events/ (marqueesingapore.com sends here) | No. Events load in the browser; the data names the club only. |
+| Zouk | https://zoukgroup.com/singapore/events/ (zoukclub.com sends here) | Yes, but only the next ten or so nights (10 today, to 2 Dec 2026), so a February or March act appears about a week before it plays. |
+| CÉ LA VI | https://sg.celavi.com/ | No. Its event pages carry a schema.org Event with no date, and sg.celavi.com/events answers 404. |
 
-No page blocked the request. A club that starts to publish Event data joins by one entry in `event-sources.mjs`.
+Only Yona blocked the request. A club that starts to publish Event data joins by one entry in `event-sources.mjs`.
 
 ## What it allows
 
 - Sites for a pasted link (`sites.mjs`, the only place that names them): `airbnb.com` with `www.`, `m.` and the country domains, `abnb.me`, `booking.com`, `instagram.com` and `tiktok.com` with `www.` and `m.`, and `vm.tiktok.com`.
-- Sites for the events check (`event-sources.mjs`): each club's own host, today `www.savaya.com` only.
+- Sites for the events check (`event-sources.mjs`): each club's own host, today `www.savaya.com`, `www.illuzionphuket.com` and `zoukgroup.com`.
 - Callers: CORS allows `https://travel-ca8f9.web.app` and `http://localhost` on any port. A call with another `Origin` gets `not_allowed`. A call with no `Origin` (curl) is served.
 - Cost: reserved concurrency of 2, and a 20-second timeout for the events check.
 

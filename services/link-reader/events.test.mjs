@@ -15,6 +15,15 @@ test("readEvents reads the Event on a saved Savaya night", () => {
   assert.deepEqual(readEvents(page("savaya-event.html")), [{ name: "PEGGY GOU", date: "2027-02-13" }]);
 });
 
+test("readEvents reads the coming nights on saved Illuzion Phuket and Zouk lists", () => {
+  const illuzion = readEvents(page("illuzion-events.html"));
+  assert.equal(illuzion.length, 7);
+  assert.deepEqual(illuzion[0], { name: "TIMMY TRUMPET", date: "2026-11-27" });
+  const zouk = readEvents(page("zouk-events.html"));
+  assert.equal(zouk.length, 10);
+  assert.deepEqual(zouk[0], { name: "TGIW", date: "2026-11-25" });
+});
+
 test("readEvents finds nothing on Savaya's calendar, which only links to the nights", () => {
   assert.deepEqual(readEvents(page("savaya-calendar.html")), []);
 });
