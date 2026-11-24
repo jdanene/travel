@@ -50,7 +50,7 @@ Each was weighed against a second design. D1 against plain files with no build (
 | stay option | One pasted listing. | a card under "Where do we stay?"; the sheet says "Add a place" |
 | heart | A member likes a stay option. | the heart and its count |
 | venue | A club or party place in an area. | "Savaya" |
-| show | One date at one venue with who is playing. | a row under "Who's playing" |
+| show | One date at one venue with who is playing; or one night a week (`weekly`, "Every Sunday"). A show is an event on screen: the module, its button and its sheets say "Events" and "event" (owner, 24 Nov 2026). | a row under "Who's playing" |
 | last-year show | A show from the 2026 file. Read only. | "Here is who played this weekend last year:" |
 | in | A member is going to a show. | "I'm in" |
 | confirm | The organizer settles the dates or a destination's stay. | "Confirm these dates", "Confirm this stay" |

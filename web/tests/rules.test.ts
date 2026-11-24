@@ -1,6 +1,7 @@
 /**
  * The rules tests of Trip 2 (1 to 9), of the admin list (10 to 12, plan
- * D15), of Add dates (13 to 15, plan D16) and of Add to map (16 and 17),
+ * D15), of Add dates (13 to 15, plan D16), of Add to map (16 and 17) and
+ * of weekly shows (18),
  * against the database emulator. Run with
  * `npm run test:rules` in web/; it starts the emulator, runs this file and
  * stops it. Each test names the rule it proves, in the words of plan
@@ -144,4 +145,10 @@ describe("database rules", () => {
 
   it("17. refuses a place outside the box around its destination", () =>
     assertFails(set(ref(db("uid-a"), paths.customPlace(T, "p3")), place({ addedBy: "alice", lat: 9.7, lng: 100.0 }))));
+
+  it("18. takes a weekly show's day as a day name and refuses anything else", async () => {
+    const a = db("uid-a");
+    await assertSucceeds(set(ref(a, paths.show(T, "w1")), show({ source: "friend", addedBy: "alice", artist: "Sunday Session", date: "2027-02-07", weekly: "sun" })));
+    await assertFails(set(ref(a, paths.show(T, "w2")), show({ source: "friend", addedBy: "alice", artist: "Funday", date: "2027-02-07", weekly: "sunday" })));
+  });
 });

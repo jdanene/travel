@@ -62,6 +62,8 @@ interface TripMapProps {
   isOrganizer: boolean;
   /** A tap on the open card. */
   onOpen: (pin: Pin) => void;
+  /** A pin to open on: the map starts on its destination, centred on it, with its card open. */
+  focus?: string;
 }
 
 /**
@@ -75,7 +77,9 @@ interface TripMapProps {
  * show as one count pin ("3 pins") that lists them; zooming in splits it.
  *
  * Inputs: the trip, the destinations with their centres, the pins, this
- * member and whether it is an organizer, and what a tap on the card does.
+ * member and whether it is an organizer, what a tap on the card does, and a
+ * pin to start on (the show sheet's "See on the map"). Only the first value
+ * of focus counts; the map is mounted afresh each time its module opens.
  * Output: the map. Pins that collide group (case 35). Switching
  * destination closes the card. A destination with no pins says "No pins
  * yet." "Add to map" puts a friend's place on the map: a search for the
@@ -92,10 +96,12 @@ interface TripMapProps {
  * Examples (checked at 390 px against 12/6 and 20/10):
  *   Bali → "Bali", "Koh Phangan · 6 pins", the Bali venues; a tap on Savaya opens its card
  *   Add to map, "single fin", pick "Single Fin · Pecatu", Food, Add → its pin and card "Food · added by KA"
+ *   focus "venue:eden-garden" → Koh Phangan, zoomed on Eden Garden, its card open
  */
-export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onOpen }: TripMapProps) {
-  const [destination, setDestination] = useState(destinations[0]?.id ?? "");
-  const [selected, setSelected] = useState<string | null>(null);
+export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onOpen, focus }: TripMapProps) {
+  const start = useRef(pins.find((pin) => pin.id === focus));
+  const [destination, setDestination] = useState(start.current?.destination ?? destinations[0]?.id ?? "");
+  const [selected, setSelected] = useState<string | null>(start.current?.id ?? null);
   const [group, setGroup] = useState<string[] | null>(null);
   const [tilesFailed, setTilesFailed] = useState(false);
   const [placing, setPlacing] = useState(false);
@@ -159,8 +165,11 @@ export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onO
     // A pin added or removed here keeps the camera where the friend is looking.
     const last = framed.current;
     if (last && last.destination === destination && last.count > 0) return void (framed.current = { destination, count: here.length });
-    const camera =
-      here.length > 1
+    // The show sheet's "See on the map" starts centred on its venue.
+    const target = here.find((pin) => pin.id === start.current?.id);
+    const camera = target
+      ? { center: [target.lng, target.lat] as [number, number], zoom: 15 }
+      : here.length > 1
         ? current.cameraForBounds(
             here.reduce((bounds, pin) => bounds.extend([pin.lng, pin.lat]), new maplibregl.LngLatBounds([here[0].lng, here[0].lat], [here[0].lng, here[0].lat])),
             { padding: 56, maxZoom: 14 },
@@ -303,6 +312,7 @@ export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onO
 
   const choose = (id: string) => {
     stopPlacing();
+    start.current = undefined;
     setDestination(id);
     setSelected(null);
     setGroup(null);

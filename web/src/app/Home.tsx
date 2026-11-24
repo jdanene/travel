@@ -9,7 +9,7 @@ import "./Home.css";
 const LOOK: Record<ModuleId, { name: string; icon: IconName }> = {
   dates: { name: "Dates", icon: "cal" },
   stay: { name: "Stay", icon: "bed" },
-  parties: { name: "Parties", icon: "music" },
+  parties: { name: "Events", icon: "music" },
   links: { name: "Links", icon: "link" },
   map: { name: "Map", icon: "map" },
 };
@@ -22,7 +22,7 @@ interface HomeProps {
   replied?: string;
   /**
    * What each module shows when open; each module's ticket fills it in.
-   * It gets openModule, so one module can open another (the map card opens Parties).
+   * It gets openModule, so one module can open another (the map card opens Events).
    */
   content?: (openModule: (id: ModuleId) => void) => Partial<Record<ModuleId, ReactNode>>;
 }
@@ -40,7 +40,7 @@ interface HomeProps {
  * sticky left column and the modules in the right one. An opened module
  * scrolls to the top of the window, unless its top is already near there.
  * Examples (checked on the emulator at 375 px against 12/2 and 12/3, and at 1650 px):
- *   dates open      → Dates "Tap to answer", Parties, Links, Map; no Stay
+ *   dates open      → Dates "Tap to answer", Events, Links, Map; no Stay
  *   tap "Dates"     → Dates opens with the accent ring at the top of the window; tap again, or another module, and it closes
  *   1650 px         → the flyer on the left, the module buttons on the right
  */

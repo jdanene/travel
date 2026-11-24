@@ -1,19 +1,81 @@
 {
- "checked": "2026-11-23",
+ "checked": "2026-11-24",
  "window": "2027-02-01 to 2027-03-31",
  "shows": [
   {
+   "date": "2027-02-06",
+   "weekly": "sat",
+   "artist": "Off The Record",
+   "about": "A Saturday pool party at Ulu Cliffhouse with house DJs, from the afternoon to sunset.",
+   "note": "Saturday pool party, afternoon to sunset; resident and guest DJs",
+   "venue": "Ulu Cliffhouse",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.ulucliffhouse.com/whats-on",
+   "verified": false
+  },
+  {
+   "date": "2027-02-06",
+   "weekly": "sat",
+   "artist": "Saturday Pool Party",
+   "about": "A Saturday pool party at Mrs Sippy, Seminyak, with hip hop from 1 to 7 pm.",
+   "note": "Saturday Pool Party: Hip Hop Edition, 1 to 7 pm",
+   "venue": "Mrs Sippy",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "https://www.mrssippybali.com/whats-on",
+   "verified": false
+  },
+  {
+   "date": "2027-02-06",
+   "weekly": "sat",
+   "artist": "Eden Garden Saturday",
+   "about": "An all-night party above Haad Yuan beach, every Saturday from 9 pm to 9 am; entry is free.",
+   "note": "All night, 9 pm to 9 am, free entry",
+   "venue": "Eden Garden",
+   "area": "Haad Yuan",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/eden-garden-saturday/",
+   "verified": false
+  },
+  {
+   "date": "2027-02-07",
+   "weekly": "sun",
+   "artist": "Sunday Session",
+   "about": "A Sunday night party on the cliff over the Uluwatu surf break; the bar stays open until 2 am.",
+   "note": "The Sunday party on the cliff over the surf break; the venue's site lists Sunday hours to 2 am but no session page",
+   "venue": "Single Fin",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.singlefinbali.com/",
+   "verified": false
+  },
+  {
+   "date": "2027-02-07",
+   "weekly": "sun",
+   "artist": "Sunday Day Party",
+   "venue": "El Kabron",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.elkabron.com/events",
+   "verified": false
+  },
+  {
    "date": "2027-02-01",
-   "artist": "Half Moon Festival", "note": "Half Moon Festival (1 Feb; no DJs named; dates from a travel blog, not on the organiser's site yet)",
+   "artist": "Half Moon Festival",
+   "about": "A two-day party in the jungle at Ban Tai, Koh Phangan, held every two weeks.",
+   "note": "Half Moon Festival (1 Feb; no DJs named; dates from a travel blog, not on the organiser's site yet)",
    "venue": "Half Moon Festival",
    "area": "Ban Tai",
    "place": "Koh Phangan",
-   "source": "https://thaiest.com/blog/half-moon-festival",
+   "source": "https://www.halfmoonfestival.com/",
    "verified": false
   },
   {
    "date": "2027-02-11",
-   "artist": "MO:DEM Teaser Party", "note": "MO:DEM Teaser Party Thailand 2027 (psytrance, 11-14 Feb): Highko Retro, Xolotl, Synthetik Chaos, Phobos and more",
+   "artist": "MO:DEM Teaser Party",
+   "about": "A three-day psytrance party at Hidden Paradise in Ban Tai, from the team behind the MO:DEM festival in Croatia.",
+   "note": "MO:DEM Teaser Party Thailand 2027 (psytrance, 11-14 Feb): Highko Retro, Xolotl, Synthetik Chaos, Phobos and more",
    "venue": "Hidden Paradise",
    "area": "Ban Tai",
    "place": "Koh Phangan",
@@ -23,6 +85,7 @@
   {
    "date": "2027-02-13",
    "artist": "Peggy Gou",
+   "about": "South Korean DJ who plays house and techno.",
    "venue": "Savaya",
    "area": "Uluwatu",
    "place": "Bali",
@@ -31,11 +94,13 @@
   },
   {
    "date": "2027-02-13",
-   "artist": "Half Moon Festival", "note": "Half Moon Festival (13-14 Feb; no DJs named; dates from a travel blog, not on the organiser's site yet)",
+   "artist": "Half Moon Festival",
+   "about": "A two-day party in the jungle at Ban Tai, Koh Phangan, held every two weeks.",
+   "note": "Half Moon Festival (13-14 Feb; no DJs named; dates from a travel blog, not on the organiser's site yet)",
    "venue": "Half Moon Festival",
    "area": "Ban Tai",
    "place": "Koh Phangan",
-   "source": "https://thaiest.com/blog/half-moon-festival",
+   "source": "https://www.halfmoonfestival.com/",
    "verified": false
   },
   {
@@ -50,6 +115,7 @@
   {
    "date": "2027-02-20",
    "artist": "Franky Rizardo",
+   "about": "Dutch DJ who plays house.",
    "venue": "Savaya",
    "area": "Uluwatu",
    "place": "Bali",
@@ -58,7 +124,9 @@
   },
   {
    "date": "2027-02-22",
-   "artist": "Full Moon Party", "note": "Full Moon Party (no guest DJs named)",
+   "artist": "Full Moon Party",
+   "about": "An all-night party on Haad Rin beach, Koh Phangan, where each bar on the sand plays its own music; it runs every full moon.",
+   "note": "Full Moon Party (no guest DJs named)",
    "venue": "Haad Rin Beach",
    "area": "Haad Rin",
    "place": "Koh Phangan",
@@ -67,7 +135,9 @@
   },
   {
    "date": "2027-02-25",
-   "artist": "ATMAN Begins Teaser Party", "note": "ATMAN Begins Teaser Party (psytrance, 25-27 Feb): Agressive Mood, Maze of Madness, Daash, Psynonima and more",
+   "artist": "ATMAN Begins Teaser Party",
+   "about": "A 48-hour psytrance party at Lost Jungle, Koh Phangan, ahead of the ATMAN festival.",
+   "note": "ATMAN Begins Teaser Party (psytrance, 25-27 Feb): Agressive Mood, Maze of Madness, Daash, Psynonima and more",
    "venue": "Lost Jungle",
    "area": "Koh Phangan",
    "place": "Koh Phangan",
@@ -77,6 +147,7 @@
   {
    "date": "2027-02-27",
    "artist": "ANTS",
+   "about": "The house party of Ushuaïa Ibiza, on tour with its resident DJs.",
    "venue": "Savaya",
    "area": "Uluwatu",
    "place": "Bali",
@@ -86,6 +157,7 @@
   {
    "date": "2027-02-28",
    "artist": "Ben Böhmer",
+   "about": "German producer who plays melodic house, often live.",
    "venue": "Savaya",
    "area": "Uluwatu",
    "place": "Bali",
@@ -94,16 +166,19 @@
   },
   {
    "date": "2027-02-28",
-   "artist": "Half Moon Festival", "note": "Half Moon Festival (28 Feb - 1 Mar; no DJs named; dates from a travel blog, not on the organiser's site yet)",
+   "artist": "Half Moon Festival",
+   "about": "A two-day party in the jungle at Ban Tai, Koh Phangan, held every two weeks.",
+   "note": "Half Moon Festival (28 Feb - 1 Mar; no DJs named; dates from a travel blog, not on the organiser's site yet)",
    "venue": "Half Moon Festival",
    "area": "Ban Tai",
    "place": "Koh Phangan",
-   "source": "https://thaiest.com/blog/half-moon-festival",
+   "source": "https://www.halfmoonfestival.com/",
    "verified": false
   },
   {
    "date": "2027-03-13",
    "artist": "FISHER",
+   "about": "Australian DJ who plays tech house.",
    "venue": "Savaya",
    "area": "Uluwatu",
    "place": "Bali",
@@ -112,29 +187,24 @@
   },
   {
    "date": "2027-03-14",
-   "artist": "Half Moon Festival", "note": "Half Moon Festival (14-15 Mar; no DJs named; dates from a travel blog, not on the organiser's site yet)",
+   "artist": "Half Moon Festival",
+   "about": "A two-day party in the jungle at Ban Tai, Koh Phangan, held every two weeks.",
+   "note": "Half Moon Festival (14-15 Mar; no DJs named; dates from a travel blog, not on the organiser's site yet)",
    "venue": "Half Moon Festival",
    "area": "Ban Tai",
    "place": "Koh Phangan",
-   "source": "https://thaiest.com/blog/half-moon-festival",
+   "source": "https://www.halfmoonfestival.com/",
    "verified": false
   },
   {
-   "date": "2027-03-22",
-   "artist": "Full Moon Party", "note": "Full Moon Party (no guest DJs named)",
-   "venue": "Haad Rin Beach",
-   "area": "Haad Rin",
-   "place": "Koh Phangan",
-   "source": "https://fullmoonparty-thailand.com/schedules/",
-   "verified": true
-  },
-  {
    "date": "2027-03-29",
-   "artist": "Half Moon Festival", "note": "Half Moon Festival (29-30 Mar; no DJs named; dates from a travel blog, not on the organiser's site yet)",
+   "artist": "Half Moon Festival",
+   "about": "A two-day party in the jungle at Ban Tai, Koh Phangan, held every two weeks.",
+   "note": "Half Moon Festival (29-30 Mar; no DJs named; dates from a travel blog, not on the organiser's site yet)",
    "venue": "Half Moon Festival",
    "area": "Ban Tai",
    "place": "Koh Phangan",
-   "source": "https://thaiest.com/blog/half-moon-festival",
+   "source": "https://www.halfmoonfestival.com/",
    "verified": false
   }
  ],
@@ -146,8 +216,6 @@
   "Klymax",
   "Desa Kitsuné (nothing dated after 31 Dec)",
   "Café del Mar Bali (nothing dated after NYE)",
-  "Single Fin",
-  "Ulu Cliffhouse (weekly Saturdays only, no named artists)",
   "Zumana",
   "La Brisa (events page unreachable; nothing dated after NYE in listings)",
   "Savaya 'Special Guest' dates with no artist named yet: 6, 7, 21 Feb; 6, 14, 20, 21, 27, 28 Mar",

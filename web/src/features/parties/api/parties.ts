@@ -3,12 +3,13 @@ import * as paths from "../../../lib/paths";
 import type { MemberId, Show, Trip } from "../../../types/trip";
 import { showId } from "../lib/shows";
 
-/** What a friend types in Add a party (screen 8). Link is "" when left empty. */
+/** What a friend types in Add an event (screen 8). About and link are "" when left empty. */
 export interface PartyDraft {
   destination: string;
   venue: string;
   date: string;
   artist: string;
+  about: string;
   link: string;
 }
 
@@ -52,7 +53,8 @@ export function addShow(tripId: string, trip: Trip, draft: PartyDraft, memberId:
 
 /**
  * Saves an edit. The show keeps its id, its source, who added it and when,
- * because the rules refuse a change of the adder.
+ * because the rules refuse a change of the adder, and a weekly show stays
+ * weekly (the sheet does not offer the day).
  *
  * Inputs: the trip id, the show's id, the show as it is, and the draft.
  * Output: the write's result; "refused" when this device neither added the
@@ -60,8 +62,8 @@ export function addShow(tripId: string, trip: Trip, draft: PartyDraft, memberId:
  * Examples (checked on the emulator): ka edits her own party → { ok: true }
  */
 export function editShow(tripId: string, id: string, current: Show, draft: PartyDraft): Promise<WriteResult> {
-  const { source, verified, addedBy, at, area } = current;
-  const show: Show = { ...fields(draft), source, verified, at, ...(addedBy ? { addedBy } : {}), ...(area ? { area } : {}) };
+  const { source, verified, addedBy, at, area, weekly } = current;
+  const show: Show = { ...fields(draft), source, verified, at, ...(addedBy ? { addedBy } : {}), ...(area ? { area } : {}), ...(weekly ? { weekly } : {}) };
   return write({ [paths.show(tripId, id)]: show });
 }
 
@@ -77,14 +79,16 @@ export function removeShow(tripId: string, id: string): Promise<WriteResult> {
   return write({ [paths.show(tripId, id)]: null, [paths.showIn(tripId, id)]: null });
 }
 
-/** The draft as stored: trimmed, with no link field when the link is empty. */
+/** The draft as stored: trimmed, with no about or link field when it is empty. */
 function fields(draft: PartyDraft) {
+  const about = draft.about.trim();
   const link = draft.link.trim();
   return {
     destination: draft.destination,
     venue: draft.venue.trim(),
     date: draft.date,
     artist: draft.artist.trim(),
+    ...(about ? { about } : {}),
     ...(link ? { link } : {}),
   };
 }

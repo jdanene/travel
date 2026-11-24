@@ -54,10 +54,11 @@ export type ListedShow = Show & { id: string };
 export interface VenueGroup {
   /** venueKey() of the venue. */
   key: string;
-  /** The venue as its earliest show spells it. */
+  /** The venue as places/venues spells it, or else as its earliest show does. */
   name: string;
-  /** The first area any of its shows names, if one does. */
+  /** The venue's own area from places/venues, or else the first area any of its shows names. */
   area?: string;
+  /** Weekly shows first, then the dated ones by date. Empty for a venue with nothing announced. */
   shows: ListedShow[];
 }
 
@@ -66,36 +67,61 @@ export interface DestinationGroup {
   venues: VenueGroup[];
 }
 
+/** A venue the trip knows from places/venues (or a friend's place), listed even with no show. */
+export interface KnownVenue {
+  name: string;
+  destination: DestinationId;
+  area?: string;
+}
+
 /**
- * Orders the shows as screen 7 lists them: by destination, then venue,
- * then date. Venue spellings that differ only by case or spaces fall into
- * one group.
+ * Orders the list as the Events module draws it: by destination, then
+ * venue, then date. Every known venue shows, so a friend sees each club
+ * even before it announces anything. Venues with a show this year come
+ * first, by their first night (a weekly show counts from its first night),
+ * then the rest by name. Venue spellings that differ only by case or spaces
+ * fall into one group.
  *
  * Inputs: shows — parties/shows as the database holds it; may be empty.
- * Output: destinations by id (the database keeps them in that order too),
- * venues by name ignoring case, shows by date then artist. No shows, no groups.
+ * known — the venues of places/venues; may be empty.
+ * Output: destinations by id (the database keeps them in that order too).
+ * Inside a venue, weekly shows come first, then dated shows by date, then
+ * artist. A known venue without shows has an empty list. Nothing at all,
+ * no groups.
  * Examples (checked on the emulator with the seed):
- *   the 2027 file → Bali: Savaya (6 shows); Koh Phangan: Haad Rin Beach,
- *                   Half Moon Festival, Hidden Paradise, Lost Jungle
+ *   the 2027 file and data/places.json → Bali: Mrs Sippy, Ulu Cliffhouse
+ *     (every Saturday from 6 Feb), El Kabron, Single Fin (every Sunday from
+ *     7 Feb), Savaya (13 Feb to 13 Mar), then Atlas Beach Club to Potato Head
+ *     by name, each with nothing announced
  */
-export function byPlaceVenueDate(shows: Record<string, Show>): DestinationGroup[] {
+export function byPlaceVenueDate(shows: Record<string, Show>, known: KnownVenue[] = []): DestinationGroup[] {
   const listed = Object.entries(shows)
     .map(([id, show]) => ({ ...show, id }))
-    .sort((a, b) => a.date.localeCompare(b.date) || a.artist.localeCompare(b.artist));
+    .sort((a, b) => Number(!a.weekly) - Number(!b.weekly) || a.date.localeCompare(b.date) || a.artist.localeCompare(b.artist));
 
-  const venues = new Map<string, VenueGroup & { destination: DestinationId }>();
+  const venues = new Map<string, VenueGroup & { destination: DestinationId; first?: string }>();
+  for (const venue of known) {
+    const key = venueKey(venue.destination, venue.name);
+    venues.set(key, { key, destination: venue.destination, name: venue.name.trim(), area: venue.area, shows: [] });
+  }
   for (const show of listed) {
     const key = venueKey(show.destination, show.venue);
     const group = venues.get(key) ?? { key, destination: show.destination, name: show.venue.trim(), shows: [] };
     group.area ??= show.area?.trim() || undefined;
+    group.first = group.first === undefined || show.date < group.first ? show.date : group.first;
     group.shows.push(show);
     venues.set(key, group);
   }
 
+  const order = (a: { name: string; first?: string }, b: { name: string; first?: string }) =>
+    Number(a.first === undefined) - Number(b.first === undefined) ||
+    (a.first ?? "").localeCompare(b.first ?? "") ||
+    a.name.localeCompare(b.name, "en", { sensitivity: "base" });
+
   const destinations = new Map<DestinationId, VenueGroup[]>();
-  const byName = [...venues.values()].sort((a, b) => a.name.localeCompare(b.name, "en", { sensitivity: "base" }));
-  for (const { destination, ...group } of byName) {
+  for (const { destination, first: _first, ...group } of [...venues.values()].sort(order)) {
     destinations.set(destination, [...(destinations.get(destination) ?? []), group]);
   }
   return [...destinations.keys()].sort().map((destination) => ({ destination, venues: destinations.get(destination)! }));
 }
+

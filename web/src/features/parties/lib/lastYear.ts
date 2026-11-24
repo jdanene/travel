@@ -32,7 +32,8 @@ const weekday = (day: string) => new Date(timeOf(day)).getUTCDay();
  * Feb"). On the real data the plan's Friday-to-Sunday weekend would add a
  * Friday row the mock does not show, so the mock wins.
  *
- * Inputs: shows — this year's shows; lastYear — last year's shows; season —
+ * Inputs: shows — this year's shows (a weekly show is skipped: it says
+ * nothing about one weekend); lastYear — last year's shows; season —
  * the trip's first and last day, "YYYY-MM-DD". Venue names match across
  * the two lists ignoring case and spaces. A weekend half inside the
  * season counts only its days inside.
@@ -47,9 +48,9 @@ const weekday = (day: string) => new Date(timeOf(day)).getUTCDay();
  *   last year " SAVAYA" on Sun 1 Mar 2026, this year nothing on Sat 27 – Sun 28 Feb 2027
  *     → one Savaya line for 27–28 Feb that holds Sun 1 Mar 2026
  */
-export function lastYearLines(shows: ShowKey[], lastYear: ShowKey[], season: { from: string; to: string }): LastYearLine[] {
+export function lastYearLines(shows: Array<ShowKey & { weekly?: string }>, lastYear: ShowKey[], season: { from: string; to: string }): LastYearLine[] {
   const venues = new Map<string, { destination: DestinationId; venue: string; days: Set<string> }>();
-  for (const show of [...shows].sort((a, b) => a.date.localeCompare(b.date))) {
+  for (const show of shows.filter((one) => !one.weekly).sort((a, b) => a.date.localeCompare(b.date))) {
     const key = venueKey(show.destination, show.venue);
     const venue = venues.get(key) ?? { destination: show.destination, venue: show.venue.trim(), days: new Set<string>() };
     venue.days.add(show.date);
@@ -74,6 +75,29 @@ export function lastYearLines(shows: ShowKey[], lastYear: ShowKey[], season: { f
   return lines.sort(
     (a, b) => a.destination.localeCompare(b.destination) || a.venue.localeCompare(b.venue, "en", { sensitivity: "base" }) || a.from.localeCompare(b.from),
   );
+}
+
+/**
+ * What a venue with nothing announced this year shows under "Last season:":
+ * the acts that played there last year, any month, newest first.
+ *
+ * Inputs: destination and venue — the venue as the list names it (case and
+ * spaces do not count); lastYear — last year's shows; max — how many to
+ * keep, three unless given.
+ * Output: { date, artist } with last year's dates, newest first; empty when
+ * last year has nothing at that venue.
+ * Examples (each is a test in lastYear.test.ts):
+ *   Atlas Beach Club: Swae Lee 1 Jan, Afrojack 31 Jan, Rudimental 2 Jan  → Afrojack, Rudimental, Swae Lee
+ *   a venue last year never listed                                     → []
+ *   Savaya with five acts                                              → its three newest
+ */
+export function lastSeason(destination: DestinationId, venue: string, lastYear: ShowKey[], max = 3): Array<{ date: string; artist: string }> {
+  const key = venueKey(destination, venue);
+  return lastYear
+    .filter((show) => venueKey(show.destination, show.venue) === key)
+    .sort((a, b) => b.date.localeCompare(a.date) || a.artist.localeCompare(b.artist))
+    .slice(0, max)
+    .map(({ date, artist }) => ({ date, artist }));
 }
 
 /** Every Saturday whose weekend touches the season, the Saturday before it included. */
