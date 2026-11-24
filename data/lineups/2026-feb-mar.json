@@ -1,74 +1,825 @@
 {
-  "checked": "2026-11-23",
-  "window": "2026-01-01 to 2026-03-31; January comes from the owner's list and only feeds \"Last season:\"",
-  "shows": [
-    {"date": "2026-01-01", "artist": "Amelie Lens", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-01-02", "artist": "Fatboy Slim", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-01-03", "artist": "Solardo", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-01-04", "artist": "Alex Wann", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-01-10", "artist": "Carl Cox", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-01-11", "artist": "Satori", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-01-17", "artist": "Michael Bibi", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-01-18", "artist": "Josh Baker & Seth Troxler", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-01-24", "artist": "Marco Carola b2b Frank Storm", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-01-31", "artist": "WhoMadeWho", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
-
-    {"date": "2026-01-01", "artist": "Swae Lee", "venue": "Atlas Beach Club", "area": "Canggu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-01-02", "artist": "Rudimental", "venue": "Atlas Beach Club", "area": "Canggu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-01-31", "artist": "Afrojack", "venue": "Atlas Beach Club", "area": "Canggu", "place": "Bali", "source": "owner's list", "verified": false},
-
-    {"date": "2026-01-30", "artist": "DJ Panda × Inquisitive", "venue": "Atlas Super Club", "area": "Canggu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-01-31", "artist": "Crooked Colours", "venue": "Atlas Super Club", "area": "Canggu", "place": "Bali", "source": "owner's list", "verified": false},
-
-    {"date": "2026-01-01", "artist": "Adam Dado, Dialect, GECO", "venue": "Klymax", "area": "Seminyak", "place": "Bali", "source": "owner's list", "verified": false},
-
-    {"date": "2026-01-31", "artist": "Sunset Park residents", "venue": "Potato Head", "area": "Seminyak", "place": "Bali", "source": "owner's list", "verified": false},
-
-    {"date": "2026-01-22", "artist": "Maréa", "venue": "Café del Mar Bali", "area": "Canggu", "place": "Bali", "source": "owner's list", "verified": false},
-
-    {"date": "2026-01-03", "artist": "Full Moon Party", "venue": "Haad Rin Beach", "area": "Haad Rin", "place": "Koh Phangan", "source": "owner's list", "verified": false},
-
-    {"date": "2026-02-01", "artist": "Amémé", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": true},
-    {"date": "2026-02-06", "artist": "Peggy Gou", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-02-07", "artist": "Nic Fanciulli", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": true},
-    {"date": "2026-02-08", "artist": "Francis Mercier", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": true},
-    {"date": "2026-02-14", "artist": "Argy", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": true},
-    {"date": "2026-02-20", "artist": "Disco Lines", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-02-21", "artist": "Mëstiza", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-02-22", "artist": "Syreeta", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-02-28", "artist": "ANTS", "note": "ANTS (Andrea Oliva, Fleur Shore)", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": true},
-    {"date": "2026-03-01", "artist": "Mahmut Orhan", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "https://www.savaya.com/new/law-of-the-jungle-2025", "verified": true},
-    {"date": "2026-03-07", "artist": "Gorgon City", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "https://www.savaya.com/new/law-of-the-jungle-2025", "verified": true},
-    {"date": "2026-03-15", "artist": "Bora Uzer", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "https://www.savaya.com/new/law-of-the-jungle-2025", "verified": true},
-    {"date": "2026-03-21", "artist": "Disko Afrika", "note": "Disko Afrika (DJs not named in source)", "venue": "Savaya", "area": "Uluwatu", "place": "Bali", "source": "https://ra.co/events/2392110", "verified": false},
-
-    {"date": "2026-02-06", "artist": "Le Twins", "venue": "Atlas Super Club", "area": "Canggu", "place": "Bali", "source": "owner's list", "verified": false},
-
-    {"date": "2026-02-07", "artist": "Laziovau, Rizkycore", "note": "Sunset Park residents (Laziovau, Rizkycore)", "venue": "Potato Head", "area": "Seminyak", "place": "Bali", "source": "owner's list", "verified": true},
-    {"date": "2026-02-19", "artist": "KAFKA, Laziovau, Apri", "venue": "Potato Head", "area": "Seminyak", "place": "Bali", "source": "owner's list", "verified": false},
-
-    {"date": "2026-02-14", "artist": "Zai Love & Friends", "venue": "Desa Kitsuné", "area": "Canggu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-02-17", "artist": "Savaya × Desa series", "venue": "Desa Kitsuné", "area": "Canggu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-02-20", "artist": "Savaya × Desa series", "venue": "Desa Kitsuné", "area": "Canggu", "place": "Bali", "source": "owner's list", "verified": false},
-    {"date": "2026-02-21", "artist": "Red Fox", "venue": "Desa Kitsuné", "area": "Canggu", "place": "Bali", "source": "owner's list", "verified": false},
-
-    {"date": "2026-02-01", "artist": "Sunday Session", "venue": "Single Fin", "area": "Uluwatu", "place": "Bali", "source": "owner's list", "verified": false},
-
-    {"date": "2026-02-02", "artist": "Full Moon Party", "note": "Full Moon Party (guest DJs not named in sources)", "venue": "Haad Rin Beach", "area": "Haad Rin", "place": "Koh Phangan", "source": "owner's list", "verified": false},
-    {"date": "2026-03-03", "artist": "Full Moon Party", "note": "Full Moon Party (guest DJs not named in sources)", "venue": "Haad Rin Beach", "area": "Haad Rin", "place": "Koh Phangan", "source": "https://pickyourtrail.com/blog/full-moon-party-thailand", "verified": false},
-
-    {"date": "2026-02-09", "artist": "Half Moon Festival", "note": "Halfmoon Festival, 9-10 Feb: Harmony Beach Club pre-party, then Magic Forest (DJs not named in source)", "venue": "Half Moon Festival", "area": "Ban Tai", "place": "Koh Phangan", "source": "https://megatix.in.th/events/halfmoon-festival-9th-10th-february-2026", "verified": false},
-    {"date": "2026-03-10", "artist": "Blastoyz, Sun Diary, Khainz", "note": "Halfmoon Festival, 10-11 Mar: Sun Diary, T-Gecko, Eros Bilgic, Khainz, Ghost Rider, Blastoyz, Junam", "venue": "Half Moon Festival", "area": "Ban Tai", "place": "Koh Phangan", "source": "https://ra.co/events/2379566", "verified": false},
-
-    {"date": "2026-02-01", "artist": "Matt Sassari, Sam Supplier, Rob Roar", "note": "Matt Sassari, Sam Supplier, Rob Roar, Graham Gold, Rob Gritton, Bata (live percussion); drum & bass stage: Profile & Fatman D, EJ Kitto, Daddy Nature, Yugo, Woodsy, MC Major G, MC Rizlablu", "venue": "Jungle Experience", "area": "Ban Tai", "place": "Koh Phangan", "source": "https://phangan.events/events/jungle-experience-festival-sun-1-february", "verified": false},
-    {"date": "2026-02-12", "artist": "Goa Jungle by Sun Festival", "note": "Goa Jungle by Sun Festival: Cosmosis, The Infinity Project, Sun Project, Roy Mor b2b Ringo, Shtutnik, Idogoa, Nook; swamp stage: Omni, Ni-Tai, Emiri, Eukai, Lugasi, Evolve", "venue": "Jungle Experience", "area": "Ban Tai", "place": "Koh Phangan", "source": "https://phangan.events/events/goa-jungle-by-sun-festival-jungle-experience-feb-12-13", "verified": false},
-
-    {"date": "2026-03-25", "artist": "1200 Micrograms, Chicago, Starling", "note": "Chicago, 1200 Micrograms, Starling, Nevo, Fishi, Tony Gatsby, Jordan Love, Cleo P, Not Zano, Sharina, Assaf Almog, Timo", "venue": "Waterfall Party", "area": "Ban Tai", "place": "Koh Phangan", "source": "https://phangan.events/events/chicago-1200-mics-at-waterfall-festival-koh-phangan", "verified": false}
-  ],
-  "nothing_found": [
-    "FINNS",
-    "Ulu Cliffhouse (closed for renovation through January and February 2026; open again in 2026)",
-    "Zumana (opened 19 August 2026)",
-    "La Brisa"
-  ]
+ "checked": "2026-11-23",
+ "window": "2026-01-01 to 2026-03-31; January comes from the owner's list and only feeds \"Last season:\"",
+ "shows": [
+  {
+   "date": "2026-01-01",
+   "artist": "Swae Lee",
+   "venue": "Atlas Beach Club",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-01-02",
+   "artist": "Rudimental",
+   "venue": "Atlas Beach Club",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-01-31",
+   "artist": "Afrojack",
+   "venue": "Atlas Beach Club",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-01-30",
+   "artist": "DJ Panda × Inquisitive",
+   "venue": "Atlas Super Club",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-01-31",
+   "artist": "Crooked Colours",
+   "venue": "Atlas Super Club",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-02-06",
+   "artist": "Le Twins",
+   "venue": "Atlas Super Club",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-01-22",
+   "artist": "Maréa",
+   "venue": "Café del Mar Bali",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-02-14",
+   "artist": "Zai Love & Friends",
+   "venue": "Desa Kitsuné",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-02-17",
+   "artist": "Savaya × Desa series",
+   "venue": "Desa Kitsuné",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-02-20",
+   "artist": "Savaya × Desa series",
+   "venue": "Desa Kitsuné",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-02-21",
+   "artist": "Red Fox",
+   "venue": "Desa Kitsuné",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-01-01",
+   "artist": "Adam Dado, Dialect, GECO",
+   "venue": "Klymax",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-01-31",
+   "artist": "Sunset Park residents",
+   "venue": "Potato Head",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-02-07",
+   "artist": "Laziovau, Rizkycore",
+   "note": "Sunset Park residents (Laziovau, Rizkycore)",
+   "venue": "Potato Head",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-02-19",
+   "artist": "KAFKA, Laziovau, Apri",
+   "venue": "Potato Head",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-01-01",
+   "artist": "Amelie Lens",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-01-02",
+   "artist": "Fatboy Slim",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-01-03",
+   "artist": "Solardo",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-01-04",
+   "artist": "Alex Wann",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-01-10",
+   "artist": "Carl Cox",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-01-11",
+   "artist": "Satori",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-01-17",
+   "artist": "Michael Bibi",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-01-18",
+   "artist": "Josh Baker & Seth Troxler",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-01-24",
+   "artist": "Marco Carola b2b Frank Storm",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-01-31",
+   "artist": "WhoMadeWho",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-02-01",
+   "artist": "Amémé",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-02-06",
+   "artist": "Peggy Gou",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-02-07",
+   "artist": "Nic Fanciulli",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-02-08",
+   "artist": "Francis Mercier",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-02-14",
+   "artist": "Argy",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-02-20",
+   "artist": "Disco Lines",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-02-21",
+   "artist": "Mëstiza",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-02-22",
+   "artist": "Syreeta",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-02-28",
+   "artist": "ANTS",
+   "note": "ANTS (Andrea Oliva, Fleur Shore)",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-03-01",
+   "artist": "Mahmut Orhan",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/new/law-of-the-jungle-2025",
+   "verified": true
+  },
+  {
+   "date": "2026-03-07",
+   "artist": "Gorgon City",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/new/law-of-the-jungle-2025",
+   "verified": true
+  },
+  {
+   "date": "2026-03-15",
+   "artist": "Bora Uzer",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/new/law-of-the-jungle-2025",
+   "verified": true
+  },
+  {
+   "date": "2026-03-21",
+   "artist": "Disko Afrika",
+   "note": "Disko Afrika (DJs not named in source)",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://ra.co/events/2392110",
+   "verified": false
+  },
+  {
+   "date": "2026-02-01",
+   "artist": "Sunday Session",
+   "venue": "Single Fin",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-01-03",
+   "artist": "Full Moon Party",
+   "venue": "Haad Rin Beach",
+   "area": "Haad Rin",
+   "place": "Koh Phangan",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-02-02",
+   "artist": "Full Moon Party",
+   "note": "Full Moon Party (guest DJs not named in sources)",
+   "venue": "Haad Rin Beach",
+   "area": "Haad Rin",
+   "place": "Koh Phangan",
+   "source": "owner's list",
+   "verified": false
+  },
+  {
+   "date": "2026-03-03",
+   "artist": "Full Moon Party",
+   "note": "Full Moon Party (guest DJs not named in sources)",
+   "venue": "Haad Rin Beach",
+   "area": "Haad Rin",
+   "place": "Koh Phangan",
+   "source": "https://pickyourtrail.com/blog/full-moon-party-thailand",
+   "verified": false
+  },
+  {
+   "date": "2026-02-09",
+   "artist": "Half Moon Festival",
+   "note": "Halfmoon Festival, 9-10 Feb: Harmony Beach Club pre-party, then Magic Forest (DJs not named in source)",
+   "venue": "Half Moon Festival",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://megatix.in.th/events/halfmoon-festival-9th-10th-february-2026",
+   "verified": false
+  },
+  {
+   "date": "2026-03-10",
+   "artist": "Blastoyz, Sun Diary, Khainz",
+   "note": "Halfmoon Festival, 10-11 Mar: Sun Diary, T-Gecko, Eros Bilgic, Khainz, Ghost Rider, Blastoyz, Junam",
+   "venue": "Half Moon Festival",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://ra.co/events/2379566",
+   "verified": false
+  },
+  {
+   "date": "2026-02-01",
+   "artist": "Matt Sassari, Sam Supplier, Rob Roar",
+   "note": "Matt Sassari, Sam Supplier, Rob Roar, Graham Gold, Rob Gritton, Bata (live percussion); drum & bass stage: Profile & Fatman D, EJ Kitto, Daddy Nature, Yugo, Woodsy, MC Major G, MC Rizlablu",
+   "venue": "Jungle Experience",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/jungle-experience-festival-sun-1-february",
+   "verified": false
+  },
+  {
+   "date": "2026-02-12",
+   "artist": "Goa Jungle by Sun Festival",
+   "note": "Goa Jungle by Sun Festival: Cosmosis, The Infinity Project, Sun Project, Roy Mor b2b Ringo, Shtutnik, Idogoa, Nook; swamp stage: Omni, Ni-Tai, Emiri, Eukai, Lugasi, Evolve",
+   "venue": "Jungle Experience",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/goa-jungle-by-sun-festival-jungle-experience-feb-12-13",
+   "verified": false
+  },
+  {
+   "date": "2026-03-25",
+   "artist": "1200 Micrograms, Chicago, Starling",
+   "note": "Chicago, 1200 Micrograms, Starling, Nevo, Fishi, Tony Gatsby, Jordan Love, Cleo P, Not Zano, Sharina, Assaf Almog, Timo",
+   "venue": "Waterfall Party",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://phangan.events/events/chicago-1200-mics-at-waterfall-festival-koh-phangan",
+   "verified": false
+  },
+  {
+   "date": "2026-01-23",
+   "artist": "MEDUZA",
+   "venue": "Armania Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-10",
+   "artist": "Michael Bibi, Shanti Celeste, Palms Trax, Saoirse, Job Jobse, Arapu, Priku, Wildealer, Miguelle & Tons",
+   "venue": "Baba Beach Club",
+   "area": "Natai",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-17",
+   "artist": "Adriatique, DJ Tennis, Jimi Jules, Josh Baker, Mochakk, Prospa, Seth Troxler, Sossa",
+   "venue": "Baba Beach Club",
+   "area": "Natai",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-02",
+   "artist": "ARTBAT",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-03",
+   "artist": "Fatboy Slim",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-08",
+   "artist": "Carl Cox",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-15",
+   "artist": "Joseph Capriati",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-21",
+   "artist": "CamelPhat",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-22",
+   "artist": "Peggy Gou",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-24",
+   "artist": "Francis Mercier",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-25",
+   "artist": "Ben Böhmer",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-02-21",
+   "artist": "Flight Facilities",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-02-22",
+   "artist": "Michael Bibi",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-02-25",
+   "artist": "Nicole Moudaber",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-02-28",
+   "artist": "Mahmut Orhan",
+   "venue": "Café del Mar Phuket",
+   "area": "Kamala",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-10",
+   "artist": "DJ Snake",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-15",
+   "artist": "Rossi",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-27",
+   "artist": "HoneyLuv × DJ Mag",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-02-20",
+   "artist": "Dennis Quin",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-02-21",
+   "artist": "ANTS",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true,
+   "note": "AJ Christou, Andrea Oliva, Fleur Shore, Nicko"
+  },
+  {
+   "date": "2026-02-27",
+   "artist": "Marco Lys",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-02-28",
+   "artist": "Olympe",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-14",
+   "artist": "Dombresky",
+   "venue": "Maya Beach Club",
+   "area": "Bang Tao",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-17",
+   "artist": "Mathame",
+   "venue": "Maya Beach Club",
+   "area": "Bang Tao",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-29",
+   "artist": "Levi",
+   "venue": "Maya Beach Club",
+   "area": "Bang Tao",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-15",
+   "artist": "Sara Landry, VTSS, Cole Knight",
+   "venue": "XANA Beach Club",
+   "area": "Bang Tao",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-19",
+   "artist": "Loco Dice",
+   "venue": "Yona Beach Club",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-23",
+   "artist": "Yamagucci",
+   "venue": "Yona Beach Club",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-24",
+   "artist": "Sven Väth",
+   "venue": "CÉ LA VI",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-03",
+   "artist": "Lilly Palmer",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-10",
+   "artist": "KlangKuenstler",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-16",
+   "artist": "Armin van Buuren",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-17",
+   "artist": "Argy",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-31",
+   "artist": "WINSON",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-02-06",
+   "artist": "DJ Novak, PARTYWITHJAY",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-02-14",
+   "artist": "BEAUZ",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-02-17",
+   "artist": "DJ SODA",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-02-20",
+   "artist": "Yellow Claw",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-02-28",
+   "artist": "TNT",
+   "venue": "Marquee",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-01-24",
+   "artist": "MEDUZA",
+   "venue": "Zouk",
+   "area": "Clarke Quay",
+   "place": "Singapore",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-02-13",
+   "artist": "YOUNA",
+   "venue": "Zouk",
+   "area": "Clarke Quay",
+   "place": "Singapore",
+   "source": "owner's list",
+   "verified": true
+  },
+  {
+   "date": "2026-02-22",
+   "artist": "Leland, Sho&tell, Suffyan",
+   "venue": "Zouk",
+   "area": "Clarke Quay",
+   "place": "Singapore",
+   "source": "owner's list",
+   "verified": true,
+   "note": "Hungover Vol. 2, daytime"
+  }
+ ],
+ "nothing_found": [
+  "FINNS",
+  "Ulu Cliffhouse (closed for renovation through January and February 2026; open again in 2026)",
+  "Zumana (opened 19 August 2026)",
+  "La Brisa"
+ ]
 }

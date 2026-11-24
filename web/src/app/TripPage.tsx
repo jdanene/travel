@@ -17,7 +17,7 @@ import { pins } from "./lib/pins";
 import { useTrip } from "../lib/useTrip";
 import type { Trip } from "../types/trip";
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
-import { CheckEventsLine, useEventCheck, type EventCheck } from "./CheckEvents";
+import { useEventCheck } from "./CheckEvents";
 import { Home } from "./Home";
 import type { ModuleId } from "./lib/modules";
 
@@ -64,7 +64,7 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
   // clears it then, so a later tap on the Map button opens the map as it was.
   const [mapFocus, setMapFocus] = useState<string | null>(null);
   // The events check runs once a friend has joined; a friend who can't make it still sees the list.
-  const eventCheck = useEventCheck(tripId, trip, crew.member ? crew.memberId : null);
+  useEventCheck(tripId, trip, crew.member ? crew.memberId : null);
   useWarmMap(trip);
   const [photoOpen, setPhotoOpen] = useState(false);
   const you = crew.memberId && crew.member ? { id: crew.memberId, name: crew.member.name } : undefined;
@@ -86,7 +86,7 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
             onYou={() => setPhotoOpen(true)}
             replied={repliedLine(crew.expected, crew.byId)}
             content={(openModule) =>
-              moduleSlots(tripId, trip, crew, eventCheck, openModule, { pin: mapFocus, clear: () => setMapFocus(null) }, (place) => {
+              moduleSlots(tripId, trip, crew, openModule, { pin: mapFocus, clear: () => setMapFocus(null) }, (place) => {
                 setMapFocus(place ? `${place.kind}:${place.id}` : null);
                 openModule("map");
               })
@@ -150,7 +150,6 @@ function moduleSlots(
   tripId: string,
   trip: Trip,
   crew: CrewView,
-  eventCheck: EventCheck,
   openModule: (id: ModuleId) => void,
   mapFocus: { pin: string | null; clear: () => void },
   seeMap: (place?: MapPlace) => void,
@@ -181,7 +180,7 @@ function moduleSlots(
     parties: (
       <>
         <PartiesBlock tripId={tripId} trip={trip} memberId={crew.memberId} isOrganizer={crew.isOrganizer} onSeeMap={seeMap} />
-        {crew.isOrganizer && <CheckEventsLine check={eventCheck} lastAt={trip.parties?.lastCheck?.at} />}
+        {/* The daily events check runs on its own; the owner asked for no button (24 Nov 2026). */}
       </>
     ), // Trip 11: the Events module (code: parties). A show's sheet opens the map on its venue; the organizer's events check sits at its foot.
     links: crew.memberId && (

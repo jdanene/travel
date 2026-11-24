@@ -8,19 +8,20 @@ import type { Show, Trip } from "../../types/trip";
  * check reads the parties context (showId) and runs for the whole page.
  */
 
-/** The check runs at most once in this long, for the whole trip. */
-export const CHECK_EVERY_MS = 12 * 60 * 60 * 1000;
+/** The check runs at most once a day, for the whole trip (owner: "once a day"). */
+export const CHECK_EVERY_MS = 24 * 60 * 60 * 1000;
 
 /**
  * Says whether the trip's events check is due, so a friend who opens the
- * trip starts it only when nobody has in the last 12 hours.
+ * trip starts it only when nobody has in the last 24 hours.
  *
  * Inputs: lastAt — parties/lastCheck/at, or undefined when the check never
  * ran; now — this device's clock, in milliseconds.
- * Output: true when there is no last check, or it is 12 hours old or more.
+ * Output: true when there is no last check, or it is 24 hours old or more.
  * Examples (each is a test in eventCheck.test.ts):
  *   checkIsDue(undefined, now)              → true
- *   checkIsDue(now - 12 h, now)             → true
+ *   checkIsDue(now - 24 h, now)             → true
+ *   checkIsDue(now - 23 h, now)             → false
  *   checkIsDue(now + 30 s, now)             → false   (another phone's clock runs ahead)
  */
 export function checkIsDue(lastAt: number | undefined, now: number): boolean {

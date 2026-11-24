@@ -63,6 +63,30 @@
    "verified": false
   },
   {
+   "date": "2027-02-03",
+   "weekly": "wed",
+   "artist": "TGIW",
+   "about": "Zouk's Wednesday night of top 40 hits and EDM classics; women and students get in free, subject to capacity.",
+   "note": "On Zouk's calendar every Wednesday through Dec 2026; no 2027 dates posted yet",
+   "venue": "Zouk",
+   "area": "Clarke Quay",
+   "place": "Singapore",
+   "source": "https://zoukgroup.com/singapore/zouk/event/EVE109748600020261202/tgiw/",
+   "verified": false
+  },
+  {
+   "date": "2027-02-06",
+   "weekly": "sat",
+   "artist": "Elevate",
+   "about": "CÉ LA VI's Saturday club night of house and electronic music, 10 pm to 4 am, with guest and resident DJs.",
+   "note": "Listed by the venue as every Saturday, 10 pm to 4 am; no guest DJs named for 2027 yet",
+   "venue": "CÉ LA VI",
+   "area": "Marina Bay",
+   "place": "Singapore",
+   "source": "https://sg.celavi.com/events/elevate",
+   "verified": false
+  },
+  {
    "date": "2027-02-01",
    "artist": "Half Moon Festival",
    "about": "A two-day party in the jungle at Ban Tai, Koh Phangan, held every two weeks.",
@@ -123,6 +147,17 @@
    "place": "Bali",
    "source": "https://www.savaya.com/event-calendar/february-20-2027",
    "verified": true
+  },
+  {
+   "date": "2027-02-20",
+   "artist": "Defected",
+   "about": "The London house label's party night, part of its winter run of Saturdays at Illuzion.",
+   "note": "Defected Phuket, Illuzion Saturdays series, 9 pm to 3 am; no DJs named; DJ Mag (15 Nov 2026) lists the same date; not on Illuzion's own calendar yet",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://phangan.events/events/defected-phuket-3/",
+   "verified": false
   },
   {
    "date": "2027-02-22",
@@ -188,6 +223,17 @@
    "verified": true
   },
   {
+   "date": "2027-03-13",
+   "artist": "Defected",
+   "about": "The London house label's party night, the last of its winter run of Saturdays at Illuzion.",
+   "note": "Date from DJ Mag's residency news (15 Nov 2026: 26 Dec, 30 Jan, 20 Feb, 13 Mar); no DJs named; not on Illuzion's own calendar yet",
+   "venue": "Illuzion Phuket",
+   "area": "Patong",
+   "place": "Phuket",
+   "source": "https://djmag.com/news/defected-announces-illuzion-phuket-winter-residency",
+   "verified": false
+  },
+  {
    "date": "2027-03-14",
    "artist": "Half Moon Festival",
    "about": "A two-day party in the jungle at Ban Tai, Koh Phangan, held every two weeks.",
@@ -223,6 +269,22 @@
   "Savaya 'Special Guest' dates with no artist named yet: 6, 7, 21 Feb; 6, 14, 20, 21, 27, 28 Mar",
   "Jungle Experience (latest listed date 12 Jan 2027)",
   "Waterfall Party (latest listed date 24 Jan 2027)",
-  "Half Moon Festival organiser site (lists December 2026 only)"
+  "Half Moon Festival organiser site (lists December 2026 only)",
+  "Café del Mar Phuket (calendar ends with Adam Ten on 27 Jan 2027)",
+  "Illuzion Phuket own calendar (nothing dated after 21 Dec 2026)",
+  "Maya Beach Club",
+  "XANA Beach Club",
+  "Yona Beach Club (latest listed date 31 Jan 2027)",
+  "Armania Phuket",
+  "Baba Beach Club (Circoloco Phuket on 9, 16 and 23 Jan 2027, before the window)",
+  "Zamna Phuket (29 and 30 Jan 2027 at Yeden Gardens, Phang Nga, before the window)",
+  "Marquee (Tao Group calendar ends 31 Dec 2026)",
+  "Zouk (dated nights end with NYE 2026)",
+  "CÉ LA VI (no dated nights in 2027; a listings site shows March 2027 nights the venue's own site does not)",
+  "Singapore festivals: none announced for Feb or Mar 2027",
+  "Savaya is closed on 7 and 8 Mar 2027"
+ ],
+ "excluded": [
+  "Full Moon Party on 2027-03-22: the owner only wants the 22 February one. Never add it back."
  ]
 }
