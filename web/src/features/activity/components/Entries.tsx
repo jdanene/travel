@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Face, tone, type Person } from "../../../components/Avatars";
+import { Face, type Person } from "../../../components/Avatars";
 import { Icon } from "../../../components/Icon";
 import type { WriteResult } from "../../../lib/db";
 import type { ActivityEntry, ActivityReply, MemberId } from "../../../types/trip";
@@ -19,9 +19,9 @@ export interface Viewer {
 }
 
 const person = (viewer: Viewer, id: MemberId): Person => ({ id, name: viewer.names[id] ?? id });
-const faceClass = (viewer: Viewer, id: MemberId) => (id === viewer.memberId ? "you" : tone(id));
+const faceClass = (viewer: Viewer, id: MemberId) => (id === viewer.memberId ? "you" : "");
 
-/** A member's circle: their photo, else their initials, in their tone. */
+/** A member's circle: their photo, else their initials, in their own colour. */
 function Who({ viewer, id }: { viewer: Viewer; id: MemberId | undefined }) {
   if (!id)
     return (

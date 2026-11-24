@@ -78,7 +78,7 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
   const you = crew.memberId && crew.member ? { id: crew.memberId, name: crew.member.name } : undefined;
 
   return (
-    <PhotosProvider photos={crew.photos}>
+    <PhotosProvider photos={crew.photos} order={joinOrder(trip)}>
       {offline && <Notice>No connection</Notice>}
       {organizerLink === "invalid" && <Notice>This organizer link is not valid.</Notice>}
       {/* Before a reply the friend sees the invitation (12/1). A friend who
@@ -320,4 +320,10 @@ function thumbOf(trip: Trip, entry: ActivityEntry): string | undefined {
   if (entry.kind === "link-added") return trip.links?.items?.[entry.ref]?.thumbUrl;
   if (entry.kind === "place-added") return trip.places?.custom?.[entry.ref]?.photo;
   return undefined;
+}
+
+/** The member ids in join order (earliest first, id breaks a tie), so a friend keeps their colour as others join. */
+function joinOrder(trip: Trip): string[] {
+  const members = trip.crew?.members ?? {};
+  return Object.keys(members).sort((a, b) => members[a].at - members[b].at || a.localeCompare(b));
 }
