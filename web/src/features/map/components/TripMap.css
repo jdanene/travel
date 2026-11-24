@@ -25,7 +25,6 @@
 
 /* Add to map: the line above the map, the crosshair pin, the button under the map. */
 .map-hint { margin: 0 0 0.5rem; font-size: 0.9375rem; font-weight: 600; color: var(--acc-ink); }
-.map-hint.off { color: #b42318; }
 .map-box.placing::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 2px var(--edge); pointer-events: none; z-index: 2; }
 .map-box.placing .mk-at { pointer-events: none; }
 .map-box.placing .mk { opacity: 0.55; }

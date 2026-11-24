@@ -97,3 +97,12 @@
 .tags-new .field { flex: 1; min-width: 0; margin-bottom: 0; }
 .tags-new .tags-add { width: auto; height: auto; padding: 0 1.25rem; }
 .event-tags .field-error { margin-top: 0.5rem; }
+
+/* Add an event's Venue suggestions: the place search's list (components/PlaceSearch.css), as options. */
+.venue-hits { margin: -0.25rem 0 0.625rem; }
+.venue-hits .psearch-hits { max-height: 16.5rem; overflow-y: auto; overscroll-behavior: contain; }
+.venue-hits [role="option"] { padding: 0.625rem 0.75rem; min-height: 2.75rem; border-radius: 0.625rem; font-size: 0.9375rem; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.venue-hits [role="option"] b { font-weight: 600; }
+.venue-hits [role="option"] span { color: var(--mut); }
+.venue-hits [role="option"][aria-selected="true"] { background: var(--soft); }
+@media (hover: hover) { .venue-hits [role="option"]:hover { background: var(--soft); } }

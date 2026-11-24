@@ -1,24 +1,22 @@
 import { useState, type FormEvent } from "react";
 import { Sheet } from "../../../components/Sheet";
 import { dayMonth } from "../../../lib/format";
-import { idFromName } from "../../../lib/ids";
 import { initials } from "../../../lib/initials";
+import { nearestDestination, type PlaceHit, type Spot } from "../../../lib/placeSearch";
 import type { Show } from "../../../types/trip";
 import type { PartyDraft } from "../api/parties";
 import { EVENTS_WINDOW, inEventsWindow } from "../lib/window";
+import { VenueField } from "./VenueField";
 
 type Field = "venue" | "date" | "artist" | "about" | "link";
-
-/** The picker's value for "Somewhere else", which opens the free-text venue. */
-const ELSEWHERE = "__elsewhere__";
 
 interface AddPartySheetProps {
   open: boolean;
   /** The show being edited; absent when adding. */
   editing?: Show;
-  /** Each destination's id and name, in the order of the pills. */
-  destinations: Array<{ id: string; name: string }>;
-  /** The venues the picker offers per destination: the trip's venues, friends' venues and friends' places on the map. */
+  /** Each destination's id, name and centre, in the order of the pills. */
+  destinations: Array<{ id: string; name: string; lat?: number; lng?: number }>;
+  /** The venues the Venue field suggests first, per destination: the trip's venues, friends' venues and friends' places on the map. */
   venues: Record<string, string[]>;
   /** This device's member name, for "added by KA". */
   yourName: string;
@@ -29,11 +27,13 @@ interface AddPartySheetProps {
 
 /**
  * Screen 20/8, "Add an event": the destination, the venue, the date, who is
- * playing, an optional "What is it?" line and an optional link. The venue
- * is picked from the destination's known venues and friends' places on the
- * map; "Somewhere else" keeps a free-text venue (it has no pin until the
- * shared place search lands). The same sheet edits an event, with "Remove"
- * at its foot.
+ * playing, an optional "What is it?" line and an optional link. The Venue
+ * field suggests the destination's known places first, then any place in
+ * the world from the place search (VenueField). A known pick is that
+ * place; a search pick also puts a pin on the map when the event is saved,
+ * and moves the destination to the trip's nearest one, so the event and its
+ * pin group together. Typed words with no pick are the venue, with no pin.
+ * The same sheet edits an event, with "Remove" at its foot.
  *
  * Inputs: whether it is open, the show being edited (if any), the
  * destinations and known venues, this member's name, and what
@@ -41,8 +41,9 @@ interface AddPartySheetProps {
  * Output: the sheet. Save checks every field first and puts the reason
  * under the field (case 27); the typed values stay.
  * Examples (checked at 390 px against screen 8):
- *   add, Koh Phangan, Somewhere else, "Haad Rin pier", Sat 20 Feb, "Boat party" → Save; the row reads "added by KA"
+ *   add, Koh Phangan, type "Haad Rin pier", Sat 20 Feb, "Boat party" → Save; the row reads "added by KA", no pin
  *   add, Bali, pick "Single Fin" → the event lists under Single Fin and opens the Map on its pin
+ *   add, Bali, "bottle beach", pick "Bottle Beach 1 · Haad Khuat, Thailand" → Koh Phangan; Save adds the event and its pin
  *   date 2027-01-24 → "Pick a day from 25 Jan to 31 Mar." under Date (lib/window.ts)
  */
 export function AddPartySheet(props: AddPartySheetProps) {
@@ -63,21 +64,29 @@ function PartyForm({ editing, destinations, venues, yourName, onSave, onRemove }
     link: editing?.link ?? "",
   });
   const offered = venues[draft.destination] ?? [];
-  const known = (name: string) => offered.find((venue) => idFromName(venue) === idFromName(name));
-  const [pick, setPick] = useState(() => (editing ? (known(editing.venue) ?? ELSEWHERE) : ""));
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
-  const set = (field: keyof PartyDraft, value: string) => {
+  const set = (field: Exclude<keyof PartyDraft, "spot">, value: string) => {
     setDraft((current) => ({ ...current, [field]: value }));
     setErrors((current) => ({ ...current, [field === "destination" ? "venue" : field]: undefined }));
   };
-  const choose = (value: string) => {
-    setPick(value);
-    set("venue", value === ELSEWHERE ? "" : value);
+  // A pin belongs to the place picked: new words or another destination drop it, and the words stay.
+  const chooseDestination = (id: string) => setDraft((current) => ({ ...current, destination: id, spot: undefined }));
+  const type = (words: string) => {
+    setDraft((current) => ({ ...current, venue: words, spot: undefined }));
+    setErrors((current) => ({ ...current, venue: undefined }));
   };
-  const chooseDestination = (id: string) => {
-    set("destination", id);
-    // A venue of the other island is no answer here; a typed one stays.
-    if (pick !== ELSEWHERE && !(venues[id] ?? []).includes(pick)) choose("");
+  const pickVenue = (venue: string, hit?: PlaceHit) => {
+    setDraft((current) => ({
+      ...current,
+      venue,
+      ...(hit ? { destination: nearestDestination(destinations, hit) ?? current.destination, spot: { lat: hit.lat, lng: hit.lng } } : { spot: undefined }),
+    }));
+    setErrors((current) => ({ ...current, venue: undefined }));
+  };
+  const region: Spot[] = destinations.flatMap(({ lat, lng }) => (typeof lat === "number" && typeof lng === "number" ? [{ lat, lng }] : []));
+  const near = (): Spot => {
+    const centre = destinations.find((destination) => destination.id === draft.destination);
+    return typeof centre?.lat === "number" && typeof centre.lng === "number" ? { lat: centre.lat, lng: centre.lng } : (region[0] ?? { lat: 0, lng: 0 });
   };
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
@@ -103,7 +112,6 @@ function PartyForm({ editing, destinations, venues, yourName, onSave, onRemove }
     </>
   );
   const described = (name: Field) => ({ name, "aria-invalid": errors[name] !== undefined, "aria-describedby": errors[name] ? `party-${name}-error` : undefined });
-  const elsewhere = pick === ELSEWHERE;
 
   return (
     <form className="party-sheet" onSubmit={submit} noValidate>
@@ -115,15 +123,22 @@ function PartyForm({ editing, destinations, venues, yourName, onSave, onRemove }
           </button>
         ))}
       </div>
-      {elsewhere ? (
-        <label className="field">
-          <small>Venue</small>
-          <VenuePicker value={pick} offered={offered} onChange={choose} />
-        </label>
-      ) : (
-        field("venue", "Venue", <VenuePicker {...described("venue")} value={pick} offered={offered} onChange={choose} />)
-      )}
-      {elsewhere && field("venue", "Venue name", <input {...described("venue")} value={draft.venue} maxLength={60} autoComplete="off" onChange={(e) => set("venue", e.target.value)} />)}
+      <VenueField
+        {...described("venue")}
+        value={draft.venue}
+        known={offered}
+        near={near}
+        region={region}
+        onType={type}
+        onPick={pickVenue}
+        error={
+          errors.venue && (
+            <p id="party-venue-error" className="field-error" role="alert">
+              {errors.venue}
+            </p>
+          )
+        }
+      />
       {field("date", "Date", <input {...described("date")} type="date" value={draft.date} min={EVENTS_WINDOW.from} max={EVENTS_WINDOW.to} onChange={(e) => set("date", e.target.value)} />)}
       {field("artist", "Who is playing", <input {...described("artist")} value={draft.artist} maxLength={200} autoComplete="off" onChange={(e) => set("artist", e.target.value)} />)}
       {field("about", "What is it? (optional)", <input {...described("about")} value={draft.about} maxLength={120} autoComplete="off" onChange={(e) => set("about", e.target.value)} />)}
@@ -143,23 +158,6 @@ function PartyForm({ editing, destinations, venues, yourName, onSave, onRemove }
         <p className="cap">Shows in the list as "added by {initials(yourName)}"</p>
       )}
     </form>
-  );
-}
-
-/** The venue picker: the destination's venues by name, then "Somewhere else". */
-function VenuePicker({ value, offered, onChange, ...rest }: { value: string; offered: string[]; onChange: (value: string) => void; name?: string; "aria-invalid"?: boolean; "aria-describedby"?: string }) {
-  return (
-    <select {...rest} value={value} onChange={(e) => onChange(e.target.value)}>
-      <option value="" disabled>
-        Choose a venue
-      </option>
-      {offered.map((venue) => (
-        <option key={venue} value={venue}>
-          {venue}
-        </option>
-      ))}
-      <option value={ELSEWHERE}>Somewhere else</option>
-    </select>
   );
 }
 

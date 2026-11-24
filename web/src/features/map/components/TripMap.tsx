@@ -5,13 +5,13 @@ import { Icon } from "../../../components/Icon";
 import { Notice } from "../../../components/Notice";
 import { PlaceSearch } from "../../../components/PlaceSearch";
 import type { WriteResult } from "../../../lib/db";
-import type { PlaceHit } from "../../../lib/placeSearch";
+import { newPlaceId } from "../../../lib/ids";
+import { nearestDestination, type PlaceHit } from "../../../lib/placeSearch";
 import type { Pin } from "../../../types/pin";
 import type { MemberId, PlaceKind } from "../../../types/trip";
-import { addPlace, newPlaceId, removePlace } from "../api/places";
+import { addPlace, removePlace } from "../api/places";
 import { BASEMAP_SOURCE, BASEMAP_STYLE, softenBasemap } from "../lib/basemap";
 import { groupByScreen } from "../lib/fan";
-import { destinationBox, insideDestination } from "../lib/places";
 import { AddPlaceForm } from "./AddPlaceForm";
 import { PinCard } from "./PinCard";
 import "./TripMap.css";
@@ -83,11 +83,13 @@ interface TripMapProps {
  * Output: the map. Pins that collide group (case 35). Switching
  * destination closes the card. A destination with no pins says "No pins
  * yet." "Add to map" puts a friend's place on the map: a search for the
- * place by name ("Search for a place"); a pick drops a crosshair pin there,
- * fills the name and flies to it; "Can't find it? Tap the map instead"
- * leaves tapping, and a tap anywhere on the map moves the pin. The pin
- * drags. A spot outside the destination says "Tap a spot in Bali." and
- * moves nothing. The fields under the map save it; "Cancel" or switching
+ * place by name ("Search for a place"), anywhere in the world, matches
+ * near the trip first; a pick drops a crosshair pin there, fills the name
+ * and flies to it; "Can't find it? Tap the map instead" leaves tapping, and
+ * a tap anywhere on the map moves the pin. The pin drags. The place groups
+ * under the trip's nearest destination; when that is another one, the
+ * switch moves to it and the camera stays on the new pin. The fields under
+ * the map save it; "Cancel" or switching
  * destination ends adding. The new pin shows at once, with its card open;
  * with no connection it shows here and reaches the others when the connection
  * is back. When no tile has loaded after 8 seconds, or the device cannot draw
@@ -95,7 +97,7 @@ interface TripMapProps {
  * map; the list opens the same cards (case 32).
  * Examples (checked at 390 px against 12/6 and 20/10):
  *   Bali → "Bali", "Koh Phangan · 1 pin", the big Bali venues; a tap on Savaya opens its card
- *   Add to map, "single fin", pick "Single Fin · Pecatu", Food, Add → its pin and card "Food · added by KA"
+ *   Add to map, "single fin", pick "Single Fin · Pecatu, Indonesia", Food, Add → its pin and card "Food · added by KA"
  *   focus "venue:haad-rin-beach" → Koh Phangan, zoomed on Haad Rin Beach, its card open
  */
 /** A map made ahead of time, waiting out of sight; TripMap moves it in when the Map module opens. */
@@ -190,7 +192,6 @@ export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onO
   const [tilesFailed, setTilesFailed] = useState(false);
   const [placing, setPlacing] = useState(false);
   const [spot, setSpot] = useState<{ lat: number; lng: number } | null>(null);
-  const [outside, setOutside] = useState(false);
   const [tapping, setTapping] = useState(false);
   const [picked, setPicked] = useState({ name: "", key: 0 });
   const [failure, setFailure] = useState<WriteResult | null>(null);
@@ -304,19 +305,8 @@ export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onO
     };
   }, [draw]);
 
-  /**
-   * Puts the new place's pin at a spot when it lies inside the destination;
-   * outside, it says so and the pin stays where it was.
-   */
-  const placeAt = useCallback(
-    ({ lat, lng }: { lat: number; lng: number }) => {
-      const inside = insideDestination(destination, lat, lng);
-      setOutside(!inside);
-      if (inside) setSpot({ lat: Math.round(lat * 1e5) / 1e5, lng: Math.round(lng * 1e5) / 1e5 });
-      else setSpot((last) => (last ? { ...last } : last)); // a pin dragged outside snaps back to the last good spot
-    },
-    [destination],
-  );
+  /** Puts the new place's pin at a spot, anywhere in the world. */
+  const placeAt = useCallback(({ lat, lng }: { lat: number; lng: number }) => setSpot({ lat: Math.round(lat * 1e5) / 1e5, lng: Math.round(lng * 1e5) / 1e5 }), []);
 
   // Adding: a tap on the map puts the pin there (the fallback to the search).
   useEffect(() => {
@@ -351,7 +341,6 @@ export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onO
   const stopPlacing = () => {
     setPlacing(false);
     setSpot(null);
-    setOutside(false);
     setTapping(false);
   };
 
@@ -371,14 +360,26 @@ export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onO
 
   const report = (result: WriteResult) => setFailure(result.ok ? null : result);
 
-  /** Saves the friend's place at the spot tapped and opens its card; the pin shows at once. */
+  /**
+   * Saves the friend's place at the spot and opens its card; the pin shows
+   * at once. It groups under the nearest destination; when that is not the
+   * one on screen, the switch moves to it without framing it, and the
+   * camera goes to the new pin.
+   */
   const add = (place: { name: string; kind: PlaceKind; link?: string; description?: string; photo?: string }) => {
     if (!spot || !memberId) return;
     const id = newPlaceId();
-    void addPlace(tripId, id, { ...place, destination, lat: spot.lat, lng: spot.lng, addedBy: memberId, at: Date.now() }).then(report);
+    const home = nearestDestination(destinations, spot) ?? destination;
+    void addPlace(tripId, id, { ...place, destination: home, lat: spot.lat, lng: spot.lng, addedBy: memberId, at: Date.now() }).then(report);
     stopPlacing();
     setGroup(null);
     setSelected(`place:${id}`);
+    if (home !== destination) {
+      framed.current = { destination: home, count: 1 };
+      setDestination(home);
+    }
+    const current = map.current;
+    if (current) move(current, { center: [spot.lng, spot.lat], zoom: Math.max(current.getZoom(), 15) }, 900);
   };
 
   const remove = (pin: Pin) => {
@@ -403,16 +404,12 @@ export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onO
     setGroup(null);
   };
   const listed = group ? here.filter((pin) => group.includes(pin.id)) : [];
-  const searchBox = destinationBox(destination);
-  const hint = !placing
-    ? null
-    : outside
-      ? `Tap a spot in ${centre?.name ?? "the map"}.`
-      : spot
-        ? "Drag the pin to move it."
-        : tapping || !searchBox
-          ? "Tap the map where it is."
-          : null;
+  const hint = !placing ? null : spot ? "Drag the pin to move it." : tapping ? "Tap the map where it is." : null;
+  /** Suggestions lean toward what the map shows, else the destination's centre. */
+  const near = () => {
+    const view = map.current?.getCenter();
+    return view ? { lat: view.lat, lng: view.lng } : { lat: centre?.lat ?? 0, lng: centre?.lng ?? 0 };
+  };
 
   return (
     <>
@@ -425,11 +422,9 @@ export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onO
       </div>
       {tilesFailed && <Notice>No connection</Notice>}
       {failure && !failure.ok && <Notice>{failure.reason === "refused" ? "This was not saved." : "No connection"}</Notice>}
-      {placing && searchBox && centre && (
-        <PlaceSearch key={destination} box={searchBox} near={centre} onPick={pick} onTapInstead={tapInstead} />
-      )}
+      {placing && <PlaceSearch key={destination} near={near} region={destinations} onPick={pick} onTapInstead={tapInstead} />}
       {hint && (
-        <p className={`map-hint${outside ? " off" : ""}`} role={outside ? "alert" : "status"}>
+        <p className="map-hint" role="status">
           {hint}
         </p>
       )}

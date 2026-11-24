@@ -141,7 +141,7 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
     if (!viewer.memberId) return;
     if (sheet?.mode === "edit" && editing) {
       setSheet(null);
-      return run(editShow(tripId, sheet.id, editing, draft));
+      return run(editShow(tripId, trip, sheet.id, editing, draft, viewer.memberId));
     }
     setProblem(null);
     void addShow(tripId, trip, draft, viewer.memberId).then((result) => {
@@ -151,7 +151,7 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
     setSheet(null);
   };
 
-  const destinations = Object.entries(destinationNames).map(([id, { name }]) => ({ id, name }));
+  const destinations = Object.entries(destinationNames).map(([id, { name, lat, lng }]) => ({ id, name, lat, lng }));
   const canAdd = viewer.memberId !== null && destinations.length > 0;
   // The map draws the venues the list keeps (app/lib/pins.ts); an event whose tag was just taken off may have left it.
   const found = opened ? placeOf(opened, trip.places) : null;

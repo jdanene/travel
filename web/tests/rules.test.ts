@@ -143,8 +143,10 @@ describe("database rules", () => {
     await assertFails(set(ref(db("uid-a"), paths.customPlace(T, "p2")), place({ addedBy: "bob" })));
   });
 
-  it("17. refuses a place outside the box around its destination", () =>
-    assertFails(set(ref(db("uid-a"), paths.customPlace(T, "p3")), place({ addedBy: "alice", lat: 9.7, lng: 100.0 }))));
+  it("17. takes a place anywhere in the world, and refuses a position off the globe", async () => {
+    await assertSucceeds(set(ref(db("uid-a"), paths.customPlace(T, "p3")), place({ addedBy: "alice", lat: 40.71, lng: -74.0 })));
+    await assertFails(set(ref(db("uid-a"), paths.customPlace(T, "p4")), place({ addedBy: "alice", lat: 95, lng: 100.0 })));
+  });
 
   it("18. takes a weekly show's day as a day name and refuses anything else", async () => {
     const a = db("uid-a");

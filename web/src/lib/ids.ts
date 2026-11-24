@@ -60,3 +60,15 @@ export function emailKey(email: string): string {
 export function dateOptionId(from: string, to: string): string {
   return `${from}_${to}`;
 }
+
+/**
+ * A new id for a friend's place (places/custom): the time and a random
+ * tail, so ids sort by when they were added and two at once never collide.
+ * Shared by Add to map and Add an event, which both put a place on the map.
+ * Inputs: none.
+ * Output: an id with letters, digits and "-" only.
+ * Examples (checked on the emulator): "m3x8k2a1-7f3k9q"
+ */
+export function newPlaceId(): string {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
