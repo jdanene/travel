@@ -1,62 +1,419 @@
 {
-  "source": "Positions from OpenStreetMap, read with the Nominatim search on 23 and 24 Nov 2026. A venue with \"big\": true is one of the owner's big nights (owner, 24 Nov 2026); the Events list and the map show those by default. A venue with \"onMap\": false is not on OpenStreetMap; it sits at its area's centre, or at the island's centre when the lineup gives no area. Marquee is not on OpenStreetMap either; it sits at The Shoppes at Marina Bay Sands, the mall that holds it.",
-  "destinations": {
-    "bali": { "lat": -8.45572, "lng": 115.27043 },
-    "kohPhangan": { "lat": 9.73495, "lng": 100.03057 },
-    "phuket": { "lat": 7.97908, "lng": 98.33552 },
-    "singapore": { "lat": 1.28992, "lng": 103.85191 }
+ "source": "Positions from OpenStreetMap, read with the Nominatim search on 23 and 24 Nov 2026. A venue with \"big\": true is one of the owner's big nights (owner, 24 Nov 2026); the Events list and the map show those by default. A venue with \"onMap\": false is not on OpenStreetMap; it sits at its area's centre, or at the island's centre when the lineup gives no area. Marquee is not on OpenStreetMap either; it sits at The Shoppes at Marina Bay Sands, the mall that holds it.",
+ "destinations": {
+  "bali": {
+   "lat": -8.45572,
+   "lng": 115.27043
   },
-  "areas": {
-    "uluwatu": { "name": "Uluwatu", "destination": "bali", "lat": -8.82824, "lng": 115.08796 },
-    "canggu": { "name": "Canggu", "destination": "bali", "lat": -8.6399, "lng": 115.1436 },
-    "seminyak": { "name": "Seminyak", "destination": "bali", "lat": -8.68986, "lng": 115.16678 },
-    "ubud": { "name": "Ubud", "destination": "bali", "lat": -8.51702, "lng": 115.25505 },
-    "munduk": { "name": "Munduk", "destination": "bali", "lat": -8.26837, "lng": 115.07771 },
-    "haad-rin": { "name": "Haad Rin", "destination": "kohPhangan", "lat": 9.67562, "lng": 100.06559 },
-    "haad-yuan": { "name": "Haad Yuan", "destination": "kohPhangan", "lat": 9.69147, "lng": 100.07386 },
-    "ban-tai": { "name": "Ban Tai", "destination": "kohPhangan", "lat": 9.70014, "lng": 100.03473 },
-    "thong-sala": { "name": "Thong Sala", "destination": "kohPhangan", "lat": 9.71056, "lng": 99.98638 },
-    "srithanu": { "name": "Srithanu", "destination": "kohPhangan", "lat": 9.75563, "lng": 99.9635 },
-    "patong": { "name": "Patong", "destination": "phuket", "lat": 7.89495, "lng": 98.2988 },
-    "kamala": { "name": "Kamala", "destination": "phuket", "lat": 7.94993, "lng": 98.28276 },
-    "bang-tao": { "name": "Bang Tao", "destination": "phuket", "lat": 8.0083, "lng": 98.29224 },
-    "kata": { "name": "Kata", "destination": "phuket", "lat": 7.81936, "lng": 98.29805 },
-    "rawai": { "name": "Rawai", "destination": "phuket", "lat": 7.77581, "lng": 98.32772 },
-    "phuket-town": { "name": "Phuket Town", "destination": "phuket", "lat": 7.88479, "lng": 98.38922 },
-    "natai": { "name": "Natai", "destination": "phuket", "lat": 8.28755, "lng": 98.2744 },
-    "marina-bay": { "name": "Marina Bay", "destination": "singapore", "lat": 1.27766, "lng": 103.85369 },
-    "clarke-quay": { "name": "Clarke Quay", "destination": "singapore", "lat": 1.28876, "lng": 103.84669 }
+  "kohPhangan": {
+   "lat": 9.73495,
+   "lng": 100.03057
   },
-  "venues": {
-    "savaya": { "name": "Savaya", "destination": "bali", "areaId": "uluwatu", "lat": -8.84641, "lng": 115.14065, "line": "Club on the cliffs", "big": true },
-    "single-fin": { "name": "Single Fin", "destination": "bali", "areaId": "uluwatu", "lat": -8.81501, "lng": 115.08892, "line": "Bar on the cliff over the surf break" },
-    "ulu-cliffhouse": { "name": "Ulu Cliffhouse", "destination": "bali", "areaId": "uluwatu", "lat": -8.81407, "lng": 115.09152, "line": "Pool club on the cliff" },
-    "el-kabron": { "name": "El Kabron", "destination": "bali", "areaId": "uluwatu", "lat": -8.80194, "lng": 115.11741, "line": "Cliff-top club with sunset parties" },
-    "atlas-beach-club": { "name": "Atlas Beach Club", "destination": "bali", "areaId": "canggu", "lat": -8.6399, "lng": 115.1436, "onMap": false, "line": "Beach club with guest DJs", "big": true },
-    "atlas-super-club": { "name": "Atlas Super Club", "destination": "bali", "areaId": "canggu", "lat": -8.66432, "lng": 115.13907, "line": "Nightclub beside Atlas Beach Club", "big": true },
-    "desa-kitsune": { "name": "Desa Kitsuné", "destination": "bali", "areaId": "canggu", "lat": -8.6399, "lng": 115.1436, "onMap": false, "line": "Garden club with house DJs", "big": true },
-    "cafe-del-mar-bali": { "name": "Café del Mar Bali", "destination": "bali", "areaId": "canggu", "lat": -8.6399, "lng": 115.1436, "onMap": false, "line": "Beach club with a large pool" },
-    "finns-beach-club": { "name": "FINNS Beach Club", "destination": "bali", "areaId": "canggu", "lat": -8.6399, "lng": 115.1436, "onMap": false, "line": "Large beach club with DJs every day" },
-    "la-brisa": { "name": "La Brisa", "destination": "bali", "areaId": "canggu", "lat": -8.65458, "lng": 115.12481, "line": "Driftwood beach club" },
-    "potato-head": { "name": "Potato Head", "destination": "bali", "areaId": "seminyak", "lat": -8.67941, "lng": 115.14996, "line": "Beach club with a pool", "big": true },
-    "klymax": { "name": "Klymax", "destination": "bali", "areaId": "seminyak", "lat": -8.67907, "lng": 115.14988, "line": "Late-night club", "big": true },
-    "mrs-sippy": { "name": "Mrs Sippy", "destination": "bali", "areaId": "seminyak", "lat": -8.67961, "lng": 115.15123, "line": "Pool club with a high dive" },
-    "haad-rin-beach": { "name": "Haad Rin Beach", "destination": "kohPhangan", "areaId": "haad-rin", "lat": 9.67667, "lng": 100.06808, "line": "Beach of the Full Moon Party", "big": true },
-    "eden-garden": { "name": "Eden Garden", "destination": "kohPhangan", "areaId": "haad-yuan", "lat": 9.69368, "lng": 100.07616, "line": "All-night party above Haad Yuan beach" },
-    "half-moon-festival": { "name": "Half Moon Festival", "destination": "kohPhangan", "areaId": "ban-tai", "lat": 9.71454, "lng": 100.02814, "line": "Jungle festival every two weeks" },
-    "hidden-paradise": { "name": "Hidden Paradise", "destination": "kohPhangan", "areaId": "ban-tai", "lat": 9.70014, "lng": 100.03473, "onMap": false },
-    "jungle-experience": { "name": "Jungle Experience", "destination": "kohPhangan", "areaId": "ban-tai", "lat": 9.71299, "lng": 100.03276, "line": "Jungle party with two stages" },
-    "waterfall-party": { "name": "Waterfall Party", "destination": "kohPhangan", "areaId": "ban-tai", "lat": 9.70588, "lng": 100.04692, "line": "All-night party by a waterfall" },
-    "lost-jungle": { "name": "Lost Jungle", "destination": "kohPhangan", "lat": 9.73495, "lng": 100.03057, "onMap": false },
-    "cafe-del-mar-phuket": { "name": "Café del Mar Phuket", "destination": "phuket", "areaId": "kamala", "lat": 7.96209, "lng": 98.28432, "line": "Beach club between Kamala and Surin beaches", "big": true },
-    "illuzion-phuket": { "name": "Illuzion Phuket", "destination": "phuket", "areaId": "patong", "lat": 7.89369, "lng": 98.2978, "line": "Large nightclub on Bangla Road", "big": true },
-    "armania-phuket": { "name": "Armania Phuket", "destination": "phuket", "areaId": "patong", "lat": 7.89495, "lng": 98.2988, "onMap": false, "line": "Nightclub on Bangla Road", "big": true },
-    "yona-beach-club": { "name": "Yona Beach Club", "destination": "phuket", "areaId": "patong", "lat": 7.89495, "lng": 98.2988, "onMap": false, "line": "Floating beach club in Patong Bay, reached by boat", "big": true },
-    "maya-beach-club": { "name": "Maya Beach Club", "destination": "phuket", "areaId": "bang-tao", "lat": 7.99582, "lng": 98.29164, "line": "Beach club on Bang Tao Beach", "big": true },
-    "xana-beach-club": { "name": "XANA Beach Club", "destination": "phuket", "areaId": "bang-tao", "lat": 8.00562, "lng": 98.29315, "line": "Beach club with a pool at Laguna, Bang Tao", "big": true },
-    "baba-beach-club": { "name": "Baba Beach Club", "destination": "phuket", "areaId": "natai", "lat": 8.28755, "lng": 98.2744, "onMap": false, "line": "Beach club on Natai Beach in Phang Nga, north of Phuket", "big": true },
-    "marquee": { "name": "Marquee", "destination": "singapore", "areaId": "marina-bay", "lat": 1.28402, "lng": 103.85887, "line": "Nightclub in the Marina Bay Sands mall", "big": true },
-    "ce-la-vi": { "name": "CÉ LA VI", "destination": "singapore", "areaId": "marina-bay", "lat": 1.28462, "lng": 103.86093, "line": "Club lounge on the roof of Marina Bay Sands", "big": true },
-    "zouk": { "name": "Zouk", "destination": "singapore", "areaId": "clarke-quay", "lat": 1.29067, "lng": 103.84602, "line": "Large club by the river at Clarke Quay", "big": true }
+  "phuket": {
+   "lat": 7.97908,
+   "lng": 98.33552
+  },
+  "singapore": {
+   "lat": 1.28992,
+   "lng": 103.85191
   }
+ },
+ "areas": {
+  "uluwatu": {
+   "name": "Uluwatu",
+   "destination": "bali",
+   "lat": -8.82824,
+   "lng": 115.08796
+  },
+  "canggu": {
+   "name": "Canggu",
+   "destination": "bali",
+   "lat": -8.6399,
+   "lng": 115.1436
+  },
+  "seminyak": {
+   "name": "Seminyak",
+   "destination": "bali",
+   "lat": -8.68986,
+   "lng": 115.16678
+  },
+  "ubud": {
+   "name": "Ubud",
+   "destination": "bali",
+   "lat": -8.51702,
+   "lng": 115.25505
+  },
+  "munduk": {
+   "name": "Munduk",
+   "destination": "bali",
+   "lat": -8.26837,
+   "lng": 115.07771
+  },
+  "haad-rin": {
+   "name": "Haad Rin",
+   "destination": "kohPhangan",
+   "lat": 9.67562,
+   "lng": 100.06559
+  },
+  "haad-yuan": {
+   "name": "Haad Yuan",
+   "destination": "kohPhangan",
+   "lat": 9.69147,
+   "lng": 100.07386
+  },
+  "ban-tai": {
+   "name": "Ban Tai",
+   "destination": "kohPhangan",
+   "lat": 9.70014,
+   "lng": 100.03473
+  },
+  "thong-sala": {
+   "name": "Thong Sala",
+   "destination": "kohPhangan",
+   "lat": 9.71056,
+   "lng": 99.98638
+  },
+  "srithanu": {
+   "name": "Srithanu",
+   "destination": "kohPhangan",
+   "lat": 9.75563,
+   "lng": 99.9635
+  },
+  "patong": {
+   "name": "Patong",
+   "destination": "phuket",
+   "lat": 7.89495,
+   "lng": 98.2988
+  },
+  "kamala": {
+   "name": "Kamala",
+   "destination": "phuket",
+   "lat": 7.94993,
+   "lng": 98.28276
+  },
+  "bang-tao": {
+   "name": "Bang Tao",
+   "destination": "phuket",
+   "lat": 8.0083,
+   "lng": 98.29224
+  },
+  "kata": {
+   "name": "Kata",
+   "destination": "phuket",
+   "lat": 7.81936,
+   "lng": 98.29805
+  },
+  "rawai": {
+   "name": "Rawai",
+   "destination": "phuket",
+   "lat": 7.77581,
+   "lng": 98.32772
+  },
+  "phuket-town": {
+   "name": "Phuket Town",
+   "destination": "phuket",
+   "lat": 7.88479,
+   "lng": 98.38922
+  },
+  "natai": {
+   "name": "Natai",
+   "destination": "phuket",
+   "lat": 8.28755,
+   "lng": 98.2744
+  },
+  "marina-bay": {
+   "name": "Marina Bay",
+   "destination": "singapore",
+   "lat": 1.27766,
+   "lng": 103.85369
+  },
+  "clarke-quay": {
+   "name": "Clarke Quay",
+   "destination": "singapore",
+   "lat": 1.28876,
+   "lng": 103.84669
+  }
+ },
+ "venues": {
+  "savaya": {
+   "name": "Savaya",
+   "destination": "bali",
+   "areaId": "uluwatu",
+   "lat": -8.84641,
+   "lng": 115.14065,
+   "line": "Club on the cliffs",
+   "big": true
+  },
+  "single-fin": {
+   "name": "Single Fin",
+   "destination": "bali",
+   "areaId": "uluwatu",
+   "lat": -8.81501,
+   "lng": 115.08892,
+   "line": "Bar on the cliff over the surf break"
+  },
+  "ulu-cliffhouse": {
+   "name": "Ulu Cliffhouse",
+   "destination": "bali",
+   "areaId": "uluwatu",
+   "lat": -8.81407,
+   "lng": 115.09152,
+   "line": "Pool club on the cliff"
+  },
+  "el-kabron": {
+   "name": "El Kabron",
+   "destination": "bali",
+   "areaId": "uluwatu",
+   "lat": -8.80194,
+   "lng": 115.11741,
+   "line": "Cliff-top club with sunset parties"
+  },
+  "atlas-beach-club": {
+   "name": "Atlas Beach Club",
+   "destination": "bali",
+   "areaId": "canggu",
+   "lat": -8.6399,
+   "lng": 115.1436,
+   "onMap": false,
+   "line": "Beach club with guest DJs",
+   "big": true
+  },
+  "atlas-super-club": {
+   "name": "Atlas Super Club",
+   "destination": "bali",
+   "areaId": "canggu",
+   "lat": -8.66432,
+   "lng": 115.13907,
+   "line": "Nightclub beside Atlas Beach Club",
+   "big": true
+  },
+  "desa-kitsune": {
+   "name": "Desa Kitsuné",
+   "destination": "bali",
+   "areaId": "canggu",
+   "lat": -8.6399,
+   "lng": 115.1436,
+   "onMap": false,
+   "line": "Garden club with house DJs",
+   "big": true
+  },
+  "cafe-del-mar-bali": {
+   "name": "Café del Mar Bali",
+   "destination": "bali",
+   "areaId": "canggu",
+   "lat": -8.6399,
+   "lng": 115.1436,
+   "onMap": false,
+   "line": "Beach club with a large pool"
+  },
+  "finns-beach-club": {
+   "name": "FINNS Beach Club",
+   "destination": "bali",
+   "areaId": "canggu",
+   "lat": -8.6399,
+   "lng": 115.1436,
+   "onMap": false,
+   "line": "Large beach club with DJs every day"
+  },
+  "la-brisa": {
+   "name": "La Brisa",
+   "destination": "bali",
+   "areaId": "canggu",
+   "lat": -8.65458,
+   "lng": 115.12481,
+   "line": "Driftwood beach club"
+  },
+  "potato-head": {
+   "name": "Potato Head",
+   "destination": "bali",
+   "areaId": "seminyak",
+   "lat": -8.67941,
+   "lng": 115.14996,
+   "line": "Beach club with a pool",
+   "big": true
+  },
+  "klymax": {
+   "name": "Klymax",
+   "destination": "bali",
+   "areaId": "seminyak",
+   "lat": -8.67907,
+   "lng": 115.14988,
+   "line": "Late-night club",
+   "big": true
+  },
+  "mrs-sippy": {
+   "name": "Mrs Sippy",
+   "destination": "bali",
+   "areaId": "seminyak",
+   "lat": -8.67961,
+   "lng": 115.15123,
+   "line": "Pool club with a high dive"
+  },
+  "haad-rin-beach": {
+   "name": "Haad Rin Beach",
+   "destination": "kohPhangan",
+   "areaId": "haad-rin",
+   "lat": 9.67667,
+   "lng": 100.06808,
+   "line": "Beach of the Full Moon Party",
+   "big": true
+  },
+  "eden-garden": {
+   "name": "Eden Garden",
+   "destination": "kohPhangan",
+   "areaId": "haad-yuan",
+   "lat": 9.69368,
+   "lng": 100.07616,
+   "line": "All-night party above Haad Yuan beach"
+  },
+  "half-moon-festival": {
+   "name": "Half Moon Festival",
+   "destination": "kohPhangan",
+   "areaId": "ban-tai",
+   "lat": 9.71454,
+   "lng": 100.02814,
+   "line": "Jungle festival every two weeks"
+  },
+  "hidden-paradise": {
+   "name": "Hidden Paradise",
+   "destination": "kohPhangan",
+   "areaId": "ban-tai",
+   "lat": 9.70014,
+   "lng": 100.03473,
+   "onMap": false
+  },
+  "jungle-experience": {
+   "name": "Jungle Experience",
+   "destination": "kohPhangan",
+   "areaId": "ban-tai",
+   "lat": 9.71299,
+   "lng": 100.03276,
+   "line": "Jungle party with two stages"
+  },
+  "waterfall-party": {
+   "name": "Waterfall Party",
+   "destination": "kohPhangan",
+   "areaId": "ban-tai",
+   "lat": 9.70588,
+   "lng": 100.04692,
+   "line": "All-night party by a waterfall"
+  },
+  "lost-jungle": {
+   "name": "Lost Jungle",
+   "destination": "kohPhangan",
+   "lat": 9.73495,
+   "lng": 100.03057,
+   "onMap": false
+  },
+  "cafe-del-mar-phuket": {
+   "name": "Café del Mar Phuket",
+   "destination": "phuket",
+   "areaId": "kamala",
+   "lat": 7.96209,
+   "lng": 98.28432,
+   "line": "Beach club between Kamala and Surin beaches",
+   "big": true
+  },
+  "illuzion-phuket": {
+   "name": "Illuzion Phuket",
+   "destination": "phuket",
+   "areaId": "patong",
+   "lat": 7.89369,
+   "lng": 98.2978,
+   "line": "Large nightclub on Bangla Road",
+   "big": true
+  },
+  "armania-phuket": {
+   "name": "Armania Phuket",
+   "destination": "phuket",
+   "areaId": "patong",
+   "lat": 7.89495,
+   "lng": 98.2988,
+   "onMap": false,
+   "line": "Nightclub on Bangla Road",
+   "big": true
+  },
+  "yona-beach-club": {
+   "name": "Yona Beach Club",
+   "destination": "phuket",
+   "areaId": "patong",
+   "lat": 7.89495,
+   "lng": 98.2988,
+   "onMap": false,
+   "line": "Floating beach club in Patong Bay, reached by boat",
+   "big": true
+  },
+  "maya-beach-club": {
+   "name": "Maya Beach Club",
+   "destination": "phuket",
+   "areaId": "bang-tao",
+   "lat": 7.99582,
+   "lng": 98.29164,
+   "line": "Beach club on Bang Tao Beach",
+   "big": true
+  },
+  "xana-beach-club": {
+   "name": "XANA Beach Club",
+   "destination": "phuket",
+   "areaId": "bang-tao",
+   "lat": 8.00562,
+   "lng": 98.29315,
+   "line": "Beach club with a pool at Laguna, Bang Tao",
+   "big": true
+  },
+  "baba-beach-club": {
+   "name": "Baba Beach Club",
+   "destination": "phuket",
+   "areaId": "natai",
+   "lat": 8.28755,
+   "lng": 98.2744,
+   "onMap": false,
+   "line": "Beach club on Natai Beach in Phang Nga, north of Phuket",
+   "big": true
+  },
+  "marquee": {
+   "name": "Marquee",
+   "destination": "singapore",
+   "areaId": "marina-bay",
+   "lat": 1.28402,
+   "lng": 103.85887,
+   "line": "Nightclub in the Marina Bay Sands mall",
+   "big": true
+  },
+  "ce-la-vi": {
+   "name": "CÉ LA VI",
+   "destination": "singapore",
+   "areaId": "marina-bay",
+   "lat": 1.28462,
+   "lng": 103.86093,
+   "line": "Club lounge on the roof of Marina Bay Sands",
+   "big": true
+  },
+  "zouk": {
+   "name": "Zouk",
+   "destination": "singapore",
+   "areaId": "clarke-quay",
+   "lat": 1.29067,
+   "lng": 103.84602,
+   "line": "Large club by the river at Clarke Quay",
+   "big": true
+  },
+  "yeden-gardens": {
+   "name": "Yeden Gardens",
+   "destination": "phuket",
+   "areaId": "natai",
+   "lat": 8.28755,
+   "lng": 98.2744,
+   "line": "Festival grounds north of Phuket, in Phang Nga (pin is approximate)",
+   "big": true
+  },
+  "barra-cuda-beach-club": {
+   "name": "Barra Cuda Beach Club",
+   "destination": "phuket",
+   "areaId": "patong",
+   "lat": 7.89495,
+   "lng": 98.2988,
+   "line": "Beach club on Patong Beach (pin is approximate)"
+  }
+ }
 }
