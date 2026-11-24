@@ -107,7 +107,7 @@ Paths live in one file, `web/src/lib/paths.ts`. The rules file repeats them; the
 /trips/{tripId}
   info        { name, summary?, note?, noteBy?, season: {from, to}, anchor: {name, date},
                 destinations: {bali:{name, lat, lng}, kohPhangan:{name, lat, lng}}, inviteTitle? }
-              inviteTitle: the name in the link preview, 1 to 60 characters; only an organizer writes it ("Edit invite");
+              inviteTitle: the name in the link preview, 1 to 60 characters; only an organizer writes it (the "Invite" sheet);
               create-trip writes the other fields one by one and leaves it; scripts/stamp-preview.mjs puts it in the page files
   crew
     expected  { {memberId}: name }                    from the trip file

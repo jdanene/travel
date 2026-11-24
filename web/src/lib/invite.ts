@@ -19,7 +19,7 @@ export const MAX_INVITE_TITLE = 60;
 export const SITE = "https://travel-ca8f9.web.app";
 
 /**
- * Makes the links "Invite friends" hands out: the crew link, and with a
+ * Makes the links the "Invite" sheet hands out: the crew link, and with a
  * key, an organizer link. Both open the splash, as the links of
  * scripts/create-trip.mjs do.
  *

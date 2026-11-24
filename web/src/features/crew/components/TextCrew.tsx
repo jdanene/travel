@@ -37,7 +37,7 @@ const REFUSED: Record<string, string> = {
 
 /**
  * "Text the crew": the organizer's text link at the foot of the trip page,
- * beside "Edit invite". Its sheet takes a message (300 characters at most,
+ * beside "Invite". Its sheet takes a message (300 characters at most,
  * with a counter), who gets it (Everyone with a number, I'm in, Maybe),
  * shows the text as a friend will read it and how many people it reaches,
  * and sends only after a confirm step that states the count and the most
