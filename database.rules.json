@@ -150,6 +150,18 @@
           }
         },
         "places": {
+          "tags": {
+            /* An organizer tags the trip's venues (owner, 24 Nov 2026); create-trip seeds "big" once. Everyone reads them with the trip. */
+            ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true",
+            "$venueId": {
+              ".validate": "$venueId.length <= 200",
+              "$tag": { ".validate": "$tag.matches(/^[a-z0-9-]{1,24}$/) && newData.val() === true" }
+            }
+          },
+          "tagNames": {
+            ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true",
+            "$tag": { ".validate": "$tag.matches(/^[a-z0-9-]{1,24}$/) && newData.isString() && newData.val().length >= 1 && newData.val().length <= 24" }
+          },
           "custom": {
             "$placeId": {
               /* A friend adds a place under its member, inside a box around the destination (the same boxes as web/src/features/map/lib/places.ts); the adder or an organizer removes it. No edits. */

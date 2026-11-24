@@ -84,3 +84,9 @@ export const phones = (tripId: string) => `tripSecrets/${tripId}/phones`;
 
 /** The trip's text count for one day (yyyy-mm-dd, UTC); the sender (services/travel-texts) adds one per text sent. */
 export const textLog = (tripId: string, day: string) => `tripSecrets/${tripId}/textLog/${day}`;
+
+/** One tag on one venue; only an organizer writes it. */
+export const venueTag = (tripId: string, venueId: string, tag: string) => `trips/${tripId}/places/tags/${venueId}/${tag}`;
+
+/** A tag's name; only an organizer writes it. */
+export const tagName = (tripId: string, tag: string) => `trips/${tripId}/places/tagNames/${tag}`;

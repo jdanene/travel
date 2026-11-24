@@ -5,16 +5,17 @@ import { Notice } from "../../../components/Notice";
 import type { WriteResult } from "../../../lib/db";
 import { idFromName } from "../../../lib/ids";
 import type { MemberId, Trip } from "../../../types/trip";
-import { addShow, editShow, removeShow, setIn, type PartyDraft } from "../api/parties";
-import { bigVenues, eventsList, shownUnder } from "../lib/big";
+import { addShow, editShow, removeShow, setIn, setVenueTag, type PartyDraft } from "../api/parties";
+import { eventsList, shownUnder, tagChips, tripTags, type EventsFilter } from "../lib/tags";
 import { areaShown, placeLine, placeOf, type MapPlace } from "../lib/detail";
 import { lastSeason, lastYearLines } from "../lib/lastYear";
 import { byPlaceVenueDate, venueKey, type KnownVenue, type ListedShow } from "../lib/shows";
 import { AddPartySheet } from "./AddPartySheet";
-import { EventsFilterChips, useEventsFilter } from "./EventsFilter";
+import { EventsFilterChips } from "./EventsFilter";
 import { LastSeason, LastYearLine } from "./LastYearLine";
 import { ShowRow } from "./ShowRow";
 import { ShowSheet } from "./ShowSheet";
+import { TagsSheet } from "./TagsSheet";
 import "./Parties.css";
 
 /** The rules' range, used when the trip has no season yet (case 9). */
@@ -30,6 +31,9 @@ interface PartiesBlockProps {
   isOrganizer: boolean;
   /** Opens the Map module: on one place from the show sheet, or as it was from "See on the map ›" (12/5). */
   onSeeMap?: (place?: MapPlace) => void;
+  /** The Events filter, shared with the map: a tag's slug or "all" (useEventsFilter). */
+  filter: EventsFilter;
+  onFilter: (next: EventsFilter) => void;
 }
 
 /**
@@ -38,9 +42,11 @@ interface PartiesBlockProps {
  * ones first, then by date), with the last-year line where a weekend is
  * empty and "Last season:" under a venue with nothing announced. Open from
  * the start; it never waits on the dates. A tap on a show opens its sheet.
- * At the top, "Big nights" and "All · 27": by default the list holds the
- * big venues and every friend's event (lib/big.ts); the device remembers
- * the choice. Without a big venue in the trip the chips are not drawn.
+ * At the top, one chip per venue tag ("Big nights" first) and "All · 27":
+ * by default the list holds the venues tagged Big nights and every
+ * friend's event (lib/tags.ts); the device remembers the choice. Without a
+ * tagged venue the chips are not drawn. An organizer finds "Tags" beside
+ * each venue of the trip, which opens the Tags sheet.
  *
  * Inputs: the trip id, the trip from the one listener, this device's
  * member and organizer mark, and a way to open the map.
@@ -54,12 +60,13 @@ interface PartiesBlockProps {
  *   tap "All · 27"   → Bali: Mrs Sippy … Savaya, then the venues with nothing announced; Koh Phangan: Eden Garden, Half Moon Festival, … Haad Rin Beach
  *   tap "Peggy Gou"  → the show sheet; "See on the map" opens the Map on Savaya with its card open
  *   tap "I'm in"     → filled at once, "1 in" with your initials, on the row and in the sheet
+ *   organizer, "Tags" on Savaya, remove Big nights → Savaya leaves the default list and the map
  */
-export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap }: PartiesBlockProps) {
+export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, filter, onFilter: setFilter }: PartiesBlockProps) {
   const [sheet, setSheet] = useState<SheetState>(null);
   const [detail, setDetail] = useState<string | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
-  const [filter, setFilter] = useEventsFilter();
+  const [tagging, setTagging] = useState<string | null>(null);
   // The row a friend's "Add" found already listed; scrolled to once it is drawn.
   const [rowToShow, setRowToShow] = useState<string | null>(null);
   const viewer = { memberId, isOrganizer };
@@ -77,9 +84,13 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap }: 
     destination: venue.destination,
     area: venue.areaId ? areas[venue.areaId]?.name : undefined,
   }));
-  const big = bigVenues(trip.places?.venues);
-  const groups = eventsList(shows, known, filter, big);
-  const lines = lastYearLines(Object.values(shows), lastYear, season).filter((line) => shownUnder(filter, line, big));
+  const tags = tripTags(trip.places);
+  const chips = tagChips(tags);
+  const groups = eventsList(shows, known, filter, tags);
+  const lines = lastYearLines(Object.values(shows), lastYear, season).filter((line) => shownUnder(filter, line, tags));
+  // The trip's own venues by venueKey(), the ones an organizer can tag.
+  const venueIds = new Map(Object.entries(trip.places?.venues ?? {}).map(([id, venue]) => [venueKey(venue.destination, venue.name), id]));
+  const taggingVenue = tagging ? trip.places?.venues?.[tagging] : undefined;
   const editing = sheet?.mode === "edit" ? shows[sheet.id] : undefined;
   const opened: ListedShow | undefined = detail && shows[detail] ? { ...shows[detail], id: detail } : undefined;
 
@@ -121,7 +132,7 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap }: 
 
   const showRow = (id: string) => {
     setSheet(null);
-    if (shows[id] && !shownUnder(filter, shows[id], big)) setFilter("all");
+    if (shows[id] && !shownUnder(filter, shows[id], tags)) setFilter("all");
     setRowToShow(id);
   };
 
@@ -141,10 +152,10 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap }: 
 
   const destinations = Object.entries(destinationNames).map(([id, { name }]) => ({ id, name }));
   const canAdd = viewer.memberId !== null && destinations.length > 0;
-  // The map draws big venues only (app/lib/pins.ts), so a show at another venue has no pin to open on.
+  // The map draws the filter's venues only (app/lib/pins.ts), so a show at another venue has no pin to open on.
   const found = opened ? placeOf(opened, trip.places) : null;
   const openedPlace =
-    opened && found && (found.kind !== "venue" || shownUnder("big", { destination: opened.destination, venue: opened.venue }, big)) ? found : null;
+    opened && found && (found.kind !== "venue" || shownUnder(filter, { destination: opened.destination, venue: opened.venue }, tags)) ? found : null;
 
   return (
     <div className="parties">
@@ -158,7 +169,7 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap }: 
           </button>
         )}
       </div>
-      {big.size > 0 && <EventsFilterChips filter={filter} total={Object.keys(shows).length} onChoose={setFilter} />}
+      {chips.length > 0 && <EventsFilterChips filter={filter} chips={chips} total={Object.keys(shows).length} onChoose={setFilter} />}
       {groups.length === 0 && <p className="sub parties-empty">Nothing announced yet.</p>}
       {groups.map(({ destination, venues: venueGroups }) => (
         <section key={destination} aria-labelledby={`place-${destination}`}>
@@ -173,13 +184,26 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap }: 
               ...venueLines.map((one) => ({ date: one.from, line: one, show: null as ListedShow | null })),
               ...venue.shows.map((show) => ({ date: show.weekly ? "" : show.date, line: null, show })),
             ].sort((a, b) => a.date.localeCompare(b.date));
+            const venueId = isOrganizer ? venueIds.get(venue.key) : undefined;
+            const heading = (
+              <h4 className="venue">
+                <b>{venue.name}</b>
+                {area && <span className="sub"> · {area}</span>}
+                {line && <span className="venue-line">{line}</span>}
+              </h4>
+            );
             return (
               <div key={venue.key} className="venue-group">
-                <h4 className="venue">
-                  <b>{venue.name}</b>
-                  {area && <span className="sub"> · {area}</span>}
-                  {line && <span className="venue-line">{line}</span>}
-                </h4>
+                {venueId ? (
+                  <div className="venue-head">
+                    {heading}
+                    <button type="button" className="venue-tags" aria-label={`Tags for ${venue.name}`} onClick={() => setTagging(venueId)}>
+                      Tags
+                    </button>
+                  </div>
+                ) : (
+                  heading
+                )}
                 {venue.shows.length === 0 && <LastSeason shows={lastSeason(destination, venue.name, lastYear)} />}
                 {items.map(({ line: weekend, show }) =>
                   weekend ? (
@@ -227,6 +251,12 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap }: 
             : undefined
         }
         onClose={() => setDetail(null)}
+      />
+      <TagsSheet
+        venue={taggingVenue ? { name: taggingVenue.name, tags: [...(tags.byVenue.get(venueKey(taggingVenue.destination, taggingVenue.name)) ?? [])] } : null}
+        names={tags.names}
+        onChange={(tag, on, newName) => setVenueTag(tripId, tagging!, tag, on, newName)}
+        onClose={() => setTagging(null)}
       />
       <AddPartySheet
         open={sheet !== null && (sheet.mode === "add" || editing !== undefined)}

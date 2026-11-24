@@ -92,3 +92,23 @@ function fields(draft: PartyDraft) {
     ...(link ? { link } : {}),
   };
 }
+
+/**
+ * Puts a tag on a venue, or takes it off. A new tag's name goes in the
+ * same write, so a tag never exists without its name. Only an organizer's
+ * write is accepted.
+ *
+ * Inputs: the trip id, the venue's id in places/venues, the tag's slug,
+ * whether the venue carries it, and the name of a tag the trip does not
+ * have yet.
+ * Output: the write's result; "refused" on a friend's device.
+ * Examples (checked on the emulator):
+ *   setVenueTag(t, "savaya", "big", false)                  → { ok: true }; Savaya leaves Big nights
+ *   setVenueTag(t, "klymax", "rooftop", true, "Rooftop")     → { ok: true }; a "Rooftop" chip appears
+ */
+export function setVenueTag(tripId: string, venueId: string, tag: string, on: boolean, newName?: string): Promise<WriteResult> {
+  return write({
+    [paths.venueTag(tripId, venueId, tag)]: on ? true : null,
+    ...(newName ? { [paths.tagName(tripId, tag)]: newName } : {}),
+  });
+}

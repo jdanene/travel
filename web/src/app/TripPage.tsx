@@ -12,7 +12,9 @@ import { DatesModule } from "../features/dates/components/DatesModule";
 import { StayModule } from "../features/stay/components/StayModule";
 import { LinksModule } from "../features/links/components/LinksModule";
 import type { MapDestination } from "../features/map/components/TripMap";
+import { useEventsFilter } from "../features/parties/components/EventsFilter";
 import { PartiesBlock } from "../features/parties/components/PartiesBlock";
+import { tagChips, tripTags, type EventsFilter } from "../features/parties/lib/tags";
 import type { MapPlace } from "../features/parties/lib/detail";
 import { pins } from "./lib/pins";
 import { useTrip } from "../lib/useTrip";
@@ -68,6 +70,8 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
   useEventCheck(tripId, trip, crew.member ? crew.memberId : null);
   useWarmMap(trip);
   const [photoOpen, setPhotoOpen] = useState(false);
+  // The Events filter is the map's too: both show the picked tag's venues (owner, 24 Nov 2026).
+  const events = useEventsFilter(tagChips(tripTags(trip.places)));
   const you = crew.memberId && crew.member ? { id: crew.memberId, name: crew.member.name } : undefined;
 
   return (
@@ -87,7 +91,7 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
             onYou={() => setPhotoOpen(true)}
             replied={repliedLine(crew.expected, crew.byId)}
             content={(openModule) =>
-              moduleSlots(tripId, trip, crew, openModule, { pin: mapFocus, clear: () => setMapFocus(null) }, (place) => {
+              moduleSlots(tripId, trip, crew, openModule, events, { pin: mapFocus, clear: () => setMapFocus(null) }, (place) => {
                 setMapFocus(place ? `${place.kind}:${place.id}` : null);
                 openModule("map");
               })
@@ -119,7 +123,7 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
  *
  * Inputs: the trip id, the trip, the crew view of this device, the events
  * check (its line sits at the foot of Events for the organizer), a way to
- * open another module, the pin the map should open on, and a way to open
+ * open another module, the Events filter (the map follows it), the pin the map should open on, and a way to open
  * the map (on one place, or as it was).
  * Output: the content for each module; null until its ticket fills it.
  * Examples (checked on screen): the Dates slot holds the Dates module.
@@ -153,6 +157,7 @@ function moduleSlots(
   trip: Trip,
   crew: CrewView,
   openModule: (id: ModuleId) => void,
+  [filter, setFilter]: [EventsFilter, (next: EventsFilter) => void],
   mapFocus: { pin: string | null; clear: () => void },
   seeMap: (place?: MapPlace) => void,
 ): Record<ModuleId, ReactNode> {
@@ -181,7 +186,7 @@ function moduleSlots(
     ), // Trip 9: the Stay module.
     parties: (
       <>
-        <PartiesBlock tripId={tripId} trip={trip} memberId={crew.memberId} isOrganizer={crew.isOrganizer} onSeeMap={seeMap} />
+        <PartiesBlock tripId={tripId} trip={trip} memberId={crew.memberId} isOrganizer={crew.isOrganizer} onSeeMap={seeMap} filter={filter} onFilter={setFilter} />
         {/* The daily events check runs on its own; the owner asked for no button (24 Nov 2026). */}
       </>
     ), // Trip 11: the Events module (code: parties). A show's sheet opens the map on its venue; the organizer's events check sits at its foot.
@@ -201,7 +206,7 @@ function moduleSlots(
           <TripMap
             tripId={tripId}
             destinations={mapDestinations(trip)}
-            pins={pins(trip)}
+            pins={pins(trip, filter)}
             memberId={crew.memberId}
             isOrganizer={crew.isOrganizer}
             focus={mapFocus.pin ?? undefined}

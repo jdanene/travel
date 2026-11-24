@@ -2,7 +2,7 @@
  * The rules tests of Trip 2 (1 to 9), of the admin list (10 to 12, plan
  * D15), of Add dates (13 to 15, plan D16), of Add to map (16 and 17), of
  * weekly shows (18), of the profile photo (19), of a place's photo (20) and
- * of the invite title (21), of organizer keys (22) and of trip texts (23 to 25), against the database emulator. Run with
+ * of the invite title (21), of organizer keys (22), of trip texts (23 to 25) and of venue tags (26), against the database emulator. Run with
  * `npm run test:rules` in web/; it starts the emulator, runs this file and
  * stops it. Each test names the rule it proves, in the words of plan
  * section 4.
@@ -205,5 +205,15 @@ describe("database rules", () => {
     await assertFails(set(ref(db("uid-o"), day), { texts: 6, at: 6 }));
     await assertFails(set(ref(db("uid-o"), day), { texts: 1, at: 7 }));
     await assertFails(remove(ref(db("uid-o"), day)));
+  });
+
+  it("26. lets only an organizer tag a venue and name a tag, with a short slug and name", async () => {
+    await assertFails(set(ref(db("uid-a"), paths.venueTag(T, "savaya", "big")), true));
+    await assertFails(set(ref(db("uid-a"), paths.tagName(T, "big")), "Big nights"));
+    const o = db("uid-o");
+    await assertSucceeds(update(ref(o), { [paths.venueTag(T, "savaya", "rooftop")]: true, [paths.tagName(T, "rooftop")]: "Rooftop" }));
+    await assertSucceeds(remove(ref(o, paths.venueTag(T, "savaya", "rooftop"))));
+    await assertFails(set(ref(o, paths.venueTag(T, "savaya", "Not A Slug")), true));
+    await assertFails(set(ref(o, paths.tagName(T, "long")), "x".repeat(25)));
   });
 });
