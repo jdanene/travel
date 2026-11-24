@@ -120,3 +120,23 @@ button.fl:active { background: var(--soft); }
   .fi.arrive, .fp-replies { animation: none; }
   .po .bar, .msg-plus, .msg-menu, .msg-menu.open, .msg-send, .msg-poll, .msg-field { transition: none; }
 }
+
+/* Activity is an outline on the charcoal page, not a white card (owner, 24 Nov 2026).
+   The card remaps the ink tokens to the page's light ones, so every line inside follows. */
+.feedcard {
+  background: transparent; border-color: rgba(244, 241, 234, 0.55); color: var(--on-page);
+  --ink: var(--on-page); --ink2: var(--on-page); --mut: var(--on-page-mut);
+  --line: rgba(244, 241, 234, 0.14); --soft: rgba(244, 241, 234, 0.1); --edge: rgba(244, 241, 234, 0.6);
+  --acc: #f4f1ea; --on-acc: #111;
+}
+.feedcard .fp .box, .feedcard .msg-field, .feedcard .msg-opt { background: transparent; }
+.feedcard .msg-field, .feedcard .msg-opt { border-color: rgba(244, 241, 234, 0.4); color: var(--on-page); }
+.feedcard .msg-field textarea::placeholder, .feedcard .msg-opt::placeholder { color: var(--on-page-mut); }
+.feedcard .po .bar { background: rgba(244, 241, 234, 0.14); }
+.feedcard .po.mine .bar { background: rgba(244, 241, 234, 0.26); }
+.feedcard .msg-send { background: rgba(244, 241, 234, 0.25); color: #111; }
+.feedcard .msg-send.ready { background: #f4f1ea; }
+.feedcard .msg-error { color: #ff9c8f; }
+.feedcard .av.sys { background: #f4f1ea; color: #111; }
+/* The "+" menu is a white popover; it keeps the dark ink. */
+.feedcard .msg-menu { --ink: #1c1c1e; --ink2: #3a3a3c; --mut: #6e6e73; --soft: #f5f5f4; --edge: #000; color: #1c1c1e; }
