@@ -281,4 +281,11 @@ describe("database rules", () => {
     await assertFails(set(ref(b, paths.activityReaction(T, "nope", "bob", "1f525")), 1));
     await assertSucceeds(update(ref(a), { [paths.activityEntry(T, "g1")]: null, [paths.activityReactions(T, "g1")]: null }));
   });
+
+  it("33. lets a member take its own automatic line off the Feed, with its emoji, and refuses another friend", async () => {
+    const a = db("uid-a");
+    await assertSucceeds(set(ref(a, paths.activityEntry(T, "in1")), { kind: "event-in", by: "alice", at: 1, text: "Peggy Gou at Savaya", ref: "show1" }));
+    await assertFails(update(ref(db("uid-c")), { [paths.activityEntry(T, "in1")]: null, [paths.activityReactions(T, "in1")]: null }));
+    await assertSucceeds(update(ref(a), { [paths.activityEntry(T, "in1")]: null, [paths.activityReactions(T, "in1")]: null }));
+  });
 });
