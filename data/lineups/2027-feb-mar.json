@@ -3,6 +3,101 @@
  "window": "2027-01-25 to 2027-03-31",
  "shows": [
   {
+   "date": "2027-01-26",
+   "artist": "Juno",
+   "venue": "Desa Kitsuné",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "https://baligasm.com/event/desa-kitsune-juno-jan-2027",
+   "link": "https://baligasm.com/event/desa-kitsune-juno-jan-2027",
+   "verified": false,
+   "about": "Juno plays Desa Kitsuné's Tuesday garden night from 8 pm; the venue's own page still says Special Guest."
+  },
+  {
+   "date": "2027-01-26",
+   "artist": "Desa Kitsuné Tuesday",
+   "venue": "Desa Kitsuné",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "https://desakitsune.com/events?tab=all&page=3",
+   "link": "https://desakitsune.com/events?tab=all&page=3",
+   "verified": false,
+   "about": "Desa Kitsuné's Tuesday garden party with a guest DJ; the venue lists dates to 26 January.",
+   "weekly": "tue"
+  },
+  {
+   "date": "2027-01-29",
+   "artist": "Desa Kitsuné Friday",
+   "venue": "Desa Kitsuné",
+   "area": "Canggu",
+   "place": "Bali",
+   "source": "https://desakitsune.com/events?tab=all&page=3",
+   "link": "https://desakitsune.com/events?tab=all&page=3",
+   "verified": false,
+   "about": "Desa Kitsuné's Friday garden party with a guest DJ; the venue lists dates to 29 January.",
+   "weekly": "fri"
+  },
+  {
+   "date": "2027-01-25",
+   "artist": "Hedonist Sunset Party",
+   "venue": "El Kabron",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.elkabron.com/events/Sunset-Party-January-25",
+   "link": "https://www.elkabron.com/events/Sunset-Party-January-25",
+   "verified": true,
+   "about": "El Kabron's Monday sunset party on the Uluwatu cliff, with DJs and live sax, violin and trumpet.",
+   "weekly": "mon"
+  },
+  {
+   "date": "2027-01-27",
+   "artist": "Pool Party",
+   "venue": "El Kabron",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.elkabron.com/events/Pool-Party-January-27",
+   "link": "https://www.elkabron.com/events/Pool-Party-January-27",
+   "verified": true,
+   "about": "El Kabron's Wednesday pool party: DJs from 11 am, live acts from 3 pm, dancing past sunset.",
+   "weekly": "wed"
+  },
+  {
+   "date": "2027-01-28",
+   "artist": "Afro House Sunset Party",
+   "venue": "El Kabron",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.elkabron.com/events/Afro-Sunset-Party-January-28",
+   "link": "https://www.elkabron.com/events/Afro-Sunset-Party-January-28",
+   "verified": true,
+   "about": "El Kabron's Thursday afro house party with drums, sax and violin from 3 pm.",
+   "weekly": "thu"
+  },
+  {
+   "date": "2027-01-29",
+   "artist": "White Sunset Party",
+   "venue": "El Kabron",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.elkabron.com/events/White-Sunset-Parties-January-29",
+   "link": "https://www.elkabron.com/events/White-Sunset-Parties-January-29",
+   "verified": true,
+   "about": "El Kabron's Friday white-dress-code sunset party, live acts from 3 pm.",
+   "weekly": "fri"
+  },
+  {
+   "date": "2027-01-30",
+   "artist": "Sunset Party of the Week",
+   "venue": "El Kabron",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.elkabron.com/events/Saturday-Party-January-30",
+   "link": "https://www.elkabron.com/events/Saturday-Party-January-30",
+   "verified": true,
+   "about": "El Kabron's Saturday sunset party, DJs from 11 am and live acts from 3 pm.",
+   "weekly": "sat"
+  },
+  {
    "date": "2027-02-07",
    "weekly": "sun",
    "artist": "Sunday Day Party",
@@ -15,6 +110,18 @@
    "verified": false
   },
   {
+   "date": "2027-01-30",
+   "artist": "Saturday Pool Party: Hip Hop Edition",
+   "venue": "Mrs Sippy",
+   "area": "Seminyak",
+   "place": "Bali",
+   "source": "https://www.mrssippybali.com/whats-on",
+   "link": "https://www.mrssippybali.com/whats-on",
+   "verified": false,
+   "about": "A Saturday hip hop pool party at Mrs Sippy, 1 to 7 pm.",
+   "weekly": "sat"
+  },
+  {
    "date": "2027-02-06",
    "weekly": "sat",
    "artist": "Saturday Pool Party",
@@ -25,6 +132,88 @@
    "place": "Bali",
    "source": "https://www.mrssippybali.com/whats-on",
    "verified": false
+  },
+  {
+   "date": "2027-01-25",
+   "artist": "Last Light",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/january-25-2027",
+   "link": "https://www.savaya.com/event-calendar/january-25-2027",
+   "verified": true,
+   "about": "Savaya's Monday sunset set from the Cube; closed on 8 March for Nyepi.",
+   "weekly": "mon"
+  },
+  {
+   "date": "2027-01-26",
+   "artist": "Savaya Tuesday",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/january-26-2027",
+   "link": "https://www.savaya.com/event-calendar/january-26-2027",
+   "verified": true,
+   "about": "Savaya's Tuesday club day on the Uluwatu cliffs with resident DJs.",
+   "weekly": "tue"
+  },
+  {
+   "date": "2027-01-27",
+   "artist": "Savaya Wednesday",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/january-27-2027",
+   "link": "https://www.savaya.com/event-calendar/january-27-2027",
+   "verified": true,
+   "about": "Savaya's Wednesday club day on the Uluwatu cliffs with resident DJs.",
+   "weekly": "wed"
+  },
+  {
+   "date": "2027-01-28",
+   "artist": "Lost Above",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/january-28-2027",
+   "link": "https://www.savaya.com/event-calendar/january-28-2027",
+   "verified": true,
+   "about": "Savaya's Thursday sunset set from the Cube.",
+   "weekly": "thu"
+  },
+  {
+   "date": "2027-01-29",
+   "artist": "Savaya Friday",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/january-29-2027",
+   "link": "https://www.savaya.com/event-calendar/january-29-2027",
+   "verified": true,
+   "about": "Savaya's Friday club night on the Uluwatu cliffs with resident DJs.",
+   "weekly": "fri"
+  },
+  {
+   "date": "2027-01-30",
+   "artist": "Hugel",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/january-30-2027",
+   "link": "https://www.savaya.com/event-calendar/january-30-2027",
+   "verified": true,
+   "about": "Hugel headlines Savaya's Law of the Jungle Saturday on the Uluwatu cliffs, with DJs from 3 pm."
+  },
+  {
+   "date": "2027-01-31",
+   "artist": "Brunello",
+   "venue": "Savaya",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.savaya.com/event-calendar/january-31-2027",
+   "link": "https://www.savaya.com/event-calendar/january-31-2027",
+   "verified": true,
+   "about": "Brunello plays the Law of the Jungle Sunday sunset session at Savaya, from 1 pm."
   },
   {
    "date": "2027-02-13",
@@ -98,6 +287,18 @@
    "verified": false
   },
   {
+   "date": "2027-01-30",
+   "artist": "DUNIA",
+   "venue": "Ulu Cliffhouse",
+   "area": "Uluwatu",
+   "place": "Bali",
+   "source": "https://www.ulucliffhouse.com/whats-on",
+   "link": "https://www.ulucliffhouse.com/whats-on",
+   "verified": false,
+   "about": "Ulu Cliffhouse's Saturday electronic music showcase on the Ocean Deck; ticketed.",
+   "weekly": "sat"
+  },
+  {
    "date": "2027-02-06",
    "weekly": "sat",
    "artist": "Off The Record",
@@ -131,6 +332,17 @@
    "place": "Koh Phangan",
    "source": "https://fullmoonparty-thailand.com/schedules/",
    "verified": true
+  },
+  {
+   "date": "2027-01-31",
+   "artist": "Half Moon Festival",
+   "venue": "Half Moon Festival",
+   "area": "Ban Tai",
+   "place": "Koh Phangan",
+   "source": "https://fullmoonparty.guide/half-moon-party",
+   "link": "https://fullmoonparty.guide/half-moon-party",
+   "verified": false,
+   "about": "A two-day party: Harmony Beach Club in the afternoon, then the Magic Forest jungle stages to sunrise on 1 February."
   },
   {
    "date": "2027-02-01",
@@ -208,6 +420,17 @@
    "place": "Koh Phangan",
    "source": "https://phangan.events/events/atman-begins-teaser-party-at-lost-jungle/",
    "verified": false
+  },
+  {
+   "date": "2027-02-26",
+   "artist": "Awakenest Festival",
+   "venue": "Stayfly",
+   "area": "Wok Tum",
+   "place": "Koh Phangan",
+   "source": "https://www.awakenestfestival.com/festival/2027/programme",
+   "link": "https://www.awakenestfestival.com/festival/2027/programme",
+   "verified": true,
+   "about": "Three evenings of music, sound healing and workshops, 26 to 28 February, on the Medicine Stage at Stayfly."
   },
   {
    "date": "2027-01-26",

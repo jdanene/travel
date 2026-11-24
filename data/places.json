@@ -132,6 +132,12 @@
    "destination": "singapore",
    "lat": 1.28876,
    "lng": 103.84669
+  },
+  "wok-tum": {
+   "name": "Wok Tum",
+   "destination": "kohPhangan",
+   "lat": 9.7432,
+   "lng": 99.9902
   }
  },
  "venues": {
@@ -414,6 +420,14 @@
    "lat": 7.89495,
    "lng": 98.2988,
    "line": "Beach club on Patong Beach (pin is approximate)"
+  },
+  "stayfly": {
+   "name": "Stayfly",
+   "destination": "kohPhangan",
+   "areaId": "wok-tum",
+   "lat": 9.7432,
+   "lng": 99.9902,
+   "line": "Venue in Wok Tum that hosts the Awakenest festival (pin is approximate)"
   }
  }
 }
