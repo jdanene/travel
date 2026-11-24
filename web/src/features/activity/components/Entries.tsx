@@ -83,17 +83,23 @@ function DeleteAsk({ onDelete, onKeep, note }: { onDelete: () => void; onKeep: (
  * line and its emoji off the Feed and leaves the thing itself (owner,
  * 24 Nov 2026: "only their updates").
  *
- * Inputs: the entry, the viewer, its thumbnail (or undefined), what a tap
- * does (or undefined), the reactions row, and what deleting does (absent when this member may not).
+ * Inputs: the line's id and entry, the viewer, its thumbnail (or undefined), what a tap
+ * does (or undefined), its replies and what replying does, the reactions row (it takes
+ * the "Reply" control, as on a message), and what deleting does (absent when this member may not).
  * Output: the row.
  * Examples (checked on screen):
  *   KA's stay line → "KA  2 h ago", "added a place: Cliffside villa" under it, the villa's photo; a tap opens Stay
  *   your own "joined", "…" then "Delete" → the line goes on every phone; the trip still has you
  */
-export function LineRow({ entry, viewer, thumb, onOpen, footer, onDelete }: { entry: ActivityEntry; viewer: Viewer; thumb?: string; onOpen?: () => void; footer: ReactNode; onDelete?: () => void }) {
+export function LineRow({ id, entry, viewer, thumb, onOpen, replies, onReply, reactions, onDelete }: { id: string; entry: ActivityEntry; viewer: Viewer; thumb?: string; onOpen?: () => void; replies: Record<string, ActivityReply> | undefined; onReply: (text: string) => Promise<WriteResult>; reactions: (after: ReactNode) => ReactNode; onDelete?: () => void }) {
   const [asking, setAsking] = useState(false);
+  const [open, setOpen] = useState(false);
   const block = useRef<HTMLDivElement>(null);
-  useFoldOutside(asking, block, () => setAsking(false));
+  useFoldOutside(asking || open, block, () => {
+    setAsking(false);
+    setOpen(false);
+  });
+  const { control, panel } = useThread(id, viewer, replies, onReply, open, setOpen);
   const { lead, rest } = lineWords(entry, entry.by ? person(viewer, entry.by).name : "");
   const main = (
     <>
@@ -118,7 +124,8 @@ export function LineRow({ entry, viewer, thumb, onOpen, footer, onDelete }: { en
         )}
         {onDelete && !asking && <MoreButton className="corner" onClick={() => setAsking(true)} />}
         {asking && onDelete && <DeleteAsk note="Only this line goes." onDelete={onDelete} onKeep={() => setAsking(false)} />}
-        {footer}
+        {reactions(control)}
+        {panel}
       </div>
     </div>
   );
@@ -165,8 +172,6 @@ export function Written({ id, entry, viewer, votes, replies, sending, onVote, on
   const block = useRef<HTMLElement>(null);
   const author = entry.by ? person(viewer, entry.by).name : "";
   const mayDelete = entry.by === viewer.memberId || viewer.isOrganizer;
-  const thread = Object.entries(replies ?? {}).sort(([, a], [, b]) => a.at - b.at);
-  const repliers = [...new Set(thread.map(([, reply]) => reply.by))];
   const mine = votes?.[viewer.memberId];
   const poll = entry.kind === "poll" && entry.options ? tally(entry.options, votes) : null;
 
@@ -175,25 +180,7 @@ export function Written({ id, entry, viewer, votes, replies, sending, onVote, on
     setAsking(false);
   });
 
-  const replyControl = (
-    <button type="button" className="reps" aria-expanded={open} onClick={() => setOpen(!open)}>
-      {thread.length > 0 ? (
-        <>
-          <span className="avs" aria-hidden="true">
-            {repliers.slice(0, 3).map((who) => (
-              <Face key={who} person={person(viewer, who)} className={faceClass(viewer, who)} />
-            ))}
-          </span>
-          {open ? "Hide replies" : `${thread.length} ${thread.length === 1 ? "reply" : "replies"}`}
-        </>
-      ) : (
-        <>
-          <Icon name="chat" size={14} />
-          {open ? "Close" : "Reply"}
-        </>
-      )}
-    </button>
-  );
+  const { control: replyControl, panel } = useThread(id, viewer, replies, onReply, open, setOpen);
 
   return (
     <article ref={block} className={`row fp${sending ? " sending" : ""}`} aria-labelledby={`fp-${id}`}>
@@ -233,23 +220,62 @@ export function Written({ id, entry, viewer, votes, replies, sending, onVote, on
           </div>
         )}
         {!sending && reactions(replyControl)}
-        {!sending && open && (
-          <div className="fp-replies">
-            {thread.map(([replyId, reply]) => (
-              <div key={replyId} className="rp">
-                <Who viewer={viewer} id={reply.by} />
-                <div className="rp-body">
-                  <Head name={person(viewer, reply.by).name} at={reply.at} viewer={viewer} />
-                  <RichText className="rp-t" text={reply.text} />
-                </div>
-              </div>
-            ))}
-            <Composer placeholder="Reply" small autoFocus draftKey={id} onSend={(draft) => onReply(draft.text)} />
-          </div>
-        )}
+        {!sending && panel}
       </div>
     </article>
   );
+}
+
+/**
+ * The reply thread under any feed line, a friend's message or an automatic
+ * update alike (owner, 24 Nov 2026: "people can reply to updates in the
+ * feed not just texts"): the "Reply" control for the reactions row, and,
+ * while open, the replies in order with a small message bar under them.
+ *
+ * Inputs: the line's id (it keys the unsent reply), the viewer, the
+ * line's replies, what sending a reply does, and the open state with its setter.
+ * Output: { control, panel }; panel is null while folded.
+ * Examples (checked by build and tests only):
+ *   no replies          → control "Reply"; open → an empty thread and the bar
+ *   KA and RB replied   → control shows both faces and "2 replies"
+ */
+function useThread(id: string, viewer: Viewer, replies: Record<string, ActivityReply> | undefined, onReply: (text: string) => Promise<WriteResult>, open: boolean, setOpen: (open: boolean) => void) {
+  const thread = Object.entries(replies ?? {}).sort(([, a], [, b]) => a.at - b.at);
+  const repliers = [...new Set(thread.map(([, reply]) => reply.by))];
+  const control = (
+    <button type="button" className="reps" aria-expanded={open} onClick={() => setOpen(!open)}>
+      {thread.length > 0 ? (
+        <>
+          <span className="avs" aria-hidden="true">
+            {repliers.slice(0, 3).map((who) => (
+              <Face key={who} person={person(viewer, who)} className={faceClass(viewer, who)} />
+            ))}
+          </span>
+          {open ? "Hide replies" : `${thread.length} ${thread.length === 1 ? "reply" : "replies"}`}
+        </>
+      ) : (
+        <>
+          <Icon name="chat" size={14} />
+          {open ? "Close" : "Reply"}
+        </>
+      )}
+    </button>
+  );
+  const panel = open ? (
+    <div className="fp-replies">
+      {thread.map(([replyId, reply]) => (
+        <div key={replyId} className="rp">
+          <Who viewer={viewer} id={reply.by} />
+          <div className="rp-body">
+            <Head name={person(viewer, reply.by).name} at={reply.at} viewer={viewer} />
+            <RichText className="rp-t" text={reply.text} />
+          </div>
+        </div>
+      ))}
+      <Composer placeholder="Reply" small autoFocus draftKey={id} onSend={(draft) => onReply(draft.text)} />
+    </div>
+  ) : null;
+  return { control, panel };
 }
 
 /**

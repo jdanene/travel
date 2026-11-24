@@ -280,4 +280,11 @@ describe("database rules", () => {
     await assertFails(update(ref(db("uid-c")), { [paths.activityEntry(T, "in1")]: null, [paths.activityReactions(T, "in1")]: null }));
     await assertSucceeds(update(ref(a), { [paths.activityEntry(T, "in1")]: null, [paths.activityReactions(T, "in1")]: null }));
   });
+  it("34. lets a member reply under an automatic line, and its author take the line off with the replies", async () => {
+    const a = db("uid-a");
+    await assertSucceeds(set(ref(a, paths.activityEntry(T, "in2")), { kind: "event-in", by: "alice", at: 1, text: "Peggy Gou at Savaya", ref: "show1" }));
+    await assertSucceeds(set(ref(db("uid-b"), paths.activityReply(T, "in2", "r1")), { by: "bob", at: 2, text: "Same!" }));
+    await assertFails(set(ref(a, paths.activityReply(T, "gone", "r1")), { by: "alice", at: 2, text: "Hi" }));
+    await assertSucceeds(update(ref(a), { [paths.activityEntry(T, "in2")]: null, [paths.activityReactions(T, "in2")]: null, [paths.activityReplies(T, "in2")]: null }));
+  });
 });

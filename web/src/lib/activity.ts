@@ -56,5 +56,5 @@ export async function forgetLines(tripId: string, ref: string, kinds: ActivityEn
   const ids = Object.entries(all.value)
     .filter(([, line]) => line.ref === ref && kinds.includes(line.kind) && (by === undefined || line.by === by))
     .map(([id]) => id);
-  await Promise.all(ids.map((id) => write({ [paths.activityEntry(tripId, id)]: null, [paths.activityReactions(tripId, id)]: null })));
+  await Promise.all(ids.map((id) => write({ [paths.activityEntry(tripId, id)]: null, [paths.activityReactions(tripId, id)]: null, [paths.activityReplies(tripId, id)]: null })));
 }

@@ -238,11 +238,14 @@ export function Activity({ tripId, entries, votes, replies, reactions, memberId,
                         />
                       ) : (
                         <LineRow
+                          id={id}
                           entry={entry}
                           viewer={viewer}
                           thumb={thumbOf(entry)}
                           onOpen={openerOf(entry)}
-                          footer={reactionsOf(id)()}
+                          replies={replies?.[id]}
+                          onReply={(text) => reply(tripId, id, memberId, text)}
+                          reactions={reactionsOf(id)}
                           onDelete={entry.by === memberId ? () => void remove(tripId, id).then(report) : undefined}
                         />
                       )}
