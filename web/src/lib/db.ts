@@ -1,4 +1,4 @@
-import { ref, runTransaction, update } from "firebase/database";
+import { get, ref, runTransaction, update } from "firebase/database";
 import { database } from "./firebase";
 
 /** Why a write did not land: the rules said no, or something else broke. */
@@ -77,4 +77,28 @@ export async function writeIf<T>(path: string, next: (current: T | null) => T | 
 function failure(error: unknown): WriteFailure {
   const text = String((error as { code?: string; message?: string }).code ?? (error as Error).message ?? error);
   return /permission[_ ]denied/i.test(text) ? "refused" : "failed";
+}
+
+export type ReadResult<T> = { ok: true; value: T | null } | { ok: false; reason: WriteFailure };
+
+/**
+ * Reads one value once, for data the trip listener cannot carry: the
+ * tripSecrets branch, which only some devices may read (a member its own
+ * phone, an organizer every phone). It does not listen; the caller reads
+ * again when its sheet opens. Nothing retries.
+ *
+ * Inputs: path — from paths.ts.
+ * Output: { ok: true, value } (null when nothing is there), or the reason,
+ * as for write(): "refused" when the rules say no, "failed" otherwise.
+ * Examples (checked on the emulator, not in a test):
+ *   read(paths.phone(t, "rb")) by rb's device      → { ok: true, value: { e164: "+14155550123", at: … } }
+ *   read(paths.phones(t)) by a friend's device     → { ok: false, reason: "refused" }
+ */
+export async function read<T>(path: string): Promise<ReadResult<T>> {
+  try {
+    const snapshot = await get(ref(database, path));
+    return { ok: true, value: snapshot.exists() ? (snapshot.val() as T) : null };
+  } catch (error) {
+    return { ok: false, reason: failure(error) };
+  }
 }

@@ -12,7 +12,8 @@
  * Each run replaces info (each field by its own path, so info/inviteTitle,
  * which an organizer sets with "Edit invite", stays; absent, the page and
  * the link preview use the default), crew/expected, places/areas,
- * places/venues (each with its `big` tag from data/places.json, plan D18)
+ * places/venues (each with its `big` tag from data/places.json, plan D18),
+ * its own organizer key (the keys organizers add on the page stay)
  * and the admin list (tripSecrets/{tripId}/admins, from the
  * file's `admins`),
  * writes each starting date option by its own path, and touches nothing
@@ -92,7 +93,8 @@ const update = {
   // Areas and venues only: places/custom holds the friends' own places, which a run must keep.
   [`trips/${tripId}/places/areas`]: places.areas,
   [`trips/${tripId}/places/venues`]: places.venues,
-  [`tripSecrets/${tripId}/organizerKey`]: { [organizerKey]: true },
+  // One path for this key, so the keys organizers made with "Add an organizer" stay.
+  [`tripSecrets/${tripId}/organizerKey/${organizerKey}`]: true,
   // The whole node, so an email taken out of the file is taken out here; null when there are none.
   [`tripSecrets/${tripId}/admins`]: (file.admins ?? []).length
     ? Object.fromEntries(file.admins.map((email) => [emailKey(email.trim()), true]))

@@ -6,6 +6,7 @@ import type { WriteResult } from "../../../lib/db";
 import type { Reply, TripInfo } from "../../../types/trip";
 import { comeBack, join, saveReply, type CrewView, type Person } from "../api/crew";
 import { savePhoto } from "../api/photo";
+import { savePhone } from "../api/phone";
 import { burst } from "./confetti";
 import { JoinSheet } from "./JoinSheet";
 import { repliedLine, REPLIES } from "../lib/crew";
@@ -62,13 +63,14 @@ export function Invitation({ tripId, uid, info, crew }: InvitationProps) {
     else setJoining(reply);
   };
 
-  // The photo is saved after the reply, so a photo the rules refuse never costs the friend their reply.
-  const onPick = (person: Person, photo: string | null) => {
+  // The photo and the phone are saved after the reply, so one the rules refuse never costs the friend their reply.
+  const onPick = (person: Person, photo: string | null, phone: string | null) => {
     const reply = joining!;
     setJoining(null);
     void join(tripId, uid, person, crew.byId[person.id] ?? null, reply).then((result) => {
       report(reply)(result);
       if (result.ok && photo) void savePhoto(tripId, person.id, photo).then((saved) => setFailure(saved.ok ? null : saved));
+      if (result.ok && phone) void savePhone(tripId, person.id, phone).then((saved) => setFailure(saved.ok ? null : saved));
     });
   };
 

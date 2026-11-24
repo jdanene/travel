@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_INVITE_TITLE, escapeHtml, inviteLine } from "./invite";
+import { DEFAULT_INVITE_TITLE, escapeHtml, inviteLine, inviteLink } from "./invite";
 
 // The header examples of inviteLine and escapeHtml.
 describe("inviteLine", () => {
@@ -15,5 +15,12 @@ describe("escapeHtml", () => {
 
   it("keeps a title from closing the meta tag it sits in", () => {
     expect(escapeHtml('"><script>')).toBe("&quot;&gt;&lt;script&gt;");
+  });
+});
+
+describe("inviteLink", () => {
+  it("makes the crew link, and the organizer link with a key", () => {
+    expect(inviteLink("abc")).toBe("https://travel-ca8f9.web.app/?t=abc");
+    expect(inviteLink("abc", "K1")).toBe("https://travel-ca8f9.web.app/?t=abc&organizer=K1");
   });
 });

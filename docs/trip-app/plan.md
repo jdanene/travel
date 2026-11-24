@@ -133,11 +133,15 @@ Paths live in one file, `web/src/lib/paths.ts`. The rules file repeats them; the
     areas     { {areaId}: { name, destination, lat, lng } }
     venues    { {venueId}: { name, destination, areaId?, lat, lng, line?, onMap?, big? } }   big: true for the owner's big nights (D18)
     custom    { {placeId}: { name, kind: "event"|"food"|"beach"|"activity"|"other", destination, lat, lng, link?, addedBy, at } }   a friend's place ("Add to map"); inside the destination's box; the adder or an organizer removes it; no edits
-/tripSecrets/{tripId}            no phone can read this branch
+/tripSecrets/{tripId}            no phone can read this branch, except the two nodes below that say so
   organizerKey { {key}: true }
   claims       { {uid}: key }    a device writes its own claim; the rules test the key exists
   admins       { {emailKey}: true }  from the trip file's `admins`; emailKey is the email in lower case
                                      with every "." as "," (web/src/lib/ids.ts); replaced whole on each run
+  phones       { {memberId}: { e164, at } }   optional phone for trip texts; the member's own device reads, writes
+                                     and removes its entry; an organizer reads them all; nobody else reads one
+  textLog      { {yyyy-mm-dd}: { texts, at } }  trip texts sent that UTC day; an organizer (the sender, with the
+                                     organizer's token) adds one at a time, up to 5; nobody removes a day
 ```
 
 Ids that must not repeat are made from their content: a member, area or venue id from its name (`web/src/lib/ids.ts`, which the scripts import too); a date option id from its two days; a `linkId` from the link address without its query string; `stayId` from the listing address without its query string; a seeded `showId` from destination, venue, date and artist. Two friends who add the same thing write the same record. The one exception is a friend's place on the map: its `placeId` is the time and a random tail, so two friends who add the same name at once get two pins.

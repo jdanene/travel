@@ -9,10 +9,13 @@
 # VITE_FIREBASE_API_KEY and VITE_FIREBASE_APP_ID, which the build needs.
 # With no local/trip.json, it copies data/trip.example.json there and says so.
 #
-# Usage: sh scripts/ship.sh [--with-reader]
+# Usage: sh scripts/ship.sh [--with-reader] [--with-texts]
 #   --with-reader  also deploys the link reader (services/link-reader/deploy.sh)
 #                  and prints its function URL. An expired AWS sign-in stops
 #                  it with the command to sign in again; the site is live by then.
+#   --with-texts   also deploys the trip texts sender (services/travel-texts/deploy.sh,
+#                  AWS profile mappack) and prints its function URL, which
+#                  web/.env.production holds as VITE_TEXTS_URL. Same rule on sign-in.
 #
 # Each step prints its name before it runs. The first step that fails stops
 # the script with the step's name and exit code. No step retries, and every
@@ -22,9 +25,11 @@ set -u
 cd "$(dirname "$0")/.." || exit 1
 
 with_reader=no
+with_texts=no
 for arg in "$@"; do
   case "$arg" in
     --with-reader) with_reader=yes ;;
+    --with-texts) with_texts=yes ;;
     *) echo "ship.sh: unknown option $arg" >&2; exit 2 ;;
   esac
 done
@@ -63,6 +68,9 @@ step "deploy hosting" firebase deploy --only hosting --project travel-ca8f9
 
 if [ "$with_reader" = yes ]; then
   step "deploy the link reader" sh services/link-reader/deploy.sh
+fi
+if [ "$with_texts" = yes ]; then
+  step "deploy the trip texts sender" sh services/travel-texts/deploy.sh
 fi
 echo "ship.sh: done. The links:"
 cat local/links.txt

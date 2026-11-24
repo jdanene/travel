@@ -23,7 +23,7 @@ This repo holds the Travel trip app and its hype pages. Read this file before an
 - `web/src/app/`: the shell. It joins the contexts: the route, the home page, the modules rule and its state lines.
 - `web/src/lib/`, `web/src/components/`, `web/src/types/`: shared by every feature.
 - Code flows one way: shared, then features, then app. No barrel files. Every folder has a `README.md` that says what belongs there and who may import it.
-- `scripts/`: the deploy (`ship.sh`) and the data scripts. `services/link-reader/`: the Lambda.
+- `scripts/`: the deploy (`ship.sh`) and the data scripts. `services/link-reader/`: the link reader Lambda. `services/travel-texts/`: the trip texts Lambda (MapPack's AWS account).
 
 Every function carries the four-part header: description, inputs, output, examples. In a pure rule function every example is a test; elsewhere the examples say what was checked on the emulator or on screen.
 

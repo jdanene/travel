@@ -2,7 +2,7 @@
  * The rules tests of Trip 2 (1 to 9), of the admin list (10 to 12, plan
  * D15), of Add dates (13 to 15, plan D16), of Add to map (16 and 17), of
  * weekly shows (18), of the profile photo (19), of a place's photo (20) and
- * of the invite title (21), against the database emulator. Run with
+ * of the invite title (21), of organizer keys (22) and of trip texts (23 to 25), against the database emulator. Run with
  * `npm run test:rules` in web/; it starts the emulator, runs this file and
  * stops it. Each test names the rule it proves, in the words of plan
  * section 4.
@@ -170,5 +170,40 @@ describe("database rules", () => {
     await assertFails(set(ref(db("uid-a"), paths.inviteTitle(T)), "Alice's trip"));
     await assertSucceeds(set(ref(db("uid-o"), paths.inviteTitle(T)), "Bali & Koh Phangan 2027"));
     await assertFails(set(ref(db("uid-o"), paths.inviteTitle(T)), "x".repeat(61)));
+  });
+
+  it("22. lets an organizer add an organizer key, never a friend, and never over one", async () => {
+    await assertFails(set(ref(db("uid-a"), paths.organizerKey(T, "FriendKey0123456789abcde")), true));
+    await assertSucceeds(set(ref(db("uid-o"), paths.organizerKey(T, "CoOrgKey0123456789abcdef")), true));
+    await assertFails(set(ref(db("uid-o"), paths.organizerKey(T, KEY)), null));
+  });
+
+  // Fictional numbers only: the repo is public.
+  const number = (e164: string) => ({ e164, at: 1 });
+
+  it("23. lets a member write, read and remove only its own phone, in E.164", async () => {
+    const a = db("uid-a");
+    await assertSucceeds(set(ref(a, paths.phone(T, "alice")), number("+14155550101")));
+    await assertSucceeds(get(ref(a, paths.phone(T, "alice"))));
+    await assertFails(set(ref(a, paths.phone(T, "bob")), number("+14155550102")));
+    await assertFails(set(ref(a, paths.phone(T, "alice")), number("415-555-0101")));
+    await assertSucceeds(remove(ref(a, paths.phone(T, "alice"))));
+  });
+
+  it("24. lets an organizer read every phone, and no friend read another's or the list", async () => {
+    await set(ref(db("uid-b"), paths.phone(T, "bob")), number("+14155550102"));
+    await assertFails(get(ref(db("uid-a"), paths.phone(T, "bob"))));
+    await assertFails(get(ref(db("uid-a"), paths.phones(T))));
+    await assertSucceeds(get(ref(db("uid-o"), paths.phones(T))));
+  });
+
+  it("25. lets only an organizer count a day's texts, one at a time, up to 5, with no reset", async () => {
+    const day = paths.textLog(T, "2027-02-01");
+    await assertFails(set(ref(db("uid-a"), day), { texts: 1, at: 1 }));
+    await assertFails(set(ref(db("uid-o"), day), { texts: 3, at: 1 }));
+    for (let texts = 1; texts <= 5; texts++) await assertSucceeds(set(ref(db("uid-o"), day), { texts, at: texts }));
+    await assertFails(set(ref(db("uid-o"), day), { texts: 6, at: 6 }));
+    await assertFails(set(ref(db("uid-o"), day), { texts: 1, at: 7 }));
+    await assertFails(remove(ref(db("uid-o"), day)));
   });
 });

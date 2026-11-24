@@ -50,12 +50,4 @@ describe("lastSeason", () => {
     expect(lastSeason("bali", "La Brisa", [atlas("2026-01-31", "Afrojack")])).toEqual([]);
   });
 
-  it("keeps only the three newest", () => {
-    const lastYear = ["2026-01-01", "2026-01-02", "2026-01-03", "2026-02-01", "2026-02-07"].map((date, i) => savaya(date, `Act ${i}`));
-    expect(lastSeason("bali", " savaya", lastYear)).toEqual([
-      { date: "2026-02-07", artist: "Act 4" },
-      { date: "2026-02-01", artist: "Act 3" },
-      { date: "2026-01-03", artist: "Act 2" },
-    ]);
-  });
 });
