@@ -133,6 +133,13 @@ export function Composer({ placeholder, small = false, autoFocus = false, onSend
     requestAnimationFrame(() => input?.setSelectionRange(start + piece.length, start + piece.length));
   };
 
+  // Back to the field, the cursor where the last emoji went in. At once, inside the tap: iOS raises the keyboard
+  // only for a focus made during the tap itself, never for one in a later frame.
+  const backToField = () => {
+    field.current?.focus({ preventScroll: true });
+    if (caret.current) field.current?.setSelectionRange(caret.current[0], caret.current[1]);
+  };
+
   const sendGif = (item: KlipyItem) => {
     setPicking(false);
     setError(null);
@@ -239,19 +246,29 @@ export function Composer({ placeholder, small = false, autoFocus = false, onSend
           ref={emojiButton}
           type="button"
           className={`msg-icon msg-emoji${picking ? " open" : ""}`}
-          aria-label={onGif ? "Emoji and GIFs" : "Emoji"}
+          aria-label={picking ? "Show keyboard" : onGif ? "Emoji and GIFs" : "Emoji"}
           aria-haspopup="dialog"
           aria-expanded={picking}
           onClick={() => {
+            if (picking) {
+              // As on Discord, the button turned keyboard: the panel goes and the keyboard comes back.
+              setPicking(false);
+              backToField();
+              return;
+            }
             if (document.activeElement === field.current) caret.current = [field.current!.selectionStart, field.current!.selectionEnd];
             setPicking(true);
           }}
         >
-          <svg viewBox="0 0 24 24" width="22" height="22" className="i" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" className="i smile" aria-hidden="true">
             <circle cx="12" cy="12" r="8.75" />
             <path d="M8.5 14c.9 1.3 2.1 2 3.5 2s2.6-.7 3.5-2" />
             <circle cx="9.25" cy="9.75" r="0.6" fill="currentColor" />
             <circle cx="14.75" cy="9.75" r="0.6" fill="currentColor" />
+          </svg>
+          <svg viewBox="0 0 24 24" width="22" height="22" className="i kb" aria-hidden="true">
+            <rect x="2.75" y="6" width="18.5" height="12" rx="2.5" />
+            <path d="M6.5 9.5h.01M10 9.5h.01M13.5 9.5h.01M17 9.5h.01M6.5 12.5h.01M10 12.5h.01M13.5 12.5h.01M17 12.5h.01M8.5 15.25h7" />
           </svg>
         </button>
         <button type="submit" className="msg-send" aria-label={options ? "Post poll" : "Send"} disabled={!draft} aria-hidden={!draft} tabIndex={draft ? 0 : -1} {...keepFocus}>
@@ -263,14 +280,12 @@ export function Composer({ placeholder, small = false, autoFocus = false, onSend
         anchor={emojiButton}
         onClose={() => {
           setPicking(false);
-          // Back to the field, the cursor where the last emoji went in.
-          requestAnimationFrame(() => {
-            field.current?.focus({ preventScroll: true });
-            if (caret.current) field.current?.setSelectionRange(caret.current[0], caret.current[1]);
-          });
+          // On a desktop focus goes back to the field; on a phone a tap elsewhere must not raise the keyboard.
+          if (window.matchMedia("(min-width: 900px) and (hover: hover)").matches) backToField();
         }}
         onEmoji={insert}
         onGif={onGif ? sendGif : undefined}
+        keep={!small}
       />
       {error && (
         <p className="msg-error" role="alert">
@@ -282,30 +297,63 @@ export function Composer({ placeholder, small = false, autoFocus = false, onSend
 }
 
 /**
- * Keeps the bar in sight above the on-screen keyboard: when the field takes
- * focus, and each time the visible part of the page (visualViewport)
- * changes while it has focus, the page scrolls just enough to show the
- * whole bar, at once, so it does not bounce.
- * Inputs: the bar and its field. Output: nothing.
- * Examples (checked at 375 px with the viewport shortened as a keyboard would): focus the field → the bar's foot sits 12 px above the keyboard
+ * Keeps the whole message bar, poll fields and all, in sight above the
+ * on-screen keyboard. Safari's keyboard shrinks only the visible part of the
+ * page (visualViewport), never the layout, so nothing here is fixed to the
+ * bottom: while a field in the bar has focus, the page's foot is padded by
+ * the keyboard's height (so the page can always move up far enough) and the
+ * page scrolls, at once, so the bar's foot sits 12 px above the keyboard; if
+ * the bar is taller than what is visible, the focused field wins. It runs on
+ * focus, on every visualViewport resize or scroll, and whenever the bar
+ * grows (Poll opening, a fourth option, a longer message).
+ * Inputs: the bar and its field. Output: nothing; sets --kb-pad on <html> while typing.
+ * Examples (checked in emulation at 375 px with the visible height cut as a keyboard would; a real iPhone is unverified):
+ *   focus "Message"                → the bar's foot 12 px above the keyboard
+ *   "+", then Poll, keyboard up    → the poll's question, options and bar all sit above the keyboard
  */
 function useAboveKeyboard(bar: React.RefObject<HTMLElement>, field: React.RefObject<HTMLTextAreaElement>) {
   useEffect(() => {
     const view = window.visualViewport;
-    const input = field.current;
-    if (!view || !input) return;
+    const box = bar.current;
+    if (!view || !box || !field.current) return;
+    const root = document.documentElement;
     const fit = () => {
-      if (document.activeElement !== input || !bar.current) return;
-      const box = bar.current.getBoundingClientRect();
-      const bottom = view.offsetTop + view.height;
-      if (box.bottom > bottom - 12) window.scrollBy({ top: box.bottom - bottom + 12, behavior: "instant" as ScrollBehavior });
-      else if (box.top < view.offsetTop) window.scrollBy({ top: box.top - view.offsetTop - 12, behavior: "instant" as ScrollBehavior });
+      const focused = document.activeElement;
+      if (!(focused instanceof HTMLElement) || !box.contains(focused)) return;
+      const covered = Math.max(0, window.innerHeight - (view.offsetTop + view.height));
+      root.style.setProperty("--kb-pad", `${Math.round(covered)}px`);
+      root.classList.toggle("kb-open", covered > 0);
+      const top = view.offsetTop + 8;
+      const bottom = view.offsetTop + view.height - 12;
+      const rect = box.getBoundingClientRect();
+      let move = 0;
+      if (rect.height <= bottom - top) {
+        if (rect.bottom > bottom) move = rect.bottom - bottom;
+        else if (rect.top < top) move = rect.top - top;
+      } else {
+        // Taller than what is visible: keep the focused field in sight.
+        const own = focused.getBoundingClientRect();
+        if (own.bottom > bottom) move = own.bottom - bottom;
+        else if (own.top < top) move = own.top - top;
+      }
+      if (Math.abs(move) > 1) window.scrollBy({ top: move, behavior: "instant" as ScrollBehavior });
     };
+    const leave = (event: FocusEvent) => {
+      if (event.relatedTarget instanceof Node && box.contains(event.relatedTarget)) return;
+      root.classList.remove("kb-open");
+    };
+    const grow = new ResizeObserver(() => fit());
+    grow.observe(box);
     view.addEventListener("resize", fit);
-    input.addEventListener("focus", fit);
+    view.addEventListener("scroll", fit);
+    box.addEventListener("focusin", fit);
+    box.addEventListener("focusout", leave);
     return () => {
+      grow.disconnect();
       view.removeEventListener("resize", fit);
-      input.removeEventListener("focus", fit);
+      view.removeEventListener("scroll", fit);
+      box.removeEventListener("focusin", fit);
+      box.removeEventListener("focusout", leave);
     };
   }, [bar, field]);
 }

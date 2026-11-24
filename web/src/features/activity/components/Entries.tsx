@@ -43,19 +43,57 @@ function Head({ name, at, viewer, sending = false, children }: { name: string; a
   );
 }
 
+/** The author's quiet "…": shown on hover with a mouse, dim on a touch screen. */
+function MoreButton({ onClick, className = "" }: { onClick: () => void; className?: string }) {
+  return (
+    <button type="button" className={`fp-more ${className}`} aria-label="More for this line" title="More" onClick={onClick}>
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+        <circle cx="6" cy="12" r="1.5" fill="currentColor" />
+        <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+        <circle cx="18" cy="12" r="1.5" fill="currentColor" />
+      </svg>
+    </button>
+  );
+}
+
+/** The one question before a line goes for everyone; note says what stays (an automatic line's thing is not undone). */
+function DeleteAsk({ onDelete, onKeep, note }: { onDelete: () => void; onKeep: () => void; note?: string }) {
+  return (
+    <div className="fp-ask" role="group" aria-label="Delete for everyone?">
+      <span>
+        Delete for everyone?{note && <small> {note}</small>}
+      </span>
+      <button type="button" className="fp-yes" onClick={onDelete}>
+        Delete
+      </button>
+      <button type="button" onClick={onKeep}>
+        Keep
+      </button>
+    </div>
+  );
+}
+
 /**
  * One automatic line, in the same shape as a message: the face, the name
  * with the time beside it, and what happened under it ("added a place:
  * Cliffside villa"), with the thing's small picture on the right when it
  * has one. A line about a module is a button that opens it. The reactions
- * row comes under, in the same text column.
+ * row comes under, in the same text column. Its author (only the author)
+ * gets the quiet "…" that asks "Delete for everyone?"; deleting takes the
+ * line and its emoji off the Feed and leaves the thing itself (owner,
+ * 24 Nov 2026: "only their updates").
  *
  * Inputs: the entry, the viewer, its thumbnail (or undefined), what a tap
- * does (or undefined), and the reactions row.
+ * does (or undefined), the reactions row, and what deleting does (absent when this member may not).
  * Output: the row.
- * Examples (checked on screen): KA's stay line → "KA  2 h ago", "added a place: Cliffside villa" under it, the villa's photo; a tap opens Stay
+ * Examples (checked on screen):
+ *   KA's stay line → "KA  2 h ago", "added a place: Cliffside villa" under it, the villa's photo; a tap opens Stay
+ *   your own "joined", "…" then "Delete" → the line goes on every phone; the trip still has you
  */
-export function LineRow({ entry, viewer, thumb, onOpen, footer }: { entry: ActivityEntry; viewer: Viewer; thumb?: string; onOpen?: () => void; footer: ReactNode }) {
+export function LineRow({ entry, viewer, thumb, onOpen, footer, onDelete }: { entry: ActivityEntry; viewer: Viewer; thumb?: string; onOpen?: () => void; footer: ReactNode; onDelete?: () => void }) {
+  const [asking, setAsking] = useState(false);
+  const block = useRef<HTMLDivElement>(null);
+  useFoldOutside(asking, block, () => setAsking(false));
   const { lead, rest } = lineWords(entry, entry.by ? person(viewer, entry.by).name : "");
   const main = (
     <>
@@ -66,17 +104,20 @@ export function LineRow({ entry, viewer, thumb, onOpen, footer }: { entry: Activ
       {thumb && <span className="th" style={{ backgroundImage: `url("${thumb}")` }} aria-hidden="true" />}
     </>
   );
+  const mainClass = `row-main${onDelete ? " with-more" : ""}`;
   return (
-    <div className="row">
+    <div className="row" ref={block}>
       <Who viewer={viewer} id={entry.by} />
       <div className="row-body">
         {onOpen ? (
-          <button type="button" className="row-main" onClick={onOpen}>
+          <button type="button" className={mainClass} onClick={onOpen}>
             {main}
           </button>
         ) : (
-          <div className="row-main">{main}</div>
+          <div className={mainClass}>{main}</div>
         )}
+        {onDelete && !asking && <MoreButton className="corner" onClick={() => setAsking(true)} />}
+        {asking && onDelete && <DeleteAsk note="Only this line goes." onDelete={onDelete} onKeep={() => setAsking(false)} />}
         {footer}
       </div>
     </div>
@@ -160,28 +201,10 @@ export function Written({ id, entry, viewer, votes, replies, sending, onVote, on
       <div className="row-body">
         <span id={`fp-${id}`} className="row-label">
           <Head name={author} at={entry.at} viewer={viewer} sending={sending}>
-            {mayDelete && !sending && !asking && (
-              <button type="button" className="fp-more" aria-label="More for this message" title="More" onClick={() => setAsking(true)}>
-                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                  <circle cx="6" cy="12" r="1.5" fill="currentColor" />
-                  <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-                  <circle cx="18" cy="12" r="1.5" fill="currentColor" />
-                </svg>
-              </button>
-            )}
+            {mayDelete && !sending && !asking && <MoreButton onClick={() => setAsking(true)} />}
           </Head>
         </span>
-        {asking && (
-          <div className="fp-ask" role="group" aria-label="Delete for everyone?">
-            <span>Delete for everyone?</span>
-            <button type="button" className="fp-yes" onClick={onDelete}>
-              Delete
-            </button>
-            <button type="button" onClick={() => setAsking(false)}>
-              Keep
-            </button>
-          </div>
-        )}
+        {asking && <DeleteAsk onDelete={onDelete} onKeep={() => setAsking(false)} />}
         {entry.gif && (
           <img className="fp-gif" src={entry.gif} alt="GIF" width={entry.gifW} height={entry.gifH} style={entry.gifW && entry.gifH ? { aspectRatio: `${entry.gifW} / ${entry.gifH}` } : undefined} loading="lazy" decoding="async" />
         )}

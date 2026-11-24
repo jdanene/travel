@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { GROUPS, loadGroups, recentChoices, searchEmoji, type EmojiItem } from "../lib/emoji";
 import { findEmotes } from "../lib/emotes";
 import { reactionKey, type EmojiChoice, type Emote } from "../lib/reactions";
 import { Glyph } from "./Glyph";
 
 interface EmojiBrowserProps {
+  /** True while its panel is open: 7TV is asked only then, never just because the page loaded. */
+  active: boolean;
   /** The search field's words: "Find the perfect reaction", or "Find the perfect emoji" in the message bar. */
   placeholder: string;
   onPick: (choice: EmojiChoice) => void;
@@ -30,7 +32,11 @@ const SEARCH_WAIT_MS = 350;
  *   tap the 🍔 icon → the grid scrolls to "Food & Drink"; the icon lights
  *   7TV down      → "Emotes didn't load." with "Try again"; the emoji still work
  */
-export function EmojiBrowser({ placeholder, onPick }: EmojiBrowserProps) {
+export function EmojiBrowser({ active: open, placeholder, onPick: pickNow }: EmojiBrowserProps) {
+  // One stable pick for every cell, so opening or closing the panel never re-renders the ~1,900 cells.
+  const latestPick = useRef(pickNow);
+  latestPick.current = pickNow;
+  const onPick = useCallback((choice: EmojiChoice) => latestPick.current(choice), []);
   const [query, setQuery] = useState("");
   const [groups, setGroups] = useState<Load<Map<number, EmojiItem[]>>>({ state: "loading" });
   const [emotes, setEmotes] = useState<Load<Emote[]>>({ state: "loading" });
@@ -47,15 +53,30 @@ export function EmojiBrowser({ placeholder, onPick }: EmojiBrowserProps) {
       (value) => live && setGroups({ state: "ready", value }),
       () => live && setGroups({ state: "failed" }),
     );
-    setEmotes({ state: "loading" });
-    findEmotes("").then(
-      (value) => live && setEmotes({ state: "ready", value }),
-      () => live && setEmotes({ state: "failed" }),
-    );
     return () => {
       live = false;
     };
   }, [tries]);
+
+  // The emotes row asks 7TV the first time the panel opens (and on "Try again"), then keeps the answer.
+  const asked = useRef(-1);
+  useEffect(() => {
+    if (!open || asked.current === tries) return;
+    asked.current = tries;
+    setEmotes({ state: "loading" });
+    // Not dropped when the panel closes before 7TV answers: the grid stays in the page, so the answer still lands.
+    findEmotes("").then(
+      (value) => alive.current && setEmotes({ state: "ready", value }),
+      () => alive.current && setEmotes({ state: "failed" }),
+    );
+  }, [open, tries]);
+  const alive = useRef(true);
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
 
   // Emoji search is local and instant; the emote search waits for a pause in typing.
   useEffect(() => {
@@ -158,12 +179,7 @@ export function EmojiBrowser({ placeholder, onPick }: EmojiBrowserProps) {
                 </button>
               </p>
             )}
-            {groups.state === "ready" &&
-              GROUPS.map((group) => (
-                <Section key={group.id} id={`g${group.id}`} title={group.label} lazy>
-                  <Cells items={(groups.value.get(group.id) ?? []).map((emoji) => ({ choice: { kind: "emoji", char: emoji.char }, name: emoji.name }))} onPick={onPick} />
-                </Section>
-              ))}
+            {groups.state === "ready" && <AllGroups groups={groups.value} onPick={onPick} />}
             <p className="eb-credit">Emoji art: Twemoji, CC-BY 4.0</p>
           </>
         )}
@@ -187,6 +203,19 @@ export function EmojiBrowser({ placeholder, onPick }: EmojiBrowserProps) {
     </div>
   );
 }
+
+/** Every emoji by group: drawn once, and again only if the emoji list itself changes. */
+const AllGroups = memo(function AllGroups({ groups, onPick }: { groups: Map<number, EmojiItem[]>; onPick: (choice: EmojiChoice) => void }) {
+  return (
+    <>
+      {GROUPS.map((group) => (
+        <Section key={group.id} id={`g${group.id}`} title={group.label} lazy>
+          <Cells items={(groups.get(group.id) ?? []).map((emoji) => ({ choice: { kind: "emoji", char: emoji.char }, name: emoji.name }))} onPick={onPick} />
+        </Section>
+      ))}
+    </>
+  );
+});
 
 /** A heading and its grid. Groups far below the fold skip layout until scrolled near (content-visibility). */
 function Section({ id, title, lazy = false, children }: { id: string; title: string; lazy?: boolean; children: React.ReactNode }) {

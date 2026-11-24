@@ -41,7 +41,9 @@
 .feedcard .av { border-color: var(--page); } /* each face carries its own GTA colour and text colour (Avatars.css) */
 .row > .av { border-width: 0; }
 .av.sys { background: var(--on-page); color: #111; }
-.row-body { min-width: 0; }
+.row-body { position: relative; min-width: 0; }
+.row-main.with-more { padding-right: 2rem; }
+.fp-more.corner { position: absolute; top: 0; right: 0; }
 .row-head { display: flex; align-items: baseline; gap: 0.5rem; min-height: 1.375rem; line-height: 1.375rem; }
 .row-head b { font-size: 0.9375rem; font-weight: 700; color: var(--on-page); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row-time { font-size: 0.75rem; color: var(--mut); white-space: nowrap; }
@@ -67,6 +69,7 @@ button.row-main:active { background: var(--soft); }
 @media (hover: none) { .fp-more { opacity: 0.6; } }
 .fp-ask { display: flex; flex-wrap: wrap; align-items: center; gap: 0.375rem; margin: 0.125rem 0 0.25rem; font-size: 0.8125rem; color: var(--mut); }
 .fp-ask span { margin-right: 0.25rem; }
+.fp-ask small { font-size: 0.75rem; color: var(--mut); }
 .fp-ask button { min-height: 1.875rem; padding: 0 0.75rem; border-radius: 999px; font-weight: 700; font-size: 0.8125rem; background: var(--pill); color: var(--on-page); }
 .fp-ask .fp-yes { background: #f4f1ea; color: #111; }
 
@@ -176,12 +179,12 @@ button.row-main:active { background: var(--soft); }
 .msg-poll { display: grid; grid-template-rows: 0fr; opacity: 0; transform: translateY(0.375rem); transition: grid-template-rows 240ms cubic-bezier(0.16, 1, 0.3, 1), opacity 180ms ease-out, transform 240ms cubic-bezier(0.16, 1, 0.3, 1); }
 .msg-poll.open { grid-template-rows: 1fr; opacity: 1; transform: none; }
 .msg-poll-in { min-height: 0; overflow: hidden; }
-.msg-poll-box { position: relative; padding: 0 0 0.5rem; }
+.msg-poll-box { position: relative; margin-bottom: 0.5rem; padding: 0.5rem 0.75rem 0.75rem; border-radius: 1rem; background: var(--bar); }
 .msg-poll-head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.375rem; font-size: 0.8125rem; color: var(--mut); padding: 0.125rem 2.5rem 0.25rem 0; }
 .msg-poll-head b { color: var(--on-page); font-size: 0.875rem; }
 .msg-poll-head svg.i { color: var(--on-page); }
-.msg-poll-off { position: absolute; top: -0.5rem; right: -0.25rem; width: 2.25rem; height: 2.25rem; display: grid; place-items: center; color: var(--mut); }
-.msg-opt { display: block; width: 100%; border: 0; border-radius: 0.625rem; padding: 0.5rem 0.75rem; font-size: max(16px, 1rem); background: var(--bar); color: var(--on-page); margin-top: 0.375rem; outline: 0; }
+.msg-poll-off { position: absolute; top: 0.125rem; right: 0.125rem; width: 2.25rem; height: 2.25rem; display: grid; place-items: center; color: var(--mut); }
+.msg-opt { display: block; width: 100%; border: 0; border-radius: 0.625rem; padding: 0.5rem 0.75rem; font-size: max(16px, 1rem); background: var(--page); color: var(--on-page); margin-top: 0.375rem; outline: 0; }
 .msg-opt:focus { box-shadow: inset 0 0 0 1px rgba(244, 241, 234, 0.4); }
 .msg-opt::placeholder { color: var(--mut); }
 .msg-addo { font-size: 0.875rem; font-weight: 800; border-bottom: 1.5px solid var(--edge); margin-top: 0.5rem; min-height: 1.75rem; }
@@ -194,15 +197,32 @@ button.row-main:active { background: var(--soft); }
   background: rgba(0, 0, 0, 0); color: var(--on-page); transition: background-color 320ms ease-out;
 }
 .drawer::backdrop { background: transparent; }
-.drawer.shown { background: rgba(0, 0, 0, 0.45); }
+.drawer.warming { visibility: hidden; } /* laid out once at idle, never seen */
+/* The reaction modal keeps a light scrim, as Discord's does. */
+.drawer.shown { background: rgba(0, 0, 0, 0.3); }
+/* The panel is fixed to the screen itself (the dialog only dims), under <body> through a portal, so no ancestor can re-anchor it.
+   --kb lifts it above an open keyboard and --seen caps it to what is visible (Drawer sets both from visualViewport). */
 .drawer-panel {
-  position: absolute; left: 0; right: 0; bottom: 0; max-width: 40rem; margin: 0 auto; height: min(72vh, 36rem); height: min(72dvh, 36rem);
+  position: fixed; left: 0; right: 0; bottom: var(--kb, 0px); max-width: 40rem; margin: 0 auto; height: min(72vh, 36rem); height: min(72dvh, 36rem); max-height: calc(var(--seen, 100vh) - 1rem);
   display: flex; flex-direction: column; background: var(--sheet); border-radius: 1rem 1rem 0 0; outline: none;
-  padding-bottom: env(safe-area-inset-bottom); transform: translate3d(0, 100%, 0); will-change: transform;
+  padding-bottom: max(env(safe-area-inset-bottom), 0.25rem); transform: translate3d(0, 100%, 0); will-change: transform;
   transition: transform 440ms cubic-bezier(0.32, 0.72, 0, 1);
 }
 .drawer.shown .drawer-panel { transform: translate3d(0, 0, 0); }
 .drawer-panel.dragging { transition: none; }
+.drawer-panel:focus, .drawer-panel:focus-visible { outline: none; } /* the panel takes focus only to hold it; no ring along its edge */
+/* Docked (the message bar's panel on a phone): where the keyboard would be, no scrim, the conversation readable above it. */
+.drawer.dock, .drawer.dock.shown { inset: auto 0 0 0; z-index: 40; height: 0; background: transparent; overflow: visible; pointer-events: none; }
+.drawer.dock .drawer-panel { height: var(--dock-h, 55vh); max-width: none; pointer-events: auto; }
+html.dock-open body { padding-bottom: var(--dock-h, 55vh); }
+/* While typing with the keyboard up, the page's foot gains the keyboard's height, so the bar can always sit above it. */
+html.kb-open body { padding-bottom: calc(var(--kb-pad, 0px) + 2.5rem); }
+/* The emoji button turns into a keyboard while its panel is docked. */
+.msg-emoji .kb { display: none; }
+@media (max-width: 899px), (hover: none) {
+  .msg-emoji.open .smile { display: none; }
+  .msg-emoji.open .kb { display: block; }
+}
 .drawer-grab { flex: none; height: 1.375rem; display: grid; place-items: center; touch-action: none; cursor: grab; }
 .drawer-grab span { width: 2.25rem; height: 0.3125rem; border-radius: 999px; background: rgba(244, 241, 234, 0.28); }
 @media (min-width: 900px) and (hover: hover) {
