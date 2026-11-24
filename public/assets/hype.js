@@ -27,6 +27,9 @@ window.HYPE = (() => {
     V("clip-stage.mp4", "clip-stage-1.jpg", "center 72%"), V("clip-hands.mp4", "clip-hands-1.jpg", "center 72%"),
     V("clip-silver.mp4", "clip-silver-1.jpg", "center 42%"), V("clip-boat.mp4", "clip-boat-1.jpg", "center 92%", false),
     V("clip-silver2.mp4", "clip-silver2-1.jpg", "center 42%"), V("clip-boat2.mp4", "clip-boat2-1.jpg", "center 92%", false),
+    // Added 23 Nov 2026: the bull ride, the beach party, the roller skaters, the sunset from the hut, the bar.
+    V("clip-bull.mp4", "", "center 55%"), V("clip-sand.mp4", "", "center 45%"), V("clip-skate.mp4", "", "center 60%"),
+    V("clip-dusk.mp4", "", "center 45%"), V("clip-bar.mp4", "", "center 45%"),
   ];
   const reel = V("reel2.mp4", "", "center 68%");   // every clip, cut together
   // The friend on the drip. It shows the whole photo so the drip line and the taped arm are always in view.
