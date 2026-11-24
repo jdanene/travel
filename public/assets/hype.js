@@ -275,31 +275,105 @@ window.HYPE = (() => {
     addEventListener("pageshow", () => { document.body.classList.remove("leaving"); a.classList.remove("pressed"); });
     document.body.appendChild(a);
     document.body.classList.add("has-enter");
-    warm(to);
+    warm(id, to);
   }
 
-  // Readies the trip app while the splash plays, so the tap finds it cached: the app's
-  // script and stylesheet (their built names read from /app/index.html) as prefetches, which
-  // the browser keeps for the next page even under "no-cache", and early connections to Firebase.
-  // Inputs: to — the trip's path. Output: nothing; every failure is silent, and the tap then loads the app as before.
-  // Examples (checked in Chrome on the emulator): the splash with ?t=<id> → rel=prefetch for
-  //   /app/assets/index-<hash>.js and its CSS, three preconnects.
-  function warm(to) {
-    const link = (rel, href, extra) => {
+  // Readies the whole trip while the splash plays, so the tap shows the finished trip page with nothing left to load
+  // (owner, 24 Nov 2026: "literally everything on the app loads at the splash screen"). At once: early connections to
+  // Firebase, the fonts and the map's hosts. Once the first clips play (1.5 s, then the next idle moment), at most
+  // four loads at a time, most needed first: the prewarm script (web/src/prewarm.ts) with the Firebase chunk, which
+  // signs in and saves the whole trip for the app's first paint; the trip's own page; the app's entry script as a
+  // modulepreload (fetched and compiled); the stylesheets; the fonts; the cover collage page and the cliff photo; the map's
+  // style, sprite, tile index and label fonts; every other script (the map chunk with MapLibre); the files the app
+  // fetches by address (the emoji picker's data); the collage's stills. The scripts and
+  // stylesheets are named in /app/preload.json, which the build writes.
+  // On Save-Data or a 2g connection it only prefetches the app's script and stylesheet, as before.
+  // Inputs: id — the trip id; href — the trip's address (never with the organizer key, which stays off the page). Output: nothing; every failure is silent, and the tap
+  //   then loads whatever is missing.
+  // Examples (checked in Chrome on the emulator, Fast 4G): the splash with ?t=<id> → after the tap the trip page
+  //   draws from the snapshot with no request but the live listener's; Save-Data → two prefetches, three preconnects.
+  function warm(id, href) {
+    const link = (rel, url, extra) => new Promise(done => {
       const l = document.createElement("link");
-      l.rel = rel; l.href = href;
+      l.rel = rel; l.href = url;
       Object.assign(l, extra || {});
+      l.onload = l.onerror = () => done();
       document.head.appendChild(l);
-    };
-    ["https://travel-ca8f9-default-rtdb.firebaseio.com", "https://identitytoolkit.googleapis.com", "https://www.googleapis.com"]
+    });
+    ["https://travel-ca8f9-default-rtdb.firebaseio.com", "https://identitytoolkit.googleapis.com", "https://www.googleapis.com",
+      "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://tiles.openfreemap.org"]
       .forEach(host => link("preconnect", host, { crossOrigin: "anonymous" }));
+    const net = navigator.connection || {};
+    if (net.saveData || /2g/.test(net.effectiveType || "")) return lean(link);
+    // At most four loads at a time, so the splash's own clips keep most of the line. A load found by another
+    // (a font file, the map's sprite) goes to the front.
+    const queue = [];
+    let running = 0;
+    const add = (task, soon) => { if (soon) queue.unshift(task); else queue.push(task); pump(); };
+    const pump = () => {
+      while (running < 4 && queue.length) {
+        running++;
+        Promise.resolve().then(queue.shift()).catch(() => {}).then(() => { running--; pump(); });
+      }
+    };
+    const json = url => fetch(url).then(r => (r.ok ? r.json() : Promise.reject(r.status)));
+    const image = url => new Promise(done => { const i = new Image(); i.onload = i.onerror = done; i.src = url; });
+    const start = () => json("/app/preload.json").then(list => {
+      // First the data: the prewarm script and the Firebase chunk it shares with the app, side by side.
+      (list.shared || []).forEach(s => add(() => link("modulepreload", s)));
+      add(() => { window.travelPrewarmTrip = id; return import(list.prewarm); });
+      // The trip's own page: a speculative prefetch, which the tap's navigation uses without asking the server again.
+      add(() => {
+        if (!(HTMLScriptElement.supports && HTMLScriptElement.supports("speculationrules"))) return link("prefetch", href, { as: "document" });
+        const rules = document.createElement("script");
+        rules.type = "speculationrules";
+        rules.textContent = JSON.stringify({ prefetch: [{ source: "list", urls: [href] }] });
+        document.head.appendChild(rules);
+      });
+      add(() => link("modulepreload", list.entry));
+      list.styles.forEach(s => add(() => link("prefetch", s, { as: "style" })));
+      // The fonts' stylesheet: read once for the Latin files it names (the app's words are all Latin), then fetched
+      // as a stylesheet, not applied here. That order matters: Google's answer varies with the kind of request and
+      // the browser keeps one copy, the last one, which must be the stylesheet the app asks for.
+      list.fonts.forEach(css => add(() => fetch(css).then(r => r.text()).then(text => {
+        (text.match(/\/\* latin \*\/[^}]*}/g) || []).forEach(face => {
+          const url = (face.match(/url\((https:[^)]+\.woff2)\)/) || [])[1];
+          if (url) add(() => link("prefetch", url, { as: "font", crossOrigin: "anonymous" }), true);
+        });
+      }).finally(() => add(() => link("preload", css, { as: "style" }), true))));
+      // The cover: the collage page in the trip's head and the cliff photo under it.
+      add(() => link("prefetch", "/hype/cover/", { as: "document" }));
+      add(() => image(B + "bali-cliff.jpg"));
+      // The map's style, its sprite, its tile index and its label fonts; the app builds the hidden map from them right after its first paint.
+      add(() => json("https://tiles.openfreemap.org/styles/positron").then(style => {
+        const sprite = typeof style.sprite === "string" ? style.sprite : null;
+        const scale = devicePixelRatio > 1 ? "@2x" : "";
+        if (sprite) [".json", ".png"].forEach(end => add(() => fetch(sprite + scale + end), true));
+        Object.values(style.sources || {}).forEach(source => { if (source.url) add(() => fetch(source.url), true); });
+        // The first range of each label font (Latin), as the map asks for it.
+        const fonts = new Set((style.layers || []).map(l => l.layout && l.layout["text-font"]).filter(Array.isArray).map(f => f.join(",")));
+        if (style.glyphs) fonts.forEach(f => add(() => fetch(style.glyphs.replace("{fontstack}", encodeURIComponent(f)).replace("{range}", "0-255")), true));
+      }));
+      // The rest of the app's scripts: the map chunk with MapLibre, and any other chunk the build made.
+      list.scripts.filter(s => s !== list.entry && s !== list.prewarm).forEach(s => add(() => link("modulepreload", s)));
+      // Files the app fetches by address, such as the emoji picker's data in Activity.
+      (list.data || []).forEach(url => add(() => fetch(url)));
+      // Last, every still the collage draws from; the splash has shown most of them already.
+      photos.filter(p => p.kind === "img").map(p => p.src).filter((url, k, all) => all.indexOf(url) === k).forEach(url => add(() => image(url)));
+    }).catch(() => lean(link));
+    // Wait until the splash's first clips play, then for a quiet moment.
+    setTimeout(() => (window.requestIdleCallback ? requestIdleCallback(start, { timeout: 1000 }) : start()), 1500);
+  }
+
+  // Today's lighter warm-up, for Save-Data, 2g, or a missing /app/preload.json: the app's script and stylesheet
+  // (their built names read from /app/index.html) as prefetches, which the browser keeps for the next page.
+  function lean(link) {
     fetch("/app/index.html").then(r => (r.ok ? r.text() : "")).then(html => {
       const doc = new DOMParser().parseFromString(html, "text/html");
       doc.querySelectorAll("script[type=module][src]").forEach(s => link("prefetch", s.getAttribute("src"), { as: "script", crossOrigin: "anonymous" }));
       doc.querySelectorAll("link[rel=stylesheet][href^='/app/']").forEach(c => link("prefetch", c.getAttribute("href"), { as: "style", crossOrigin: "anonymous" }));
     }).catch(() => {});
   }
-
 
   // Small link back to the list of options.
   function back(n) {

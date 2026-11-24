@@ -15,7 +15,7 @@ const count = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
 /**
  * Says whether the dates are settled: a confirmed date option that still
- * exists. The Stay button exists only after this (owner, 23 Nov 2026).
+ * exists.
  *
  * Inputs: trip — the whole trip, or any half of it.
  * Output: true when dates/confirmed names an option that is in dates/options.
@@ -47,9 +47,7 @@ export function allSet(trip: Trip): boolean {
 /**
  * The module buttons of the home page, in their fixed order (Dates, Stay,
  * Events, Links, Map), each with the state line on its right (plan
- * section 3). The order means nothing; the only rule is that Stay exists
- * once the dates are confirmed, and goes again if the confirm is undone,
- * with its data kept (case 42).
+ * section 3). The order means nothing; every module shows from the start.
  *
  * Inputs: trip — the whole trip; a missing branch counts as empty (case 9).
  * memberId — this device's member, or null before a reply.
@@ -59,14 +57,15 @@ export function allSet(trip: Trip): boolean {
  * counting what the list shows by default: the events tagged Big nights
  * and every friend's event (all events when nothing carries Big nights).
  * Examples (each is a test in modules.test.ts):
- *   dates open                → Dates "Tap to answer", Events, Links, Map; no Stay
+ *   dates open                → Dates "Tap to answer", Stay, Events, Links, Map
  *   dates confirmed           → Dates "13–23 Feb · confirmed", Stay "1 option · heart one", …
  *   everything confirmed      → Stay "Cliffside villa · confirmed", and allSet() is true
  *   one event listed          → Events "1 event · I'm in"
  */
 export function modules(trip: Trip, memberId: MemberId | null): Module[] {
   const shown: Module[] = [{ id: "dates", lines: [datesLine(trip, memberId)] }];
-  if (datesSettled(trip)) shown.push({ id: "stay", lines: stayLines(trip) });
+  // Stay shows from the start, like every other module (owner, 24 Nov 2026).
+  shown.push({ id: "stay", lines: stayLines(trip) });
   shown.push({ id: "parties", lines: [eventsLine(trip)] });
   const links = Object.keys(trip.links?.items ?? {}).length;
   shown.push({ id: "links", lines: [links ? count(links, "link") : "TikToks & Instas"] });
