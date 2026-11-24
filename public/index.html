@@ -1,1 +1,10 @@
-<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>TRAVEL</title><script>location.replace(Math.random() < .5 ? "/hype/1/" : "/hype/13/")</script><noscript><meta http-equiv="refresh" content="0; url=/hype/1/"></noscript><a href="/hype/1/">TRAVEL</a>
+<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><title>TRAVEL</title>
+<script>
+  // The address stays "/": the page loads hype option 1 or 13 in place, so every refresh is a new random pick.
+  const pick = Math.random() < .5 ? "/hype/1/" : "/hype/13/";
+  fetch(pick, { cache: "no-cache" })
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+    .then(html => { document.open(); document.write(html); document.close(); })
+    .catch(() => location.replace(pick));   // if loading in place fails, open the page itself
+</script>
+<noscript><meta http-equiv="refresh" content="0; url=/hype/1/"></noscript>
