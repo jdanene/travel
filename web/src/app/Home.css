@@ -10,3 +10,4 @@
 .fb-head .close { color: #8e8e93; }
 .fb-body { padding: 0 18px 16px; }
 .all-set { margin-top: 6px; font-weight: 700; color: var(--acc); }
+.map-wait { height: 360px; border-radius: 16px; background: #e8eef0; }

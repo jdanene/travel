@@ -307,7 +307,7 @@ One builder runs the tickets in order on the branch `trip-app`. Trip 8 and Trip 
 | [ ] | Trip 9 · Stay | 2 | 7, 8 |
 | [ ] | Trip 10 · Party data and the last-year rule | 2 | 3 |
 | [ ] | Trip 11 · Parties | 2 | 6, 10 |
-| [ ] | Trip 12 · Map | 3 | 9, 11 |
+| [x] | Trip 12 · Map | 3 | 9, 11 |
 | [x] | Trip 13 · Module states and the All set line | 1 | 4 |
 | [ ] | Trip 14 · Splash button into the app | 3 | 4 |
 | [ ] | Trip 15 · Ship | 3 | 12, 13, 14, 16 |

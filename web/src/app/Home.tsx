@@ -18,8 +18,11 @@ interface HomeProps {
   trip: Trip;
   memberId: string | null;
   organizer: string | undefined;
-  /** What a module shows when open; each module's ticket fills it in. */
-  content?: Partial<Record<ModuleId, ReactNode>>;
+  /**
+   * What each module shows when open; each module's ticket fills it in.
+   * It gets openModule, so one module can open another (the map card opens Parties).
+   */
+  content?: (openModule: (id: ModuleId) => void) => Partial<Record<ModuleId, ReactNode>>;
 }
 
 /**
@@ -36,10 +39,11 @@ interface HomeProps {
  *   dates open      → Dates "Tap to answer", Parties, Links, Map; no Stay
  *   tap "Dates"     → Dates opens with the accent ring; tap again, or another module, and it closes
  */
-export function Home({ trip, memberId, organizer, content = {} }: HomeProps) {
+export function Home({ trip, memberId, organizer, content }: HomeProps) {
   const [open, setOpen] = useState<ModuleId | null>(null);
   const shown = modules(trip, memberId);
   const openId = shown.some((module) => module.id === open) ? open : null;
+  const filled = content?.(setOpen) ?? {};
 
   return (
     <>
@@ -77,7 +81,7 @@ export function Home({ trip, memberId, organizer, content = {} }: HomeProps) {
               </button>
               {isOpen && (
                 <div className="fb-body" id={`fb-body-${id}`}>
-                  {content[id]}
+                  {filled[id]}
                 </div>
               )}
             </section>
