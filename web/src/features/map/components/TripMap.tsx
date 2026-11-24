@@ -16,6 +16,21 @@ const GLYPH = {
   stay: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z"/></svg>',
 };
 
+/** The longest pin label, in characters; a longer name is cut with "…", and the open card shows it whole. */
+const LABEL_MAX = 22;
+
+/**
+ * A pin's label: the name cut to 22 characters with an ellipsis, so a long
+ * name stays inside the map.
+ *
+ * Inputs: name — the pin's name.
+ * Output: the name, or its first 21 characters (trailing space dropped) and "…".
+ * Examples (checked on the map):
+ *   "Savaya"                                          → "Savaya"
+ *   "Little Country Houses – Finley's Fort + hot tub" → "Little Country Houses…"
+ */
+const pinLabel = (name: string) => (name.length <= LABEL_MAX ? name : `${name.slice(0, LABEL_MAX - 1).trimEnd()}…`);
+
 const escapeHtml = (text: string) =>
   text.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]!);
 
@@ -100,7 +115,7 @@ export function TripMap({ destinations, pins, onOpen }: TripMapProps) {
       const first = byId.get(found.ids[0])!;
       const many = found.ids.length > 1;
       const on = found.ids.includes(selected ?? "");
-      const label = many ? `${found.ids.length} pins` : escapeHtml(first.name);
+      const label = many ? `${found.ids.length} pins` : escapeHtml(pinLabel(first.name));
       const kind = many ? "venue" : first.kind;
       const html = `<span class="mk${kind === "stay" ? " stay" : ""}${on ? " on" : ""}${many ? " many" : ""}"><i>${GLYPH[kind]}</i>${label}</span>`;
       L.marker([first.lat, first.lng], { icon: L.divIcon({ className: "", html, iconSize: [0, 0] }), title: many ? found.ids.map((id) => byId.get(id)!.name).join(", ") : first.name, keyboard: true })
