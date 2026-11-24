@@ -154,7 +154,8 @@ function jsonString(raw) {
   }
 }
 
-function decodeEntities(text) {
+// Shared with events.mjs, which reads names out of the same kind of page.
+export function decodeEntities(text) {
   const named = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
   return text.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (whole, code) => {
     if (code[0] !== "#") return named[code.toLowerCase()] ?? whole;
@@ -163,7 +164,7 @@ function decodeEntities(text) {
   });
 }
 
-function clean(text) {
+export function clean(text) {
   const t = text?.replace(/\s+/g, " ").trim();
   return t || undefined;
 }

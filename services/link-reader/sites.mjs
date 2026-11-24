@@ -1,6 +1,7 @@
-// The sites the link reader may open. This file is the only place that knows
-// them: the handler asks it about the pasted address and about every redirect.
-// It does not fetch anything.
+// The sites a pasted link may point to. This file is the only place that
+// knows them: the handler asks it about the pasted address and about every
+// redirect. The events check opens its own list (event-sources.mjs). It
+// does not fetch anything.
 
 const SITES = [
   // Airbnb on airbnb.com, a country domain (airbnb.co.uk, airbnb.com.au,
@@ -33,13 +34,28 @@ const SITES = [
  *   siteOf("https://www.booking.com@evil.example/") → null   (host is evil.example)
  */
 export function siteOf(address) {
+  const url = plainHttps(address);
+  const found = url && SITES.find((s) => s.host.test(url.hostname));
+  return found ? { site: found.site, kind: found.kind } : null;
+}
+
+/**
+ * Reads an address the reader might open: https, on the default port, with
+ * no user name. The pasted-link sites above and the event sources
+ * (event-sources.mjs) both pass through it.
+ *
+ * Inputs: address, any text.
+ * Output: the parsed URL, or null for anything else.
+ * Examples (checked through siteOf's tests):
+ *   plainHttps("https://www.savaya.com/event-calendar") → URL { hostname: "www.savaya.com", … }
+ *   plainHttps("https://www.booking.com@evil.example/") → null
+ */
+export function plainHttps(address) {
   let url;
   try {
     url = new URL(address);
   } catch {
     return null;
   }
-  if (url.protocol !== "https:" || url.username || url.password || url.port) return null;
-  const found = SITES.find((s) => s.host.test(url.hostname));
-  return found ? { site: found.site, kind: found.kind } : null;
+  return url.protocol === "https:" && !url.username && !url.password && !url.port ? url : null;
 }
