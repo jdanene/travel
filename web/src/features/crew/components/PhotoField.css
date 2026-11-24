@@ -4,12 +4,12 @@
 .photo-preview { width: 3rem; height: 3rem; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 2px #fff, 0 0 0 3px var(--line); }
 .photo-pick { position: relative; cursor: pointer; }
 .photo-pick.busy { opacity: .6; cursor: progress; }
-.photo-pick:focus-within { outline: 2px solid var(--acc); outline-offset: 2px; }
+.photo-pick:focus-within { outline: 2px solid var(--edge); outline-offset: 2px; }
 /* The real file input stays in the page for keyboards and screen readers, under its visible label. */
 .photo-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 0; }
 .photo-error { margin: 0.5rem 0 0 0.25rem; }
 .photo-sheet { display: grid; justify-items: center; gap: 1rem; padding: 0.75rem 0 0.25rem; }
-.photo-sheet .photo-big { width: 8rem; height: 8rem; border-radius: 50%; display: grid; place-items: center; overflow: hidden; background: var(--acc); color: #fff; font-size: 2.25rem; font-weight: 700; }
+.photo-sheet .photo-big { width: 8rem; height: 8rem; border-radius: 50%; display: grid; place-items: center; overflow: hidden; background: var(--acc); color: var(--on-acc); font-size: 2.25rem; font-weight: 700; }
 .photo-sheet .photo-big img { width: 100%; height: 100%; object-fit: cover; }
 .photo-sheet .photo-field { margin: 0; }
 .photo-sheet .photo-row { justify-content: center; }

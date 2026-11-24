@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { Face, tone } from "../../../components/Avatars";
 import { FlyerHead } from "../../../components/FlyerHead";
 import { Notice } from "../../../components/Notice";
 import type { WriteResult } from "../../../lib/db";
 import type { Reply, TripInfo } from "../../../types/trip";
-import { join, saveReply, type CrewView, type Person } from "../api/crew";
+import { comeBack, join, saveReply, type CrewView, type Person } from "../api/crew";
 import { savePhoto } from "../api/photo";
 import { burst } from "./confetti";
 import { JoinSheet } from "./JoinSheet";
@@ -28,6 +29,12 @@ interface InvitationProps {
  * rules refuse it, with the reason above the buttons (case 8). When an
  * "I'm in" saves, a short burst of confetti falls over the page.
  *
+ * A friend who replied on another device sees, under the replied line,
+ * "Been here before? Tap your name:" and every member's face and name; a
+ * tap points this device at that member, keeps their reply, and opens the
+ * trip. The join sheet's "Already replied" list does the same with a new
+ * reply.
+ *
  * Inputs: the trip, this device, the trip's info (absent on a half-written
  * trip) and the crew view.
  * Output: the invitation. With no note, the quotation is left out (Trip 5,
@@ -38,6 +45,7 @@ interface InvitationProps {
  *   the example trip, 6 of 8 replied → "Bali · Koh Phangan", the note, "I'm in / Maybe / Can't", "6 of 8 replied · no app, no account"
  *   "I'm in" saves                   → confetti for 1.5 s, then the home page; "Maybe" → no confetti
  *   1650 px                          → the photo on the left; the trip, the note and the buttons on the right
+ *   Dom replied on a phone; the laptop taps "Dom" under "Been here before?" → the home page as Dom, Dom's reply kept
  */
 export function Invitation({ tripId, uid, info, crew }: InvitationProps) {
   const [joining, setJoining] = useState<Reply | null>(null);
@@ -62,6 +70,10 @@ export function Invitation({ tripId, uid, info, crew }: InvitationProps) {
       report(reply)(result);
       if (result.ok && photo) void savePhoto(tripId, person.id, photo).then((saved) => setFailure(saved.ok ? null : saved));
     });
+  };
+
+  const onComeBack = (memberId: string) => {
+    void comeBack(tripId, uid, memberId).then((result) => setFailure(result.ok ? null : result));
   };
 
   return (
@@ -89,6 +101,21 @@ export function Invitation({ tripId, uid, info, crew }: InvitationProps) {
           ))}
         </div>
         <p className="cap">{repliedLine(crew.expected, crew.byId)} · no app, no account</p>
+        {!crew.memberId && crew.members.length > 0 && (
+          <div className="invite-back">
+            <p id="invite-back-label">Been here before? Tap your name:</p>
+            <ul aria-labelledby="invite-back-label">
+              {crew.members.map((member) => (
+                <li key={member.id}>
+                  <button type="button" onClick={() => onComeBack(member.id)}>
+                    <Face person={member} className={tone(member.id)} />
+                    <span>{member.name}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
       <JoinSheet reply={joining} crew={crew} onClose={() => setJoining(null)} onPick={onPick} />
     </div>

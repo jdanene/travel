@@ -38,7 +38,7 @@ export function Face({ person, className }: { person: Person; className: string 
 /** The mock's four avatar tones; a friend keeps one tone everywhere. */
 const TONES = ["", "b", "c", "d"];
 
-function tone(id: string): string {
+export function tone(id: string): string {
   let sum = 0;
   for (const char of id) sum = (sum + char.charCodeAt(0)) % TONES.length;
   return TONES[sum];

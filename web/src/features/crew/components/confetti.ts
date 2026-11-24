@@ -2,7 +2,7 @@
 const LENGTH = 1500;
 
 /** The pieces' colours: the app's accent, the hype yellow and pink, and the page's ink. */
-const COLOURS = ["#0d6b5e", "#ffd23d", "#ff3cac", "#1c1c1e", "#7fd1c1"];
+const COLOURS = ["#ffd23d", "#ff3cac", "#000000", "#ffd23d", "#ff3cac"];
 
 /**
  * One short burst of confetti when a friend's "I'm in" saves. It draws on

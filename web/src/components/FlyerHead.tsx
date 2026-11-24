@@ -49,7 +49,7 @@ interface FlyerHeadProps {
  * picture in the left column.
  * Examples (checked at 375 px and at 1650 px on the emulator):
  *   organizer JD, a friend RB → the collage, the "JD" circle with RB's small circle beside it,
- *                               "Bali · Koh Phangan", "(Indonesia, Thailand) · Feb–Mar 2027"
+ *                               "Bali · Koh Phangan", "(Indonesia, Thailand) · Feb 2027" (the anchor's month)
  *   JD on JD's own phone      → the "JD" circle is the button; no second circle
  *   reduced motion            → the cliff photo, no collage
  */
@@ -75,12 +75,12 @@ export function FlyerHead({ organizer, you, onYou, info, photo, replied, childre
           </span>
         )}
         {info && (
-          <h1 className="flyer-title" aria-label={`${info.name.split(" · ").join(" and ")}, ${COUNTRIES.spoken}, ${seasonLine(info.season.from, info.season.to, "long")}`}>
+          <h1 className="flyer-title" aria-label={`${info.name.split(" · ").join(" and ")}, ${COUNTRIES.spoken}, ${seasonLine(info.anchor.date, info.anchor.date, "long")}`}>
             <span className="flyer-trip">{info.name}</span>
             <span className="flyer-where">
               <span>{COUNTRIES.shown}</span>
               <span className="flyer-dot" aria-hidden="true"> · </span>
-              <span>{seasonLine(info.season.from, info.season.to, "short")}</span>
+              <span>{seasonLine(info.anchor.date, info.anchor.date, "short")}</span>
             </span>
           </h1>
         )}

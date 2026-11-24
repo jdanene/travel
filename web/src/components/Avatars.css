@@ -2,7 +2,7 @@
 .avs { display: inline-flex; align-items: center; flex: none; }
 .av { width: 1.625rem; height: 1.625rem; border-radius: 50%; display: inline-grid; place-items: center; font-size: 0.6562rem; font-weight: 700; color: var(--ink2); background: #e9e6df; border: 2px solid #fff; }
 .avs .av + .av { margin-left: -0.25rem; }
-.av.b { background: #dfe7ea; } .av.c { background: #ece3dd; } .av.d { background: #e4e9df; } .av.you { background: var(--acc); color: #fff; }
+.av.b { background: #dfe7ea; } .av.c { background: #ece3dd; } .av.d { background: #e4e9df; } .av.you { background: var(--acc); color: var(--on-acc); }
 /* A friend's photo fills the circle; the white ring stays, so overlapping faces stay apart. */
 .av.has-photo { overflow: hidden; background: #e9e6df; }
 .av img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }

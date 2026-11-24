@@ -83,6 +83,19 @@ export async function join(tripId: string, uid: string, person: Person, existing
 }
 
 /**
+ * Points this device at a member who replied on another device, and
+ * nothing else: the member's reply, time and photo stay as they are. It is
+ * the join sheet's pick without a new reply (case 4).
+ * Inputs: the trip, this device, the member.
+ * Output: the write result.
+ * Examples (checked on the emulator with two browser profiles):
+ *   a second browser taps "Dom" → crew/devices/<uid> = "dom"; the trip opens as Dom, Dom's "I'm in" kept
+ */
+export function comeBack(tripId: string, uid: string, memberId: MemberId): Promise<WriteResult> {
+  return write({ [paths.device(tripId, uid)]: memberId });
+}
+
+/**
  * Saves a member's reply; a new reply replaces the old one (case 7). It
  * writes the three fields one by one, so the member's photo stays.
  * Inputs: the trip, the member, the member's name, the reply.
