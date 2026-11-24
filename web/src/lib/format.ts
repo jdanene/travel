@@ -46,3 +46,26 @@ export function weekdayDate(day: string): string {
   const { month, date, weekday } = parts(day);
   return `${WEEKDAYS[weekday]} ${date} ${MONTHS[month]}`;
 }
+
+/**
+ * A day without its weekday, as design 12 writes the anchor.
+ * Inputs: day — "YYYY-MM-DD".
+ * Output: "22 Feb".
+ * Examples: dayMonth("2027-02-22") → "22 Feb"
+ */
+export function dayMonth(day: string): string {
+  const { month, date } = parts(day);
+  return `${date} ${MONTHS[month]}`;
+}
+
+/**
+ * A range of days, short, as on the confirmed Dates button.
+ * Inputs: from and to — "YYYY-MM-DD", from first.
+ * Output: "13–23 Feb" inside one month; "19 Feb – 1 Mar" across two.
+ * Examples: dayRange("2027-02-13", "2027-02-23") → "13–23 Feb"
+ */
+export function dayRange(from: string, to: string): string {
+  const a = parts(from);
+  const b = parts(to);
+  return a.month === b.month ? `${a.date}–${b.date} ${MONTHS[b.month]}` : `${dayMonth(from)} – ${dayMonth(to)}`;
+}

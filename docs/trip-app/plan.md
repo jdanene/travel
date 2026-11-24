@@ -300,7 +300,7 @@ One builder runs the tickets in order on the branch `trip-app`. Trip 8 and Trip 
 | [x] | Trip 2 · Database, sign-in and rules | 1 | 1 |
 | [x] | Trip 3 · Create a trip | 1 | 2 |
 | [x] | Trip 4 · Load the trip and pick the stage | 1 | 3 |
-| [ ] | Trip 5 · Invitation and who replied | 1 | 4 |
+| [x] | Trip 5 · Invitation and who replied | 1 | 4 |
 | [ ] | Trip 6 · Reply with a name | 1 | 5 |
 | [ ] | Trip 7 · Dates | 2 | 6 |
 | [ ] | Trip 8 · Link reader | 2 | 1 |
@@ -308,7 +308,7 @@ One builder runs the tickets in order on the branch `trip-app`. Trip 8 and Trip 
 | [ ] | Trip 10 · Party data and the last-year rule | 2 | 3 |
 | [ ] | Trip 11 · Parties | 2 | 6, 10 |
 | [ ] | Trip 12 · Map | 3 | 9, 11 |
-| [ ] | Trip 13 · Module states and the All set line | 1 | 4 |
+| [x] | Trip 13 · Module states and the All set line | 1 | 4 |
 | [ ] | Trip 14 · Splash button into the app | 3 | 4 |
 | [ ] | Trip 15 · Ship | 3 | 12, 13, 14, 16 |
 | [ ] | Trip 16 · Links | 3 | 6, 8 |

@@ -1,6 +1,6 @@
 # app: the shell
 
-The route, the page frame, the stage rule, the pinned lines, the "next" rows and the All set summary. These join several features, so they live here and nowhere else.
+The route, the page frame, the home page of design 12, and the modules rule with its state lines and the "All set" line. These join several features, so they live here and nowhere else.
 
 - Belongs here: anything that reads two or more features, and the design tokens (`tokens.css`).
 - Does not belong here: a rule of one feature. Put it in that feature's `lib/`.

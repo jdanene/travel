@@ -104,6 +104,21 @@ export interface Parties {
   in?: Record<string, Record<MemberId, true>>;
 }
 
+export interface LinkItem {
+  url: string;
+  site: "instagram" | "tiktok" | "other";
+  destination: DestinationId;
+  note?: string;
+  title?: string;
+  thumbUrl?: string;
+  addedBy: MemberId;
+  at: number;
+}
+
+export interface Links {
+  items?: Record<string, LinkItem>;
+}
+
 export interface Area {
   name: string;
   destination: DestinationId;
@@ -135,5 +150,6 @@ export interface Trip {
   dates?: Dates;
   stay?: Stay;
   parties?: Parties;
+  links?: Links;
   places?: Places;
 }

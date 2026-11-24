@@ -1,7 +1,0 @@
-/*
- * Dates, Stay and Parties are equal open sections (exception 10): one
- * heading size (the mock's .h1 of screen 2) and one gap between sections.
- */
-.section { margin-top: 28px; }
-.section:first-of-type { margin-top: 12px; }
-.section-title { margin-bottom: 4px; }
