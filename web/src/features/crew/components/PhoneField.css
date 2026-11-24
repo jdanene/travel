@@ -1,0 +1,20 @@
+/* "Phone for trip texts (optional)": the sheet's .field box, with "+1 ▾" in front of the number and the STOP line under it. */
+.phone-field { margin: 0.25rem 0 0.875rem; }
+.phone-box { margin-bottom: 0.375rem; }
+.phone-row { display: flex; align-items: center; gap: 0.625rem; margin-top: 0.125rem; }
+.phone-country { position: relative; flex: none; display: inline-flex; align-items: center; gap: 0.25rem; padding-right: 0.625rem; border-right: 1px solid #dcdcdf; font-size: 1rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.phone-country .i { transform: rotate(90deg); color: var(--mut); }
+/* The real select covers the visible "+1", so a tap anywhere on it opens the list; 16px stops iOS from zooming. */
+.phone-country select { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: pointer; font-size: 1rem; }
+.phone-box:has(select:focus-visible) { box-shadow: inset 0 0 0 2px var(--edge); }
+.phone-row input { flex: 1; min-width: 0; font-variant-numeric: tabular-nums; }
+.phone-note { margin: 0 0 0 0.25rem; }
+.phone-field .field-error { margin: 0 0 0.25rem 0.25rem; }
+/* The phone part of "You": full width under the centred photo. */
+.photo-sheet .you-phone { justify-self: stretch; display: grid; gap: 0.625rem; margin-top: 0.5rem; padding-top: 1.125rem; border-top: 1px solid var(--line); }
+.you-phone-line small { display: block; font-size: 0.7812rem; color: var(--mut); font-weight: 600; }
+.you-phone-line b { font-size: 1.0625rem; font-variant-numeric: tabular-nums; }
+.you-phone .phone-field { margin: 0 0 0.75rem; }
+.you-phone .notice { margin: 0; }
+.pill.pill-main { background: var(--acc); color: var(--on-acc); }
+.pill:disabled { opacity: .5; cursor: default; }

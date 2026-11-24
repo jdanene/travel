@@ -175,3 +175,16 @@ export function watchUid(onUid: (uid: string) => void): () => void {
     if (user) onUid(user.uid);
   });
 }
+
+/**
+ * This device's Firebase ID token, for a call to a service that checks who
+ * is calling (services/travel-texts). The SDK refreshes it when it is close
+ * to expiring.
+ *
+ * Inputs: none.
+ * Output: the token, or null when the device is not signed in.
+ * Examples (checked against the deployed sender): an organizer's device → "eyJhbGciOiJSUzI1NiIs…"
+ */
+export async function idToken(): Promise<string | null> {
+  return auth.currentUser ? auth.currentUser.getIdToken() : null;
+}

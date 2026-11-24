@@ -72,3 +72,12 @@ export const link = (tripId: string, linkId: string) => `trips/${tripId}/links/i
 
 /** One place a friend put on the map. */
 export const customPlace = (tripId: string, placeId: string) => `trips/${tripId}/places/custom/${placeId}`;
+
+/** One member's phone for trip texts: { e164, at }. Its own device writes it; an organizer reads them all. */
+export const phone = (tripId: string, memberId: string) => `tripSecrets/${tripId}/phones/${memberId}`;
+
+/** Every member's phone, for the organizer's "Text the crew" count. */
+export const phones = (tripId: string) => `tripSecrets/${tripId}/phones`;
+
+/** The trip's text count for one day (yyyy-mm-dd, UTC); the sender (services/travel-texts) adds one per text sent. */
+export const textLog = (tripId: string, day: string) => `tripSecrets/${tripId}/textLog/${day}`;

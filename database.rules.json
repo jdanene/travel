@@ -219,6 +219,33 @@
             ".write": "auth != null && auth.uid === $uid",
             ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_-]{16,64}$/) && root.child('tripSecrets').child($tripId).child('organizerKey').child(newData.val()).exists()"
           }
+        },
+        "phones": {
+          /* A member's phone for trip texts. An organizer reads them all (for "Text the crew"; the sender
+             services/travel-texts reads them with the organizer's token). A member's own device reads,
+             writes and removes its own entry. Nobody else reads one: friends never see each other's numbers. */
+          ".read": "auth != null && root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true",
+          "$memberId": {
+            ".read": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() === $memberId",
+            ".write": "auth != null && root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() === $memberId",
+            ".validate": "newData.hasChildren(['e164', 'at'])",
+            "e164": { ".validate": "newData.isString() && newData.val().matches(/^\\+[1-9][0-9]{7,14}$/)" },
+            "at": { ".validate": "newData.isNumber()" },
+            "$other": { ".validate": false }
+          }
+        },
+        "textLog": {
+          /* The trip's texts per day (UTC), which the sender counts against its cap of 5 a day. It writes with
+             the organizer's token, so an organizer may write; the count only goes up by one and stops at 5,
+             and nobody can remove a day, so a page cannot reset the cap. */
+          ".read": "auth != null && root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true",
+          "$day": {
+            ".write": "auth != null && newData.exists() && root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true",
+            ".validate": "$day.matches(/^20[0-9]{2}-[01][0-9]-[0-3][0-9]$/) && newData.hasChildren(['texts', 'at']) && ((!data.exists() && newData.child('texts').val() === 1) || (data.exists() && newData.child('texts').val() === data.child('texts').val() + 1)) && newData.child('texts').val() <= 5",
+            "texts": { ".validate": "newData.isNumber()" },
+            "at": { ".validate": "newData.isNumber()" },
+            "$other": { ".validate": false }
+          }
         }
       }
     }
