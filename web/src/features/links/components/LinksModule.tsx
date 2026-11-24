@@ -47,7 +47,7 @@ export function LinksModule({ tripId, links, destinations, names, memberId, isOr
   return (
     <>
       <p className="sub" style={{ marginBottom: 8 }}>
-        TikToks and Instas about Bali and Thailand.
+        TikToks and Instas about the place you’re traveling to.
       </p>
       {failure && !failure.ok && <Notice>{failure.reason === "refused" ? "This was not saved." : "No connection"}</Notice>}
       {Object.keys(items).length === 0 && <p className="sub">No links yet.</p>}

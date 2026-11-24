@@ -3,7 +3,7 @@ import { Avatars } from "../../../components/Avatars";
 import { Icon } from "../../../components/Icon";
 import { Notice } from "../../../components/Notice";
 import type { WriteResult } from "../../../lib/db";
-import { dayRange, weekdayRange } from "../../../lib/format";
+import { dayRange, weekdayRange, stayLength } from "../../../lib/format";
 import { initials } from "../../../lib/initials";
 import type { Answer, Dates, Member, MemberId, TripInfo } from "../../../types/trip";
 import { dateOptionId } from "../../../lib/ids";
@@ -104,7 +104,7 @@ export function DatesModule({ tripId, info, dates, expected, members, memberId, 
                 <h3>{weekdayRange(option.from, option.to)}</h3>
                 <p className="meta">
                   {/* No-break spaces keep each count with its word when the line wraps. */}
-                  {`${counts.nights}\u00a0nights · ${counts.yes}\u00a0yes · ${counts.maybe}\u00a0maybe · ${counts.no}\u00a0no`}
+                  {`${stayLength(counts.nights)} · ${counts.yes}\u00a0yes · ${counts.maybe}\u00a0maybe · ${counts.no}\u00a0no`}
                   {adder && ` · added\u00a0by\u00a0${adder}`}
                 </p>
               </div>

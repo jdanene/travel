@@ -139,3 +139,20 @@ export function seasonLine(from: string, to: string, style: "short" | "long"): s
   if (a.month === b.month) return `${names[a.month]} ${a.year}`;
   return `${names[a.month]}${join}${names[b.month]} ${b.year}`;
 }
+
+/**
+ * A stay's length in words: the nights, and the weeks to the nearest half.
+ * Friends think in weeks when they ask for time off.
+ * Inputs: n — whole nights, 0 or more.
+ * Output: "10 nights · 1.5 weeks"; the weeks part is left out under 4 nights.
+ * Examples:
+ *   stayLength(10) → "10 nights · 1.5 weeks"
+ *   stayLength(7)  → "7 nights · 1 week"
+ *   stayLength(3)  → "3 nights"
+ */
+export function stayLength(n: number): string {
+  const nightsPart = `${n}\u00a0${n === 1 ? "night" : "nights"}`;
+  if (n < 4) return nightsPart;
+  const weeks = Math.round((n / 7) * 2) / 2;
+  return `${nightsPart} · ${weeks}\u00a0${weeks === 1 ? "week" : "weeks"}`;
+}
