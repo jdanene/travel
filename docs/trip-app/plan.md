@@ -311,7 +311,7 @@ One builder runs the tickets in order on the branch `trip-app`. Trip 8 and Trip 
 | [x] | Trip 13 · Module states and the All set line | 1 | 4 |
 | [ ] | Trip 14 · Splash button into the app | 3 | 4 |
 | [ ] | Trip 15 · Ship | 3 | 12, 13, 14, 16 |
-| [ ] | Trip 16 · Links | 3 | 6, 8 |
+| [x] | Trip 16 · Links | 3 | 6, 8 |
 
 Milestones: 1 · A friend can join (Trip 0 to 6, and Trip 13). 2 · The three goals (Trip 7 to 11). 3 · Map, Links, splash, ship (Trip 12, 14, 15, 16).
 

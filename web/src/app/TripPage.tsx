@@ -3,6 +3,7 @@ import { crewOf, useOrganizerLink, type CrewView } from "../features/crew/api/cr
 import { Invitation } from "../features/crew/components/Invitation";
 import { DatesModule } from "../features/dates/components/DatesModule";
 import { StayModule } from "../features/stay/components/StayModule";
+import { LinksModule } from "../features/links/components/LinksModule";
 import type { MapDestination } from "../features/map/components/TripMap";
 import { PartiesBlock } from "../features/parties/components/PartiesBlock";
 import { pins } from "./lib/pins";
@@ -95,7 +96,7 @@ function moduleSlots(tripId: string, trip: Trip, crew: CrewView, openModule: (id
       <StayModule
         tripId={tripId}
         stay={trip.stay}
-        destinations={Object.entries(trip.info?.destinations ?? {}).map(([id, place]) => ({ id, name: place.name }))}
+        destinations={destinationList(trip)}
         areas={Object.values(trip.places?.areas ?? {})}
         names={Object.fromEntries(crew.members.map((member) => [member.id, member.name]))}
         memberId={crew.memberId}
@@ -103,7 +104,16 @@ function moduleSlots(tripId: string, trip: Trip, crew: CrewView, openModule: (id
       />
     ), // Trip 9: the Stay module.
     parties: <PartiesBlock tripId={tripId} trip={trip} memberId={crew.memberId} isOrganizer={crew.isOrganizer} onSeeMap={() => openModule("map")} />, // Trip 11: the Parties module.
-    links: null, // Trip 16: the Links module.
+    links: crew.memberId && (
+      <LinksModule
+        tripId={tripId}
+        links={trip.links}
+        destinations={destinationList(trip)}
+        names={Object.fromEntries(crew.members.map((member) => [member.id, member.name]))}
+        memberId={crew.memberId}
+        isOrganizer={crew.isOrganizer}
+      />
+    ), // Trip 16: the Links module.
     map: (
       <Suspense fallback={<div className="map-wait" aria-busy="true" />}>
         <TripMap
@@ -128,4 +138,9 @@ function mapDestinations(trip: Trip): MapDestination[] {
   return Object.entries(trip.info?.destinations ?? {})
     .filter(([, place]) => place.lat !== undefined && place.lng !== undefined)
     .map(([id, place]) => ({ id, name: place.name, lat: place.lat!, lng: place.lng! }));
+}
+
+/** The trip's destinations as { id, name }, in the trip file's order. */
+function destinationList(trip: Trip): Array<{ id: string; name: string }> {
+  return Object.entries(trip.info?.destinations ?? {}).map(([id, place]) => ({ id, name: place.name }));
 }

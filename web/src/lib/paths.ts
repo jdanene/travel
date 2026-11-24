@@ -50,3 +50,6 @@ export const showIn = (tripId: string, showId: string) => `trips/${tripId}/parti
 /** A member's "in" mark on one show. */
 export const inMark = (tripId: string, showId: string, memberId: string) =>
   `trips/${tripId}/parties/in/${showId}/${memberId}`;
+
+/** One saved link. */
+export const link = (tripId: string, linkId: string) => `trips/${tripId}/links/items/${linkId}`;
