@@ -3,6 +3,7 @@ import { crewOf, useOrganizerLink, type CrewView } from "../features/crew/api/cr
 import { Invitation } from "../features/crew/components/Invitation";
 import { DatesModule } from "../features/dates/components/DatesModule";
 import type { MapDestination } from "../features/map/components/TripMap";
+import { PartiesBlock } from "../features/parties/components/PartiesBlock";
 import { pins } from "./lib/pins";
 import { useTrip } from "../lib/useTrip";
 import type { Trip } from "../types/trip";
@@ -90,7 +91,7 @@ function moduleSlots(tripId: string, trip: Trip, crew: CrewView, openModule: (id
       />
     ), // Trip 7: the Dates module.
     stay: null, // Trip 9: the Stay module.
-    parties: null, // Trip 11: the Parties module.
+    parties: <PartiesBlock tripId={tripId} trip={trip} memberId={crew.memberId} isOrganizer={crew.isOrganizer} onSeeMap={() => openModule("map")} />, // Trip 11: the Parties module.
     links: null, // Trip 16: the Links module.
     map: (
       <Suspense fallback={<div className="map-wait" aria-busy="true" />}>
