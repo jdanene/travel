@@ -83,15 +83,14 @@ export function lastYearLines(shows: Array<ShowKey & { weekly?: string }>, lastY
  *
  * Inputs: destination and venue — the venue as the list names it (case and
  * spaces do not count); lastYear — last year's shows; max — how many to
- * keep, three unless given.
+ * keep; all of them unless given (the owner wants the whole season shown).
  * Output: { date, artist } with last year's dates, newest first; empty when
  * last year has nothing at that venue.
  * Examples (each is a test in lastYear.test.ts):
  *   Atlas Beach Club: Swae Lee 1 Jan, Afrojack 31 Jan, Rudimental 2 Jan  → Afrojack, Rudimental, Swae Lee
  *   a venue last year never listed                                     → []
- *   Savaya with five acts                                              → its three newest
  */
-export function lastSeason(destination: DestinationId, venue: string, lastYear: ShowKey[], max = 3): Array<{ date: string; artist: string }> {
+export function lastSeason(destination: DestinationId, venue: string, lastYear: ShowKey[], max = Infinity): Array<{ date: string; artist: string }> {
   const key = venueKey(destination, venue);
   return lastYear
     .filter((show) => venueKey(show.destination, show.venue) === key)
