@@ -76,18 +76,20 @@ export function StayModule({ tripId, stay, destinations, areas, names, memberId,
               </p>
             )}
             {ids.length === 0 && <p className="sub">No places yet.</p>}
-            {ids.map((id) => (
-              <StayCard
-                key={id}
-                id={id}
-                option={options[id]}
-                addedBy={names[options[id].addedBy] ?? options[id].addedBy}
-                hearted={Object.keys(hearts[id] ?? {}).map((who) => ({ id: who, name: names[who] ?? who }))}
-                you={memberId}
-                onHeart={(on) => void setHeart(tripId, id, memberId, on).then(report)}
-                onConfirm={isOrganizer && !chosen ? () => void confirmStay(tripId, place.id, id, memberId).then(report) : undefined}
-              />
-            ))}
+            <div className="stay-grid">
+              {ids.map((id) => (
+                <StayCard
+                  key={id}
+                  id={id}
+                  option={options[id]}
+                  addedBy={names[options[id].addedBy] ?? options[id].addedBy}
+                  hearted={Object.keys(hearts[id] ?? {}).map((who) => ({ id: who, name: names[who] ?? who }))}
+                  you={memberId}
+                  onHeart={(on) => void setHeart(tripId, id, memberId, on).then(report)}
+                  onConfirm={isOrganizer && !chosen ? () => void confirmStay(tripId, place.id, id, memberId).then(report) : undefined}
+                />
+              ))}
+            </div>
             {isOrganizer && chosen && (
               <button type="button" className="btn sm sec" onClick={() => void undoStay(tripId, place.id).then(report)}>
                 Change the stay

@@ -1,19 +1,23 @@
-/* Inside the Stay module: the rows of 20/4 (.srw, .heart), and the sheet of 20/5. */
-.srw { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
-.srw .photo { width: 72px; height: 72px; border-radius: 14px; flex: none; object-fit: cover; background: #ddd; }
-.srw .body { flex: 1; min-width: 0; }
-.srw b { font-size: 15px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.25; }
-.srw .l { font-size: 13px; font-weight: 700; margin-top: 2px; }
+/* Inside the Stay module: the stay cards (20/4 as Airbnb-style cards, exception 10), and the sheet of 20/5. */
+.stay-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); gap: 1.5rem 1.25rem; margin-top: 0.75rem; }
+.srw { display: flex; flex-direction: column; min-width: 0; scroll-margin: 1rem; }
+.srw-photo { position: relative; }
+.srw .photo { display: block; width: 100%; aspect-ratio: 4 / 3; border-radius: 1rem; object-fit: cover; background: #ddd; }
+.srw b { font-size: 1rem; margin-top: 0.625rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; text-wrap: pretty; }
+.srw .facts { margin-top: 0.125rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.srw .l { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; min-height: 1.75rem; margin-top: 0.375rem; font-size: 0.8125rem; font-weight: 700; }
 .srw .l a { text-decoration: underline; text-underline-offset: 3px; color: var(--ink2); }
-.srw .btn.sm { margin-top: 8px; width: auto; display: inline-flex; }
-.heart { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 10px; border-radius: 18px; background: #fff; box-shadow: inset 0 0 0 1px #dcdcdf; font-size: 14px; font-weight: 700; flex: none; }
-.heart svg { width: 18px; height: 18px; }
-.heart[aria-pressed="true"] { background: var(--acc-soft); color: var(--acc); box-shadow: none; }
+.srw .btn.sm { width: 100%; margin-top: 0.75rem; white-space: nowrap; }
+/* The heart sits over the photo's top right corner, white so it reads on any photo. */
+.heart { position: absolute; top: 0.625rem; right: 0.625rem; display: inline-flex; align-items: center; gap: 0.375rem; height: 2.25rem; padding: 0 0.75rem; border-radius: 1.125rem; background: rgba(255,255,255,.94); box-shadow: 0 2px 8px rgba(0,0,0,.14); font-size: 0.875rem; font-weight: 700; color: var(--ink); transition: background-color .15s ease-out, color .15s ease-out; }
+.heart svg.i { width: 1.125rem; height: 1.125rem; }
+.heart[aria-pressed="true"] { background: var(--acc); color: #fff; }
 .heart[aria-pressed="true"] svg { fill: currentColor; }
-.stay-done { display: flex; align-items: center; gap: 6px; font-size: 14.5px; color: var(--acc); margin: 4px 0 6px; }
+@media (prefers-reduced-motion: reduce) { .heart { transition: none; } }
+.stay-done { display: flex; align-items: center; gap: 0.375rem; font-size: 0.9062rem; color: var(--acc); margin: 0.25rem 0 0.375rem; }
 .stay-done b { color: var(--ink); }
-.stay-add { margin-top: 12px; }
-.place-preview { height: 140px; width: 100%; border-radius: 20px; object-fit: cover; background: #ddd; display: block; }
+.stay-add { margin-top: 1.5rem; }
+.place-preview { height: 8.75rem; width: 100%; border-radius: 1.25rem; object-fit: cover; background: #ddd; display: block; }
 .place-preview[aria-busy="true"] { background: var(--soft); }
-.field select { display: block; width: 100%; border: 0; outline: 0; background: none; font-size: 16px; padding: 0; color: inherit; }
-.add-facts { display: grid; grid-template-columns: 1fr 110px; gap: 8px; }
+.field select { display: block; width: 100%; border: 0; outline: 0; background: none; font-size: 1rem; padding: 0; color: inherit; }
+.add-facts { display: grid; grid-template-columns: 1fr 6.875rem; gap: 0.5rem; }

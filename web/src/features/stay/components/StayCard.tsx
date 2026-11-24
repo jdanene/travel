@@ -18,16 +18,22 @@ interface StayCardProps {
 }
 
 /**
- * One stay option (a row of 20/4): the photo, the name, its facts, "Open
- * listing", who hearted it, and the heart with its count.
+ * One stay option, as an Airbnb-style card (exception 10): a large photo
+ * with rounded corners and the heart with its count over the photo's
+ * corner; then the name, one line of facts, "Open listing" with who hearted
+ * it, and, for the organizer, a full-width "Confirm this stay". The words
+ * and the order are those of 20/4 and 20/6.
  *
  * Inputs: the option, who added it, who hearted it, this member, what a
  * heart tap does, and the organizer's confirm.
- * Output: the row, with the id "stay-<id>" so the page can bring it into
- * view (case 17). A long name takes two lines, then is cut (case 11). A
- * photo that fails to load gives way to the area's scenery (case 18).
- * Examples (checked at 390 px against 20/4):
- *   → photo, "Cliffside villa with pool", "Uluwatu · sleeps 10 · added by KA", "Open listing", KA TO MB, heart 3
+ * Output: the card, with the id "stay-<id>" so the page can bring it into
+ * view (case 17). A long name takes two lines, then is cut (case 11); the
+ * facts take one line. A photo that fails to load gives way to the area's
+ * scenery (case 18). The module lays cards one per row on a phone and two
+ * per row in the desktop column.
+ * Examples (checked on the emulator at 375 px and 1650 px):
+ *   → photo with heart 3 on its corner, "Cliffside villa with pool", "Uluwatu · sleeps 10 · added by KA", "Open listing" and KA TO MB
+ *   organizer, stay open → the same, with "Confirm this stay" across the card on one line
  */
 export function StayCard({ id, option, addedBy, hearted, you, onHeart, onConfirm }: StayCardProps) {
   const on = hearted.some((person) => person.id === you);
@@ -35,38 +41,34 @@ export function StayCard({ id, option, addedBy, hearted, you, onHeart, onConfirm
   const facts = [option.area, option.sleeps ? `sleeps ${option.sleeps}` : null, `added by ${initials(addedBy)}`].filter(Boolean).join(" · ");
   return (
     <article className="srw" id={`stay-${id}`}>
-      <img
-        className="photo"
-        src={option.photoUrl ?? fallback}
-        alt=""
-        loading="lazy"
-        onError={(event) => {
-          if (event.currentTarget.src !== fallback) event.currentTarget.src = fallback;
-        }}
-      />
-      <div className="body">
-        <b>{option.name}</b>
-        <p className="cap">{facts}</p>
-        <p className="l">
-          <a href={option.url} target="_blank" rel="noopener noreferrer">
-            Open listing
-          </a>
-        </p>
-        {hearted.length > 0 && (
-          <div style={{ marginTop: 4 }}>
-            <Avatars people={hearted} you={you} />
-          </div>
-        )}
-        {onConfirm && (
-          <button type="button" className="btn sm" onClick={onConfirm}>
-            Confirm this stay
-          </button>
-        )}
+      <div className="srw-photo">
+        <img
+          className="photo"
+          src={option.photoUrl ?? fallback}
+          alt=""
+          loading="lazy"
+          onError={(event) => {
+            if (event.currentTarget.src !== fallback) event.currentTarget.src = fallback;
+          }}
+        />
+        <button type="button" className="heart" aria-pressed={on} aria-label={`Heart ${option.name}, ${hearted.length}`} onClick={() => onHeart(!on)}>
+          <Icon name="heart" />
+          {hearted.length}
+        </button>
       </div>
-      <button type="button" className="heart" aria-pressed={on} aria-label={`Heart ${option.name}, ${hearted.length}`} onClick={() => onHeart(!on)}>
-        <Icon name="heart" />
-        {hearted.length}
-      </button>
+      <b>{option.name}</b>
+      <p className="cap facts">{facts}</p>
+      <div className="l">
+        <a href={option.url} target="_blank" rel="noopener noreferrer">
+          Open listing
+        </a>
+        <Avatars people={hearted} you={you} />
+      </div>
+      {onConfirm && (
+        <button type="button" className="btn sm" onClick={onConfirm}>
+          Confirm this stay
+        </button>
+      )}
     </article>
   );
 }
