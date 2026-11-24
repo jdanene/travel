@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { Trip } from "../types/trip";
 import { database, signIn, watchUid } from "./firebase";
 import * as paths from "./paths";
+import { readSnapshot } from "./snapshot";
 
 /** How long the page waits, with no connection, before it says so. */
 const OFFLINE_AFTER_MS = 5000;
@@ -32,14 +33,21 @@ export type TripState =
  *               reason is the SDK's code, and retry() starts again (case 3).
  *   ready     — the trip, this device's uid, and whether the connection is
  *               gone right now. The trip updates live under the page, and
- *               the uid follows a Google sign-in that changes it.
+ *               the uid follows a Google sign-in that changes it. With a
+ *               fresh snapshot from the splash (lib/snapshot.ts) the first
+ *               state is already ready, drawn from it, and the listener
+ *               takes over when its first answer comes.
  * Examples (checked on the emulator, not in a test):
  *   a good link                → ready
+ *   the splash's button        → ready on the first paint, from the snapshot
  *   /trip/wrong                → notFound
  *   emulator stopped, 5 s      → offline
  */
 export function useTrip(tripId: string): TripState {
-  const [state, setState] = useState<TripState>({ status: "loading" });
+  const [state, setState] = useState<TripState>(() => {
+    const snapshot = TRIP_ID.test(tripId) ? readSnapshot(tripId) : null;
+    return snapshot ? { status: "ready", trip: snapshot.trip, uid: snapshot.uid, offline: false } : { status: "loading" };
+  });
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
@@ -47,7 +55,8 @@ export function useTrip(tripId: string): TripState {
       setState({ status: "notFound" });
       return;
     }
-    setState({ status: "loading" });
+    // A page drawn from the splash's snapshot stays drawn while the listener connects.
+    setState((current) => (current.status === "ready" ? current : { status: "loading" }));
 
     let stopped = false;
     let connected = false;

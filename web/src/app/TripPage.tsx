@@ -148,7 +148,8 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
  * Output: the content for each module; null until its ticket fills it.
  * Examples (checked on screen): the Dates slot holds the Dates module.
  */
-/** The map's code is its own file, so it stays out of the first page load; warmUpMap fetches it right after. */
+/** The map's code is its own file, so MapLibre is not run before the first paint. It is never fetched late: the splash
+ * preloads it with every other chunk (public/assets/hype.js, /app/preload.json), and useWarmMap runs it right after. */
 const loadMap = () => import("../features/map/components/TripMap");
 const TripMap = lazy(() => loadMap().then((module) => ({ default: module.TripMap })));
 

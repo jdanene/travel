@@ -51,7 +51,7 @@ export function FlyerHead({ organizer, info, photo, children }: FlyerHeadProps) 
   return (
     <header className="flyer">
       <div className={`flyer-hero${photo ? ` ${photo}` : ""}`} style={{ backgroundImage: `url(${COVER})` }} role="img" aria-label={still ? "Cliffs over the sea in Uluwatu, Bali" : "Photos from the trip"}>
-        {!still && <iframe className="flyer-collage" src={COLLAGE} title="Trip photos" aria-hidden="true" tabIndex={-1} loading="lazy" scrolling="no" />}
+        {!still && <iframe className="flyer-collage" src={COLLAGE} title="Trip photos" aria-hidden="true" tabIndex={-1} scrolling="no" />}
       </div>
       <div className={`flyer-name${organizer ? "" : " bare"}`}>
         {organizer && (
