@@ -19,3 +19,4 @@ design/cover/photos/
 local/
 public/app/
 node_modules/
+*-debug.log

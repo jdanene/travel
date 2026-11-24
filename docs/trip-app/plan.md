@@ -92,7 +92,8 @@ Paths live in one file, `web/src/lib/paths.ts`. The rules file repeats them; the
 
 ```
 /trips/{tripId}
-  info        { name, note, noteBy, season: {from, to}, destinations: {bali:{name}, kohPhangan:{name}} }
+  info        { name, summary?, note?, noteBy?, season: {from, to}, anchor: {name, date},
+                destinations: {bali:{name, lat, lng}, kohPhangan:{name, lat, lng}} }
   crew
     expected  { {memberId}: name }                    from the trip file
     members   { {memberId}: { name, reply, at } }
@@ -112,13 +113,13 @@ Paths live in one file, `web/src/lib/paths.ts`. The rules file repeats them; the
     in        { {showId}: { {memberId}: true } }
   places
     areas     { {areaId}: { name, destination, lat, lng } }
-    venues    { {venueId}: { name, areaId, lat, lng, line? } }
+    venues    { {venueId}: { name, destination, areaId?, lat, lng, line?, onMap? } }
 /tripSecrets/{tripId}            no phone can read this branch
   organizerKey { {key}: true }
   claims       { {uid}: key }    a device writes its own claim; the rules test the key exists
 ```
 
-Ids that must not repeat are made from their content: `stayId` from the listing address without its query string; a seeded `showId` from destination, venue, date and artist. Two friends who add the same thing write the same record.
+Ids that must not repeat are made from their content: a member, area or venue id from its name (`web/src/lib/ids.ts`, which the scripts import too); a date option id from its two days; `stayId` from the listing address without its query string; a seeded `showId` from destination, venue, date and artist. Two friends who add the same thing write the same record.
 
 Rules, in words:
 
@@ -275,7 +276,7 @@ One builder runs the tickets in order on the branch `trip-app`. Trip 8 and Trip 
 | [x] | Trip 0 · Handoff on the branch | 1 | nothing |
 | [x] | Trip 1 · App shell and ship script | 1 | 0 |
 | [x] | Trip 2 · Database, sign-in and rules | 1 | 1 |
-| [ ] | Trip 3 · Create a trip | 1 | 2 |
+| [x] | Trip 3 · Create a trip | 1 | 2 |
 | [ ] | Trip 4 · Load the trip and pick the stage | 1 | 3 |
 | [ ] | Trip 5 · Invitation and who replied | 1 | 4 |
 | [ ] | Trip 6 · Reply with a name | 1 | 5 |

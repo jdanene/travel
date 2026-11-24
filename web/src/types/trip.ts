@@ -20,10 +20,15 @@ export type Answer = "yes" | "maybe" | "no";
 
 export interface TripInfo {
   name: string;
+  /** The line under the name on the invitation (screen 1). */
+  summary?: string;
   note?: string;
   noteBy?: string;
   season: { from: string; to: string };
-  destinations: Record<DestinationId, { name: string }>;
+  /** The day every date option includes: the Full Moon Party, 2027-02-22. */
+  anchor: { name: string; date: string };
+  /** Each destination with its centre on the map. */
+  destinations: Record<DestinationId, { name: string; lat?: number; lng?: number }>;
 }
 
 export interface Member {
@@ -108,10 +113,15 @@ export interface Area {
 
 export interface Venue {
   name: string;
-  areaId: string;
+  destination: DestinationId;
+  /** Absent when the lineup names no area (Lost Jungle). */
+  areaId?: string;
   lat: number;
   lng: number;
+  /** A short line under the name on the map card: "Club on the cliffs". */
   line?: string;
+  /** false when the venue is not on OpenStreetMap and sits at its area's centre. */
+  onMap?: boolean;
 }
 
 export interface Places {
