@@ -30,3 +30,19 @@ export function idFromName(name: string): string {
   const first = name.trim().codePointAt(0) ?? 0;
   return `u-${first.toString(16)}`;
 }
+
+/**
+ * Makes the database key of an admin email, the same way the rules build
+ * it from a signed-in account's email, so the key create-trip writes is the
+ * key the rules look up. A key may not hold ".", so each "." becomes ",",
+ * a character no email address uses.
+ *
+ * Inputs: email — an email address, as typed in local/trip.json or as
+ * Google reports it.
+ * Output: the email in lower case, with every "." replaced by ",".
+ * Example:
+ *   emailKey("Jo.Owner@Mail.Example.com") → "jo,owner@mail,example,com"
+ */
+export function emailKey(email: string): string {
+  return email.toLowerCase().replaceAll(".", ",");
+}

@@ -1,5 +1,6 @@
 /**
- * The nine rules tests of Trip 2, against the database emulator. Run with
+ * The rules tests of Trip 2 (1 to 9) and of the admin list (10 to 12,
+ * plan D15), against the database emulator. Run with
  * `npm run test:rules` in web/; it starts the emulator, runs this file and
  * stops it. Each test names the rule it proves, in the words of plan
  * section 4.
@@ -8,6 +9,7 @@ import { readFileSync } from "node:fs";
 import { assertFails, assertSucceeds, initializeTestEnvironment, type RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { get, ref, remove, set, update } from "firebase/database";
 import { afterAll, beforeAll, describe, it } from "vitest";
+import { emailKey } from "../src/lib/ids";
 import * as paths from "../src/lib/paths";
 
 const T = "t1";
@@ -15,6 +17,10 @@ const KEY = "Key0123456789abcdefXYZ";
 let env: RulesTestEnvironment;
 
 const db = (uid?: string) => (uid ? env.authenticatedContext(uid) : env.unauthenticatedContext()).database();
+const ADMIN = "Owner@Example.com";
+/** A device signed in with Google: its email, verified or not. */
+const google = (uid: string, email: string, verified: boolean) =>
+  env.authenticatedContext(uid, { email, email_verified: verified }).database();
 const show = (extra: object) => ({ destination: "bali", venue: "Savaya", date: "2027-02-13", artist: "Peggy Gou", verified: true, at: 1, ...extra });
 
 beforeAll(async () => {
@@ -31,7 +37,7 @@ beforeAll(async () => {
         stay: { options: { s1: { destination: "bali", url: "https://www.airbnb.com/rooms/1", name: "Villa", area: "Uluwatu", addedBy: "bob", at: 1 } } },
         parties: { shows: { seed1: show({ source: "seed" }), f1: show({ source: "friend", addedBy: "alice", artist: "Friend set" }) } },
       } },
-      tripSecrets: { [T]: { organizerKey: { [KEY]: true } } },
+      tripSecrets: { [T]: { organizerKey: { [KEY]: true }, admins: { [emailKey(ADMIN)]: true } } },
     }),
   );
 });
@@ -96,4 +102,13 @@ describe("database rules", () => {
     await assertSucceeds(update(ref(db("uid-a"), "/"), { [paths.show(T, "f1")]: null, [paths.showIn(T, "f1")]: null }));
     await assertSucceeds(remove(ref(db("uid-o"), paths.show(T, "seed1"))));
   });
+
+  it("10. makes a device an organizer when its verified email is on the admin list", () =>
+    assertSucceeds(set(ref(google("uid-g1", "owner@example.com", true), paths.organizer(T, "uid-g1")), true)));
+
+  it("11. refuses the organizer mark to an admin email that is not verified", () =>
+    assertFails(set(ref(google("uid-g2", "owner@example.com", false), paths.organizer(T, "uid-g2")), true)));
+
+  it("12. refuses the organizer mark to a verified email that is not on the admin list", () =>
+    assertFails(set(ref(google("uid-g3", "friend@example.com", true), paths.organizer(T, "uid-g3")), true)));
 });

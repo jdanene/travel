@@ -6,6 +6,8 @@
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const isDay = (value) => typeof value === "string" && DAY.test(value) && !Number.isNaN(Date.parse(value));
+/** One address with one "@", a dot in the domain, and none of the characters a database key refuses. */
+const EMAIL = /^[^\s@#$[\]/]+@[^\s@#$[\]/]+\.[^\s@#$[\]/]+$/;
 const isText = (value, max) => typeof value === "string" && value.trim().length > 0 && value.length <= max;
 
 /**
@@ -14,7 +16,8 @@ const isText = (value, max) => typeof value === "string" && value.trim().length 
  *
  * Inputs: file — the parsed JSON of local/trip.json. Its shape is
  * data/trip.example.json. `crew` may be empty (plan, case 8); `summary`,
- * `note` and `noteBy` may be left out.
+ * `note`, `noteBy` and `admins` (the organizers' emails, D15) may be left
+ * out.
  * idFromName — the id rule of web/src/lib/ids.ts, passed in so that two
  * names that give one id ("Kai" and "KAI") count as equal.
  * Output: a list of problems, each naming the field; an empty list means
@@ -71,6 +74,13 @@ export function validateTripFile(file, idFromName) {
       const id = idFromName(name);
       if (seen.has(id)) problems.push(`crew has two equal names: "${seen.get(id)}" and "${name}"`);
       else seen.set(id, name);
+    });
+  }
+
+  if (file.admins !== undefined) {
+    if (!Array.isArray(file.admins)) problems.push("admins must be a list of emails; use [] for none");
+    else file.admins.forEach((email, i) => {
+      if (typeof email !== "string" || !EMAIL.test(email.trim()) || email.length > 200) problems.push(`admins[${i}] is not an email`);
     });
   }
 

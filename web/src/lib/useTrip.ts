@@ -1,7 +1,7 @@
 import { onValue, ref } from "firebase/database";
 import { useEffect, useState } from "react";
 import type { Trip } from "../types/trip";
-import { database, signIn } from "./firebase";
+import { database, signIn, watchUid } from "./firebase";
 import * as paths from "./paths";
 
 /** How long the page waits, with no connection, before it says so. */
@@ -31,7 +31,8 @@ export type TripState =
  *   failed    — sign-in failed three times, or the read was refused; the
  *               reason is the SDK's code, and retry() starts again (case 3).
  *   ready     — the trip, this device's uid, and whether the connection is
- *               gone right now. The trip updates live under the page.
+ *               gone right now. The trip updates live under the page, and
+ *               the uid follows a Google sign-in that changes it.
  * Examples (checked on the emulator, not in a test):
  *   a good link                → ready
  *   /trip/wrong                → notFound
@@ -76,13 +77,21 @@ export function useTrip(tripId: string): TripState {
         setState({ status: "failed", reason: result.reason, retry });
         return;
       }
+      // The organizer's second phone signs in as the first phone's uid (D15); the page follows.
+      let uid = result.uid;
+      stops.push(
+        watchUid((next) => {
+          uid = next;
+          setState((current) => (current.status === "ready" && current.uid !== next ? { ...current, uid: next } : current));
+        }),
+      );
       stops.push(
         onValue(
           ref(database, paths.trip(tripId)),
           (snapshot) =>
             setState(
               snapshot.exists()
-                ? { status: "ready", trip: snapshot.val() as Trip, uid: result.uid, offline: !connected }
+                ? { status: "ready", trip: snapshot.val() as Trip, uid, offline: !connected }
                 : { status: "notFound" },
             ),
           (error) => setState({ status: "failed", reason: (error as { code?: string }).code ?? error.message, retry }),

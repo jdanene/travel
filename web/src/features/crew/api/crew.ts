@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { write, type WriteResult } from "../../../lib/db";
+import { write, type WriteFailure, type WriteResult } from "../../../lib/db";
+import { signInWithGoogle, type GoogleFailure } from "../../../lib/firebase";
 import * as paths from "../../../lib/paths";
 import type { Member, MemberId, Reply, Trip } from "../../../types/trip";
 
@@ -169,4 +170,26 @@ export function useOrganizerLink(tripId: string, uid: string, crew: CrewView): "
   }, [ready, tripId, uid, key]);
 
   return invalid ? "invalid" : null;
+}
+
+export type OrganizerSignInResult = { ok: true } | { ok: false; reason: GoogleFailure | WriteFailure; code?: string };
+
+/**
+ * Makes this device an organizer by its Google account (plan, D15): it
+ * signs in with Google, then writes the device's organizer mark. The rules
+ * accept the mark only when the account's email is verified and on the
+ * trip's admin list (or when the device holds the organizer key, as with
+ * the organizer link). A refusal leaves the device signed in as a friend.
+ *
+ * Inputs: the trip. Call it from a click: it opens the Google window.
+ * Output: { ok: true } once the mark is saved; otherwise the reason, and
+ * for a sign-in failure the SDK's code. Nothing retries.
+ * Examples (checked on the emulator, with a fake Google credential in place of the window):
+ *   Owner@Example.com, owner@example.com on the list → { ok: true }
+ *   friend@example.com, not on the list             → { ok: false, reason: "refused" }
+ */
+export async function signInAsOrganizer(tripId: string): Promise<OrganizerSignInResult> {
+  const signedIn = await signInWithGoogle();
+  if (!signedIn.ok) return signedIn;
+  return write({ [paths.organizer(tripId, signedIn.uid)]: true });
 }
