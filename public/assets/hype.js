@@ -253,12 +253,56 @@ window.HYPE = (() => {
     const a = document.createElement("a"), to = "/trip/" + id;
     a.className = "enter"; a.href = to; a.textContent = "OPEN THE TRIP";
     // The key joins the link only for the tap itself, so the page never shows it, not even on hover.
-    a.addEventListener("click", () => {
+    a.addEventListener("click", event => {
       try { sessionStorage.setItem("travel.splash." + id, String(Date.now())); } catch (err) {}
-      if (key) { a.href = to + "?organizer=" + key; setTimeout(() => { a.href = to; }); }
+      const href = key ? to + "?organizer=" + key : to;
+      // A plain click rolls the smoke in, then opens the trip under it; reduced motion, or a click that
+      // opens a new tab, opens it at once.
+      const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (still || event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) {
+        if (key) { a.href = href; setTimeout(() => { a.href = to; }); }
+        return;
+      }
+      event.preventDefault();
+      a.classList.add("pressed");
+      smoke();
+      setTimeout(() => location.assign(href), 400);
     });
     document.body.appendChild(a);
     document.body.classList.add("has-enter");
+    warm(to);
+  }
+
+  // Readies the trip app while the splash plays, so the tap finds it cached: the smoke's stylesheet, the trip's
+  // page and the app's script and stylesheet (their built names read from /app/index.html) as prefetches, which
+  // the browser keeps for the next page even under "no-cache", and early connections to Firebase.
+  // Inputs: to — the trip's path. Output: nothing; every failure is silent, and the tap then loads the app as before.
+  // Examples (checked in Chrome on the emulator): the splash with ?t=<id> → rel=prefetch for /trip/<id>,
+  //   /app/assets/index-<hash>.js and its CSS, three preconnects.
+  function warm(to) {
+    const link = (rel, href, extra) => {
+      const l = document.createElement("link");
+      l.rel = rel; l.href = href;
+      Object.assign(l, extra || {});
+      document.head.appendChild(l);
+    };
+    link("stylesheet", "/assets/smoke.css");
+    link("prefetch", to);
+    ["https://travel-ca8f9-default-rtdb.firebaseio.com", "https://identitytoolkit.googleapis.com", "https://www.googleapis.com"]
+      .forEach(host => link("preconnect", host, { crossOrigin: "anonymous" }));
+    fetch("/app/index.html").then(r => (r.ok ? r.text() : "")).then(html => {
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      doc.querySelectorAll("script[type=module][src]").forEach(s => link("prefetch", s.getAttribute("src"), { as: "script", crossOrigin: "anonymous" }));
+      doc.querySelectorAll("link[rel=stylesheet][href^='/app/']").forEach(c => link("prefetch", c.getAttribute("href"), { as: "style", crossOrigin: "anonymous" }));
+    }).catch(() => {});
+  }
+
+  // Rolls the smoke over the splash (assets/smoke.css); the app's page opens covered by the same smoke.
+  function smoke() {
+    const s = document.createElement("div");
+    s.className = "smoke in"; s.setAttribute("aria-hidden", "true");
+    s.innerHTML = "<i></i><i></i><i></i><i></i><i></i><i></i>";
+    document.body.appendChild(s);
   }
 
   // Small link back to the list of options.

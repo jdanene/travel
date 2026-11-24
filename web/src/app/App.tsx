@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Notice } from "../components/Notice";
+import { clearSmoke } from "./lib/smoke";
 import { splashAddress } from "./lib/splash";
 import { TripPage } from "./TripPage";
 
@@ -37,6 +38,11 @@ export function App() {
     };
     window.addEventListener("pageshow", restored);
     return () => window.removeEventListener("pageshow", restored);
+  }, []);
+
+  // With no trip id there is nothing to wait for; the notice shows at once.
+  useEffect(() => {
+    if (!tripId) clearSmoke();
   }, []);
 
   if (splash) return null;

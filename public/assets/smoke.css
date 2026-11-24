@@ -1,0 +1,45 @@
+/*
+ * The smoke between the splash and the trip (owner, 24 Nov 2026: "make it appear from behind smoke").
+ * One overlay, the same on both pages: a dark veil and six large soft puffs, moved by transform and
+ * opacity only. The splash adds it with "in" on the tap (it rolls in, about 400 ms); the app's
+ * index.html starts with it "on" (covered), and the app adds "out" when the trip is ready (it drifts
+ * apart, about 700 ms). Under reduced motion there is no smoke at all.
+ */
+@view-transition { navigation: auto; }
+::view-transition-group(root) { animation-duration: 0s; }
+
+.smoke { position: fixed; inset: 0; z-index: 9999; pointer-events: none; overflow: hidden; contain: strict; }
+.smoke::before { content: ""; position: absolute; inset: 0; background: #141414; opacity: 0; }
+.smoke i { position: absolute; width: 120vmax; height: 120vmax; left: calc(var(--x) - 60vmax); top: calc(var(--y) - 60vmax);
+  border-radius: 50%; opacity: 0; will-change: transform, opacity;
+  background: radial-gradient(closest-side, rgba(236, 236, 236, .8), rgba(180, 180, 180, .42) 45%, rgba(120, 120, 120, 0));
+  transform: translate(var(--dx), var(--dy)) scale(.35); }
+.smoke i:nth-child(1) { --x: 0%;   --y: 0%;   --dx: -30vmax; --dy: -30vmax; }
+.smoke i:nth-child(2) { --x: 100%; --y: 0%;   --dx: 30vmax;  --dy: -30vmax; }
+.smoke i:nth-child(3) { --x: 0%;   --y: 100%; --dx: -30vmax; --dy: 30vmax; }
+.smoke i:nth-child(4) { --x: 100%; --y: 100%; --dx: 30vmax;  --dy: 30vmax; }
+.smoke i:nth-child(5) { --x: 50%;  --y: 30%;  --dx: 0vmax;   --dy: -40vmax; }
+.smoke i:nth-child(6) { --x: 50%;  --y: 75%;  --dx: 0vmax;   --dy: 40vmax; }
+
+/* Covered: the state both animations meet in, so the load under it shows nothing else. */
+.smoke.on::before { opacity: 1; }
+.smoke.on i { opacity: 1; transform: none; }
+
+.smoke.in::before { animation: smoke-veil-in 400ms ease-in forwards; }
+.smoke.in i { animation: smoke-in 400ms cubic-bezier(.2, .7, .3, 1) forwards; }
+.smoke.out::before { animation: smoke-veil-out 700ms ease-out forwards; }
+.smoke.out i { animation: smoke-out 700ms cubic-bezier(.3, 0, .6, 1) forwards; }
+.smoke i:nth-child(even) { animation-delay: 40ms; }
+
+@keyframes smoke-veil-in { to { opacity: 1; } }
+@keyframes smoke-in { to { opacity: 1; transform: none; } }
+@keyframes smoke-veil-out { from { opacity: 1; } 60% { opacity: .15; } to { opacity: 0; } }
+@keyframes smoke-out {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translate(calc(var(--dx) * 1.4), calc(var(--dy) * 1.4)) scale(1.5); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  .smoke { display: none; }
+}
