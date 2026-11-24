@@ -94,8 +94,8 @@ export function notAnswered(
  */
 export function checkDates(draft: { from: string; to: string }): Partial<Record<"from" | "to", string>> {
   const found: Partial<Record<"from" | "to", string>> = {};
-  if (!isDay(draft.from)) found.from = "Pick the first day.";
-  if (!isDay(draft.to)) found.to = "Pick the last day.";
+  if (!isDay(draft.from)) found.from = "Pick a day.";
+  if (!isDay(draft.to)) found.to = "Pick a day.";
   else if (!found.from && draft.to < draft.from) found.to = "Pick a day on or after From.";
   return found;
 }

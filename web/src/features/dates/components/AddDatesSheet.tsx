@@ -1,6 +1,6 @@
 import { nights, stayLength } from "../../../lib/format";
 import { useState, type FormEvent } from "react";
-import { Calendar, dayLabel } from "../../../components/Calendar";
+import { DateField } from "../../../components/Calendar";
 import { Sheet } from "../../../components/Sheet";
 import type { TripInfo } from "../../../types/trip";
 import { checkDates } from "../lib/dates";
@@ -16,20 +16,19 @@ interface AddDatesSheetProps {
 
 /**
  * "Add dates": a friend's own range, in the pattern of the Add a party
- * sheet (20/8). The shared calendar (components/Calendar.tsx), open in the
- * sheet: the first tap is From, the second is To, and the line under it
- * says both days and the nights. Any day of any month and year can be
- * picked (owner, 24 Nov 2026); it opens on the season's first month. "Add"
- * says what is missing when a day is not picked yet.
+ * sheet (20/8). Two fields, From and To; each opens the shared calendar
+ * (components/Calendar.tsx) under it and takes one day. Any day of any
+ * month and year can be picked (owner, 24 Nov 2026); From opens on the
+ * season's first month, To on From's month. "Add" says what is missing
+ * under the field that is wrong.
  *
  * Inputs: whether it is open, the season, and what closing and
  * adding do.
  * Output: the sheet. On a good Add it closes; the option shows for
  * everyone with this friend's Yes.
- * Examples (checked on the emulator at 375 px and 1650 px):
- *   tap 18, tap 24, Add        → the sheet closes; "Thu 18 – Wed 24 Feb" shows, sorted by its start, "added by you"
- *   tap 13, Add                → "Pick the last day." under the calendar
- *   Previous month, tap 28 Jan → January can be picked
+ * Examples (build and tests only, not yet checked on screen):
+ *   From 18 Feb, To 24 Feb, Add → the sheet closes; "Thu 18 – Wed 24 Feb" shows, "added by you"
+ *   From 13 Feb, To 10 Feb, Add → "Pick a day on or after From." under To
  */
 export function AddDatesSheet({ open, season, onClose, onAdd }: AddDatesSheetProps) {
   return (
@@ -41,39 +40,46 @@ export function AddDatesSheet({ open, season, onClose, onAdd }: AddDatesSheetPro
 
 function DatesForm({ season, onAdd }: Pick<AddDatesSheetProps, "season" | "onAdd">) {
   const [draft, setDraft] = useState({ from: "", to: "" });
-  const [error, setError] = useState<string | undefined>();
+  const [errors, setErrors] = useState<Partial<Record<"from" | "to", string>>>({});
   const [saving, setSaving] = useState(false);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     const found = checkDates(draft);
-    setError(found.from ?? found.to);
+    setErrors(found);
     if (found.from || found.to) return;
     setSaving(true);
     await onAdd(draft.from, draft.to);
     setSaving(false);
   };
 
-  const picked = draft.from ? `${dayLabel(draft.from)} – ${draft.to ? dayLabel(draft.to) : "pick the last day"}` : "Pick the first day, then the last.";
+  // Two fields, From and To, each with its own calendar (owner, 24 Nov 2026: one calendar for both "is not intuitive").
+  const field = (name: "from" | "to", label: string) => (
+    <DateField
+      label={label}
+      placeholder="Pick a day"
+      from={draft[name]}
+      startMonth={(name === "to" && draft.from ? draft.from : season?.from)?.slice(0, 7)}
+      onPick={(day) => {
+        setDraft((current) => ({ ...current, [name]: day }));
+        setErrors((current) => ({ ...current, [name]: undefined }));
+      }}
+      error={
+        errors[name] && (
+          <p className="field-error" role="alert">
+            {errors[name]}
+          </p>
+        )
+      }
+    />
+  );
   return (
     <form className="dates-sheet" onSubmit={(event) => void submit(event)} noValidate>
-      <Calendar
-        label="From and to"
-        from={draft.from}
-        to={draft.to}
-        startMonth={season?.from?.slice(0, 7)}
-        onPick={(from, to) => {
-          setDraft({ from, to });
-          setError(undefined);
-        }}
-      />
-      <p className="cap dates-picked" aria-live="polite">
-        {picked}
-        {draft.from && draft.to && <> · {stayLength(nights(draft.from, draft.to))}</>}
-      </p>
-      {error && (
-        <p className="field-error" role="alert">
-          {error}
+      {field("from", "From")}
+      {field("to", "To")}
+      {draft.from && draft.to && draft.to >= draft.from && (
+        <p className="cap dates-picked" aria-live="polite">
+          {stayLength(nights(draft.from, draft.to))}
         </p>
       )}
       <button type="submit" className="btn" style={{ marginTop: 6 }} disabled={saving} aria-busy={saving}>

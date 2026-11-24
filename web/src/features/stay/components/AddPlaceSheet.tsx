@@ -180,17 +180,8 @@ export function AddPlaceSheet({ open, destinations, cities, city: startCity, sta
           <input value={city} onChange={(event) => setCity(event.target.value)} maxLength={60} autoFocus autoComplete="off" />
         </label>
       )}
-      <DateField
-        label="Check-in and check-out (optional)"
-        placeholder="Pick the nights"
-        from={from}
-        to={to}
-        startMonth={startMonth}
-        onPick={(start, end) => {
-          setFrom(start);
-          setTo(end);
-        }}
-      />
+      <DateField label="Check-in (optional)" placeholder="Pick a day" from={from} startMonth={startMonth} onPick={(day) => setFrom(day)} />
+      <DateField label="Check-out (optional)" placeholder="Pick a day" from={to} startMonth={from ? from.slice(0, 7) : startMonth} onPick={(day) => setTo(day)} />
       {!datesOk && (
         <p className="field-error" role="alert">
           Check-out is after check-in.
