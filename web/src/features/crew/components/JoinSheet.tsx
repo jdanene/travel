@@ -24,7 +24,7 @@ interface JoinSheetProps {
  * is typed once. Names already taken sit under "Already replied", so a
  * friend on a second phone can pick their own name again (case 4).
  *
- * Under the name, "Add a photo (optional)" opens the phone's picker; the
+ * Under the name, "Add a photo" opens the phone's picker; the
  * photo joins with whichever name is picked or typed.
  *
  * Inputs: the reply tapped, the crew view, closing, and what a pick does.

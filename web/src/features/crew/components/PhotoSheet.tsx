@@ -27,7 +27,7 @@ interface PhotoSheetProps {
  * connection the change waits and lands later, and the sheet says "No
  * connection" if the SDK gives up.
  * Examples (checked on the emulator at 375 px and 1650 px):
- *   RB with no photo → "RB" in a large circle and "Add a photo (optional)"
+ *   RB with no photo → "RB" in a large circle and "Add a photo"
  *   pick a photo     → the circle shows it; RB's circles in Dates and Parties change too
  *   "Remove photo"   → back to "RB"
  */
