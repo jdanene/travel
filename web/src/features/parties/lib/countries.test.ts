@@ -6,12 +6,13 @@ const destinations = {
   kohPhangan: { name: "Koh Phangan", country: "Thailand" },
   phuket: { name: "Phuket", country: "Thailand" },
   singapore: { name: "Singapore", country: "Singapore" },
+  kohSamui: { name: "Koh Samui", country: "Thailand" },
   old: { name: "Old" },
 };
 
 describe("countryChips", () => {
   it("lists each country once, in the order of the trip's destinations", () => {
-    const listed = [{ destination: "phuket" }, { destination: "singapore" }, { destination: "bali" }, { destination: "kohPhangan" }];
+    const listed = [{ destination: "phuket" }, { destination: "singapore" }, { destination: "bali" }, { destination: "kohPhangan" }, { destination: "kohSamui" }];
     expect(countryChips(destinations, listed)).toEqual(["Indonesia", "Thailand", "Singapore"]);
   });
 

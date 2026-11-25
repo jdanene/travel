@@ -71,8 +71,9 @@ function km(a: Spot, b: Spot): number {
  * is skipped); spot — the place.
  * Output: the nearest destination's id, or undefined when none has a centre.
  * Examples (each is a test in placeSearch.test.ts):
- *   Canggu (-8.65, 115.13) among Bali, Koh Phangan, Phuket, Singapore → "bali"
- *   Bangkok (13.75, 100.5), far from all four                          → "kohPhangan"
+ *   Canggu (-8.65, 115.13) among Bali, Koh Phangan, Phuket, Singapore, Koh Samui → "bali"
+ *   CLUB SEEN in Chaweng (9.52, 100.06), 25 km south of Koh Phangan           → "kohSamui"
+ *   Bangkok (13.75, 100.5), far from all five                                → "kohPhangan"
  */
 export function nearestDestination(destinations: Array<{ id: string; lat?: number; lng?: number }>, spot: Spot): string | undefined {
   let best: { id: string; far: number } | undefined;

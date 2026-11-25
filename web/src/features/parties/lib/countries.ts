@@ -38,7 +38,7 @@ function countryOf(destinations: Destinations, id: DestinationId): string | unde
  * every event (parties/shows) and every known venue (places/venues).
  * Output: the countries, in that order; empty when nothing is listed.
  * Examples (each is a test in countries.test.ts):
- *   Phuket, Singapore and Bali events, a Koh Phangan venue → Indonesia, Thailand, Singapore
+ *   Phuket, Singapore and Bali events, a Koh Phangan and a Koh Samui venue → Indonesia, Thailand, Singapore
  *   an event at a destination with no country, one in Bali → Indonesia
  */
 export function countryChips(destinations: Destinations, listed: Array<{ destination: DestinationId }>): string[] {

@@ -1,5 +1,5 @@
 {
- "source": "Positions from OpenStreetMap, read with the Nominatim search on 23 and 24 Nov 2026. A venue with \"big\": true is one of the owner's big nights (owner, 24 Nov 2026); the Events list and the map show those by default. A venue with \"onMap\": false is not on OpenStreetMap; it sits at its area's centre, or at the island's centre when the lineup gives no area. Marquee is not on OpenStreetMap either; it sits at The Shoppes at Marina Bay Sands, the mall that holds it. photoUrl is the venue's link-preview picture (og:image) or the main photo on its own website, read on 24 Nov 2026; a venue without one has no website picture that loads.",
+ "source": "Positions from OpenStreetMap, read with the Nominatim search on 23, 24 and 25 Nov 2026. A venue with \"big\": true is one of the owner's big nights (owner, 24 Nov 2026); the Events list and the map show those by default. A venue with \"onMap\": false is not on OpenStreetMap; it sits at its area's centre, or at the island's centre when the lineup gives no area. Marquee is not on OpenStreetMap either; it sits at The Shoppes at Marina Bay Sands, the mall that holds it. photoUrl is the venue's link-preview picture (og:image) or the main photo on its own website, read on 24 Nov 2026 (CLUB SEEN's on 25 Nov 2026); a venue without one has no website picture that loads.",
  "destinations": {
   "bali": {
    "country": "Indonesia",
@@ -20,6 +20,11 @@
    "country": "Singapore",
    "lat": 1.28992,
    "lng": 103.85191
+  },
+  "kohSamui": {
+   "country": "Thailand",
+   "lat": 9.50139,
+   "lng": 99.99562
   }
  },
  "areas": {
@@ -142,6 +147,12 @@
    "destination": "kohPhangan",
    "lat": 9.7432,
    "lng": 99.9902
+  },
+  "chaweng": {
+   "name": "Chaweng",
+   "destination": "kohSamui",
+   "lat": 9.51892,
+   "lng": 100.05313
   }
  },
  "venues": {
@@ -458,6 +469,16 @@
    "lng": 99.9902,
    "line": "Venue in Wok Tum that hosts the Awakenest festival (pin is approximate)",
    "photoUrl": "https://stayflystudio.com/landing/studio/stayfly-og.jpg"
+  },
+  "club-seen": {
+   "name": "CLUB SEEN",
+   "destination": "kohSamui",
+   "areaId": "chaweng",
+   "lat": 9.5215,
+   "lng": 100.05863,
+   "line": "Beach club on Chaweng Beach with guest DJs",
+   "big": true,
+   "photoUrl": "https://seenbeachclubsamui.eme-devops.com/2025/10/share-image.png"
   }
  }
 }

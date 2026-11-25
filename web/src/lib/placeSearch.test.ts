@@ -49,7 +49,9 @@ describe("nearestDestination", () => {
     { id: "kohPhangan", lat: 9.73495, lng: 100.03057 },
     { id: "phuket", lat: 7.97908, lng: 98.33552 },
     { id: "singapore", lat: 1.28992, lng: 103.85191 },
+    { id: "kohSamui", lat: 9.50139, lng: 99.99562 },
   ];
   it("groups Canggu under Bali", () => expect(nearestDestination(trip, { lat: -8.65, lng: 115.13 })).toBe("bali"));
-  it("groups Bangkok, far from all four, under Koh Phangan", () => expect(nearestDestination(trip, { lat: 13.75, lng: 100.5 })).toBe("kohPhangan"));
+  it("groups Chaweng under Koh Samui, not Koh Phangan 25 km north", () => expect(nearestDestination(trip, { lat: 9.5215, lng: 100.05863 })).toBe("kohSamui"));
+  it("groups Bangkok, far from all five, under Koh Phangan", () => expect(nearestDestination(trip, { lat: 13.75, lng: 100.5 })).toBe("kohPhangan"));
 });
