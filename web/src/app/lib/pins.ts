@@ -9,8 +9,8 @@ import { datesSettled } from "./modules";
 
 /**
  * Every pin of the trip's map in one list, for every destination at once:
- * the stay options, the venues with an event this season, and friends'
- * places. The map holds them all and only moves its camera between
+ * the stay options, the major clubs and the venues with an event this
+ * season, and friends' places. The map holds them all and only moves its camera between
  * destinations; it never hides a pin. It lives in app/ because it joins
  * stay, parties and places; the map feature only draws what it is given.
  *
@@ -18,20 +18,22 @@ import { datesSettled } from "./modules";
  * listing gives no exact position (D10); an unknown area puts the pin at
  * the destination's centre (case 33). None while the dates are not
  * confirmed (exception 3).
- * Venue pins: one per venue of places/venues with at least one event this
- * season (parties/shows), whatever its tags; the Events filter does not
- * touch the map (owner, 24 Nov 2026: "If I zoom out on the map to see
- * Thailand, the Philippines and Bali, I expect all the events to show
- * too"). A venue with only last-season lines gets no pin. A friend's party
- * at another venue gets no pin (case 34); its row still shows in Events.
+ * Venue pins: one per venue of places/venues that is a major club (`big`)
+ * or has an event this season, so a tap on such a club in Events lands on
+ * its pin and shows it among the other places (owner, 25 Nov 2026: "if I
+ * tap a club I should be transported to the map", "every major club will
+ * get a pin", "not every club"). A small venue with only last-season lines
+ * gets no pin. The Events filter does not touch the map. A friend's party at
+ * another venue gets no pin (case 34); its row still shows in Events.
  * Friends' places: one per entry in places/custom ("Add to map"), where
  * the friend put it, with its kind's icon, its link and who added it.
  *
  * Inputs: trip — the whole trip.
  * Output: the pins, stays first, then venues, then friends' places. A venue's card line is its own line (or
- * its area) and its next show this season.
+ * its area) and its next show this season, or "nothing announced yet".
  * Examples (each is a test in pins.test.ts):
- *   Savaya with a show on 13 Feb, Klymax with none → one venue pin, Savaya, line "Club on the cliffs · next show Sat 13 Feb"
+ *   Savaya with a show on 13 Feb, Klymax (big) with none, Mrs Sippy (small) with none → two pins:
+ *     Savaya "Club on the cliffs · next show Sat 13 Feb", Klymax "Bali · nothing announced yet"
  *   a stay option before the dates are confirmed    → no stay pin; after → a pin at its area's centre
  *   Kai adds "Sunset bar", Food                     → a place pin, line "Food · added by KA", even with no event anywhere
  */
@@ -59,10 +61,13 @@ export function pins(trip: Trip): Pin[] {
   }
 
   const places: Pin[] = Object.entries(venues).flatMap(([venueId, venue]) => {
+    // A venue with no position is no use to the map.
+    if (typeof venue.lat !== "number" || typeof venue.lng !== "number") return [];
     const next = nextShow.get(venueKey(venue.destination, venue.name));
-    if (!next) return [];
+    if (!next && venue.big !== true) return [];
     const where = venue.line ?? (venue.areaId ? areas[venue.areaId]?.name : undefined) ?? destinations[venue.destination]?.name ?? "";
-    return [{ id: `venue:${venueId}`, kind: "venue" as const, destination: venue.destination, name: venue.name, lat: venue.lat, lng: venue.lng, line: `${where} · next show ${weekdayDate(next)}` }];
+    const when = next ? `next show ${weekdayDate(next)}` : "nothing announced yet";
+    return [{ id: `venue:${venueId}`, kind: "venue" as const, destination: venue.destination, name: venue.name, lat: venue.lat, lng: venue.lng, line: where ? `${where} · ${when}` : when }];
   });
 
   const members = trip.crew?.members ?? {};

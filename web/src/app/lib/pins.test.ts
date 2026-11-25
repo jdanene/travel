@@ -6,15 +6,19 @@ const show = { destination: "bali", venue: "Savaya", date: "2027-02-13", artist:
 const venues = {
   savaya: { name: "Savaya", destination: "bali", lat: -8.84, lng: 115.1, line: "Club on the cliffs", big: true },
   klymax: { name: "Klymax", destination: "bali", lat: -8.7, lng: 115.17, big: true },
+  "mrs-sippy": { name: "Mrs Sippy", destination: "bali", lat: -8.68, lng: 115.16 },
 };
 const areas = { uluwatu: { name: "Uluwatu", destination: "bali", lat: -8.83, lng: 115.09 } };
 const villa = { destination: "bali", url: "https://www.airbnb.com/rooms/1", name: "Cliffside villa", area: "Uluwatu", addedBy: "ka", at: 1 };
 const options = { o1: { from: "2027-02-13", to: "2027-02-23" } };
 
 describe("pins", () => {
-  it("pins only the venues with an event this season, whatever its tags", () => {
-    const found = pins({ places: { venues }, parties: { shows: { s1: show } } });
-    expect(found.map((pin) => [pin.id, pin.line])).toEqual([["venue:savaya", "Club on the cliffs · next show Sat 13 Feb"]]);
+  it("pins the major clubs and the venues with an event, not a small venue with none", () => {
+    const found = pins({ places: { venues }, parties: { shows: { s1: show } }, info: { destinations: { bali: { name: "Bali" } } } } as never);
+    expect(found.map((pin) => [pin.id, pin.line])).toEqual([
+      ["venue:savaya", "Club on the cliffs · next show Sat 13 Feb"],
+      ["venue:klymax", "Bali · nothing announced yet"],
+    ]);
   });
 
   it("pins a stay only once the dates are confirmed", () => {

@@ -293,7 +293,9 @@ export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onO
     if (camera) move(current, camera, duration);
   };
 
-  // The first frame, once the pins are in: on the focus pin (the show sheet's "See on the map"), else the destination.
+  // The first frame, once the pins are in: on the focus pin (the show sheet's "See on the map", a club tapped in Events),
+  // else the destination. Zoom 12 shows the pin among its neighbours and the stays (owner, 25 Nov 2026: "so I can see
+  // where it is in relation to other places"); the friend zooms in from there.
   useEffect(() => {
     if (!map.current || framed.current || pins.length === 0) return;
     framed.current = true;
@@ -301,7 +303,7 @@ export function TripMap({ tripId, destinations, pins, memberId, isOrganizer, onO
     if (!target) return frame(view, 0);
     setView(target.destination);
     setSelected(target.id);
-    move(map.current, { center: [target.lng, target.lat], zoom: 15 }, 0);
+    move(map.current, { center: [target.lng, target.lat], zoom: 12 }, 0);
   }, [pins.length > 0]);
 
   /** Draws every pin at the current zoom: a pin alone as itself, colliding pins as one count pin. */

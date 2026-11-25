@@ -92,10 +92,8 @@ function DeleteAsk({ onDelete, onKeep, note }: { onDelete: () => void; onKeep: (
 export function LineRow({ id, entry, viewer, thumb, onOpen, thread, reactions, onDelete }: { id: string; entry: ActivityEntry; viewer: Viewer; thumb?: string; onOpen?: () => void; thread: ThreadProps; reactions: (after: ReactNode) => ReactNode; onDelete?: () => void }) {
   const [asking, setAsking] = useState(false);
   const block = useRef<HTMLDivElement>(null);
-  useFoldOutside(asking || thread.open, block, thread.answering ? id : null, () => {
-    setAsking(false);
-    thread.onOpen(false);
-  });
+  // Only the delete question folds on a tap outside; a thread stays open until "Hide replies".
+  useFoldOutside(asking, block, thread.answering ? id : null, () => setAsking(false));
   const { control, panel } = useThread(viewer, thread);
   const { lead, rest } = lineWords(entry, entry.by ? person(viewer, entry.by).name : "");
   const main = (
@@ -150,9 +148,9 @@ interface WrittenProps {
  * that keeps its shape while it loads. A poll keeps a quiet box in the
  * card's thin grey, with a bar for each share, the voters' faces and the
  * count; a tap votes or changes the vote. Under it, on the reactions row,
- * "Reply" puts the message bar in reply mode for it, and "3 replies" opens
- * the thread in place; a tap or click outside the post (the bar counts as
- * inside while it answers this post), or Escape, folds it. The author and an organizer get a quiet "…" (shown on
+ * "Reply" puts the message bar in reply mode for it; its replies show under
+ * it from the start, and "Hide replies" folds them ("3 replies" opens them
+ * again). The author and an organizer get a quiet "…" (shown on
  * hover with a mouse, always on a touch screen) that opens "Delete for
  * everyone?".
  *
@@ -161,7 +159,7 @@ interface WrittenProps {
  * Output: the block.
  * Examples (checked on the emulator with two profiles):
  *   TO's poll, 4 Yes and 1 No, you voted Yes → "Yes" with a check, its bar at 80 %, "5 of 8 voted · tap to change your vote"
- *   "2 replies" tapped, then a tap on the map  → the thread folds
+ *   2 replies                                 → both show under the post, "Hide replies" folds them
  *   "Reply" tapped                            → "Replying to TO" over the bar, the post lightly marked
  */
 export function Written({ id, entry, viewer, votes, thread, sending, onVote, onDelete, reactions }: WrittenProps) {
@@ -172,10 +170,8 @@ export function Written({ id, entry, viewer, votes, thread, sending, onVote, onD
   const mine = votes?.[viewer.memberId];
   const poll = entry.kind === "poll" && entry.options ? tally(entry.options, votes) : null;
 
-  useFoldOutside(thread.open || asking, block, thread.answering ? id : null, () => {
-    thread.onOpen(false);
-    setAsking(false);
-  });
+  // Only the delete question folds on a tap outside; a thread stays open until "Hide replies".
+  useFoldOutside(asking, block, thread.answering ? id : null, () => setAsking(false));
 
   const { control: replyControl, panel } = useThread(viewer, thread);
 
@@ -247,7 +243,7 @@ export interface ThreadProps {
  * Output: { control, panel }; panel is null while folded.
  * Examples (checked on the emulator at 390 px):
  *   no replies        → control "Reply"; a tap → the bar reads "Replying to KA"
- *   KA and RB replied → control shows both faces and "2 replies"; a tap opens them, "Reply" last
+ *   KA and RB replied → both replies show, "Reply" last; the control "Hide replies" folds them to both faces and "2 replies"
  */
 function useThread(viewer: Viewer, thread: ThreadProps) {
   const { open, onOpen, onReply } = thread;
@@ -294,13 +290,13 @@ function useThread(viewer: Viewer, thread: ThreadProps) {
 }
 
 /**
- * Folds something open (a thread, the delete question) when the friend
+ * Folds something open (the delete question) when the friend
  * taps or clicks outside it, or presses Escape. A tap inside, including in
  * a panel above the page, keeps it open; so does a tap in the message bar
  * while the bar answers this line.
  * Inputs: whether it is open, the block, the line's id while the bar answers it (else null), and what folding does.
  * Output: nothing.
- * Examples (checked on screen): thread open, tap the map → it folds; tap a reaction pill on the same post → it stays;
+ * Examples (checked on screen): delete question open, tap the map → it folds; tap a reaction pill on the same post → it stays;
  *   answering this line, tap into the bar → it stays
  */
 function useFoldOutside(open: boolean, block: React.RefObject<HTMLElement>, answering: string | null, fold: () => void) {

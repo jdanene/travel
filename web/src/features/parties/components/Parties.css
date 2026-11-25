@@ -122,6 +122,13 @@
 .venue-icon { width: 2.5rem; height: 2.5rem; flex: none; border-radius: 0.625rem; object-fit: cover; background: var(--soft); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04); }
 .venue:has(.venue-icon) { display: flex; align-items: center; gap: 0.625rem; }
 .venue-name { min-width: 0; }
+/* A club's heading is a button to its pin: the whole row is the target, with a pin at the end as the cue. */
+.venue-go { display: flex; align-items: center; gap: 0.625rem; width: 100%; min-height: 2.75rem; margin: 0; padding: 0.25rem 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; border-radius: 0.625rem; -webkit-tap-highlight-color: transparent; }
+.venue-go .venue-name { flex: 1; }
+.venue-pin { flex: none; display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; color: var(--mut); transition: background-color .15s ease-out, color .15s ease-out; }
+@media (hover: hover) { .venue-go:hover .venue-pin { background: var(--soft); color: var(--ink); } }
+.venue-go:active .venue-pin { background: var(--soft); color: var(--ink); }
+.venue-go:focus-visible { outline: 2px solid var(--edge); outline-offset: 2px; }
 
 /* Add an event's search: a field like a search box, then rows of an icon, the name and its place. */
 .venue-search { display: flex; align-items: center; gap: 0.625rem; padding-block: 0.8125rem; }

@@ -59,8 +59,10 @@ interface ActivityProps {
  * keyboard up); sending, words or a GIF, goes into that line's thread,
  * opens it, and leaves reply mode. × or Escape leaves it too. The answered
  * line moves to the foot of the list, right above the bar, so it stays in
- * sight when the keyboard comes up. One thread
- * is open at a time.
+ * sight when the keyboard comes up. Every line's replies show under it
+ * by default (owner, 25 Nov 2026: "when we reply to an update don't want it
+ * hidden", "default is open"); "Hide replies" folds one line's thread until
+ * the page reloads.
  *
  * Inputs: the trip id, the activity branch with its votes, replies and
  * emoji, this device's member and organizer mark, the names, the crew's
@@ -77,8 +79,17 @@ export function Activity({ tripId, entries, votes, replies, reactions, memberId,
   const [sending, setSending] = useState<ReadonlySet<string>>(new Set());
   const [problem, setProblem] = useState<string | null>(null);
   const [picking, setPicking] = useState<string | null>(null);
-  // The one open thread, and the line the message bar answers (reply mode), by line id.
-  const [thread, setThread] = useState<string | null>(null);
+  // The threads this friend folded with "Hide replies" (every other one is open), and the line the message bar answers (reply mode), by line id.
+  const [folded, setFolded] = useState<ReadonlySet<string>>(new Set());
+  const fold = useCallback((id: string, open: boolean) => {
+    setFolded((before) => {
+      if (open !== before.has(id)) return before;
+      const next = new Set(before);
+      if (open) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const field = useRef<HTMLTextAreaElement | null>(null);
   const [unseen, setUnseen] = useState(false);
@@ -220,8 +231,8 @@ export function Activity({ tripId, entries, votes, replies, reactions, memberId,
 
   const threadOf = (id: string): ThreadProps => ({
     replies: replies?.[id],
-    open: thread === id,
-    onOpen: (open) => setThread(open ? id : thread === id ? null : thread),
+    open: !folded.has(id),
+    onOpen: (open) => fold(id, open),
     answering: replyTo === id,
     onReply: () => {
       // Focus inside the tap, so a phone raises its keyboard; the bar scrolls itself above it.
@@ -233,7 +244,7 @@ export function Activity({ tripId, entries, votes, replies, reactions, memberId,
   // Sends into the answered line's thread and shows it; on a failure reply mode comes back, as the words do.
   const sendReply = (said: Parameters<typeof reply>[3]) => {
     const target = replyTo!;
-    setThread(target);
+    fold(target, true);
     setReplyTo(null);
     return reply(tripId, target, memberId, said).then((result) => {
       if (!result.ok) setReplyTo(target);

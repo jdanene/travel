@@ -100,6 +100,7 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
   const [country, setCountry] = useEventsCountry(countries);
   const here = (destination: string) => inCountry(country, destinationNames, destination);
   // The country and the tag combine: Thailand and Big nights list the Big nights in Thailand.
+  const withShows = new Set(Object.values(shows).map((show) => venueKey(show.destination, show.venue)));
   const groups = eventsList(shows, known, filter, tags).filter((group) => here(group.destination));
   // A row the friend just added or edited stays in sight: another country than the picked one opens "All countries".
   const keepInSight = (destination: string) => !here(destination) && setCountry("all");
@@ -216,7 +217,10 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
           </h3>
           {venueGroups.map((venue) => {
             const area = areaShown(venue.name, venue.area, nameOf(destination));
-            const line = placeOf({ destination, venue: venue.name }, trip.places)?.line;
+            const place = placeOf({ destination, venue: venue.name }, trip.places);
+            // The map pins a major club, or a venue with an event this season (app/lib/pins.ts); only those open it.
+            const pinned = place?.kind === "venue" && (trip.places?.venues?.[place.id]?.big === true || withShows.has(venue.key));
+            const line = place?.line;
             const venueLines = lines.filter((one) => venueKey(one.destination, one.venue) === venue.key);
             const items = [
               ...venueLines.map((one) => ({ date: one.from, line: one, show: null as ListedShow | null })),
@@ -225,12 +229,17 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
             return (
               <div key={venue.key} className="venue-group">
                 <h4 className="venue">
-                  <VenueIcon url={photoOf.get(venue.key)} />
-                  <span className="venue-name">
-                    <b>{venue.name}</b>
-                    {area && <span className="sub"> · {area}</span>}
-                    {line && <span className="venue-line">{line}</span>}
-                  </span>
+                  {/* A tap on a club opens the map on its pin, among the other places (owner, 25 Nov 2026). */}
+                  {onSeeMap && place && pinned ? (
+                    <button type="button" className="venue-go" onClick={() => onSeeMap(place)} aria-label={`${venue.name}, show on the map`}>
+                      <VenueHead icon={photoOf.get(venue.key)} name={venue.name} area={area} line={line} />
+                      <span className="venue-pin" aria-hidden="true">
+                        <Icon name="pin" size={18} />
+                      </span>
+                    </button>
+                  ) : (
+                    <VenueHead icon={photoOf.get(venue.key)} name={venue.name} area={area} line={line} />
+                  )}
                 </h4>
                 {venue.shows.length === 0 && <LastSeason shows={lastSeason(destination, venue.name, lastYear)} />}
                 {items.map(({ line: weekend, show }) =>
@@ -334,4 +343,26 @@ function knownVenues(trip: Trip, groups: ReturnType<typeof byPlaceVenueDate>): V
     seen.add(key);
     return true;
   });
+}
+
+/**
+ * A venue's heading in the Events list: its picture, its name, its area
+ * and its one plain line.
+ *
+ * Inputs: icon — the picture's address, if any; name; area — shown after a
+ * dot when it is not the destination; line — "Club on the cliffs", if any.
+ * Output: the icon and the words, for a heading or the button inside one.
+ * Examples (checked on screen): Savaya → its picture, "Savaya · Uluwatu", "Club on the cliffs"
+ */
+function VenueHead({ icon, name, area, line }: { icon: string | undefined; name: string; area: string | null | undefined; line: string | undefined }) {
+  return (
+    <>
+      <VenueIcon url={icon} />
+      <span className="venue-name">
+        <b>{name}</b>
+        {area && <span className="sub"> · {area}</span>}
+        {line && <span className="venue-line">{line}</span>}
+      </span>
+    </>
+  );
 }
