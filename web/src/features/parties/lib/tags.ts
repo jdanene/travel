@@ -36,19 +36,27 @@ export interface TripTags {
 }
 
 /**
- * The trip's event tags and tag names, and the big venues with no event
- * this season (they show under Big nights with their last-season lines;
- * nobody can tag a venue).
+ * The trip's event tags and tag names, and the big venues with no Big
+ * night this season: no event tagged Big nights and none a friend added.
+ * They show under Big nights with their last-season lines, even when they
+ * have ordinary weekly nights (owner, 25 Nov 2026: Zouk and CÉ LA VI were
+ * missing from Big nights). Nobody can tag a venue.
  *
  * Inputs: trip — its parties and places branches; either may be missing.
  * Output: { byShow, bigVenues, names, made }.
  * Examples (each is a test in tags.test.ts):
  *   showTags { s1: { big: true } }                                 → byShow s1 → { big }; names { big: "Big nights" }
- *   Savaya `big: true` with no event, Klymax `big: true` with one  → bigVenues { bali_savaya }
+ *   Savaya `big: true` with no event, Klymax `big: true` with a Big night  → bigVenues { bali_savaya }
+ *   Zouk `big: true` with only an untagged weekly night                     → bigVenues has singapore_zouk
  */
 export function tripTags(trip: Pick<Trip, "parties" | "places">): TripTags {
   const byShow = Object.fromEntries(Object.entries(trip.parties?.showTags ?? {}).map(([id, tags]) => [id, new Set(Object.keys(tags ?? {}))]));
-  const withEvents = new Set(Object.values(trip.parties?.shows ?? {}).map((show) => venueKey(show.destination, show.venue)));
+  // The events Big nights would list at a venue: tagged big, or added by a friend (eventShown).
+  const withEvents = new Set(
+    Object.entries(trip.parties?.shows ?? {})
+      .filter(([id, show]) => show.source === "friend" || byShow[id]?.has(BIG) === true)
+      .map(([, show]) => venueKey(show.destination, show.venue)),
+  );
   const bigVenues = new Set(
     Object.values(trip.places?.venues ?? {})
       .filter((venue) => venue.big === true)
@@ -123,7 +131,7 @@ export function eventShown(filter: EventsFilter, id: string, show: Pick<Show, "s
 
 /**
  * Says whether the list keeps a venue that has no event to show: under
- * "all" every venue; under Big nights a big venue with no event this
+ * "all" every venue; under Big nights a big venue with no Big night this
  * season, with its last-season lines. No other tag keeps a venue.
  *
  * Inputs: filter; venue — its destination and name; tags — tripTags().

@@ -19,8 +19,13 @@ describe("tripTags", () => {
     expect(tags.names.big).toBe("Big nights");
   });
 
-  it("keeps only the big venues with no event this season", () => {
+  it("keeps only the big venues with no Big night this season", () => {
     expect([...tags.bigVenues]).toEqual(["bali_savaya"]);
+  });
+
+  it("keeps a big venue whose only event is an untagged weekly night", () => {
+    const weekly = tripTags({ parties: { shows: { k1: show("Klymax", "seed") } }, places: { venues } });
+    expect([...weekly.bigVenues].sort()).toEqual(["bali_klymax", "bali_savaya"]);
   });
 });
 
