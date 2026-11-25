@@ -3,6 +3,8 @@ import { activityLine } from "../lib/activity";
 import { write, writeIf } from "../lib/db";
 import { dayMonth } from "../lib/format";
 import { showLine } from "../features/parties/api/parties";
+import { venueKey } from "../features/parties/lib/shows";
+import { BIG } from "../features/parties/lib/tags";
 import { ago } from "../lib/format";
 import * as paths from "../lib/paths";
 import { checkClubs } from "../lib/reader";
@@ -62,7 +64,8 @@ export function useEventCheck(tripId: string, trip: Trip, memberId: MemberId | n
 }
 
 /**
- * Claims the check, asks the reader, and writes the new shows. The claim
+ * Claims the check, asks the reader, and writes the new shows; a show at
+ * a big venue (places/venues `big`) comes tagged Big nights. The claim
  * is a transaction on parties/lastCheck, so of two phones that open the
  * trip at once only one asks the reader.
  */
@@ -88,12 +91,24 @@ async function runCheck(tripId: string, tripNow: () => Trip, memberId: MemberId,
   }
   for (const { venue, reason } of found.failed) console.warn(`Events check: could not read ${venue} (${reason}).`);
 
-  const shows = Object.entries(newShows(found.events, tripNow(), now));
+  const trip = tripNow();
+  const shows = Object.entries(newShows(found.events, trip, now));
+  // A found event at a big venue is a Big night, the same rule the seed uses (owner, 25 Nov 2026: HUGEL at
+  // Café del Mar Phuket came in untagged). The tag goes on once, with the show; a friend may remove it later.
+  const bigVenues = new Set(
+    Object.values(trip.places?.venues ?? {})
+      .filter((venue) => venue.big === true)
+      .map((venue) => venueKey(venue.destination, venue.name)),
+  );
   // One write per show, so a show another phone just added (refused) does not hold back the rest. Each show's
   // "New event found" line goes in its write; the line has no `by`, since nobody added the show.
   const results = await Promise.all(
     shows.map(([id, show]) =>
-      write({ [paths.show(tripId, id)]: show, ...activityLine(tripId, { kind: "event-found", text: `${showLine(show)}, ${dayMonth(show.date)}`, ref: id }) }),
+      write({
+        [paths.show(tripId, id)]: show,
+        ...(bigVenues.has(venueKey(show.destination, show.venue)) ? { [paths.showTag(tripId, id, BIG)]: true } : {}),
+        ...activityLine(tripId, { kind: "event-found", text: `${showLine(show)}, ${dayMonth(show.date)}`, ref: id }),
+      }),
     ),
   );
   const refused = results.filter((r) => !r.ok).length;

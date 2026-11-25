@@ -16,13 +16,15 @@ interface CrewTitleProps {
   onYou: () => void;
   /** "See the crew": opens the crew sheet. */
   onSee: () => void;
+  /** Your reply buttons, drawn just above "See the crew". */
+  reply?: ReactNode;
 }
 
 /**
  * The crew in the flyer's title block (mock 5): the faces of the friends
  * who are in, in reply order, then "6 in · 1 maybe · 1 not replied" and
- * "See the crew". Your own face is in the stack (added when you are not
- * in) and is a button that opens your photo, with a camera badge; the
+ * "See the crew", with your reply buttons just above it. Your own face is
+ * in the stack (added when you are not in) and is a button that opens your photo, with a camera badge; the
  * other faces are pictures. With just you on the trip it reads "Just you
  * so far · share the link".
  *
@@ -32,7 +34,7 @@ interface CrewTitleProps {
  *   Dom, KA, TO, you, RJ, LC in; SN maybe; AJ not replied → six faces, "6 in · 1 maybe · 1 not replied", "See the crew"
  *   only you                                              → your face, "Just you so far · share the link"
  */
-export function CrewTitle({ list, you, onYou, onSee }: CrewTitleProps) {
+export function CrewTitle({ list, you, onYou, onSee, reply }: CrewTitleProps) {
   const photo = usePhoto(you.id);
   const alone = list.in.length + list.maybe.length + list.out.length <= 1;
   const others = list.in.filter((row) => row.id !== you.id);
@@ -58,13 +60,17 @@ export function CrewTitle({ list, you, onYou, onSee }: CrewTitleProps) {
         )}
       </span>
       {alone ? (
-        <span className="t">Just you so far · share the link</span>
+        <>
+          <span className="t">Just you so far · share the link</span>
+          {reply}
+        </>
       ) : (
         <>
           <span className="t">
             <b>{counts[0]}</b>
             {counts.slice(1).map((part) => ` · ${part}`)}
           </span>
+          {reply}
           <button type="button" className="see" aria-haspopup="dialog" onClick={onSee}>
             See the crew
             <Icon name="chev" size={16} />
@@ -80,13 +86,11 @@ export function CrewTitle({ list, you, onYou, onSee }: CrewTitleProps) {
  * CAN'T and NOT REPLIED, each with its count, a face, the name ("You" for
  * yourself) and the small line; an empty group says "Nobody".
  *
- * Your own reply buttons, when given, sit above the groups.
- * Inputs: whether it is open, the crew list, your member, closing, and
- * what goes on top (your reply buttons).
+ * Inputs: whether it is open, the crew list, your member, and closing.
  * Output: the sheet.
  * Examples (checked on the emulator): "See the crew" → IN · 6 with Dom "organizer · 13–23 Feb · 4 events", CAN'T · 0 "Nobody"
  */
-export function CrewSheet({ open, list, youId, onClose, children }: { open: boolean; list: CrewList; youId: string; onClose: () => void; children?: ReactNode }) {
+export function CrewSheet({ open, list, youId, onClose }: { open: boolean; list: CrewList; youId: string; onClose: () => void }) {
   const groups: Array<[string, CrewRow[]]> = [
     ["IN", list.in],
     ["MAYBE", list.maybe],
@@ -97,7 +101,6 @@ export function CrewSheet({ open, list, youId, onClose, children }: { open: bool
   return (
     <Sheet open={open} title={`The crew · ${total}`} onClose={onClose} focusFirst={false}>
       <div className="crew-sheet">
-        {children}
         {groups.map(([name, rows]) => (
           <section key={name} aria-label={`${name.toLowerCase()}, ${rows.length}`}>
             <p className="grp">

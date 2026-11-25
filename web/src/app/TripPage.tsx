@@ -90,7 +90,17 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
           <Home
             trip={trip}
             memberId={crew.memberId}
-            crew={you && <CrewTitle list={list} you={you} onYou={() => setPhotoOpen(true)} onSee={() => setCrewOpen(true)} />}
+            crew={
+              you && (
+                <CrewTitle
+                  list={list}
+                  you={you}
+                  onYou={() => setPhotoOpen(true)}
+                  onSee={() => setCrewOpen(true)}
+                  reply={crew.memberId && <YourReply tripId={tripId} memberId={crew.memberId} member={crew.member} />}
+                />
+              )
+            }
             lead={(openModule) =>
               crew.memberId && (
                 <Activity
@@ -132,9 +142,7 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
         <OrganizerSignIn tripId={tripId} />
       )}
       {crew.memberId && (
-        <CrewSheet open={crewOpen} list={list} youId={crew.memberId} onClose={() => setCrewOpen(false)}>
-          {crew.member && <YourReply tripId={tripId} memberId={crew.memberId} member={crew.member} />}
-        </CrewSheet>
+        <CrewSheet open={crewOpen} list={list} youId={crew.memberId} onClose={() => setCrewOpen(false)} />
       )}
       {crew.memberId && crew.member && (
         <PhotoSheet open={photoOpen} tripId={tripId} memberId={crew.memberId} member={crew.member} onClose={() => setPhotoOpen(false)} />
