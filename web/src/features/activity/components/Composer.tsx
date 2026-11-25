@@ -306,20 +306,43 @@ export function Composer({ placeholder, onSend, onGif, replyTo = null, onCancelR
   );
 }
 
+/** Wait this long after the visible part of the page last changed before fitting the bar (the keyboard's own animation). */
+const SETTLE_MS = 160;
+/** Fit anyway once this long has passed, even if the visible part keeps changing. */
+const SETTLE_MAX_MS = 700;
 /**
- * Keeps the whole message bar, poll fields and all, in sight above the
- * on-screen keyboard. Safari's keyboard shrinks only the visible part of the
- * page (visualViewport), never the layout, so nothing here is fixed to the
- * bottom: while a field in the bar has focus, the page's foot is padded by
- * the keyboard's height (so the page can always move up far enough) and the
- * page scrolls, at once, so the bar's foot sits 12 px above the keyboard; if
- * the bar is taller than what is visible, the focused field wins. It runs on
- * focus, on every visualViewport resize or scroll, and whenever the bar
- * grows (Poll opening, a fourth option, a longer message).
+ * Safari on iPhone (iOS 26) floats its URL pill and the keyboard's ^ v ✓ bar over the foot of the visible
+ * page without shrinking visualViewport, so with the keyboard up the bar keeps this much clear above that foot.
+ */
+const IOS_FLOATING_CHROME = 104;
+
+/** True on an iPhone or iPad (an iPad reports itself as a Mac with touch). */
+function isIOS(): boolean {
+  return /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+
+/**
+ * Keeps the whole message bar (the reply strip and poll fields too) in
+ * sight above the on-screen keyboard. Safari's keyboard shrinks only the
+ * visible part of the page (visualViewport), never the layout, so nothing
+ * here is fixed to the bottom. While a field in the bar has focus, the
+ * page's foot is padded by the keyboard's height (so the page can move up
+ * far enough), and once the visible part has stopped changing the page
+ * scrolls once, at once, so the bar's foot sits above the keyboard, with
+ * room for Safari's floating URL pill and ^ v ✓ bar on an iPhone. If the
+ * bar is taller than what is visible, the focused field wins.
+ *
+ * It waits for the keyboard to settle on purpose: fitting on every resize
+ * and scroll of the visible part fought Safari's own panning as the
+ * keyboard rose, and pushed the page up until the Feed's heading sat
+ * under the status bar with the bar behind Safari's floating bars (owner's
+ * iPhone, 25 Nov 2026).
+ *
  * Inputs: the bar and its field. Output: nothing; sets --kb-pad on <html> while typing.
- * Examples (checked in emulation at 375 px with the visible height cut as a keyboard would; a real iPhone is unverified):
- *   focus "Message"                → the bar's foot 12 px above the keyboard
- *   "+", then Poll, keyboard up    → the poll's question, options and bar all sit above the keyboard
+ * Examples (checked in emulation only, a frame shrunk as a keyboard would; a real iPhone is unverified):
+ *   focus "Message", the visible height drops 336 px        → once it settles, the bar's foot 12 px above the new foot
+ *   the same on an iPhone (iOS reported)                     → the bar's foot 116 px above it, clear of the URL pill and ^ v ✓
+ *   "Reply" on a line, keyboard up                           → the "Replying to …" strip and the field both in sight
  */
 function useAboveKeyboard(bar: React.RefObject<HTMLElement>, field: React.RefObject<HTMLTextAreaElement>) {
   useEffect(() => {
@@ -327,14 +350,18 @@ function useAboveKeyboard(bar: React.RefObject<HTMLElement>, field: React.RefObj
     const box = bar.current;
     if (!view || !box || !field.current) return;
     const root = document.documentElement;
-    const fit = () => {
+    const typing = () => {
       const focused = document.activeElement;
-      if (!(focused instanceof HTMLElement) || !box.contains(focused)) return;
+      return focused instanceof HTMLElement && box.contains(focused) ? focused : null;
+    };
+    const fit = () => {
+      const focused = typing();
+      if (!focused) return;
       const covered = Math.max(0, window.innerHeight - (view.offsetTop + view.height));
       root.style.setProperty("--kb-pad", `${Math.round(covered)}px`);
-      root.classList.toggle("kb-open", covered > 0);
+      root.classList.toggle("kb-open", covered > 0 || isIOS());
       const top = view.offsetTop + 8;
-      const bottom = view.offsetTop + view.height - 12;
+      const bottom = view.offsetTop + view.height - 12 - (isIOS() ? IOS_FLOATING_CHROME : 0);
       const rect = box.getBoundingClientRect();
       let move = 0;
       if (rect.height <= bottom - top) {
@@ -348,21 +375,36 @@ function useAboveKeyboard(bar: React.RefObject<HTMLElement>, field: React.RefObj
       }
       if (Math.abs(move) > 1) window.scrollBy({ top: move, behavior: "instant" as ScrollBehavior });
     };
+    // One fit, after the visible part stops changing (or SETTLE_MAX_MS at most), never one per event.
+    let wait = 0;
+    let first = 0;
+    const settle = () => {
+      if (!typing()) return;
+      const now = performance.now();
+      if (!wait) first = now;
+      window.clearTimeout(wait);
+      const left = Math.max(0, Math.min(SETTLE_MS, SETTLE_MAX_MS - (now - first)));
+      wait = window.setTimeout(() => {
+        wait = 0;
+        fit();
+      }, left);
+    };
     const leave = (event: FocusEvent) => {
       if (event.relatedTarget instanceof Node && box.contains(event.relatedTarget)) return;
       root.classList.remove("kb-open");
     };
-    const grow = new ResizeObserver(() => fit());
+    const grow = new ResizeObserver(settle);
     grow.observe(box);
-    view.addEventListener("resize", fit);
-    view.addEventListener("scroll", fit);
-    box.addEventListener("focusin", fit);
+    view.addEventListener("resize", settle);
+    view.addEventListener("scroll", settle);
+    box.addEventListener("focusin", settle);
     box.addEventListener("focusout", leave);
     return () => {
+      window.clearTimeout(wait);
       grow.disconnect();
-      view.removeEventListener("resize", fit);
-      view.removeEventListener("scroll", fit);
-      box.removeEventListener("focusin", fit);
+      view.removeEventListener("resize", settle);
+      view.removeEventListener("scroll", settle);
+      box.removeEventListener("focusin", settle);
       box.removeEventListener("focusout", leave);
     };
   }, [bar, field]);
