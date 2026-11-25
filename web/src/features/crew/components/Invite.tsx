@@ -3,6 +3,7 @@ import { Icon } from "../../../components/Icon";
 import { Notice } from "../../../components/Notice";
 import { Sheet } from "../../../components/Sheet";
 import type { WriteFailure } from "../../../lib/db";
+import { canShare as browserCanShare, copyLink, shareLink, useFlash } from "../../../lib/share";
 import { DEFAULT_INVITE_TITLE, inviteLine, inviteLink, MAX_INVITE_TITLE, SITE } from "../../../lib/invite";
 import type { TripInfo } from "../../../types/trip";
 import { addOrganizerKey, saveInviteTitle } from "../api/invite";
@@ -251,23 +252,17 @@ function AddOrganizer({ tripId, title }: { tripId: string; title: string }) {
 function ShareLink({ link, title }: { link: string; title: string }) {
   const [copied, setCopied] = useState(false);
   const text = useRef<HTMLParagraphElement>(null);
-  const canShare = typeof navigator.share === "function";
+  const canShare = browserCanShare();
   useFlash(copied, () => setCopied(false));
 
   const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(link);
-      setCopied(true);
-    } catch {
-      const node = text.current;
-      if (node) window.getSelection()?.selectAllChildren(node);
-    }
+    if (await copyLink(link)) return setCopied(true);
+    const node = text.current;
+    if (node) window.getSelection()?.selectAllChildren(node);
   };
 
-  const share = () => {
-    // A closed share sheet rejects; there is nothing to say about it.
-    navigator.share({ text: title, url: link }).catch(() => undefined);
-  };
+  // A closed share sheet ends quietly; there is nothing to say about it.
+  const share = () => void shareLink(link, title);
 
   // The last 12 characters never shrink, so the cut falls in the middle.
   const tail = link.slice(-12);
@@ -293,20 +288,4 @@ function ShareLink({ link, title }: { link: string; title: string }) {
       </span>
     </div>
   );
-}
-
-/**
- * Ends a 2-second confirmation ("Copied", "Saved"): while on is true, calls
- * off after 2 seconds; a new on restarts the wait.
- * Inputs: on, off. Output: nothing.
- * Examples (checked on screen): "Copy link" → "Copied" → "Copy link" 2 seconds later
- */
-function useFlash(on: boolean, off: () => void): void {
-  const latest = useRef(off);
-  latest.current = off;
-  useEffect(() => {
-    if (!on) return;
-    const timer = setTimeout(() => latest.current(), 2000);
-    return () => clearTimeout(timer);
-  }, [on]);
 }
