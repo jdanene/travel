@@ -58,13 +58,14 @@ It reads a club's schema.org Event data (JSON-LD) where the club publishes it. W
 | Marquee | https://taogroup.com/wp-json/wp/v2/events (the WordPress feed its events page loads, venue 824, from 1 Feb 2027) | Yes, from the feed: from today it holds 11 nights (27 Nov to 31 Dec 2026); from 1 Feb 2027, none yet. |
 | Zouk | https://zoukgroup.com/singapore/events/ (zoukclub.com sends here) | Yes, but only the next ten or so nights (10 today, to 2 Dec 2026), so a February or March act appears about a week before it plays. |
 | CÉ LA VI | https://sg.celavi.com/ | Yes, as text: the home page's highlights hold 6 events (25 Nov to 31 Dec 2026), 3 of them in the Club Lounge, which are the ones read; the rest are dinners and a bar takeover. |
+| CLUB SEEN (Koh Samui) | https://www.seenbeachclubsamui.com/events/ (fetched 25 Nov 2026) | Yes. The list carries one schema.org Event per coming night: 30 today, 24 Nov 2026 to 14 Feb 2027. Names carry a subtitle after a bar ("MAHMUT ORHAN \| SEASON OPENING 2026"); the check keeps the act before it. In 25 Jan to 31 Mar 2027 it holds only O BEACH IBIZA, three Sundays (31 Jan, 7 and 14 Feb), a series, so the check finds nothing there yet. A request without a browser's user agent and `Accept` header is refused (403 or 405); the reader sends both. |
 
-Only Yona blocked the request. A club that starts to publish Event data joins by one entry in `event-sources.mjs`; a club with a new layout needs a reader in `event-lists.mjs`.
+Only Yona blocked the request. A club that starts to publish Event data joins by one entry in `event-sources.mjs` (with `actName` when its names add a subtitle after the act); a club with a new layout needs a reader in `event-lists.mjs`.
 
 ## What it allows
 
 - Sites for a pasted link (`sites.mjs`, the only place that names them): `airbnb.com` with `www.`, `m.` and the country domains, `abnb.me`, `booking.com`, `instagram.com` and `tiktok.com` with `www.` and `m.`, and `vm.tiktok.com`.
-- Sites for the events check (`event-sources.mjs`): each club's own host: `www.savaya.com`, `www.illuzionphuket.com`, `zoukgroup.com`, `phuket.cafedelmar.com`, `sg.celavi.com`, `klymax.co`, `www.cafedelmarbali.co.id`, `desakitsune.com`, `fullmoonparty-thailand.com`, `seminyak.potatohead.co` and `taogroup.com`.
+- Sites for the events check (`event-sources.mjs`): each club's own host: `www.savaya.com`, `www.illuzionphuket.com`, `zoukgroup.com`, `phuket.cafedelmar.com`, `sg.celavi.com`, `klymax.co`, `www.cafedelmarbali.co.id`, `desakitsune.com`, `fullmoonparty-thailand.com`, `seminyak.potatohead.co`, `taogroup.com` and `www.seenbeachclubsamui.com`.
 - Callers: CORS allows `https://travel-ca8f9.web.app` and `http://localhost` on any port. A call with another `Origin` gets `not_allowed`. A call with no `Origin` (curl) is served.
 - Cost: reserved concurrency of 2, and a 20-second timeout for the events check.
 
