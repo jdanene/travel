@@ -17,7 +17,8 @@
  * Field map: place becomes destination (matched by name against the
  * destinations of local/trip.json); source becomes link when it is an
  * address; artist, about, venue, area, date, weekly and verified keep their
- * names. about is the one plain line under the event's name.
+ * names. about is the one plain line under the event's name. photoUrl, an
+ * https address, is the event's own picture (shown on its shared page).
  * weekly ("sun", "sat", ...) marks a show that repeats every week, and date
  * is then its first night, which must fall on that day. note holds research
  * notes and is not written.
@@ -106,7 +107,7 @@ function readLineup(path, { inSeason }) {
     const destination = destinationOf.get(nameKey(entry.place));
     if (!destination) stop(`${where}: place "${entry.place}" is not a destination in ${TRIP_FILE}.`);
     const show = { destination, venue: entry.venue.trim(), date: entry.date, artist: entry.artist.trim() };
-    records[showId(show)] = { ...show, area: isText(entry.area, 60) ? entry.area.trim() : undefined, weekly: entry.weekly, about: isText(entry.about, 200) ? entry.about.trim() : undefined, link: entry.source, verified: entry.verified };
+    records[showId(show)] = { ...show, area: isText(entry.area, 60) ? entry.area.trim() : undefined, weekly: entry.weekly, about: isText(entry.about, 200) ? entry.about.trim() : undefined, link: entry.source, verified: entry.verified, photoUrl: isText(entry.photoUrl, 500) && entry.photoUrl.startsWith("https://") ? entry.photoUrl.trim() : undefined };
   });
   return { records, at: isDay(file.checked) ? Date.parse(file.checked) : Date.now() };
 }
@@ -115,12 +116,14 @@ const thisYear = readLineup(THIS_YEAR, { inSeason: true });
 const lastYear = readLineup(LAST_YEAR, { inSeason: false });
 
 const update = {};
-for (const [id, { area, weekly, about, link, verified, ...show }] of Object.entries(thisYear.records)) {
+for (const [id, { area, weekly, about, link, verified, photoUrl, ...show }] of Object.entries(thisYear.records)) {
   update[`trips/${tripId}/parties/shows/${id}`] = {
     ...show,
     ...(area ? { area } : {}),
     ...(weekly ? { weekly } : {}),
     ...(about ? { about } : {}),
+    // The event's own picture, when the file gives one (owner, 25 Nov 2026: the Zamna flyer).
+    ...(photoUrl ? { photoUrl } : {}),
     ...(typeof link === "string" && /^https?:\/\//.test(link) && link.length <= 500 ? { link } : {}),
     verified: verified === true,
     source: "seed",
