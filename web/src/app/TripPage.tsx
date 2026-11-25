@@ -1,6 +1,10 @@
 import { PhotosProvider } from "../components/Avatars";
 import { Notice } from "../components/Notice";
-import { crewOf, useOrganizerLink, type CrewView } from "../features/crew/api/crew";
+import {
+  crewOf,
+  useOrganizerLink,
+  type CrewView,
+} from "../features/crew/api/crew";
 import { Invitation } from "../features/crew/components/Invitation";
 import { Invite } from "../features/crew/components/Invite";
 import { OrganizerSignIn } from "../features/crew/components/OrganizerSignIn";
@@ -14,7 +18,11 @@ import { LinksModule } from "../features/links/components/LinksModule";
 import type { MapDestination } from "../features/map/components/TripMap";
 import { useEventsFilter } from "../features/parties/components/EventsFilter";
 import { PartiesBlock } from "../features/parties/components/PartiesBlock";
-import { tagChips, tripTags, type EventsFilter } from "../features/parties/lib/tags";
+import {
+  tagChips,
+  tripTags,
+  type EventsFilter,
+} from "../features/parties/lib/tags";
 import type { MapPlace } from "../features/parties/lib/detail";
 import { pins } from "./lib/pins";
 import { useTrip } from "../lib/useTrip";
@@ -50,7 +58,11 @@ export function TripPage({ tripId }: { tripId: string }) {
     case "offline":
       return <Notice>No connection</Notice>;
     case "notFound":
-      return <Notice>This link does not open a trip. Ask the organizer for the link.</Notice>;
+      return (
+        <Notice>
+          This link does not open a trip. Ask the organizer for the link.
+        </Notice>
+      );
     case "failed":
       return (
         <Notice detail={state.reason} onRetry={state.retry}>
@@ -58,11 +70,28 @@ export function TripPage({ tripId }: { tripId: string }) {
         </Notice>
       );
     case "ready":
-      return <ReadyPage tripId={tripId} trip={state.trip} uid={state.uid} offline={state.offline} />;
+      return (
+        <ReadyPage
+          tripId={tripId}
+          trip={state.trip}
+          uid={state.uid}
+          offline={state.offline}
+        />
+      );
   }
 }
 
-function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip; uid: string; offline: boolean }) {
+function ReadyPage({
+  tripId,
+  trip,
+  uid,
+  offline,
+}: {
+  tripId: string;
+  trip: Trip;
+  uid: string;
+  offline: boolean;
+}) {
   const crew = crewOf(trip, uid);
   const organizerLink = useOrganizerLink(tripId, uid, crew);
   // The pin the show sheet's "See on the map" asked for. The map reads it once, as it mounts; FocusedMap
@@ -76,16 +105,25 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
   const list = crewList(trip);
   // The Events filter; the map does not follow it, it holds every pin (design exception 24).
   const events = useEventsFilter(tagChips(tripTags(trip)));
-  const you = crew.memberId && crew.member ? { id: crew.memberId, name: crew.member.name } : undefined;
+  const you =
+    crew.memberId && crew.member
+      ? { id: crew.memberId, name: crew.member.name }
+      : undefined;
+  const out = crew.member?.reply === "out";
 
   return (
     <PhotosProvider photos={crew.photos} order={joinOrder(trip)}>
       {offline && <Notice>No connection</Notice>}
-      {organizerLink === "invalid" && <Notice>This organizer link is not valid.</Notice>}
-      {/* Before a reply the friend sees the invitation (12/1). A friend who
-          can't make it sees it again with that reply pressed, and the modules below. */}
-      {(!crew.member || crew.member.reply === "out") && <Invitation tripId={tripId} uid={uid} info={trip.info} crew={crew} />}
-      {crew.member && (
+      {organizerLink === "invalid" && (
+        <Notice>This organizer link is not valid.</Notice>
+      )}
+      {/* Before a reply the friend sees the invitation (12/1). A friend who can't make it sees only the
+          invitation again, with that reply pressed (owner, 25 Nov 2026: "the bottom part should be removed");
+          "I'm in" or "Maybe" brings the trip back. */}
+      {(!crew.member || out) && (
+        <Invitation tripId={tripId} uid={uid} info={trip.info} crew={crew} />
+      )}
+      {crew.member && !out && (
         <>
           <Home
             trip={trip}
@@ -97,7 +135,15 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
                   you={you}
                   onYou={() => setPhotoOpen(true)}
                   onSee={() => setCrewOpen(true)}
-                  reply={crew.memberId && <YourReply tripId={tripId} memberId={crew.memberId} member={crew.member} />}
+                  reply={
+                    crew.memberId && (
+                      <YourReply
+                        tripId={tripId}
+                        memberId={crew.memberId}
+                        member={crew.member}
+                      />
+                    )
+                  }
                 />
               )
             }
@@ -111,7 +157,9 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
                   reactions={trip.activityReactions}
                   memberId={crew.memberId}
                   isOrganizer={crew.isOrganizer}
-                  names={Object.fromEntries(crew.members.map((member) => [member.id, member.name]))}
+                  names={Object.fromEntries(
+                    crew.members.map((member) => [member.id, member.name]),
+                  )}
                   crewSize={crew.members.length}
                   thumbOf={(entry) => thumbOf(trip, entry)}
                   openerOf={(entry) => {
@@ -123,10 +171,18 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
               )
             }
             content={(openModule) =>
-              moduleSlots(tripId, trip, crew, openModule, events, { pin: mapFocus, clear: () => setMapFocus(null) }, (place) => {
-                setMapFocus(place ? `${place.kind}:${place.id}` : null);
-                openModule("map");
-              })
+              moduleSlots(
+                tripId,
+                trip,
+                crew,
+                openModule,
+                events,
+                { pin: mapFocus, clear: () => setMapFocus(null) },
+                (place) => {
+                  setMapFocus(place ? `${place.kind}:${place.id}` : null);
+                  openModule("map");
+                },
+              )
             }
           />
         </>
@@ -134,18 +190,35 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
       {/* The organizer signs in with Google from any phone (D15); an organizer no longer needs it,
           and finds "Invite" and "Text the crew" in its place. */}
       {crew.isOrganizer ? (
-        <div className="organizer-foot">
-          <Invite tripId={tripId} info={trip.info} />
-          <TextCrew tripId={tripId} tripName={trip.info?.name ?? ""} members={crew.byId} />
-        </div>
+        !out && (
+          <div className="organizer-foot">
+            <Invite tripId={tripId} info={trip.info} />
+            <TextCrew
+              tripId={tripId}
+              tripName={trip.info?.name ?? ""}
+              members={crew.byId}
+            />
+          </div>
+        )
       ) : (
         <OrganizerSignIn tripId={tripId} />
       )}
       {crew.memberId && (
-        <CrewSheet open={crewOpen} list={list} youId={crew.memberId} onClose={() => setCrewOpen(false)} />
+        <CrewSheet
+          open={crewOpen}
+          list={list}
+          youId={crew.memberId}
+          onClose={() => setCrewOpen(false)}
+        />
       )}
       {crew.memberId && crew.member && (
-        <PhotoSheet open={photoOpen} tripId={tripId} memberId={crew.memberId} member={crew.member} onClose={() => setPhotoOpen(false)} />
+        <PhotoSheet
+          open={photoOpen}
+          tripId={tripId}
+          memberId={crew.memberId}
+          member={crew.member}
+          onClose={() => setPhotoOpen(false)}
+        />
       )}
     </PhotosProvider>
   );
@@ -165,7 +238,9 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
 /** The map's code is its own file, so MapLibre is not run before the first paint. It is never fetched late: the splash
  * preloads it with every other chunk (public/assets/hype.js, /app/preload.json), and useWarmMap runs it right after. */
 const loadMap = () => import("../features/map/components/TripMap");
-const TripMap = lazy(() => loadMap().then((module) => ({ default: module.TripMap })));
+const TripMap = lazy(() =>
+  loadMap().then((module) => ({ default: module.TripMap })),
+);
 
 /**
  * Readies the Map module once the trip is drawn (owner, 24 Nov 2026: "Don't lazy load the map, load it immediately
@@ -178,11 +253,21 @@ const TripMap = lazy(() => loadMap().then((module) => ({ default: module.TripMap
 function useWarmMap(trip: Trip): void {
   const first = mapDestinations(trip)[0];
   useEffect(() => {
-    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
+    const saveData =
+      (navigator as Navigator & { connection?: { saveData?: boolean } })
+        .connection?.saveData === true;
     if (!first || saveData) return;
-    const go = () => void loadMap().then((module) => module.warmMap(first)).catch(() => {});
-    const idle = window.requestIdleCallback ? window.requestIdleCallback(go, { timeout: 1500 }) : window.setTimeout(go, 300);
-    return () => (window.cancelIdleCallback ? window.cancelIdleCallback(idle) : window.clearTimeout(idle));
+    const go = () =>
+      void loadMap()
+        .then((module) => module.warmMap(first))
+        .catch(() => {});
+    const idle = window.requestIdleCallback
+      ? window.requestIdleCallback(go, { timeout: 1500 })
+      : window.setTimeout(go, 300);
+    return () =>
+      window.cancelIdleCallback
+        ? window.cancelIdleCallback(idle)
+        : window.clearTimeout(idle);
     // Once, for the first destination the trip had when it was drawn.
   }, [first?.id]);
 }
@@ -214,13 +299,23 @@ function moduleSlots(
         stay={trip.stay}
         destinations={destinationList(trip)}
         areas={Object.values(trip.places?.areas ?? {})}
-        names={Object.fromEntries(crew.members.map((member) => [member.id, member.name]))}
+        names={Object.fromEntries(
+          crew.members.map((member) => [member.id, member.name]),
+        )}
         memberId={crew.memberId}
       />
     ), // Trip 9: the Stay module.
     parties: (
       <>
-        <PartiesBlock tripId={tripId} trip={trip} memberId={crew.memberId} isOrganizer={crew.isOrganizer} onSeeMap={seeMap} filter={filter} onFilter={setFilter} />
+        <PartiesBlock
+          tripId={tripId}
+          trip={trip}
+          memberId={crew.memberId}
+          isOrganizer={crew.isOrganizer}
+          onSeeMap={seeMap}
+          filter={filter}
+          onFilter={setFilter}
+        />
         {/* The daily events check runs on its own; the owner asked for no button (24 Nov 2026). */}
       </>
     ), // Trip 11: the Events module (code: parties). A show's sheet opens the map on its venue; the organizer's events check sits at its foot.
@@ -229,7 +324,9 @@ function moduleSlots(
         tripId={tripId}
         links={trip.links}
         destinations={destinationList(trip)}
-        names={Object.fromEntries(crew.members.map((member) => [member.id, member.name]))}
+        names={Object.fromEntries(
+          crew.members.map((member) => [member.id, member.name]),
+        )}
         memberId={crew.memberId}
         isOrganizer={crew.isOrganizer}
       />
@@ -244,7 +341,9 @@ function moduleSlots(
             memberId={crew.memberId}
             isOrganizer={crew.isOrganizer}
             focus={mapFocus.pin ?? undefined}
-            onOpen={(pin) => openModule(pin.kind === "stay" ? "stay" : "parties")}
+            onOpen={(pin) =>
+              openModule(pin.kind === "stay" ? "stay" : "parties")
+            }
           />
         </FocusedMap>
       </Suspense>
@@ -261,7 +360,13 @@ function moduleSlots(
  * Output: the map.
  * Examples (checked on the emulator): "See on the map" on Peggy Gou → Savaya's card open; Map button later → all Bali pins
  */
-function FocusedMap({ focus, children }: { focus: { pin: string | null; clear: () => void }; children: ReactNode }) {
+function FocusedMap({
+  focus,
+  children,
+}: {
+  focus: { pin: string | null; clear: () => void };
+  children: ReactNode;
+}) {
   useEffect(() => {
     if (focus.pin) focus.clear();
     // Once per mount: the map reads its focus only as it mounts.
@@ -280,12 +385,20 @@ function FocusedMap({ focus, children }: { focus: { pin: string | null; clear: (
 function mapDestinations(trip: Trip): MapDestination[] {
   return Object.entries(trip.info?.destinations ?? {})
     .filter(([, place]) => place.lat !== undefined && place.lng !== undefined)
-    .map(([id, place]) => ({ id, name: place.name, lat: place.lat!, lng: place.lng! }));
+    .map(([id, place]) => ({
+      id,
+      name: place.name,
+      lat: place.lat!,
+      lng: place.lng!,
+    }));
 }
 
 /** The trip's destinations as { id, name }, in the trip file's order. */
 function destinationList(trip: Trip): Array<{ id: string; name: string }> {
-  return Object.entries(trip.info?.destinations ?? {}).map(([id, place]) => ({ id, name: place.name }));
+  return Object.entries(trip.info?.destinations ?? {}).map(([id, place]) => ({
+    id,
+    name: place.name,
+  }));
 }
 
 /**
@@ -329,14 +442,19 @@ function moduleOf(entry: ActivityEntry): ModuleId | "crew" | null {
  */
 function thumbOf(trip: Trip, entry: ActivityEntry): string | undefined {
   if (!entry.ref) return undefined;
-  if (entry.kind === "stay-added" || entry.kind === "stay-confirmed") return trip.stay?.options?.[entry.ref]?.photoUrl;
-  if (entry.kind === "link-added") return trip.links?.items?.[entry.ref]?.thumbUrl;
-  if (entry.kind === "place-added") return trip.places?.custom?.[entry.ref]?.photo;
+  if (entry.kind === "stay-added" || entry.kind === "stay-confirmed")
+    return trip.stay?.options?.[entry.ref]?.photoUrl;
+  if (entry.kind === "link-added")
+    return trip.links?.items?.[entry.ref]?.thumbUrl;
+  if (entry.kind === "place-added")
+    return trip.places?.custom?.[entry.ref]?.photo;
   return undefined;
 }
 
 /** The member ids in join order (earliest first, id breaks a tie), so a friend keeps their colour as others join. */
 function joinOrder(trip: Trip): string[] {
   const members = trip.crew?.members ?? {};
-  return Object.keys(members).sort((a, b) => members[a].at - members[b].at || a.localeCompare(b));
+  return Object.keys(members).sort(
+    (a, b) => members[a].at - members[b].at || a.localeCompare(b),
+  );
 }

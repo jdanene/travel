@@ -19,5 +19,13 @@
 .reply-circles [data-tone="yes"][aria-pressed="true"] .rc-dot { background: var(--yes); }
 .reply-circles [data-tone="maybe"][aria-pressed="true"] .rc-dot { background: var(--maybe); }
 .reply-circles [data-tone="no"][aria-pressed="true"] .rc-dot { background: var(--no); }
+/* Once one is picked, the other two step back (owner, 25 Nov 2026: "look more deselected"): no fill, a quiet
+   outline, the word in the page's muted colour. They keep their coloured icon and an outline of at least 3:1
+   against the page (WCAG 1.4.11), so they still read as buttons, not as disabled (hci-design, ui-patterns). */
+.reply-circles:has([aria-pressed="true"]) [aria-pressed="false"] .rc-dot { background: transparent; border-color: #8a847b; }
+.reply-circles:has([aria-pressed="true"]) [data-tone="yes"][aria-pressed="false"] .rc-dot { color: #3fb760; }
+.reply-circles:has([aria-pressed="true"]) [data-tone="maybe"][aria-pressed="false"] .rc-dot { color: #f08040; }
+.reply-circles:has([aria-pressed="true"]) [data-tone="no"][aria-pressed="false"] .rc-dot { color: #f0596b; }
+.reply-circles:has([aria-pressed="true"]) [aria-pressed="false"] .rc-word { color: var(--on-page-mut); font-weight: 600; }
 @media (min-width: 900px) { .rc-dot { width: 3.75rem; height: 3.75rem; } }
 @media (prefers-reduced-motion: reduce) { .rc-dot { transition: none; } }
