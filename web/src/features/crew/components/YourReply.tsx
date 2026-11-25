@@ -3,6 +3,7 @@ import { Notice } from "../../../components/Notice";
 import type { WriteResult } from "../../../lib/db";
 import type { Member, MemberId, Reply } from "../../../types/trip";
 import { saveReply } from "../api/crew";
+import { burst } from "./confetti";
 import { ReplyCircles } from "./ReplyCircles";
 import "./YourReply.css";
 
@@ -28,7 +29,11 @@ export function YourReply({ tripId, memberId, member }: { tripId: string; member
   const pick = (reply: Reply) => {
     if (reply === member.reply) return;
     setFailure(null);
-    void saveReply(tripId, memberId, member.name, reply, member).then((result) => setFailure(result.ok ? null : result));
+    // A saved "I'm in" gets its confetti here too, as on the invitation.
+    void saveReply(tripId, memberId, member.name, reply, member).then((result) => {
+      setFailure(result.ok ? null : result);
+      if (result.ok && reply === "in") burst();
+    });
   };
 
   return (

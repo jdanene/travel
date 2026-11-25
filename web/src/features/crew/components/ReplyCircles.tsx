@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent, ty
 import { Icon, type IconName } from "../../../components/Icon";
 import type { Reply } from "../../../types/trip";
 import { REPLIES } from "../lib/crew";
+import { burst } from "./confetti";
 import "./ReplyCircles.css";
 
 const ICONS: Record<Reply, IconName> = { in: "check", maybe: "ask", out: "close" };
@@ -37,7 +38,9 @@ function buzz() {
  * nothing; that circle shakes and "Hold to change" under the circles lights
  * up, so a fast tapper learns the rule. Enter, Space and screen-reader
  * activation change the reply at once; a held key does not repeat it.
- * Tapping the circle already picked does nothing.
+ * Tapping the circle already picked does nothing. Holding "I'm in" when
+ * you are already in celebrates: the ring fills, the phone buzzes and the
+ * confetti falls again; nothing is saved (owner, 25 Nov 2026).
  *
  * Inputs: picked — this member's reply, if any; onPick — what a committed
  * pick does (open the join sheet, or save the reply).
@@ -50,6 +53,7 @@ function buzz() {
  *   picked "in", hold "Maybe" 650 ms → the ring fills, onPick("maybe")
  *   picked "in", release at 300 ms   → no change
  *   picked "in", focus Maybe, Enter  → onPick("maybe") at once
+ *   picked "in", hold "I'm in" 650 ms → the ring fills, a buzz and confetti; onPick is not called
  */
 export function ReplyCircles({ picked, onPick }: { picked: Reply | undefined; onPick: (reply: Reply) => void }) {
   const hintId = useId();
@@ -57,7 +61,8 @@ export function ReplyCircles({ picked, onPick }: { picked: Reply | undefined; on
   const [nudge, setNudge] = useState<{ reply: Reply; odd: boolean } | null>(null);
   const latest = useRef({ picked, onPick });
   latest.current = { picked, onPick };
-  const hold = useRef<{ reply: Reply; pointerId: number; x: number; y: number; timer: number } | null>(null);
+  // cheer: a hold on "I'm in" by a friend who is already in; it celebrates and saves nothing.
+  const hold = useRef<{ reply: Reply; pointerId: number; x: number; y: number; timer: number; cheer: boolean } | null>(null);
   // Set on a pointer press with no reply yet, so the click that follows is that first tap.
   const tapArmed = useRef(false);
 
@@ -86,20 +91,23 @@ export function ReplyCircles({ picked, onPick }: { picked: Reply | undefined; on
     };
   }, [cancel]);
   useEffect(() => {
-    if (hold.current && (picked === undefined || picked === hold.current.reply)) cancel();
+    if (hold.current && (hold.current.cheer || picked === undefined || picked === hold.current.reply)) cancel();
   }, [picked, cancel]);
 
   const down = (reply: Reply) => (event: PointerEvent<HTMLButtonElement>) => {
     // A second finger, or a second press anywhere, is not a deliberate hold.
     if (hold.current || !event.isPrimary || event.button !== 0) return cancel();
     tapArmed.current = picked === undefined;
-    if (picked === undefined || picked === reply) return;
+    const cheer = picked === reply && reply === "in";
+    if (picked === undefined || (picked === reply && !cheer)) return;
     const timer = window.setTimeout(() => {
       hold.current = null;
       setHolding(null);
-      commit(reply);
+      if (!cheer) return commit(reply);
+      buzz();
+      burst();
     }, HOLD_MS);
-    hold.current = { reply, pointerId: event.pointerId, x: event.clientX, y: event.clientY, timer };
+    hold.current = { reply, pointerId: event.pointerId, x: event.clientX, y: event.clientY, timer, cheer };
     setHolding(reply);
   };
 
@@ -113,7 +121,8 @@ export function ReplyCircles({ picked, onPick }: { picked: Reply | undefined; on
     const start = hold.current;
     if (!start || event.pointerId !== start.pointerId) return;
     cancel();
-    setNudge((last) => ({ reply: start.reply, odd: !last?.odd }));
+    // An early release on your own "I'm in" is just a tap: no nudge.
+    if (!start.cheer) setNudge((last) => ({ reply: start.reply, odd: !last?.odd }));
   };
 
   // A click with no pointer behind it (detail 0) is a key or a screen reader: it picks at once.

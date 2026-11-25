@@ -41,6 +41,9 @@ window.HYPE = (() => {
     card: { big: "WASTED", small: "DRINK WATER THIS TIME", k: 118.2, ar: 1.225, cy: 54.5, ty: .12 } };
   const pause = { kind: "img", src: B + "pause.jpg", pos: "center",
     card: { big: "PAUSE", small: "AS A GROWN MAN SHOULD YOU...", k: 163, ar: 1.333, cy: 52, ty: .25 } };
+  // The club photo the owner picked from the first set (25 Nov 2026: "add that to the picture carousel, make sure it's
+  // treated same as wasted"): one picture among the rest, on any panel but the title (side).
+  const lasers = { kind: "img", src: B + "club-lasers.jpg", pos: "center 30%", side: true };
   // Named places lead, with the crew's photos between them, so every slideshow reaches them early.
   const named = bali.filter(b => b.label), stills = [];
   for (let k = 0; k < named.length; k++) { stills.push(named[k]); if (ours[k]) stills.push(ours[k]); }
@@ -48,6 +51,7 @@ window.HYPE = (() => {
   const photos = [];
   for (let k = 0; k < Math.max(clips.length, stills.length); k++) { if (clips[k]) photos.push(clips[k]); if (stills[k]) photos.push(stills[k]); }
   photos.splice(Math.floor(photos.length / 2), 0, pause);
+  photos.splice(Math.floor(photos.length / 4), 0, lasers);
   photos.push(wasted);   // one picture among the rest; on a wall it lands on a random panel, never the title
 
   // Build a filling element for a photo or a clip.
@@ -181,12 +185,12 @@ window.HYPE = (() => {
     const free = pool.slice(), cur = [];
     // A tile's own scene counts as busy too, or it would swap between two cuts of one clip and look frozen.
     // Order is random on every visit and every round, but every item comes up once per round before any repeats.
-    // The WASTED card moves around like any picture, except onto the title panel (class "t").
+    // The WASTED card and the club photo (side) move around like any picture, except onto the title panel (class "t").
     let shown = new Set();
     const take = k => {
       const busy = new Set(cur.filter(c => c).map(scene));
       const playing = cur.filter((c, j) => c && j !== k && c.kind === "vid").length;
-      const ok = it => !busy.has(scene(it)) && !(it.card && tiles[k].classList.contains("t")) && !(it.kind === "vid" && playing >= clips);
+      const ok = it => !busy.has(scene(it)) && !((it.card || it.side) && tiles[k].classList.contains("t")) && !(it.kind === "vid" && playing >= clips);
       let options = free.filter(it => ok(it) && !shown.has(it));
       if (!options.length) { shown = new Set(cur.filter(c => c)); options = free.filter(ok); }   // a new round
       if (!options.length) return null;
