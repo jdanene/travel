@@ -34,7 +34,6 @@ export function YourReply({ tripId, memberId, member }: { tripId: string; member
   return (
     <div className="your-reply">
       {failure && !failure.ok && <Notice>{failure.reason === "refused" ? "This was not saved." : "No connection"}</Notice>}
-      <p className="your-reply-label">Your reply</p>
       <ReplyCircles picked={member.reply} onPick={pick} />
     </div>
   );
