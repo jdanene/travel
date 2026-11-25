@@ -303,6 +303,7 @@ describe("database rules", () => {
     await assertFails(set(ref(a, paths.activityReply(T, "d1", "r1")), null));
     await assertFails(set(ref(b, paths.activityReply(T, "d1", "r1")), { by: "bob", at: 3, text: "Edited" }));
     await assertSucceeds(set(ref(b, paths.activityReply(T, "d1", "r1")), null));
+  });
 
   it("37. keeps an event's https picture on a friend's own edit, and refuses one that is not https", async () => {
     const a = db("uid-a");
