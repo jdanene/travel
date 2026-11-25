@@ -2140,6 +2140,71 @@
    "place": "Singapore",
    "source": "https://sg.celavi.com/events/ce-la-vi-pres-an-ka",
    "verified": true
+  },
+  {
+   "date": "2026-02-01",
+   "artist": "Glitterbox",
+   "note": "Glitterbox Australasia Tour: Mousse T., Jellybean Benitez, Breakbot & Irfane, Yasmin",
+   "venue": "CLUB SEEN",
+   "area": "Chaweng",
+   "place": "Koh Samui",
+   "source": "https://megatix.in.th/events/glitterbox-Australasia-Tour-at-Koh-samui-club-seen",
+   "verified": true
+  },
+  {
+   "date": "2026-02-06",
+   "artist": "Jonas Blue",
+   "venue": "CLUB SEEN",
+   "area": "Chaweng",
+   "place": "Koh Samui",
+   "source": "https://megatix.in.th/events/clubseenxjonasblue",
+   "verified": true
+  },
+  {
+   "date": "2026-02-12",
+   "artist": "Nic Fanciulli",
+   "venue": "CLUB SEEN",
+   "area": "Chaweng",
+   "place": "Koh Samui",
+   "source": "https://megatix.in.th/events/clubseenxnicfanciulli",
+   "verified": true
+  },
+  {
+   "date": "2026-02-21",
+   "artist": "Zamna on the Beach",
+   "note": "Zamna Soundsystem, Øostil, Goom Gum",
+   "venue": "CLUB SEEN",
+   "area": "Chaweng",
+   "place": "Koh Samui",
+   "source": "https://megatix.in.th/events/clubseenxzamna",
+   "verified": true
+  },
+  {
+   "date": "2026-02-26",
+   "artist": "Mahmut Orhan",
+   "venue": "CLUB SEEN",
+   "area": "Chaweng",
+   "place": "Koh Samui",
+   "source": "https://megatix.in.th/events/clubseenxmahmutorhan",
+   "verified": true
+  },
+  {
+   "date": "2026-02-28",
+   "artist": "Claptone",
+   "venue": "CLUB SEEN",
+   "area": "Chaweng",
+   "place": "Koh Samui",
+   "source": "https://megatix.in.th/events/clubseenxclaptone",
+   "verified": true
+  },
+  {
+   "date": "2026-03-28",
+   "artist": "Alec Monopoly",
+   "venue": "CLUB SEEN",
+   "area": "Chaweng",
+   "place": "Koh Samui",
+   "source": "https://megatix.in.th/events/clubseenxalecmonopoly",
+   "verified": true
   }
  ],
  "nothing_found": [

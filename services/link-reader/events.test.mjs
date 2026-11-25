@@ -6,10 +6,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { checkEvents, readEvents } from "./events.mjs";
-import { SOURCES, onSourceSite } from "./event-sources.mjs";
+import { SOURCES, actBeforeBar, onSourceSite } from "./event-sources.mjs";
 
 const page = (name) => readFileSync(new URL(`./fixtures/${name}`, import.meta.url), "utf8");
 const savaya = SOURCES.find((source) => source.venue === "Savaya");
+const clubSeen = SOURCES.find((source) => source.venue === "CLUB SEEN");
 
 test("readEvents reads the Event on a saved Savaya night", () => {
   assert.deepEqual(readEvents(page("savaya-event.html")), [{ name: "PEGGY GOU", date: "2027-02-13" }]);
@@ -22,6 +23,19 @@ test("readEvents reads the coming nights on saved Illuzion Phuket and Zouk lists
   const zouk = readEvents(page("zouk-events.html"));
   assert.equal(zouk.length, 10);
   assert.deepEqual(zouk[0], { name: "TGIW", date: "2026-11-25" });
+});
+
+test("readEvents reads CLUB SEEN's list of coming nights, entities decoded", () => {
+  const nights = readEvents(page("club-seen-events.html"));
+  assert.equal(nights.length, 30);
+  assert.deepEqual(nights[0], { name: "HERS | LADIES’ DAY", date: "2026-11-24" });
+  assert.deepEqual(nights[29], { name: "O BEACH IBIZA", date: "2027-02-14" });
+});
+
+test("actBeforeBar keeps the act before the club's subtitle", () => {
+  assert.equal(actBeforeBar("MAHMUT ORHAN | SEASON OPENING 2026"), "MAHMUT ORHAN");
+  assert.equal(actBeforeBar("AFRODISE"), "AFRODISE");
+  assert.equal(actBeforeBar("| NEW YEAR’S EVE"), "| NEW YEAR’S EVE");
 });
 
 test("readEvents finds nothing on Savaya's calendar, which only links to the nights", () => {
@@ -67,4 +81,24 @@ test("checkEvents keeps acts in the window (from 25 Jan), leaves out series and 
   ]);
   assert.deepEqual(answer.failed, [{ venue: "Down Club", reason: "unreadable" }]);
   assert.ok(!opened.some((url) => url.includes("whatsform")), "opens no other host");
+});
+
+test("checkEvents reads CLUB SEEN: the weekly O BEACH IBIZA is a series, and an act loses its subtitle", async (t) => {
+  const extra = '<script type="application/ld+json">{"@type":"Event","name":"MAHMUT ORHAN | SEASON CLOSING 2027","startDate":"2027-02-26T14:00:00+07:00"}</script>';
+  t.mock.method(globalThis, "fetch", async (url) =>
+    url === "https://www.seenbeachclubsamui.com/events/" ? new Response(page("club-seen-events.html") + extra, { status: 200 }) : new Response("", { status: 404 }),
+  );
+
+  const answer = await checkEvents([clubSeen]);
+
+  assert.deepEqual(answer.events, [
+    { destination: "kohSamui", venue: "CLUB SEEN", area: "Chaweng", date: "2027-02-26", artist: "MAHMUT ORHAN", link: "https://www.seenbeachclubsamui.com/events/" },
+  ]);
+  assert.deepEqual(answer.failed, []);
+});
+
+test("checkEvents reports CLUB SEEN as unreadable when its page refuses the request", async (t) => {
+  t.mock.method(globalThis, "fetch", async () => new Response("Method Not Allowed", { status: 405 }));
+  const answer = await checkEvents([clubSeen]);
+  assert.deepEqual(answer, { ...answer, events: [], failed: [{ venue: "CLUB SEEN", reason: "unreadable" }] });
 });

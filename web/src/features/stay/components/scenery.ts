@@ -13,7 +13,8 @@ const BY_DESTINATION: Record<string, string> = { bali: "bali-cliff.jpg", kohPhan
  * A scenery photo for a stay whose own photo is missing or broken.
  * Inputs: the area id (from idFromName) and the destination id.
  * Output: an https photo address; the destination's photo when the area has none.
- * Examples: scenery("ubud", "bali") → ".../ubud.jpg"; scenery("haad-rin", "kohPhangan") → ".../kp-aerial.jpg"
+ * Examples: scenery("ubud", "bali") → ".../ubud.jpg"; scenery("haad-rin", "kohPhangan") → ".../kp-aerial.jpg";
+ *   scenery("chaweng", "kohSamui") → ".../kp-beach.jpg" (Phuket, Singapore and Koh Samui have no photo of their own)
  */
 export function scenery(areaId: string, destination: string): string {
   return MEDIA + (BY_AREA[areaId] ?? BY_DESTINATION[destination] ?? "kp-beach.jpg");

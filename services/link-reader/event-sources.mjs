@@ -8,7 +8,9 @@
 //
 // A club whose page carries schema.org Event data needs no more. A club
 // that lists its nights as plain text names its reader in event-lists.mjs
-// (list). Checked from a Mac on 23 Nov 2026; README.md lists every club in
+// (list). A club whose names carry a subtitle after the act ("MAHMUT ORHAN |
+// SEASON OPENING 2026") names the rule that keeps the act (actName).
+// Checked from a Mac on 23 Nov 2026; README.md lists every club in
 // data/places.json, what its page showed, and why a club is not read.
 
 import { plainHttps } from "./sites.mjs";
@@ -58,7 +60,27 @@ export const SOURCES = [
   },
   // The party's schedule site; the seed names the venue Haad Rin Beach.
   { venue: "Haad Rin Beach", destination: "kohPhangan", area: "Haad Rin", url: "https://fullmoonparty-thailand.com/schedules/", list: readFullMoonParty },
+  // One Event per coming night (/events answers with a redirect to /events/). Names carry a
+  // subtitle: "MINISTRY OF SOUND | NEW YEAR’S EVE".
+  { venue: "CLUB SEEN", destination: "kohSamui", area: "Chaweng", url: "https://www.seenbeachclubsamui.com/events/", actName: actBeforeBar },
 ];
+
+/**
+ * The act in a night's name that adds a subtitle after a bar, so the list
+ * reads "MAHMUT ORHAN", and the same act on two nights counts as one name.
+ *
+ * Inputs: name, the night's name as read, entities decoded.
+ * Output: the words before the first "|", trimmed; the whole name when
+ *   there is no bar or nothing before it.
+ * Examples (each is a test in events.test.mjs):
+ *   actBeforeBar("MAHMUT ORHAN | SEASON OPENING 2026") → "MAHMUT ORHAN"
+ *   actBeforeBar("AFRODISE")                           → "AFRODISE"
+ *   actBeforeBar("| NEW YEAR’S EVE")                   → "| NEW YEAR’S EVE"   (no act before the bar)
+ */
+export function actBeforeBar(name) {
+  const act = name.split("|")[0].trim();
+  return act || name;
+}
 
 /**
  * Says whether the check may open an address for a source: the source's own

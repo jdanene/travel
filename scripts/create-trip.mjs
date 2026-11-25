@@ -10,7 +10,8 @@
  * key, and saves both in local/trip.state.json (local/trip.state.emulator.json
  * with --emulator). Every later run keeps them.
  * Each destination takes its centre and its country ("Indonesia", for
- * "Bali, Indonesia") from data/places.json.
+ * "Bali, Indonesia") from data/places.json. Areas and venues whose
+ * destination the trip file does not list are not written.
  * Each run replaces info (each field by its own path, so info/inviteTitle,
  * which an organizer sets in the "Invite" sheet, stays; absent, the page and
  * the link preview use the default), crew/expected, places/areas,
@@ -79,6 +80,9 @@ const state = existsSync(STATE_FILE) ? readJson(STATE_FILE) : { tripId: randomId
 writeFileSync(STATE_FILE, JSON.stringify(state, null, 2) + "\n");
 const { tripId, organizerKey } = state;
 
+// data/places.json may know destinations this trip file does not list; their areas and venues stay out,
+// or the Events list would show them under a bare id. The database rules refuse shows there anyway.
+const inTrip = (records) => Object.fromEntries(Object.entries(records ?? {}).filter(([, place]) => Object.hasOwn(file.destinations, place.destination)));
 const destinations = Object.fromEntries(
   Object.entries(file.destinations).map(([id, { name }]) => [id, { name, ...places.destinations[id] }]),
 );
@@ -98,8 +102,9 @@ const update = {
   // One path per option, so the options friends added stay.
   ...Object.fromEntries(file.dateOptions.map(({ from, to }) => [`trips/${tripId}/dates/options/${dateOptionId(from, to)}`, { from, to }])),
   // Areas and venues only: places/custom holds the friends' own places, which a run must keep.
-  [`trips/${tripId}/places/areas`]: places.areas,
-  [`trips/${tripId}/places/venues`]: places.venues,
+  // Only those in the trip's destinations: a trip file without Koh Samui gets no Koh Samui venues.
+  [`trips/${tripId}/places/areas`]: inTrip(places.areas),
+  [`trips/${tripId}/places/venues`]: inTrip(places.venues),
   // One path for this key, so the keys organizers made with "Add an organizer" stay.
   [`tripSecrets/${tripId}/organizerKey/${organizerKey}`]: true,
   // The whole node, so an email taken out of the file is taken out here; null when there are none.

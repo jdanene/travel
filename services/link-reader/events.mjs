@@ -37,7 +37,8 @@ const SERIES_NIGHTS = 3;
  *   events     at most 100, by date: { destination, venue, area, date,
  *              artist, link }, where date is "YYYY-MM-DD" inside the season,
  *              artist is the club's name for the night, and link is the
- *              https page the event came from. A night named "Special
+ *              https page the event came from; a subtitle the club adds
+ *              after the act is dropped (a source's actName). A night named "Special
  *              guest" or "TBA", or a name the club gives three or more
  *              nights in the season, is left out: it is not an act.
  *   failed     [{ venue, reason }], one entry per source that failed, with
@@ -156,6 +157,8 @@ function eventLinks(html, pageUrl, source) {
 // The found events as the app wants them: inside the season, acts only,
 // each night once, by date.
 function actsInSeason(found) {
+  // A club that adds subtitles to its names gives the act alone (source.actName).
+  found = found.map((item) => (item.source.actName ? { ...item, event: { ...item.event, name: item.source.actName(item.event.name) } } : item));
   const nights = new Map();
   for (const { source, event } of found) {
     if (!inSeason(event.date)) continue;
