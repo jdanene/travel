@@ -24,7 +24,8 @@ test("Café del Mar Phuket: 29 nights, the date read month first and checked day
 
 test("CÉ LA VI: the Club Lounge nights only, not the dinners", () => {
   reads(lists.readCeLaVi(page("ce-la-vi-home.html"), "https://sg.celavi.com/"), 3, "2026-11-28", "2026-12-31",
-    { name: "CÉ LA VI Pres. Fabio Neural", date: "2026-11-28", link: "https://sg.celavi.com/events/ce-la-vi-pres-fabio-neural" });
+    { name: "CÉ LA VI Pres. Fabio Neural", date: "2026-11-28", link: "https://sg.celavi.com/events/ce-la-vi-pres-fabio-neural",
+      image: "https://cdn.prod.website-files.com/698c1624c29ff5d3d3ca21d6/6ae85e966bf9155e11c415f7_Fabio%20Neural_28Nov%2726_Web.jpg" });
 });
 
 test("Klymax: this week's one night", () => {
@@ -32,7 +33,8 @@ test("Klymax: this week's one night", () => {
 });
 
 test("Café del Mar Bali: the coming night and the past ones in the same shape", () => {
-  reads(lists.readCafeDelMarBali(page("cafe-del-mar-bali-whats-on.html")), 18, "2023-05-01", "2026-12-31", { name: "NEW YEARS EVE 2026", date: "2026-12-31" });
+  reads(lists.readCafeDelMarBali(page("cafe-del-mar-bali-whats-on.html"), "https://www.cafedelmarbali.co.id/whats-on"), 18, "2023-05-01", "2026-12-31",
+    { name: "NEW YEARS EVE 2026", date: "2026-12-31", image: "https://www.cafedelmarbali.co.id/reserve/assets/images/events/event_square_1792567873_6ad86a41d5753.jpg" });
 });
 
 test("Desa Kitsuné: the year comes from the weekday", () => {
@@ -49,8 +51,10 @@ test("Full Moon Party: one row per party", () => {
 
 test("Potato Head and Marquee: the feeds their pages load", () => {
   assert.deepEqual(lists.readPotatoHead(page("potato-head-music.json"), "https://seminyak.potatohead.co/api/cached/experiences?type=Event&categories=music"), [
-    { name: "Live at Klymax: OFFSCRIPT", date: "2026-12-11", link: "https://seminyak.potatohead.co/experience/live-at-klymax-offscript" },
-    { name: "NYE 2026", date: "2026-12-31", link: "https://seminyak.potatohead.co/experience/new-years-eve" },
+    { name: "Live at Klymax: OFFSCRIPT", date: "2026-12-11", link: "https://seminyak.potatohead.co/experience/live-at-klymax-offscript",
+      image: "https://cdn.potatohead.co/139_KLYMAX_OFFSCRIPT_LIVE_AT_KLYMAX_AUG_2026_1920x1080_WEB_4_dd0f32d092.jpg" },
+    { name: "NYE 2026", date: "2026-12-31", link: "https://seminyak.potatohead.co/experience/new-years-eve",
+      image: "https://cdn.potatohead.co/New_Year_Eve_NYE_2026_Potato_Head_16x9_65b55abc14.jpg" },
   ]);
   reads(lists.readMarquee(page("marquee-events.json"), "https://taogroup.com/wp-json/wp/v2/events"), 11, "2026-11-27", "2026-12-31",
     { name: "HOLY PRIEST", date: "2026-11-27", link: "https://taogroup.com/event/27-11-26-holy-priest-marquee-singapore/" });

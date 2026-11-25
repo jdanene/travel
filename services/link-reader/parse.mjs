@@ -197,3 +197,43 @@ export function dayOf(text) {
   if (month < 1 || date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return null;
   return date.toISOString().slice(0, 10);
 }
+
+/**
+ * An event's picture as the events check hands it to the app (a show's
+ * photoUrl): from schema.org's image (an address, a list of them, or an
+ * ImageObject with url), a feed's field, an <img> src or og:image. A
+ * relative address resolves against the club's page; the result must be
+ * https and at most 500 characters, or there is none. The image itself is
+ * never fetched. Shared with events.mjs and event-lists.mjs.
+ *
+ * Inputs: value — what the page gives; pageUrl — the page it came from.
+ * Output: the https address, or undefined.
+ * Examples (each is a test in events.test.mjs):
+ *   eventImage(["https://cdn.example/a.png"], page)            → "https://cdn.example/a.png"
+ *   eventImage({ "@type": "ImageObject", url: "/b.jpg" }, "https://club.example/events") → "https://club.example/b.jpg"
+ *   eventImage("http://cdn.example/c.jpg", page)               → undefined (not https)
+ */
+export function eventImage(value, pageUrl) {
+  const first = Array.isArray(value) ? value[0] : value;
+  const raw = typeof first === "string" ? first : typeof first?.url === "string" ? first.url : typeof first?.contentUrl === "string" ? first.contentUrl : undefined;
+  if (!raw?.trim()) return undefined;
+  try {
+    const url = new URL(decodeEntities(raw.trim()), pageUrl);
+    const text = url.toString();
+    return url.protocol === "https:" && text.length <= 500 ? text : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * The og:image of a page, as an event's picture (eventImage's rules): the
+ * picture a club's one-night page gives when its event data has none.
+ *
+ * Inputs: html, pageUrl.
+ * Output: the https address, or undefined.
+ * Examples (checked through events.test.mjs): a night's page with og:image "https://cdn.example/n.jpg" → that address
+ */
+export function ogImage(html, pageUrl) {
+  return eventImage(readHead(html).meta["og:image"], pageUrl);
+}
