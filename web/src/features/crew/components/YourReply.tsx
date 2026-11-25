@@ -19,7 +19,7 @@ import "./YourReply.css";
  * with no connection the SDK keeps the change and the row says "No
  * connection" if it gives up.
  * Examples (checked on screen):
- *   KA is in, taps "Maybe" → Maybe picked; "1 in · 2 maybe"; Activity "KA said maybe"
+ *   KA is in, holds "Maybe" → Maybe picked; "1 in · 2 maybe"; Activity "KA said maybe"
  *   KA taps the reply already picked → nothing is written
  */
 export function YourReply({ tripId, memberId, member }: { tripId: string; memberId: MemberId; member: Member }) {

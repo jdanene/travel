@@ -26,7 +26,7 @@ interface InvitationProps {
  * with no app and no account.
  *
  * The first tap opens "Who are you?"; a friend who already replied changes
- * the reply in one tap (case 7). The tapped reply shows pressed at once;
+ * the reply with a short hold (case 7; ReplyCircles). The tapped reply shows pressed at once;
  * the SDK sends it when the connection allows, and flips it back if the
  * rules refuse it, with the reason above the buttons (case 8). When an
  * "I'm in" saves, a short burst of confetti falls over the page.
