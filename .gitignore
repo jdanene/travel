@@ -18,5 +18,7 @@ design/cover/photos/
 # Trip app: local trip file and links, build output, dependencies.
 local/
 public/app/
+# The shared events addresses' page files (scripts/stamp-event-previews.mjs); their paths hold the trip id.
+public/trip/
 node_modules/
 *-debug.log

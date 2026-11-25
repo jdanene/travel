@@ -64,6 +64,7 @@ step "deploy database rules" firebase deploy --only database --project travel-ca
 step "create or update the trip" node scripts/create-trip.mjs
 step "seed this year's and last year's parties" node scripts/seed-parties.mjs
 step "stamp the invite title into the link preview" node scripts/stamp-preview.mjs
+step "write the events' link previews" node scripts/stamp-event-previews.mjs
 step "deploy hosting" firebase deploy --only hosting --project travel-ca8f9
 
 if [ "$with_reader" = yes ]; then
