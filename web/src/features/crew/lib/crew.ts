@@ -1,10 +1,10 @@
 import type { Member, MemberId, Reply } from "../../../types/trip";
 
 /** The three replies of screen 12/1, in the mock's words. */
-export const REPLIES: Array<{ reply: Reply; label: string }> = [
-  { reply: "in", label: "I'm in" },
-  { reply: "maybe", label: "Maybe" },
-  { reply: "out", label: "Can't" },
+export const REPLIES: Array<{ reply: Reply; label: string; tone: "yes" | "maybe" | "no" }> = [
+  { reply: "in", label: "I'm in", tone: "yes" },
+  { reply: "maybe", label: "Maybe", tone: "maybe" },
+  { reply: "out", label: "Can't", tone: "no" },
 ];
 
 /**

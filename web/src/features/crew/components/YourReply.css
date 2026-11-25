@@ -1,5 +1,3 @@
-/* Your reply under the crew line, on the charcoal page: as wide as the invitation's buttons. */
-.your-reply { display: grid; gap: 0.5rem; width: 100%; max-width: 24rem; margin: 0.5rem auto 0; }
+/* Your reply circles under the crew line, on the charcoal page. */
+.your-reply { display: grid; gap: 0.5rem; width: 100%; max-width: 24rem; margin: 0.5rem auto 0.25rem; }
 .your-reply .notice { margin: 0; }
-/* The picked one is black; a light edge keeps it from sinking into the page. */
-.your-reply .seg3 button[aria-pressed="true"] { border-color: var(--on-page); }

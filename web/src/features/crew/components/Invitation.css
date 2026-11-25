@@ -1,7 +1,5 @@
 /* Screen 12/1: the note under the date line, the buttons, the replied line. */
 .invite-note { font-size: 1rem; color: var(--on-page); margin: 0.75rem 1.5rem 1.125rem; text-wrap: pretty; }
-.invite-reply .seg3 button { height: 3.25rem; }
-/* "I'm in" is the main button (the mock's .on), yellow in tokens.css; "Maybe" and "Can't" stay white until chosen. */
 .invite-reply .cap { text-align: center; margin-top: 0.75rem; }
 /* "Been here before?": a quiet row well below the buttons, so it never reads as a fourth reply. */
 .invite-back { margin: 1.75rem 0 0; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.14); }
@@ -25,6 +23,7 @@
   .invite-note { margin: 1.25rem 0 0; font-size: 1.125rem; max-width: 34ch; }
   .invite-reply { grid-column: 2; grid-row: 2 / 4; align-self: start; padding-top: 1.75rem; }
   .invite-reply .cap { text-align: left; }
+  .invite-reply .reply-circles { justify-content: flex-start; }
   .invite-back p { text-align: left; }
   .invite-back ul { justify-content: flex-start; }
 }

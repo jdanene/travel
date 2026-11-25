@@ -3,7 +3,7 @@ import { Notice } from "../../../components/Notice";
 import type { WriteResult } from "../../../lib/db";
 import type { Member, MemberId, Reply } from "../../../types/trip";
 import { saveReply } from "../api/crew";
-import { REPLIES } from "../lib/crew";
+import { ReplyCircles } from "./ReplyCircles";
 import "./YourReply.css";
 
 /**
@@ -34,13 +34,7 @@ export function YourReply({ tripId, memberId, member }: { tripId: string; member
   return (
     <div className="your-reply">
       {failure && !failure.ok && <Notice>{failure.reason === "refused" ? "This was not saved." : "No connection"}</Notice>}
-      <div className="seg3" role="group" aria-label="Your reply">
-        {REPLIES.map(({ reply, label }) => (
-          <button key={reply} type="button" aria-pressed={member.reply === reply} onClick={() => pick(reply)}>
-            {label}
-          </button>
-        ))}
-      </div>
+      <ReplyCircles picked={member.reply} onPick={pick} />
     </div>
   );
 }

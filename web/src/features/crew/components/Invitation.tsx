@@ -9,7 +9,8 @@ import { savePhoto } from "../api/photo";
 import { savePhone } from "../api/phone";
 import { burst } from "./confetti";
 import { JoinSheet } from "./JoinSheet";
-import { repliedLine, REPLIES } from "../lib/crew";
+import { repliedLine } from "../lib/crew";
+import { ReplyCircles } from "./ReplyCircles";
 import "./Invitation.css";
 
 interface InvitationProps {
@@ -89,19 +90,7 @@ export function Invitation({ tripId, uid, info, crew }: InvitationProps) {
       </FlyerHead>
       <div className="invite-reply">
         {failure && !failure.ok && <Notice>{failure.reason === "refused" ? "This was not saved." : "No connection"}</Notice>}
-        <div className="seg3" role="group" aria-label="Your reply">
-          {REPLIES.map(({ reply, label }) => (
-            <button
-              key={reply}
-              type="button"
-              className={reply === "in" ? "main" : undefined}
-              aria-pressed={crew.member?.reply === reply}
-              onClick={() => onReply(reply)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <ReplyCircles picked={crew.member?.reply} onPick={onReply} />
         <p className="cap">{repliedLine(crew.expected, crew.byId)} · no app, no account</p>
         {!crew.memberId && crew.members.length > 0 && (
           <div className="invite-back">
