@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { areaShown, eventLink, placeLine, placeOf, whenLine } from "./detail";
+import { areaShown, eventLink, placeLine, placeOf, showPlace, whenLine } from "./detail";
 
 // The header examples of detail.ts, one test each.
 describe("areaShown", () => {
@@ -63,5 +63,27 @@ describe("placeOf", () => {
   it("falls back to a place a friend put on the map", () => {
     const custom = { p1: { name: "Kai's villa", kind: "stay", destination: "bali", lat: -8.6, lng: 115.1, addedBy: "ka", at: 1 } };
     expect(placeOf({ destination: "bali", venue: "Kai's villa" }, { venues: { savaya }, custom })).toEqual({ kind: "custom", id: "p1" });
+  });
+});
+
+describe("showPlace", () => {
+  const trip = {
+    info: { destinations: { bali: { name: "Bali", country: "Indonesia" } } },
+    places: {
+      areas: { uluwatu: { name: "Uluwatu", destination: "bali" } },
+      venues: { savaya: { name: "Savaya", destination: "bali", areaId: "uluwatu", lat: -8.8, lng: 115.1, line: "Club on the cliffs", photoUrl: "https://example.com/savaya.jpg" } },
+    },
+  } as unknown as Parameters<typeof showPlace>[1];
+
+  it("names a known venue with its area, country, line and picture", () => {
+    expect(showPlace({ destination: "bali", venue: "Savaya" }, trip)).toEqual({
+      where: "Savaya · Uluwatu, Bali, Indonesia",
+      line: "Club on the cliffs",
+      photoUrl: "https://example.com/savaya.jpg",
+    });
+  });
+
+  it("gives a friend's venue the trip does not know its place line alone", () => {
+    expect(showPlace({ destination: "bali", venue: "Kai's villa" }, trip)).toEqual({ where: "Kai's villa · Bali, Indonesia" });
   });
 });

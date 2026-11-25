@@ -59,19 +59,32 @@ export function FlyerHead({ organizer, info, photo, children }: FlyerHeadProps) 
             <Face person={organizer} className="d" />
           </span>
         )}
-        {info && (
-          <h1 className="flyer-title" aria-label={`${info.name.split(" · ").join(" and ")}, ${COUNTRIES.spoken}, ${seasonLine(info.anchor.date, info.anchor.date, "long")}`}>
-            <span className="flyer-trip">{info.name}</span>
-            <span className="flyer-where">
-              <span>{COUNTRIES.shown}</span>
-              <span className="flyer-dot" aria-hidden="true"> · </span>
-              <span>{seasonLine(info.anchor.date, info.anchor.date, "short")}</span>
-            </span>
-          </h1>
-        )}
+        {info && <FlyerTitle info={info} />}
         {children}
       </div>
     </header>
+  );
+}
+
+/**
+ * The title block alone: the trip's name in the hype title's face, then the
+ * countries and the months in the hype script. The flyer head draws it;
+ * the shared events pages draw it with no photo above it.
+ *
+ * Inputs: info — the trip's info.
+ * Output: the page's one h1, heard as one sentence.
+ * Examples (checked on screen): "Bali · Koh Phangan", "(Indonesia, Thailand) · Feb 2027"
+ */
+export function FlyerTitle({ info }: { info: TripInfo }) {
+  return (
+    <h1 className="flyer-title" aria-label={`${info.name.split(" · ").join(" and ")}, ${COUNTRIES.spoken}, ${seasonLine(info.anchor.date, info.anchor.date, "long")}`}>
+      <span className="flyer-trip">{info.name}</span>
+      <span className="flyer-where">
+        <span>{COUNTRIES.shown}</span>
+        <span className="flyer-dot" aria-hidden="true"> · </span>
+        <span>{seasonLine(info.anchor.date, info.anchor.date, "short")}</span>
+      </span>
+    </h1>
   );
 }
 

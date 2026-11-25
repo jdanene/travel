@@ -33,4 +33,10 @@ describe("newShows", () => {
   it("adds nothing for a seeded show the club writes in capitals, nor for a day that does not exist", () => {
     expect(newShows([event("2027-02-13", "PEGGY GOU"), event("2027-02-30", "Nobody")], trip, now)).toEqual({});
   });
+
+  it("keeps an https picture as photoUrl and drops an http one", () => {
+    const shows = newShows([{ ...event("2027-02-27", "ANTS"), image: "https://cdn.example/ants.webp" }, { ...event("2027-02-14", "BABY J"), image: "http://cdn.example/j.jpg" }], trip, now);
+    expect(shows["bali_2027-02-27_savaya_ants"].photoUrl).toBe("https://cdn.example/ants.webp");
+    expect(shows["bali_2027-02-14_savaya_baby-j"]).not.toHaveProperty("photoUrl");
+  });
 });

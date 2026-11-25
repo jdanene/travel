@@ -107,6 +107,8 @@ export interface Show {
   /** One plain line that says what the event is. */
   about?: string;
   link?: string;
+  /** The event's own picture (the artist or line-up flyer its club publishes): https, at most 500 characters. */
+  photoUrl?: string;
   verified: boolean;
   /** "check" is a show the events check found on the club's own page; nobody added it. */
   source: "seed" | "friend" | "check";

@@ -1,0 +1,18 @@
+/* The shared events pages: one column, as wide as a module card on the home page, centred at every width. */
+.shared { max-width: 42rem; margin: 0 auto; padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)); }
+.shared > .notice { margin-top: 1rem; }
+.shared-head { padding: 2.25rem 0 1.5rem; text-align: center; }
+.shared-head .flyer-title { margin-top: 0; }
+.shared-list .fb-body { padding-top: 1rem; }
+
+/* The join bar: the app's white card with its black outline, fixed to the foot, clear of the phone's home bar. */
+.join-bar { position: fixed; z-index: 20; left: 0; right: 0; bottom: calc(0.75rem + env(safe-area-inset-bottom)); width: min(calc(100% - 1.5rem), 42rem); margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.625rem 0.625rem 0.625rem 1rem;
+  background: #fff; color: var(--ink); border: 2.5px solid var(--edge); border-radius: 1.125rem; box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 0.35);
+  animation: join-in 200ms ease-out both; }
+@keyframes join-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .join-bar { animation: none; } }
+.join-words { min-width: 0; line-height: 1.3; }
+.join-words b { display: block; font-size: 1rem; }
+.join-words span { display: block; font-size: 0.8125rem; color: var(--mut); }
+.btn.join-go { flex: none; width: auto; height: 2.875rem; padding: 0 1.125rem; font-size: 0.9688rem; white-space: nowrap; }

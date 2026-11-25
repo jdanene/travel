@@ -5,14 +5,16 @@
 // (the caller passes the time). event-sources.mjs names which club uses
 // which reader.
 //
-// Every reader takes (html, pageUrl, now) and returns [{ name, date, link? }]:
-// name is the act as the club writes it, date is "YYYY-MM-DD", and link,
-// when the night has its own page, is that page's https address. It returns
+// Every reader takes (html, pageUrl, now) and returns [{ name, date, link?, image? }]:
+// name is the act as the club writes it, date is "YYYY-MM-DD", link,
+// when the night has its own page, is that page's https address, and image,
+// where the list plainly gives the night's picture, its https address
+// (eventImage in parse.mjs; never fetched). It returns
 // null when it does not recognise the page: for a text list, no night at
 // all (the layout has changed); for a feed, an answer that is not the
 // feed. A feed that lists no night gives [], which is not a failure.
 
-import { clean, dayOf, decodeEntities } from "./parse.mjs";
+import { clean, dayOf, decodeEntities, eventImage } from "./parse.mjs";
 
 /**
  * Café del Mar Phuket's events list: each card holds the date three times,
@@ -37,12 +39,13 @@ export function readCafeDelMarPhuket(html, pageUrl) {
 /**
  * CÉ LA VI Singapore's home page highlights: each card holds the date as
  * YYYY-MM-DD, the room ("Club Lounge", "Sky Bar", "Restaurant") and the
- * event's name, linked to /events/<slug>. Only the Club Lounge counts: the
- * other rooms hold dinners and bar takeovers.
+ * event's name, linked to /events/<slug>, with its featured picture. Only
+ * the Club Lounge counts: the other rooms hold dinners and bar takeovers.
  *
  * Examples (fixtures/ce-la-vi-home.html):
  *   → 3 Club Lounge nights from 28 Nov to 31 Dec 2026, the first
- *     { name: "CÉ LA VI Pres. Fabio Neural", date: "2026-11-28", link: "https://sg.celavi.com/events/ce-la-vi-pres-fabio-neural" }
+ *     { name: "CÉ LA VI Pres. Fabio Neural", date: "2026-11-28", link: "https://sg.celavi.com/events/ce-la-vi-pres-fabio-neural",
+ *       image: "https://cdn.prod.website-files.com/…/6ae85e966bf9155e11c415f7_Fabio%20Neural_28Nov%2726_Web.jpg" }
  */
 export function readCeLaVi(html, pageUrl) {
   const nights = [];
@@ -51,7 +54,8 @@ export function readCeLaVi(html, pageUrl) {
     const date = item.match(/fs-list-field="eventdate"[^>]*>(\d{4}-\d{2}-\d{2})</)?.[1];
     const room = item.match(/eventdate"[^>]*>[^<]*<\/div>\s*<div[^>]*>\s*<div[^>]*>([^<]+)</)?.[1];
     const name = item.match(/<h3[^>]*>([^<]+)<\/h3>/)?.[1];
-    if (path && date && name && clean(room) === "Club Lounge") nights.push(night(name, date, path, pageUrl));
+    const image = eventImage(item.match(/<img\b[^>]*\bsrc="([^"]+)"[^>]*class="eventnew_featuredimg"/)?.[1], pageUrl);
+    if (path && date && name && clean(room) === "Club Lounge") nights.push(night(name, date, path, pageUrl, image));
   }
   return found(nights);
 }
@@ -73,16 +77,23 @@ export function readKlymax(html) {
 
 /**
  * Café del Mar Bali's "What's on": each card gives the date as
- * "31 December 2026" and the event's name. Past events follow in the same
- * shape; the check's season leaves them out.
+ * "31 December 2026" and the event's name; its picture is the <img>
+ * whose alt text is that name. Past events follow in the same shape; the
+ * check's season leaves them out.
  *
  * Examples (fixtures/cafe-del-mar-bali-whats-on.html):
- *   → 18 nights from 1 May 2023 to 31 Dec 2026, among them { name: "NEW YEARS EVE 2026", date: "2026-12-31" }
+ *   → 18 nights from 1 May 2023 to 31 Dec 2026, among them
+ *     { name: "NEW YEARS EVE 2026", date: "2026-12-31", image: "https://www.cafedelmarbali.co.id/reserve/assets/images/events/event_square_1792567873_6ad86a41d5753.jpg" }
  */
-export function readCafeDelMarBali(html) {
+export function readCafeDelMarBali(html, pageUrl) {
+  const pictures = new Map();
+  for (const [, src, alt] of html.matchAll(/<img\b[^>]*\bsrc="([^"]+)"[^>]*\balt="([^"]+)"/g)) {
+    const name = clean(decodeEntities(alt));
+    if (name && !pictures.has(name)) pictures.set(name, src);
+  }
   const nights = [];
   for (const [, when, name] of html.matchAll(/<span[^>]*>\s*(\d{1,2} [A-Za-z]+ \d{4})\s*<\/span>\s*<h3[^>]*>([^<]+)<\/h3>/g)) {
-    nights.push(night(name, dayOf(when)));
+    nights.push(night(name, dayOf(when), undefined, pageUrl, eventImage(pictures.get(clean(decodeEntities(name)) ?? ""), pageUrl)));
   }
   return found(nights);
 }
@@ -131,15 +142,18 @@ export function readFullMoonParty(html) {
 /**
  * Potato Head's events feed, the JSON its "What's on" page loads
  * (/api/cached/experiences?type=Event&categories=music): music events from
- * today to six months ahead, each with a title, its days and a slug.
+ * today to six months ahead, each with a title, its days, a slug and its
+ * picture (Image, else Thumbnail).
  *
  * Examples (fixtures/potato-head-music.json):
- *   → [{ name: "Live at Klymax: OFFSCRIPT", date: "2026-12-11", link: "https://seminyak.potatohead.co/experience/live-at-klymax-offscript" },
- *      { name: "NYE 2026", date: "2026-12-31", link: "https://seminyak.potatohead.co/experience/new-years-eve" }]
+ *   → [{ name: "Live at Klymax: OFFSCRIPT", date: "2026-12-11", link: "https://seminyak.potatohead.co/experience/live-at-klymax-offscript",
+ *        image: "https://cdn.potatohead.co/139_KLYMAX_OFFSCRIPT_LIVE_AT_KLYMAX_AUG_2026_1920x1080_WEB_4_dd0f32d092.jpg" },
+ *      { name: "NYE 2026", date: "2026-12-31", link: "https://seminyak.potatohead.co/experience/new-years-eve",
+ *        image: "https://cdn.potatohead.co/New_Year_Eve_NYE_2026_Potato_Head_16x9_65b55abc14.jpg" }]
  */
 export function readPotatoHead(text, pageUrl) {
   return feed(text, "data")?.map((item) =>
-    night(item?.Title, dayOf(String(item?.Schedule?.[0]?.dates?.[0] ?? "")), item?.Slug && `/experience/${encodeURIComponent(item.Slug)}`, pageUrl),
+    night(item?.Title, dayOf(String(item?.Schedule?.[0]?.dates?.[0] ?? "")), item?.Slug && `/experience/${encodeURIComponent(item.Slug)}`, pageUrl, eventImage(item?.Image?.url ?? item?.Thumbnail?.url, pageUrl)),
   ).filter(Boolean) ?? null;
 }
 
@@ -180,14 +194,15 @@ function found(nights) {
   return real.length ? real : null;
 }
 
-// One night, or null when the name or the date is missing.
-function night(name, date, path, pageUrl) {
+// One night, or null when the name or the date is missing; its picture only when there is one.
+function night(name, date, path, pageUrl, image) {
   const text = clean(decodeEntities(name ?? ""));
   if (!text || !date) return null;
-  if (!path) return { name: text, date };
+  const pic = image ? { image } : {};
+  if (!path) return { name: text, date, ...pic };
   const link = new URL(path, pageUrl);
   link.protocol = "https:";
-  return { name: text, date, link: link.toString() };
+  return { name: text, date, link: link.toString(), ...pic };
 }
 
 // The page's visible text, one line per block, without scripts and styles.

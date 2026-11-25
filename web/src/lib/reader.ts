@@ -56,6 +56,8 @@ export interface FoundEvent {
   date: string;
   artist: string;
   link: string;
+  /** The night's picture, when the club gives one: an https address. */
+  image?: string;
 }
 
 /** A club the check could not read, and why ("timeout", "unreadable", …). */
