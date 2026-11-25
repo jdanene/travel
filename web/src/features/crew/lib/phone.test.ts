@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { showPhone, toE164 } from "./phone";
+import { countryOf, showPhone, toE164 } from "./phone";
 
 // The header examples of toE164 and showPhone (fictional numbers).
 describe("toE164", () => {
@@ -18,6 +18,16 @@ describe("toE164", () => {
 
   it("refuses seven digits as a US number", () => {
     expect(toE164("1", "555-0123")).toBeNull();
+  });
+});
+
+describe("countryOf", () => {
+  it("finds the saved number's country", () => {
+    expect(countryOf("+447700900123")).toBe("44");
+  });
+
+  it("falls back to +1 for a country the picker does not list", () => {
+    expect(countryOf("+81312345678")).toBe("1");
   });
 });
 

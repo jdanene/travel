@@ -9,6 +9,8 @@ interface PhotoFieldProps {
   onChange: (photo: string | null) => void;
   /** "face" (a round 160 px photo, the default) or "place" (a 640 px landscape). */
   shape?: PhotoShape;
+  /** True when adding a photo is the sheet's main action: "Add a photo" is then black ("You"). */
+  main?: boolean;
 }
 
 /**
@@ -18,15 +20,15 @@ interface PhotoFieldProps {
  * before anything is saved; a file it cannot use is refused under the
  * button, with the reason. The join sheet, "Your photo" and Add to map use it.
  *
- * Inputs: the photo now, and what a change does.
+ * Inputs: the photo now, what a change does, the shape, and whether "Add a photo" is the main action.
  * Output: the field. The file input is the real control (keyboard and
  * screen readers reach it); its label is the visible button.
  * Examples (checked in Chrome at 375 px):
- *   no photo                           → one button, "Add a photo"
+ *   no photo                           → one button, "Add a photo" (black in "You")
  *   a photo                            → the photo, "Change photo" and "Remove photo"
  *   a .txt file                        → "That file is not a photo. Pick another." under the button
  */
-export function PhotoField({ photo, onChange, shape = "face" }: PhotoFieldProps) {
+export function PhotoField({ photo, onChange, shape = "face", main = false }: PhotoFieldProps) {
   const [error, setError] = useState<string | null>(null);
   const [reading, setReading] = useState(false);
   const id = useId();
@@ -46,7 +48,7 @@ export function PhotoField({ photo, onChange, shape = "face" }: PhotoFieldProps)
     <div className="photo-field">
       <div className="photo-row">
         {photo && <img className={`photo-preview${shape === "place" ? " wide" : ""}`} src={photo} alt={shape === "place" ? "The place's photo" : "Your photo"} />}
-        <label className={`pill photo-pick${reading ? " busy" : ""}`} htmlFor={id}>
+        <label className={`pill photo-pick${main && !photo ? " pill-main" : ""}${reading ? " busy" : ""}`} htmlFor={id}>
           <input
             id={id}
             type="file"
