@@ -17,7 +17,9 @@ interface EventPageProps {
  * The shared page of one event (owner, 25 Nov 2026: "share … a single
  * event"; of three layouts he chose S1, "just that event"): the event big,
  * read-only, with no crew. Top to bottom: a wide picture card with the
- * artist over its foot, the date in the show sheet's words, the place line
+ * artist over its foot (the event's own picture, the artist or line-up
+ * flyer its club publishes; else the venue's; else a plain card; owner,
+ * 25 Nov 2026: "try to get a pic of the artist or line up"), the date in the show sheet's words, the place line
  * and the venue's one line, "not confirmed", the about line, then "Event
  * page" when the event has an https link, and "See all 27 events".
  *
@@ -27,7 +29,8 @@ interface EventPageProps {
  * hold, or an event removed while the page is open, reads "This event was
  * removed." with "See all events".
  * Examples (checked on the emulator at 390 px and 1650 px):
- *   Peggy Gou at Savaya → Savaya's picture, "PEGGY GOU", "Sat 13 Feb 2027", "Savaya · Uluwatu, Bali, Indonesia", "Club on the cliffs", Event page, "See all 12 events"
+ *   Peggy Gou at Savaya, with its photoUrl → Savaya's flyer for the night, "PEGGY GOU", "Sat 13 Feb 2027", "Savaya · Uluwatu, Bali, Indonesia", "Club on the cliffs", Event page, "See all 12 events"
+ *   Black Coffee at Potato Head, no photoUrl → Potato Head's picture
  *   a weekly show        → "Every Sunday from 7 Feb"
  *   a friend's party at a venue the trip does not know → the plain card, the place line alone
  *   /events/nope         → "This event was removed." and "See all events"
@@ -51,7 +54,7 @@ export function EventPage({ trip, showId, allHref }: EventPageProps) {
   const count = Object.keys(shows).length;
   return (
     <article className="event-page" aria-labelledby="event-artist">
-      <EventCard photo={place.photoUrl} artist={show.artist} />
+      <EventCard photos={[show.photoUrl, place.photoUrl]} artist={show.artist} />
       <p className="event-when">{whenLine(show)}</p>
       <p className="event-where">
         {place.where}
@@ -78,19 +81,20 @@ export function EventPage({ trip, showId, allHref }: EventPageProps) {
  * The event's wide card: its picture at a fixed shape, so nothing moves as
  * it loads, with the artist's name over its foot on a dark fade that reads
  * on any photo. The picture loads lazily and sends no referrer (as
- * VenueIcon does); with none, or one that fails, the card is plain white
- * with the name in ink.
+ * VenueIcon does). A picture that fails gives way to the next; with none
+ * left, the card is plain white with the name in ink.
  *
- * Inputs: photo — an https address, or none; artist.
+ * Inputs: photos — the pictures in order of preference (the event's, the
+ * venue's), https only, any of them absent; artist.
  * Output: the card, with the artist as the page's h2.
- * Examples (checked on the emulator): Savaya's photo → the photo, white name; a 404 → the plain card
+ * Examples (checked on the emulator): Peggy Gou's flyer → the flyer, white name; a flyer that answers 404 → Savaya's picture; none → the plain card
  */
-function EventCard({ photo, artist }: { photo: string | undefined; artist: string }) {
-  const [failed, setFailed] = useState<string | null>(null);
-  const shown = photo?.startsWith("https://") && failed !== photo ? photo : null;
+function EventCard({ photos, artist }: { photos: Array<string | undefined>; artist: string }) {
+  const [failed, setFailed] = useState<string[]>([]);
+  const shown = photos.find((photo): photo is string => !!photo?.startsWith("https://") && !failed.includes(photo)) ?? null;
   return (
     <div className={`event-card${shown ? " has-photo" : ""}`}>
-      {shown && <img src={shown} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setFailed(shown)} />}
+      {shown && <img key={shown} src={shown} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setFailed((was) => [...was, shown])} />}
       <h2 className="event-artist" id="event-artist">
         {artist}
       </h2>
