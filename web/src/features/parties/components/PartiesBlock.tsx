@@ -8,12 +8,13 @@ import { placeName } from "../../../lib/place";
 import type { MemberId, Trip } from "../../../types/trip";
 import { addShow, editShow, removeShow, makeTag, setIn, setShowTag, type PartyDraft } from "../api/parties";
 import { byTagName, eventShown, eventsList, tagChips, tripTags, type EventsFilter } from "../lib/tags";
+import { countryChips, inCountry } from "../lib/countries";
 import { areaShown, placeLine, placeOf, type MapPlace } from "../lib/detail";
 import { lastSeason, lastYearLines } from "../lib/lastYear";
 import { EVENTS_WINDOW } from "../lib/window";
 import { byPlaceVenueDate, venueKey, type KnownVenue, type ListedShow } from "../lib/shows";
 import { AddPartySheet } from "./AddPartySheet";
-import { EventsFilterChips } from "./EventsFilter";
+import { CountryChips, EventsFilterChips, useEventsCountry } from "./EventsFilter";
 import { LastSeason, LastYearLine } from "./LastYearLine";
 import { ShowRow } from "./ShowRow";
 import { ShowSheet } from "./ShowSheet";
@@ -49,7 +50,12 @@ interface PartiesBlockProps {
  * every friend's event (lib/tags.ts); the device remembers the choice. A
  * tag with nothing under it says "No events tagged yet. Open an event to
  * add it." Each row shows its other tags as grey labels; any member puts
- * the trip's tags on an event or takes them off in its show sheet.
+ * the trip's tags on an event or takes them off in its show sheet. Above
+ * the tags, with two countries or more, "All countries" and one chip per
+ * country (lib/countries.ts); a country and a tag combine, "All · N" counts
+ * the events in the picked country, and the device remembers the country.
+ * An event saved in another country opens "All countries" so it stays in
+ * sight.
  *
  * Inputs: the trip id, the trip from the one listener, this device's
  * member and organizer mark, and a way to open the map.
@@ -64,6 +70,7 @@ interface PartiesBlockProps {
  *   tap "Peggy Gou"  → the show sheet; "See on the map" opens the Map on Savaya with its card open
  *   tap "I'm in"     → filled at once, "1 in" with your initials, on the row and in the sheet
  *   any member, Peggy Gou's sheet, remove Big nights → Peggy Gou leaves the default list; Savaya with it when it has no other Big nights event
+ *   tap "Thailand", then "Big nights" → only Koh Phangan, Thailand and Phuket, Thailand, with their Big nights; "All · N" counts Thailand's events
  */
 export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, filter, onFilter: setFilter }: PartiesBlockProps) {
   const [sheet, setSheet] = useState<SheetState>(null);
@@ -89,7 +96,13 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
   }));
   const tags = tripTags(trip);
   const chips = tagChips(tags);
-  const groups = eventsList(shows, known, filter, tags);
+  const countries = countryChips(destinationNames, [...Object.values(shows), ...known]);
+  const [country, setCountry] = useEventsCountry(countries);
+  const here = (destination: string) => inCountry(country, destinationNames, destination);
+  // The country and the tag combine: Thailand and Big nights list the Big nights in Thailand.
+  const groups = eventsList(shows, known, filter, tags).filter((group) => here(group.destination));
+  // A row the friend just added or edited stays in sight: another country than the picked one opens "All countries".
+  const keepInSight = (destination: string) => !here(destination) && setCountry("all");
   // A last-year line shows inside its venue, so it follows the venue in or out of the list.
   const lines = lastYearLines(Object.values(shows), lastYear, EVENTS_WINDOW);
   const tagsOf = (id: string) => [...(tags.byShow[id] ?? [])];
@@ -141,11 +154,13 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
   const showRow = (id: string) => {
     setSheet(null);
     if (shows[id] && !eventShown(filter, id, shows[id], tags)) setFilter("all");
+    if (shows[id]) keepInSight(shows[id].destination);
     setRowToShow(id);
   };
 
   const save = (draft: PartyDraft) => {
     if (!viewer.memberId) return;
+    keepInSight(draft.destination);
     if (sheet?.mode === "edit" && editing) {
       setSheet(null);
       return run(editShow(tripId, trip, sheet.id, editing, draft, viewer.memberId));
@@ -175,17 +190,24 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
           </button>
         )}
       </div>
+      <CountryChips country={country} countries={countries} onChoose={setCountry} />
       {(chips.length > 0 || viewer.memberId !== null) && (
         <EventsFilterChips
           filter={filter}
           chips={chips}
-          total={Object.keys(shows).length}
+          total={Object.values(shows).filter((show) => here(show.destination)).length}
           onChoose={setFilter}
           onMake={viewer.memberId !== null ? (tag, name) => makeTag(tripId, tag, name) : undefined}
         />
       )}
       {groups.length === 0 && (
-        <p className="sub parties-empty">{filter === "all" ? "Nothing announced yet." : "No events tagged yet. Open an event to add it."}</p>
+        <p className="sub parties-empty">
+          {filter === "all"
+            ? "Nothing announced yet."
+            : country === "all"
+              ? "No events tagged yet. Open an event to add it."
+              : `No events tagged yet in ${country}. Open an event to add it.`}
+        </p>
       )}
       {groups.map(({ destination, venues: venueGroups }) => (
         <section key={destination} aria-labelledby={`place-${destination}`}>

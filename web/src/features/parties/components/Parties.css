@@ -6,6 +6,8 @@
 .parties-empty { margin: 0.75rem 0 0.25rem; }
 /* "Big nights" and "All · 27": the shared chips, under the heading row and above the first destination. */
 .parties-filter { margin: 0.75rem 0 0; }
+/* Two rows (country, then tags) sit closer to each other than to the heading. */
+.parties-filter + .parties-filter { margin-top: 0.5rem; }
 /* On a phone the chips scroll sideways in one line, edge to edge of the card's padding, with no bar. */
 @media (max-width: 899px) {
   .parties-filter { flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; scroll-padding-inline: 0.25rem; padding-bottom: 0.125rem; }
