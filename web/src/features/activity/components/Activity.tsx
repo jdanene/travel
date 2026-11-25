@@ -57,7 +57,9 @@ interface ActivityProps {
  * Replies use the one message bar, as on Discord: "Reply" on any line puts
  * the bar in reply mode ("Replying to KA", the line lightly marked, the
  * keyboard up); sending, words or a GIF, goes into that line's thread,
- * opens it, and leaves reply mode. × or Escape leaves it too. One thread
+ * opens it, and leaves reply mode. × or Escape leaves it too. The answered
+ * line moves to the foot of the list, right above the bar, so it stays in
+ * sight when the keyboard comes up. One thread
  * is open at a time.
  *
  * Inputs: the trip id, the activity branch with its votes, replies and
@@ -186,6 +188,24 @@ export function Activity({ tripId, entries, votes, replies, reactions, memberId,
   };
   const report = (result: { ok: boolean }) => setProblem(result.ok ? null : "That did not save. Try again.");
 
+  // The answered line sits at the foot of the list, right above the bar, so it stays in sight with the keyboard up.
+  // Only the list scrolls here; the page is the bar's business (Composer, useAboveKeyboard).
+  // The list can change height while the keyboard comes up, so it follows the list's size until reply mode ends.
+  useLayoutEffect(() => {
+    const box = scroller.current;
+    if (!box || !replyTo) return;
+    const align = () => {
+      const line = box.querySelector<HTMLElement>(`[data-line="${replyTo}"]`);
+      if (!line) return;
+      const gap = line.getBoundingClientRect().bottom - box.getBoundingClientRect().bottom;
+      if (Math.abs(gap) > 1) box.scrollTop += gap;
+    };
+    align();
+    const watch = new ResizeObserver(align);
+    watch.observe(box);
+    return () => watch.disconnect();
+  }, [replyTo]);
+
   // Escape leaves reply mode, unless a panel above the page takes that Escape.
   useEffect(() => {
     if (!replyTo) return;
@@ -268,7 +288,7 @@ export function Activity({ tripId, entries, votes, replies, reactions, memberId,
                         <span>{day}</span>
                       </p>
                     )}
-                    <div className={`fi${arrive ? " arrive" : ""}`}>
+                    <div className={`fi${arrive ? " arrive" : ""}`} data-line={id}>
                       {written ? (
                         <Written
                           id={id}
