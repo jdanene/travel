@@ -8,13 +8,7 @@
 .phone-country select { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: pointer; font-size: 1rem; }
 .phone-box:has(select:focus-visible) { box-shadow: inset 0 0 0 2px var(--edge); }
 .phone-row input { flex: 1; min-width: 0; font-variant-numeric: tabular-nums; }
+/* The format hint, "(415) 555-0123": the muted grey, which keeps 4.5:1 on white. */
+.phone-row input::placeholder { color: var(--mut); opacity: 1; }
 .phone-note { margin: 0 0 0 0.25rem; }
 .phone-field .field-error { margin: 0 0 0.25rem 0.25rem; }
-/* The phone part of "You": full width under the centred photo. */
-.photo-sheet .you-phone { justify-self: stretch; display: grid; gap: 0.625rem; margin-top: 0.5rem; padding-top: 1.125rem; border-top: 1px solid var(--line); }
-.you-phone-line small { display: block; font-size: 0.7812rem; color: var(--mut); font-weight: 600; }
-.you-phone-line b { font-size: 1.0625rem; font-variant-numeric: tabular-nums; }
-.you-phone .phone-field { margin: 0 0 0.75rem; }
-.you-phone .notice { margin: 0; }
-.pill.pill-main { background: var(--acc); color: var(--on-acc); }
-.pill:disabled { opacity: .5; cursor: default; }

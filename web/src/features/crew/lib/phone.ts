@@ -30,6 +30,22 @@ export const COUNTRIES: Array<{ code: string; name: string }> = [
 export const DEFAULT_COUNTRY = "1";
 
 /**
+ * The picker's country for a saved number, so "Change number" opens on
+ * the country the friend saved, not on +1. The longest code that starts
+ * the number wins, so +971 is the UAE and not +9 anything.
+ *
+ * Inputs: e164 — a number toE164() made.
+ * Output: the picker's code without "+"; DEFAULT_COUNTRY when no listed country matches.
+ * Examples (each is a test in phone.test.ts):
+ *   countryOf("+447700900123")  → "44"
+ *   countryOf("+81312345678")   → "1"   (Japan is not in the picker; a typed "+81" still wins in toE164)
+ */
+export function countryOf(e164: string): string {
+  const match = COUNTRIES.filter((c) => e164.startsWith(`+${c.code}`)).sort((a, b) => b.code.length - a.code.length)[0];
+  return match?.code ?? DEFAULT_COUNTRY;
+}
+
+/**
  * Turns a typed phone number into E.164. Spaces, dashes, dots and
  * brackets are ignored. A number typed with a leading "+" carries its own
  * country, whatever the picker says. Otherwise the picker's code goes in
