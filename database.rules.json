@@ -265,6 +265,8 @@
               "artist": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200" },
               "about": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200" },
               "link": { ".validate": "newData.isString() && newData.val().length <= 500 && newData.val().matches(/^https?:\\/\\//)" },
+              /* The event's own picture (the artist or line-up flyer the club publishes), from the events check or its backfill. */
+              "photoUrl": { ".validate": "newData.isString() && newData.val().length <= 500 && newData.val().beginsWith('https://')" },
               "verified": { ".validate": "newData.isBoolean()" },
               "source": { ".validate": "newData.isString() && newData.val().matches(/^(seed|friend|check)$/)" },
               "addedBy": { ".validate": "newData.isString()" },
