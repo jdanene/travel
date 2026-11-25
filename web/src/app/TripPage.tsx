@@ -6,6 +6,7 @@ import { Invite } from "../features/crew/components/Invite";
 import { OrganizerSignIn } from "../features/crew/components/OrganizerSignIn";
 import { PhotoSheet } from "../features/crew/components/PhotoSheet";
 import { TextCrew } from "../features/crew/components/TextCrew";
+import { YourReply } from "../features/crew/components/YourReply";
 import { Activity } from "../features/activity/components/Activity";
 import { DatesModule } from "../features/dates/components/DatesModule";
 import { StayModule } from "../features/stay/components/StayModule";
@@ -130,7 +131,11 @@ function ReadyPage({ tripId, trip, uid, offline }: { tripId: string; trip: Trip;
       ) : (
         <OrganizerSignIn tripId={tripId} />
       )}
-      {crew.memberId && <CrewSheet open={crewOpen} list={list} youId={crew.memberId} onClose={() => setCrewOpen(false)} />}
+      {crew.memberId && (
+        <CrewSheet open={crewOpen} list={list} youId={crew.memberId} onClose={() => setCrewOpen(false)}>
+          {crew.member && <YourReply tripId={tripId} memberId={crew.memberId} member={crew.member} />}
+        </CrewSheet>
+      )}
       {crew.memberId && crew.member && (
         <PhotoSheet open={photoOpen} tripId={tripId} memberId={crew.memberId} member={crew.member} onClose={() => setPhotoOpen(false)} />
       )}

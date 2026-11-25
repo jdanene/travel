@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Face, usePhoto, type Person } from "../components/Avatars";
 import { Icon } from "../components/Icon";
 import { Sheet } from "../components/Sheet";
@@ -79,11 +80,13 @@ export function CrewTitle({ list, you, onYou, onSee }: CrewTitleProps) {
  * CAN'T and NOT REPLIED, each with its count, a face, the name ("You" for
  * yourself) and the small line; an empty group says "Nobody".
  *
- * Inputs: whether it is open, the crew list, your member, and closing.
+ * Your own reply buttons, when given, sit above the groups.
+ * Inputs: whether it is open, the crew list, your member, closing, and
+ * what goes on top (your reply buttons).
  * Output: the sheet.
  * Examples (checked on the emulator): "See the crew" → IN · 6 with Dom "organizer · 13–23 Feb · 4 events", CAN'T · 0 "Nobody"
  */
-export function CrewSheet({ open, list, youId, onClose }: { open: boolean; list: CrewList; youId: string; onClose: () => void }) {
+export function CrewSheet({ open, list, youId, onClose, children }: { open: boolean; list: CrewList; youId: string; onClose: () => void; children?: ReactNode }) {
   const groups: Array<[string, CrewRow[]]> = [
     ["IN", list.in],
     ["MAYBE", list.maybe],
@@ -94,6 +97,7 @@ export function CrewSheet({ open, list, youId, onClose }: { open: boolean; list:
   return (
     <Sheet open={open} title={`The crew · ${total}`} onClose={onClose} focusFirst={false}>
       <div className="crew-sheet">
+        {children}
         {groups.map(([name, rows]) => (
           <section key={name} aria-label={`${name.toLowerCase()}, ${rows.length}`}>
             <p className="grp">
