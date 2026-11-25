@@ -169,7 +169,7 @@ Rules, in words:
 - A device adds a stay option or a show with `addedBy` equal to its member. It edits or removes a show only when it added it, or when it is an organizer.
 - Only an organizer writes `dates/confirmed`, `stay/confirmed` and `crew/organizers`. A device becomes an organizer when its claim holds a key that exists, or when it is signed in with a verified email that is on `tripSecrets/{tripId}/admins`.
 - Every write is checked for shape and length. A value outside the shape is refused.
-- Any member adds a show the events check found (`source: "check"`, no `addedBy`, `verified: false`, an https `link`), but never over a show that exists. Only an organizer edits or removes it. Any member writes `parties/lastCheck` under its own member, with `at` no more than 60 s ahead of the server and later than the last one.
+- Any member adds a show the events check found (`source: "check"`, no `addedBy`, `verified: true`, an https `link`: the venue's own page lists it; owner, 25 Nov 2026), but never over a show that exists. Only an organizer edits or removes it. Any member writes `parties/lastCheck` under its own member, with `at` no more than 60 s ahead of the server and later than the last one.
 - Any member adds or removes an event's tag (`parties/showTags/{showId}/{tag}: true`, on a show that exists) and makes a new tag's name (`places/tagNames/{tag}`, never over one); a device that has not joined does neither. Only the seed writes `parties/tagSeeded`.
 
 ### The events check (owner, 23 Nov 2026)

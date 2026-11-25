@@ -37,12 +37,15 @@ export function checkIsDue(lastAt: number | undefined, now: number): boolean {
  *
  * Inputs: events — from the reader, untrusted; trip — the trip as loaded;
  * now — the time to stamp on each show.
- * Output: showId → the show to write, with source "check", verified false
+ * Output: showId → the show to write, with source "check", verified true
+ * (the venue's own events page lists it, and its link goes with it; owner,
+ * 25 Nov 2026: "the bot found the hugel event sent the link.. clearly
+ * looks confirmed")
  * and no addedBy. An event is dropped when its destination is not the
  * trip's, its date is not a day from 25 Jan to 31 Mar 2027 (EVENTS_WINDOW), its venue or
  * artist is empty or too long, its link is not https, or its id is listed.
  * Examples (each is a test in eventCheck.test.ts):
- *   BEN BÖHMER at Savaya on 28 Feb, not listed → { "bali_2027-02-28_savaya_ben-bohmer": { …, source: "check", verified: false } }
+ *   BEN BÖHMER at Savaya on 28 Feb, not listed → { "bali_2027-02-28_savaya_ben-bohmer": { …, source: "check", verified: true } }
  *   PEGGY GOU on 13 Feb, seeded as "Peggy Gou", and a show on 30 Feb → {}   (the same id; no such day)
  */
 export function newShows(events: FoundEvent[], trip: Trip, now: number): Record<string, Show> {
@@ -62,7 +65,7 @@ export function newShows(events: FoundEvent[], trip: Trip, now: number): Record<
     if (!fits) continue;
     const id = showId({ destination: event.destination, venue, date: event.date, artist });
     if (listed[id] || shows[id]) continue;
-    shows[id] = { destination: event.destination, venue, ...(area ? { area } : {}), date: event.date, artist, link: event.link, verified: false, source: "check", at: now };
+    shows[id] = { destination: event.destination, venue, ...(area ? { area } : {}), date: event.date, artist, link: event.link, verified: true, source: "check", at: now };
   }
   return shows;
 }

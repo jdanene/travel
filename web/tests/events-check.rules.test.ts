@@ -15,7 +15,7 @@ const T = "t1";
 let env: RulesTestEnvironment;
 
 const db = (uid: string) => env.authenticatedContext(uid).database();
-const found = { destination: "bali", venue: "Savaya", area: "Uluwatu", date: "2027-02-28", artist: "BEN BÖHMER", link: "https://www.savaya.com/event-calendar/february-28-2027", verified: false, source: "check", at: 1 };
+const found = { destination: "bali", venue: "Savaya", area: "Uluwatu", date: "2027-02-28", artist: "BEN BÖHMER", link: "https://www.savaya.com/event-calendar/february-28-2027", verified: true, source: "check", at: 1 };
 
 beforeAll(async () => {
   env = await initializeTestEnvironment({
@@ -36,9 +36,9 @@ beforeAll(async () => {
 afterAll(() => env.cleanup());
 
 describe("events check rules", () => {
-  it("lets a member add a show the check found, not confirmed and with an https link", async () => {
+  it("lets a member add a show the check found, confirmed and with an https link", async () => {
     await assertSucceeds(set(ref(db("uid-a"), paths.show(T, "c1")), found));
-    await assertFails(set(ref(db("uid-a"), paths.show(T, "c2")), { ...found, verified: true }));
+    await assertFails(set(ref(db("uid-a"), paths.show(T, "c2")), { ...found, verified: false }));
     await assertFails(set(ref(db("uid-a"), paths.show(T, "c3")), { ...found, link: "http://www.savaya.com/" }));
   });
 

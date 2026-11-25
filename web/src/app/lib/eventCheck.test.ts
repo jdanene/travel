@@ -26,7 +26,7 @@ describe("newShows", () => {
 
   it("adds an event the trip does not list, as a show nobody added", () => {
     expect(newShows([event("2027-02-28", "BEN BÖHMER")], trip, now)).toEqual({
-      "bali_2027-02-28_savaya_ben-bohmer": { ...event("2027-02-28", "BEN BÖHMER"), verified: false, source: "check", at: now },
+      "bali_2027-02-28_savaya_ben-bohmer": { ...event("2027-02-28", "BEN BÖHMER"), verified: true, source: "check", at: now },
     });
   });
 
