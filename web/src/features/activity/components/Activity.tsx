@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { newActivityId } from "../../../lib/activity";
 import type { ActivityEntry, ActivityReactions, ActivityReply, MemberId } from "../../../types/trip";
-import { post, postGif, react, remove, reply, vote } from "../api/activity";
+import { post, postGif, react, remove, reply, vote, removeReply } from "../api/activity";
 import type { KlipyItem } from "../lib/klipy";
 import type { Draft } from "../lib/lines";
 import { lineWords, whenLabels } from "../lib/lines";
@@ -239,6 +239,7 @@ export function Activity({ tripId, entries, votes, replies, reactions, memberId,
       field.current?.focus({ preventScroll: true });
       setReplyTo(id);
     },
+    onDeleteReply: (replyId) => void removeReply(tripId, id, replyId).then(report),
   });
 
   // A reply just sent must be in sight: the list scrolls until the foot of that line's thread shows (seen on an

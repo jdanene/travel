@@ -228,6 +228,8 @@ export interface ThreadProps {
   answering: boolean;
   /** Puts the message bar in reply mode for this line (it focuses the field inside the tap). */
   onReply: () => void;
+  /** Deletes one reply for everyone; its author and an organizer get the "…" for it. */
+  onDeleteReply: (replyId: string) => void;
 }
 
 /**
@@ -237,16 +239,21 @@ export interface ThreadProps {
  * is no second text box: "Reply" (the control on a line with no replies,
  * or the last item of an open thread) puts the one message bar in reply
  * mode, as on Discord (owner, 25 Nov 2026: "why are we using a different
- * text box to reply?").
+ * text box to reply?"). A reply's author, or an organizer, gets the quiet
+ * "…" on it, then "Delete for everyone?" (owner, 25 Nov 2026: "I can delete
+ * replies as well").
  *
  * Inputs: the viewer and the line's thread.
  * Output: { control, panel }; panel is null while folded.
  * Examples (checked on the emulator at 390 px):
  *   no replies        → control "Reply"; a tap → the bar reads "Replying to KA"
  *   KA and RB replied → both replies show, "Reply" last; the control "Hide replies" folds them to both faces and "2 replies"
+ *   KA taps "…" on its own reply, then "Delete" → the reply goes; "Keep" leaves it
  */
 function useThread(viewer: Viewer, thread: ThreadProps) {
-  const { open, onOpen, onReply } = thread;
+  const { open, onOpen, onReply, onDeleteReply } = thread;
+  // The reply whose delete question is open, if any.
+  const [asking, setAsking] = useState<string | null>(null);
   const list = Object.entries(thread.replies ?? {}).sort(([, a], [, b]) => a.at - b.at);
   const repliers = [...new Set(list.map(([, reply]) => reply.by))];
   const replyButton = (label: string) => (
@@ -275,7 +282,18 @@ function useThread(viewer: Viewer, thread: ThreadProps) {
           <div key={replyId} className="rp">
             <Who viewer={viewer} id={reply.by} />
             <div className="rp-body">
-              <Head name={person(viewer, reply.by).name} at={reply.at} viewer={viewer} />
+              <Head name={person(viewer, reply.by).name} at={reply.at} viewer={viewer}>
+                {(reply.by === viewer.memberId || viewer.isOrganizer) && asking !== replyId && <MoreButton onClick={() => setAsking(replyId)} />}
+              </Head>
+              {asking === replyId && (
+                <DeleteAsk
+                  onDelete={() => {
+                    setAsking(null);
+                    onDeleteReply(replyId);
+                  }}
+                  onKeep={() => setAsking(null)}
+                />
+              )}
               {reply.gif && (
                 <img className="rp-gif" src={reply.gif} alt="GIF" width={reply.gifW} height={reply.gifH} style={reply.gifW && reply.gifH ? { aspectRatio: `${reply.gifW} / ${reply.gifH}` } : undefined} loading="lazy" decoding="async" />
               )}

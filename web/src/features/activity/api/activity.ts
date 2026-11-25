@@ -50,6 +50,16 @@ export function reply(tripId: string, id: string, memberId: MemberId, said: stri
 }
 
 /**
+ * Deletes one reply for everyone. Its author may, and so may an organizer.
+ * Inputs: the trip, the line the reply is under, and the reply's id.
+ * Output: the write result; "refused" for anyone else.
+ * Examples (checked on the emulator): KA deletes its "Welcome" under AA's "joined" → the reply goes; the line and its other replies stay
+ */
+export function removeReply(tripId: string, id: string, replyId: string): Promise<WriteResult> {
+  return write({ [paths.activityReply(tripId, id, replyId)]: null });
+}
+
+/**
  * Deletes a post or a poll for everyone, with its votes and replies, in one
  * write. The author may, and so may an organizer.
  * Inputs: the trip and the post's id.

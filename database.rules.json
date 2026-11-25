@@ -235,8 +235,9 @@
             /* Deleting a line takes its replies with it, by whoever may delete it. */
             ".write": "auth != null && !newData.exists() && !newData.parent().parent().child('activity').child($id).exists() && (root.child('trips').child($tripId).child('activity').child($id).child('by').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true)",
             "$replyId": {
-              /* A reply under any feed line (owner, 24 Nov 2026), under the member's own name, once: no edits. */
-              ".write": "auth != null && !data.exists() && newData.child('by').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val()",
+              /* A reply under any feed line (owner, 24 Nov 2026), under the member's own name, once: no edits.
+                 Its author or an organizer may delete it (owner, 25 Nov 2026). */
+              ".write": "auth != null && ((!data.exists() && newData.child('by').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val()) || (data.exists() && !newData.exists() && (data.child('by').val() === root.child('trips').child($tripId).child('crew').child('devices').child(auth.uid).val() || root.child('trips').child($tripId).child('crew').child('organizers').child(auth.uid).val() === true)))",
               ".validate": "$replyId.length <= 40 && newData.hasChildren(['by', 'at']) && (newData.hasChild('text') || newData.hasChild('gif')) && root.child('trips').child($tripId).child('activity').child($id).exists()",
               "by": { ".validate": "newData.isString()" },
               "at": { ".validate": "newData.isNumber()" },

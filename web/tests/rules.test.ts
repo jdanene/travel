@@ -294,4 +294,14 @@ describe("database rules", () => {
     await assertSucceeds(set(ref(b, paths.activityReply(T, "g3", "r1")), { by: "bob", at: 2, gif: "https://static.klipy.com/ii/a1/b2/c3.webp", gifW: 220, gifH: 220 }));
     await assertFails(set(ref(b, paths.activityReply(T, "g3", "r2")), { by: "bob", at: 2, gif: "https://evil.example/x.gif" }));
   });
+
+  it("36. lets a reply's author delete it, refuses another friend, and never an edit", async () => {
+    const a = db("uid-a");
+    const b = db("uid-b");
+    await assertSucceeds(set(ref(a, paths.activityEntry(T, "d1")), { kind: "post", by: "alice", at: 1, text: "Flights?" }));
+    await assertSucceeds(set(ref(b, paths.activityReply(T, "d1", "r1")), { by: "bob", at: 2, text: "Booked" }));
+    await assertFails(set(ref(a, paths.activityReply(T, "d1", "r1")), null));
+    await assertFails(set(ref(b, paths.activityReply(T, "d1", "r1")), { by: "bob", at: 3, text: "Edited" }));
+    await assertSucceeds(set(ref(b, paths.activityReply(T, "d1", "r1")), null));
+  });
 });
