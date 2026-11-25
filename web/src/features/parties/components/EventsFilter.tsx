@@ -1,44 +1,125 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type RefObject } from "react";
 import { Icon } from "../../../components/Icon";
 import type { WriteResult } from "../../../lib/db";
+import { pickCountry, type CountryFilter } from "../lib/countries";
 import { pickFilter, tagSlug, type EventsFilter, type TagChip } from "../lib/tags";
 
-/** Where this device keeps its choice; one key for every trip. */
-const STORE = "travel.eventsFilter";
+/**
+ * A choice this device keeps in localStorage under one key for every trip.
+ * A browser that refuses storage (some private modes) keeps the choice for
+ * this visit only.
+ *
+ * Inputs: key — the localStorage key.
+ * Output: the stored value (null when none or refused) and a way to change it.
+ * Examples (checked on the emulator): choose("all"), reload → "all"
+ */
+function useStoredChoice(key: string): [string | null, (next: string) => void] {
+  const [stored, setStored] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  });
+  const choose = (next: string) => {
+    setStored(next);
+    try {
+      localStorage.setItem(key, next);
+    } catch {
+      // The choice still holds until the page closes.
+    }
+  };
+  return [stored, choose];
+}
 
 /**
- * The Events filter this device last picked, kept in localStorage so the
- * list and the map open as the friend left them. The pick holds while its
- * chip exists; else "Big nights", else "All" (pickFilter). A browser that
- * refuses storage (some private modes) keeps the choice for this visit only.
+ * The Events filter this device last picked, kept so the list opens as the
+ * friend left it. The pick holds while its chip exists; else "Big nights",
+ * else "All" (pickFilter).
  *
  * Inputs: chips — the trip's tag chips.
  * Output: the filter and a way to change it.
  * Examples (checked on the emulator): pick "All", reload, open Events → "All" is picked
  */
 export function useEventsFilter(chips: TagChip[]): [EventsFilter, (next: EventsFilter) => void] {
-  const [stored, setStored] = useState<string | null>(() => {
-    try {
-      return localStorage.getItem(STORE);
-    } catch {
-      return null;
-    }
-  });
-  const choose = (next: EventsFilter) => {
-    setStored(next);
-    try {
-      localStorage.setItem(STORE, next);
-    } catch {
-      // The choice still holds until the page closes.
-    }
-  };
+  const [stored, choose] = useStoredChoice("travel.eventsFilter");
   return [pickFilter(stored, chips), choose];
+}
+
+/**
+ * The country this device last picked in Events, kept like the tag filter.
+ * The pick holds while its chip exists and there are two chips or more;
+ * else "All countries" (pickCountry).
+ *
+ * Inputs: chips — countryChips() of the trip.
+ * Output: the country and a way to change it.
+ * Examples (checked on the emulator at 390 px): pick "Thailand", reload, open Events → "Thailand" is picked
+ */
+export function useEventsCountry(chips: string[]): [CountryFilter, (next: CountryFilter) => void] {
+  const [stored, choose] = useStoredChoice("travel.eventsCountry");
+  return [pickCountry(stored, chips), choose];
+}
+
+/**
+ * On a phone a chip row scrolls: keeps its picked chip in sight after a
+ * pick, or after the row's chips change.
+ *
+ * Inputs: row — the row's element; picked — what is picked; count — how many chips the row has.
+ * Output: none; it scrolls the row.
+ * Examples (checked on the emulator at 390 px): "Singapore" remembered, open Events → the row starts scrolled to Singapore
+ */
+function usePickedInView(row: RefObject<HTMLDivElement | null>, picked: string, count: number) {
+  useEffect(() => {
+    const chip = row.current?.querySelector<HTMLElement>('[aria-pressed="true"]');
+    if (!chip || !row.current) return;
+    const box = row.current.getBoundingClientRect();
+    const at = chip.getBoundingClientRect();
+    if (at.left < box.left || at.right > box.right) row.current.scrollLeft += at.left - box.left - (box.width - at.width) / 2;
+  }, [row, picked, count]);
+}
+
+interface CountryChipsProps {
+  country: CountryFilter;
+  /** countryChips() of the trip; with fewer than two there is no row. */
+  countries: string[];
+  onChoose: (next: CountryFilter) => void;
+}
+
+/**
+ * The row above the tag chips (owner, 25 Nov 2026, layout A, "two chip
+ * rows"): "All countries", picked by default, then one chip per country
+ * that has events or venues, the picked one filled. On a phone the row
+ * scrolls sideways in one line. With one country or none there is
+ * nothing to filter, and no row.
+ *
+ * Inputs: the picked country, the countries, what a tap does.
+ * Output: the row, heard as the group "Country"; or nothing.
+ * Examples (checked on the emulator at 390 px and 1650 px):
+ *   events in Bali, Koh Phangan, Phuket and Singapore → All countries (filled), Indonesia, Thailand, Singapore
+ *   events in Bali only                              → no row
+ */
+export function CountryChips({ country, countries, onChoose }: CountryChipsProps) {
+  const row = useRef<HTMLDivElement>(null);
+  usePickedInView(row, country, countries.length);
+  if (countries.length < 2) return null;
+  return (
+    <div ref={row} className="pills parties-filter" role="group" aria-label="Country">
+      <button type="button" className="pill" aria-pressed={country === "all"} onClick={() => onChoose("all")}>
+        All countries
+      </button>
+      {countries.map((name) => (
+        <button key={name} type="button" className="pill" aria-pressed={country === name} onClick={() => onChoose(name)}>
+          {name}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 interface EventsFilterChipsProps {
   filter: EventsFilter;
   chips: TagChip[];
-  /** Every event of the trip, whatever the filter. */
+  /** The events "All" shows: every event of the trip in the picked country, whatever the tag. */
   total: number;
   onChoose: (next: EventsFilter) => void;
   /** Makes a new tag (places/tagNames); absent on a device that has not joined, and then there is no "+". */
@@ -71,13 +152,7 @@ export function EventsFilterChips({ filter, chips, total, onChoose, onMake }: Ev
   const row = useRef<HTMLDivElement>(null);
 
   // On a phone the row scrolls: keep the picked chip in sight, a new tag's too.
-  useEffect(() => {
-    const picked = row.current?.querySelector<HTMLElement>('[aria-pressed="true"]');
-    if (!picked || !row.current) return;
-    const box = row.current.getBoundingClientRect();
-    const chip = picked.getBoundingClientRect();
-    if (chip.left < box.left || chip.right > box.right) row.current.scrollLeft += chip.left - box.left - (box.width - chip.width) / 2;
-  }, [filter, chips.length]);
+  usePickedInView(row, filter, chips.length);
 
   useEffect(() => {
     if (making) field.current?.focus();
