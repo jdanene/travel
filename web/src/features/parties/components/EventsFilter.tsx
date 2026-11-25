@@ -5,58 +5,43 @@ import { pickCountry, type CountryFilter } from "../lib/countries";
 import { pickFilter, tagSlug, type EventsFilter, type TagChip } from "../lib/tags";
 
 /**
- * A choice this device keeps in localStorage under one key for every trip.
- * A browser that refuses storage (some private modes) keeps the choice for
- * this visit only.
+ * A choice kept for this visit only: nothing is saved, so every return to
+ * the trip starts from the defaults (owner, 25 Nov 2026: "every time I come
+ * back it should reset to all countries", "like everything").
  *
- * Inputs: key — the localStorage key.
- * Output: the stored value (null when none or refused) and a way to change it.
- * Examples (checked on the emulator): choose("all"), reload → "all"
+ * Inputs: none.
+ * Output: the choice (null until one is made) and a way to change it.
+ * Examples (checked on the emulator): pick "Thailand", reload → "All countries"
  */
-function useStoredChoice(key: string): [string | null, (next: string) => void] {
-  const [stored, setStored] = useState<string | null>(() => {
-    try {
-      return localStorage.getItem(key);
-    } catch {
-      return null;
-    }
-  });
-  const choose = (next: string) => {
-    setStored(next);
-    try {
-      localStorage.setItem(key, next);
-    } catch {
-      // The choice still holds until the page closes.
-    }
-  };
-  return [stored, choose];
+function useVisitChoice(): [string | null, (next: string) => void] {
+  return useState<string | null>(null);
 }
 
 /**
- * The Events filter this device last picked, kept so the list opens as the
- * friend left it. The pick holds while its chip exists; else "Big nights",
- * else "All" (pickFilter).
+ * The Events filter picked on this visit. The pick holds while its chip
+ * exists; else "Big nights", else "All" (pickFilter). A new visit starts at
+ * the default again.
  *
  * Inputs: chips — the trip's tag chips.
  * Output: the filter and a way to change it.
- * Examples (checked on the emulator): pick "All", reload, open Events → "All" is picked
+ * Examples (checked on the emulator): pick "All", reload, open Events → "Big nights" is picked again
  */
 export function useEventsFilter(chips: TagChip[]): [EventsFilter, (next: EventsFilter) => void] {
-  const [stored, choose] = useStoredChoice("travel.eventsFilter");
+  const [stored, choose] = useVisitChoice();
   return [pickFilter(stored, chips), choose];
 }
 
 /**
- * The country this device last picked in Events, kept like the tag filter.
- * The pick holds while its chip exists and there are two chips or more;
- * else "All countries" (pickCountry).
+ * The country picked in Events on this visit. The pick holds while its chip
+ * exists and there are two chips or more; else "All countries"
+ * (pickCountry). A new visit starts at "All countries" again.
  *
  * Inputs: chips — countryChips() of the trip.
  * Output: the country and a way to change it.
- * Examples (checked on the emulator at 390 px): pick "Thailand", reload, open Events → "Thailand" is picked
+ * Examples (checked on the emulator at 390 px): pick "Thailand", reload, open Events → "All countries" is picked
  */
 export function useEventsCountry(chips: string[]): [CountryFilter, (next: CountryFilter) => void] {
-  const [stored, choose] = useStoredChoice("travel.eventsCountry");
+  const [stored, choose] = useVisitChoice();
   return [pickCountry(stored, chips), choose];
 }
 

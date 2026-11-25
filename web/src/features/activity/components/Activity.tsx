@@ -241,9 +241,26 @@ export function Activity({ tripId, entries, votes, replies, reactions, memberId,
     },
   });
 
+  // A reply just sent must be in sight: the list scrolls until the foot of that line's thread shows (seen on an
+  // iPhone simulator, 25 Nov 2026: the new reply landed below the list's edge).
+  const sentTo = useRef<string | null>(null);
+  useLayoutEffect(() => {
+    const box = scroller.current;
+    const id = sentTo.current;
+    if (!box || !id) return;
+    const line = box.querySelector<HTMLElement>(`[data-line="${id}"]`);
+    if (!line) return;
+    const gap = line.getBoundingClientRect().bottom - box.getBoundingClientRect().bottom;
+    if (gap > 1) box.scrollTop += gap;
+  }, [replies, replyTo]);
+
   // Sends into the answered line's thread and shows it; on a failure reply mode comes back, as the words do.
   const sendReply = (said: Parameters<typeof reply>[3]) => {
     const target = replyTo!;
+    sentTo.current = target;
+    window.setTimeout(() => {
+      if (sentTo.current === target) sentTo.current = null;
+    }, 3000);
     fold(target, true);
     setReplyTo(null);
     return reply(tripId, target, memberId, said).then((result) => {

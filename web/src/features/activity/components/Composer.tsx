@@ -310,11 +310,8 @@ export function Composer({ placeholder, onSend, onGif, replyTo = null, onCancelR
 const SETTLE_MS = 160;
 /** Fit anyway once this long has passed, even if the visible part keeps changing. */
 const SETTLE_MAX_MS = 700;
-/**
- * Safari on iPhone (iOS 26) floats its URL pill and the keyboard's ^ v ✓ bar over the foot of the visible
- * page without shrinking visualViewport, so with the keyboard up the bar keeps this much clear above that foot.
- */
-const IOS_FLOATING_CHROME = 104;
+/** Where an iPhone keeps the visible part's height with the keyboard up, so the next reply can place the bar before the keyboard moves. */
+const KB_VIEW_KEY = "travel.kbView";
 
 /** True on an iPhone or iPad (an iPad reports itself as a Mac with touch). */
 function isIOS(): boolean {
@@ -354,14 +351,49 @@ function useAboveKeyboard(bar: React.RefObject<HTMLElement>, field: React.RefObj
       const focused = document.activeElement;
       return focused instanceof HTMLElement && box.contains(focused) ? focused : null;
     };
+    const ios = isIOS();
+    // Where the visible part starts inside the window. On an iPhone, offsetTop read 250 while the page showed 0
+    // (iOS 26 simulator, 25 Nov 2026); pageTop less the page's own scroll matched the screen every time.
+    const off = () => (ios ? Math.max(0, view.pageTop - window.scrollY) : view.offsetTop);
+    // On an iPhone the visible part's height with the keyboard up, as last seen (else a first guess: a little over half).
+    const seen = () => {
+      let kept = 0;
+      try {
+        kept = Number(localStorage.getItem(KB_VIEW_KEY)) || 0;
+      } catch {
+        /* Storage refused: the guess serves. */
+      }
+      return kept > 120 && kept < window.innerHeight ? kept : Math.round(window.innerHeight * 0.53);
+    };
+    // iPhone only, at the moment of focus, before the keyboard moves: give the page its room and put the bar where
+    // the keyboard will leave it, in one jump. Safari then has nothing to pan, so nothing moves twice.
+    const prepare = () => {
+      if (!ios || !typing() || view.height < window.innerHeight * 0.8) return;
+      const tall = seen();
+      root.style.setProperty("--kb-pad", `${window.innerHeight - tall}px`);
+      root.classList.add("kb-open");
+      const move = box.getBoundingClientRect().bottom - (off() + tall - 12);
+      if (move > 1) window.scrollBy({ top: move, behavior: "instant" as ScrollBehavior });
+    };
     const fit = () => {
       const focused = typing();
       if (!focused) return;
-      const covered = Math.max(0, window.innerHeight - (view.offsetTop + view.height));
+      // On an iPhone the room is the keyboard's whole height however Safari has panned (offsetTop): a room that
+      // changed with the pan made the page and Safari chase each other (seen on an iPhone simulator, 25 Nov 2026).
+      const up = view.height < window.innerHeight * 0.8;
+      const covered = ios ? (up ? window.innerHeight - view.height : window.innerHeight - seen()) : Math.max(0, window.innerHeight - (view.offsetTop + view.height));
+      if (ios && up) {
+        try {
+          localStorage.setItem(KB_VIEW_KEY, String(Math.round(view.height)));
+        } catch {
+          /* Storage refused: the guess serves next time. */
+        }
+      }
       root.style.setProperty("--kb-pad", `${Math.round(covered)}px`);
-      root.classList.toggle("kb-open", covered > 0 || isIOS());
-      const top = view.offsetTop + 8;
-      const bottom = view.offsetTop + view.height - 12 - (isIOS() ? IOS_FLOATING_CHROME : 0);
+      root.classList.toggle("kb-open", covered > 0 || ios);
+      if (ios && !up) return;   // the keyboard is not up yet: prepare() has placed the bar
+      const top = off() + 8;
+      const bottom = off() + view.height - 12;
       const rect = box.getBoundingClientRect();
       let move = 0;
       if (rect.height <= bottom - top) {
@@ -373,7 +405,9 @@ function useAboveKeyboard(bar: React.RefObject<HTMLElement>, field: React.RefObj
         if (own.bottom > bottom) move = own.bottom - bottom;
         else if (own.top < top) move = own.top - top;
       }
-      if (Math.abs(move) > 1) window.scrollBy({ top: move, behavior: "instant" as ScrollBehavior });
+      // A glide, not a jump (owner, 25 Nov 2026: "it's not smooth"); reduced motion keeps the jump.
+      const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (Math.abs(move) > 1) window.scrollBy({ top: move, behavior: calm ? ("instant" as ScrollBehavior) : "smooth" });
     };
     // One fit, after the visible part stops changing (or SETTLE_MAX_MS at most), never one per event.
     let wait = 0;
@@ -393,18 +427,26 @@ function useAboveKeyboard(bar: React.RefObject<HTMLElement>, field: React.RefObj
       if (event.relatedTarget instanceof Node && box.contains(event.relatedTarget)) return;
       root.classList.remove("kb-open");
     };
-    const grow = new ResizeObserver(settle);
+    // The bar grows when "Replying to" comes in: before the keyboard is up, place it again at once; after, settle.
+    const grow = new ResizeObserver(() => {
+      prepare();
+      settle();
+    });
     grow.observe(box);
     view.addEventListener("resize", settle);
     view.addEventListener("scroll", settle);
-    box.addEventListener("focusin", settle);
+    const enter = () => {
+      prepare();
+      settle();
+    };
+    box.addEventListener("focusin", enter);
     box.addEventListener("focusout", leave);
     return () => {
       window.clearTimeout(wait);
       grow.disconnect();
       view.removeEventListener("resize", settle);
       view.removeEventListener("scroll", settle);
-      box.removeEventListener("focusin", settle);
+      box.removeEventListener("focusin", enter);
       box.removeEventListener("focusout", leave);
     };
   }, [bar, field]);
