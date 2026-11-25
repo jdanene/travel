@@ -16,14 +16,14 @@ interface CrewTitleProps {
   onYou: () => void;
   /** "See the crew": opens the crew sheet. */
   onSee: () => void;
-  /** Your reply buttons, drawn just above "See the crew". */
+  /** Your reply buttons, drawn under the count line. */
   reply?: ReactNode;
 }
 
 /**
  * The crew in the flyer's title block (mock 5): the faces of the friends
  * who are in, in reply order, then "6 in · 1 maybe · 1 not replied" and
- * "See the crew", with your reply buttons just above it. Your own face is
+ * "See the crew" on one line, with your reply buttons under it. Your own face is
  * in the stack (added when you are not in) and is a button that opens your photo, with a camera badge; the
  * other faces are pictures. With just you on the trip it reads "Just you
  * so far · share the link".
@@ -66,15 +66,18 @@ export function CrewTitle({ list, you, onYou, onSee, reply }: CrewTitleProps) {
         </>
       ) : (
         <>
-          <span className="t">
-            <b>{counts[0]}</b>
-            {counts.slice(1).map((part) => ` · ${part}`)}
-          </span>
+          {/* The count and its link read as one line (owner, 25 Nov 2026); your reply sits under them. */}
+          <p className="tcrew-line">
+            <span className="t">
+              <b>{counts[0]}</b>
+              {counts.slice(1).map((part) => ` · ${part}`)}
+            </span>
+            <button type="button" className="see" aria-haspopup="dialog" onClick={onSee}>
+              See the crew
+              <Icon name="chev" size={16} />
+            </button>
+          </p>
           {reply}
-          <button type="button" className="see" aria-haspopup="dialog" onClick={onSee}>
-            See the crew
-            <Icon name="chev" size={16} />
-          </button>
         </>
       )}
     </div>

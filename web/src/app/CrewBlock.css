@@ -6,6 +6,7 @@
 .tcrew .t { font-size: 0.9062rem; color: var(--on-page); }
 .tcrew .t b { color: #fff; }
 .tcrew .see { display: inline-flex; align-items: center; gap: 0.25rem; min-height: 2.25rem; font-weight: 800; font-size: 0.875rem; color: #fff; touch-action: manipulation; }
+.tcrew-line { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; column-gap: 0.625rem; margin: 0; text-align: center; }
 .tcrew .see { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 0.25rem; }
 .tcrew .see svg.i { stroke-width: 2.2; }
 /* Your own face is the button to your photo; a small camera says so. */

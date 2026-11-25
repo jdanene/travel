@@ -1,3 +1,5 @@
 /* Your reply circles under the crew line, on the charcoal page. */
-.your-reply { display: grid; gap: 0.5rem; width: 100%; max-width: 24rem; margin: 0.5rem auto 0.25rem; }
+.your-reply { display: grid; gap: 0.5rem; width: 100%; max-width: 24rem; margin: 0.75rem auto 0.25rem; }
 .your-reply .notice { margin: 0; }
+/* Says the circles are yours, not the group's (owner, 25 Nov 2026). */
+.your-reply-label { margin: 0; text-align: center; font-size: 0.75rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--on-page-mut); }
