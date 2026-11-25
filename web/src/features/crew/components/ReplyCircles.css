@@ -1,31 +1,66 @@
-/* The three reply circles on the charcoal page: green yes, orange maybe, red no; pale at rest, full when picked. */
-.reply-circles {
-  --yes: #1f8a3e; --yes-soft: #dcf2e2;
-  --maybe: #e8590c; --maybe-soft: #ffe3d1;
-  --no: #d7263d; --no-soft: #fde1e5;
-  display: flex; justify-content: center; gap: clamp(1.25rem, 6vw, 2rem);
+/* The three reply circles on the charcoal page: green yes, orange maybe, red no; pale at rest, full when picked.
+   They press like a key: in and out with one smooth ease. Changing a reply is a hold (exception 28). */
+.reply-pick {
+  --yes: #1f8a3e; --yes-soft: #dcf2e2; --yes-lit: #3fb760;
+  --maybe: #e8590c; --maybe-soft: #ffe3d1; --maybe-lit: #f08040;
+  --no: #d7263d; --no-soft: #fde1e5; --no-lit: #f0596b;
+  display: grid; gap: 0.625rem;
 }
-.reply-circles button { display: flex; flex-direction: column; align-items: center; gap: 0.375rem; min-width: 4rem; padding: 0; border: 0; background: none; color: var(--on-page); font: inherit; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-.rc-dot { width: 3.5rem; height: 3.5rem; border-radius: 50%; display: grid; place-items: center; border: 2.5px solid var(--edge); transition: background-color .15s ease-out, box-shadow .15s ease-out, transform 120ms ease-out; }
+.reply-circles { display: flex; justify-content: center; gap: clamp(1.25rem, 6vw, 2rem); }
+.reply-circles button {
+  display: flex; flex-direction: column; align-items: center; gap: 0.375rem; min-width: 4rem; padding: 0; border: 0; background: none;
+  color: var(--on-page); font: inherit; cursor: pointer;
+  /* A hold must not select the word, open iOS's callout or wait for a double-tap zoom. */
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
+}
+.rc-hold { position: relative; display: grid; place-items: center; }
+.rc-dot {
+  width: 3.5rem; height: 3.5rem; border-radius: 50%; display: grid; place-items: center; border: 2.5px solid var(--edge);
+  /* Press and release share one smooth ease-out (ease-out-quart). */
+  transition: background-color .15s ease-out, box-shadow .2s ease-out, transform 180ms cubic-bezier(.25, 1, .5, 1);
+}
 .rc-dot svg.i { stroke-width: 2.4; }
 .rc-word { font-size: 0.875rem; font-weight: 700; }
-.reply-circles button:active .rc-dot { transform: scale(0.94); }
+/* Press: in, and stay in for as long as a hold lasts. */
+.reply-circles button:active .rc-dot, .reply-circles [data-holding] .rc-dot { transform: scale(0.93); }
 .reply-circles button:focus-visible { outline: none; }
 .reply-circles button:focus-visible .rc-dot { outline: 2px solid var(--on-page); outline-offset: 4px; }
-.reply-circles [data-tone="yes"] .rc-dot { background: var(--yes-soft); color: var(--yes); }
-.reply-circles [data-tone="maybe"] .rc-dot { background: var(--maybe-soft); color: var(--maybe); }
-.reply-circles [data-tone="no"] .rc-dot { background: var(--no-soft); color: var(--no); }
-.reply-circles [aria-pressed="true"] .rc-dot { color: #fff; box-shadow: 0 0 0 3px var(--on-page); }
-.reply-circles [data-tone="yes"][aria-pressed="true"] .rc-dot { background: var(--yes); }
-.reply-circles [data-tone="maybe"][aria-pressed="true"] .rc-dot { background: var(--maybe); }
-.reply-circles [data-tone="no"][aria-pressed="true"] .rc-dot { background: var(--no); }
+.reply-circles [data-tone="yes"] { --tone: var(--yes); --tone-soft: var(--yes-soft); --tone-lit: var(--yes-lit); }
+.reply-circles [data-tone="maybe"] { --tone: var(--maybe); --tone-soft: var(--maybe-soft); --tone-lit: var(--maybe-lit); }
+.reply-circles [data-tone="no"] { --tone: var(--no); --tone-soft: var(--no-soft); --tone-lit: var(--no-lit); }
+.rc-dot { background: var(--tone-soft); color: var(--tone); }
+/* Picked: the full colour, a light ring, and a soft shadow under it, so it sits a little above the page. */
+.reply-circles [aria-pressed="true"] .rc-dot {
+  background: var(--tone); color: #fff;
+  box-shadow: 0 0 0 3px var(--on-page), 0 6px 12px -2px rgb(0 0 0 / .55), inset 0 -3px 5px rgb(0 0 0 / .16);
+}
 /* Once one is picked, the other two step back (owner, 25 Nov 2026: "look more deselected"): no fill, a quiet
    outline, the word in the page's muted colour. They keep their coloured icon and an outline of at least 3:1
    against the page (WCAG 1.4.11), so they still read as buttons, not as disabled (hci-design, ui-patterns). */
-.reply-circles:has([aria-pressed="true"]) [aria-pressed="false"] .rc-dot { background: transparent; border-color: #8a847b; }
-.reply-circles:has([aria-pressed="true"]) [data-tone="yes"][aria-pressed="false"] .rc-dot { color: #3fb760; }
-.reply-circles:has([aria-pressed="true"]) [data-tone="maybe"][aria-pressed="false"] .rc-dot { color: #f08040; }
-.reply-circles:has([aria-pressed="true"]) [data-tone="no"][aria-pressed="false"] .rc-dot { color: #f0596b; }
+.reply-circles:has([aria-pressed="true"]) [aria-pressed="false"] .rc-dot { background: transparent; border-color: #8a847b; color: var(--tone-lit); }
 .reply-circles:has([aria-pressed="true"]) [aria-pressed="false"] .rc-word { color: var(--on-page-mut); font-weight: 600; }
+
+/* The hold ring: drawn round the circle in its colour, filling once over the hold (650 ms, ReplyCircles.tsx). */
+.rc-ring { position: absolute; inset: -0.5rem; width: calc(100% + 1rem); height: calc(100% + 1rem); transform: rotate(-90deg); pointer-events: none; overflow: visible; }
+.rc-ring circle { fill: none; stroke: var(--tone-lit); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; animation: rc-fill 650ms linear forwards; }
+@keyframes rc-fill { to { stroke-dashoffset: 0; } }
+
+/* A quick tap on another circle: it shakes once, and the caption lights up (two names, so each tap replays it). */
+.reply-circles [data-nudge="a"] .rc-dot { animation: rc-shake-a 320ms ease-out; }
+.reply-circles [data-nudge="b"] .rc-dot { animation: rc-shake-b 320ms ease-out; }
+@keyframes rc-shake-a { 20% { translate: -4px 0; } 45% { translate: 3px 0; } 70% { translate: -2px 0; } 100% { translate: 0 0; } }
+@keyframes rc-shake-b { 20% { translate: -4px 0; } 45% { translate: 3px 0; } 70% { translate: -2px 0; } 100% { translate: 0 0; } }
+.rc-hint { font-size: 0.8125rem; color: var(--on-page-mut); text-align: center; }
+.rc-hint[data-nudge="a"] { animation: rc-lit-a 1.4s ease-out; }
+.rc-hint[data-nudge="b"] { animation: rc-lit-b 1.4s ease-out; }
+@keyframes rc-lit-a { 0%, 45% { color: var(--on-page); font-weight: 700; } }
+@keyframes rc-lit-b { 0%, 45% { color: var(--on-page); font-weight: 700; } }
+
 @media (min-width: 900px) { .rc-dot { width: 3.75rem; height: 3.75rem; } }
-@media (prefers-reduced-motion: reduce) { .rc-dot { transition: none; } }
+/* Reduced motion: the hold stays, with no press, no ring and no shake; the caption carries the rule. */
+@media (prefers-reduced-motion: reduce) {
+  .rc-dot { transition: none; }
+  .reply-circles button:active .rc-dot, .reply-circles [data-holding] .rc-dot { transform: none; }
+  .rc-ring { display: none; }
+  .reply-circles [data-nudge] .rc-dot { animation: none; }
+}

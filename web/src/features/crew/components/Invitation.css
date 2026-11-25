@@ -24,6 +24,7 @@
   .invite-reply { grid-column: 2; grid-row: 2 / 4; align-self: start; padding-top: 1.75rem; }
   .invite-reply .cap { text-align: left; }
   .invite-reply .reply-circles { justify-content: flex-start; }
+  .invite-reply .rc-hint { text-align: left; }
   .invite-back p { text-align: left; }
   .invite-back ul { justify-content: flex-start; }
 }
