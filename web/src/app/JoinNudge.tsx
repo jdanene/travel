@@ -19,14 +19,16 @@ import "./SharedEvents.css";
  */
 export function JoinNudge({ tripId, nudge }: { tripId: string; nudge: Nudge }) {
   return (
-    <aside className="join-bar" aria-label={nudge.action}>
-      <p className="join-words">
-        <b>{nudge.title}</b>
-        {nudge.line && <span>{nudge.line}</span>}
-      </p>
-      <a className="btn join-go" href={`/?${new URLSearchParams({ t: tripId })}`}>
-        {nudge.action}
-      </a>
+    <aside className="join-dock" aria-label={nudge.action}>
+      <div className="join-bar">
+        <p className="join-words">
+          <b>{nudge.title}</b>
+          {nudge.line && <span>{nudge.line}</span>}
+        </p>
+        <a className="btn join-go" href={`/?${new URLSearchParams({ t: tripId })}`}>
+          {nudge.action}
+        </a>
+      </div>
     </aside>
   );
 }

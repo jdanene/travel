@@ -16,14 +16,19 @@ export function canShare(): boolean {
  * Opens the share sheet with a link. A sheet the friend closes, or a
  * browser that refuses, ends quietly: there is nothing to say about it.
  *
- * Inputs: url — the link to hand out; text — the line the sheet carries.
+ * Only the link is sent. The name goes as the sheet's title, never as text:
+ * a desktop share sheet's "Copy" joined text and link into one string, and
+ * the words then became part of the address (owner, 25 Nov 2026: the shared
+ * events link opened "…/events Bali · Koh Phangan").
+ *
+ * Inputs: url — the link to hand out; text — the sheet's title, where it shows one.
  * Output: true when the friend sent it somewhere, false when the sheet was
  * closed or refused.
  * Examples (checked on screen): Share → the phone's share sheet; Cancel → false, nothing shown
  */
 export async function shareLink(url: string, text: string): Promise<boolean> {
   try {
-    await navigator.share({ text, url });
+    await navigator.share({ title: text, url });
     return true;
   } catch {
     return false;

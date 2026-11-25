@@ -119,7 +119,7 @@ function ShowDetail({ show, where, venueLine, going, you, addedByName, onIn, onS
               Event page
             </a>
           )}
-          {share && <ShareButton url={share.url} text={share.text} className="btn sec" />}
+          {share && <ShareButton url={share.url} text={share.text} className="btn sec show-share" />}
         </div>
       )}
       {link?.kind === "text" && <p className="cap show-link-text">{link.text}</p>}

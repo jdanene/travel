@@ -1,12 +1,16 @@
 /* The shared events pages: one column, as wide as a module card on the home page, centred at every width. */
-.shared { max-width: 42rem; margin: 0 auto; padding-bottom: calc(6.5rem + env(safe-area-inset-bottom)); }
+.shared { max-width: 42rem; margin: 0 auto; padding-bottom: calc(7.5rem + env(safe-area-inset-bottom)); }
 .shared > .notice { margin-top: 1rem; }
 .shared-head { padding: 2.25rem 0 1.5rem; text-align: center; }
 .shared-head .flyer-title { margin-top: 0; }
 .shared-list .fb-body { padding-top: 1rem; }
 
-/* The join bar: the app's white card with its black outline, fixed to the foot, clear of the phone's home bar. */
-.join-bar { position: fixed; z-index: 20; left: 0; right: 0; bottom: calc(0.75rem + env(safe-area-inset-bottom)); width: min(calc(100% - 1.5rem), 42rem); margin: 0 auto;
+/* The join bar: the app's white card with its black outline, fixed to the foot, clear of the phone's home bar.
+   Its dock runs to the very foot of the screen in the page's colour, so the list never shows in the gap between the
+   bar and the screen's edge (seen on an iPhone: Safari's floating bars left the list showing under the bar). */
+.join-dock { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; padding: 1.5rem 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--page) calc(100% - 1.5rem), rgb(35 33 31 / 0)); pointer-events: none; }
+.join-bar { pointer-events: auto; width: min(100%, 42rem); margin: 0 auto;
   display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.625rem 0.625rem 0.625rem 1rem;
   background: #fff; color: var(--ink); border: 2.5px solid var(--edge); border-radius: 1.125rem; box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 0.35);
   animation: join-in 200ms ease-out both; }

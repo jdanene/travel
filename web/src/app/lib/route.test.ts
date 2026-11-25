@@ -23,6 +23,10 @@ describe("readRoute", () => {
     expect(readRoute("/trip/abc/events/%E0%A4%A")).toBeNull();
   });
 
+  it("opens every event when words were glued on after a space", () => {
+    expect(readRoute("/trip/abc/events%20Bali%20%C2%B7%20Koh%20Phangan")).toEqual({ page: "events", tripId: "abc" });
+  });
+
   it("opens nothing for a trip id with other characters", () => {
     expect(readRoute("/trip/a%2Fb")).toBeNull();
   });

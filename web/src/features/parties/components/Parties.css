@@ -1,9 +1,16 @@
 /* Screen 20/7 inside the module frame of 12/5: the mock's .place, .venue, .prow, .dt, .who, .nc, .inbtn, .na and .lr,
    plus the about and venue lines, the row's link button and the show sheet. */
 .parties-top { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-top: 0.125rem; }
-.parties-add { display: inline-flex; align-items: center; gap: 0.375rem; height: 2.625rem; padding: 0 0.75rem; border-radius: 0.75rem; background: var(--soft); font-size: 0.9375rem; font-weight: 700; flex: none; }
+.parties-add { display: inline-flex; align-items: center; gap: 0.375rem; height: 2.625rem; padding: 0 1rem; border-radius: 0.75rem; background: var(--soft); font-size: 0.9375rem; font-weight: 700; flex: none; }
+/* "Share" sends the list out; "+ Add" changes it. Add is this list's action and keeps the filled button; Share is
+   lighter, a labelled link with no fill, so the two do not compete (hci-design: weight says importance). Both stay
+   at the head of the list, where a friend looks first, and both keep a target at least 44 px tall. */
+.parties-share { display: inline-flex; align-items: center; gap: 0.375rem; min-height: 2.75rem; padding: 0 0.5rem; border-radius: 0.75rem; font-size: 0.9375rem; font-weight: 700; color: var(--ink2); flex: none; }
+.parties-share svg.i { width: 1.125rem; height: 1.125rem; }
+@media (hover: hover) { .parties-share:hover { background: var(--soft); color: var(--ink); } }
+.parties-share:active { background: var(--soft); }
 .parties-add svg.i { width: 1rem; height: 1rem; }
-/* "Share" and "+ Add" side by side, both quiet; a refused copy shows the link on its own line below them. */
+/* "Share" then "+ Add" at the right of the heading; a refused copy shows the link on its own line below them. */
 .parties-top { flex-wrap: wrap; gap: 0.5rem; }
 .parties-top > .h3 { margin-right: auto; }
 .parties-acts { display: contents; }
@@ -17,7 +24,9 @@
 .parties-filter + .parties-filter { margin-top: 0.5rem; }
 /* On a phone the chips scroll sideways in one line, edge to edge of the card's padding, with no bar. */
 @media (max-width: 899px) {
-  .parties-filter { flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; scroll-padding-inline: 0.25rem; padding-bottom: 0.125rem; }
+  /* .pills.parties-filter, not .parties-filter alone: Sheet.css's ".pills { flex-wrap: wrap }" has the same weight
+     and won when it loaded later, so the country chips ran onto two lines (owner, 25 Nov 2026). */
+  .pills.parties-filter { flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; scroll-padding-inline: 0.25rem; padding-bottom: 0.125rem; }
   .parties-filter::-webkit-scrollbar { display: none; }
   .parties-filter .pill { flex: none; white-space: nowrap; }
 }
@@ -96,7 +105,10 @@
 .show-going { display: flex; align-items: center; gap: 0.625rem; margin: 0.875rem 0 0.75rem; min-height: 1.75rem; }
 .show-going .sub { font-size: 0.875rem; }
 .inbtn.show-in { display: flex; justify-content: center; width: 100%; height: 3rem; border-radius: 0.875rem; font-size: 1rem; }
-.show-ways { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 0.5rem; margin-top: 0.625rem; }
+/* Two places to go sit side by side ("See on the map", "Event page"); "Share" is a different kind of thing, a
+   command on this event, so as the third it takes its own full row and is never left as a half-width orphan. */
+.show-ways { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; margin-top: 0.625rem; }
+.show-ways > .show-share, .show-ways > .btn:first-child:has(+ .show-share), .show-ways > .btn:only-child { grid-column: 1 / -1; }
 .show-ways .btn { height: 3rem; font-size: 0.9688rem; }
 .show-link-text { margin-top: 0.625rem; overflow-wrap: anywhere; user-select: all; }
 .show-by { margin-top: 0.75rem; text-align: center; }

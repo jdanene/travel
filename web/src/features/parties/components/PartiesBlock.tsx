@@ -202,7 +202,7 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
         <h2 className="h3">Who's playing</h2>
         {viewer.memberId !== null && (
           <div className="parties-acts">
-            <ShareButton url={eventsLink(window.location.origin, tripId)} text={tripName} className="parties-add" />
+            <ShareButton url={eventsLink(window.location.origin, tripId)} text={tripName} className="parties-share" />
             {canAdd && (
               <button type="button" className="parties-add" onClick={() => setSheet({ mode: "add" })}>
                 <Icon name="plus" />
