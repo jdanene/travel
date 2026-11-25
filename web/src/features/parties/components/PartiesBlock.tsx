@@ -5,17 +5,19 @@ import { Notice } from "../../../components/Notice";
 import type { WriteResult } from "../../../lib/db";
 import { idFromName } from "../../../lib/ids";
 import { placeName } from "../../../lib/place";
+import { eventsLink } from "../../../lib/share";
 import type { MemberId, Trip } from "../../../types/trip";
 import { addShow, editShow, removeShow, makeTag, setIn, setShowTag, type PartyDraft } from "../api/parties";
 import { byTagName, eventShown, eventsList, tagChips, tripTags, type EventsFilter } from "../lib/tags";
 import { countryChips, inCountry } from "../lib/countries";
-import { areaShown, placeLine, placeOf, type MapPlace } from "../lib/detail";
+import { areaShown, placeOf, showPlace, type MapPlace } from "../lib/detail";
 import { lastSeason, lastYearLines } from "../lib/lastYear";
 import { EVENTS_WINDOW } from "../lib/window";
 import { byPlaceVenueDate, venueKey, type KnownVenue, type ListedShow } from "../lib/shows";
 import { AddPartySheet } from "./AddPartySheet";
 import { CountryChips, EventsFilterChips, useEventsCountry } from "./EventsFilter";
 import { LastSeason, LastYearLine } from "./LastYearLine";
+import { ShareButton } from "./ShareButton";
 import { ShowRow } from "./ShowRow";
 import { ShowSheet } from "./ShowSheet";
 import { VenueIcon } from "./VenueIcon";
@@ -27,7 +29,7 @@ type SheetState = { mode: "add" } | { mode: "edit"; id: string } | null;
 interface PartiesBlockProps {
   tripId: string;
   trip: Trip;
-  /** This device's member; null before a reply, and then nothing can be tapped. */
+  /** This device's member; null on the shared events page: nothing writes and no crew shows. */
   memberId: MemberId | null;
   isOrganizer: boolean;
   /** Opens the Map module: on one place from the show sheet, or as it was from "See on the map ›" (12/5). */
@@ -35,6 +37,8 @@ interface PartiesBlockProps {
   /** The Events filter, shared with the map: a tag's slug or "all" (useEventsFilter). */
   filter: EventsFilter;
   onFilter: (next: EventsFilter) => void;
+  /** On the shared events page: each event's own page, which its row links to instead of opening the sheet. */
+  eventHref?: (showId: string) => string;
 }
 
 /**
@@ -57,8 +61,16 @@ interface PartiesBlockProps {
  * An event saved in another country opens "All countries" so it stays in
  * sight.
  *
+ * Beside "+ Add", a member's "Share" hands out the shared events page,
+ * /trip/<id>/events (owner, 25 Nov 2026: "share all the events to my
+ * friends so they can see it"); each show sheet shares its own event.
+ * With no member (that shared page) the same list is read-only: no "+ Add",
+ * no "Share", no "+" tag, no tag edits, no "I'm in", and no crew, no
+ * faces, counts, names or initials; each row links to its event's page.
+ *
  * Inputs: the trip id, the trip from the one listener, this device's
- * member and organizer mark, and a way to open the map.
+ * member and organizer mark, a way to open the map, and on the shared
+ * page each event's address.
  * Output: the list, the show sheet and the Add an event sheet. With no
  * shows and no venues, "Nothing announced yet." and the Add button. A
  * refused or failed write shows one notice above the list; the listener
@@ -70,9 +82,11 @@ interface PartiesBlockProps {
  *   tap "Peggy Gou"  → the show sheet; "See on the map" opens the Map on Savaya with its card open
  *   tap "I'm in"     → filled at once, "1 in" with your initials, on the row and in the sheet
  *   any member, Peggy Gou's sheet, remove Big nights → Peggy Gou leaves the default list; Savaya with it when it has no other Big nights event
+ *   tap "Share" on a desktop → "Copied"; the clipboard holds <origin>/trip/<id>/events
+ *   memberId null    → the same groups and chips; no Add, Share, "+", "I'm in", faces or counts; a row opens /trip/<id>/events/<showId>
  *   tap "Thailand", then "Big nights" → only Koh Phangan, Thailand and Phuket, Thailand, with their Big nights; "All · N" counts Thailand's events
  */
-export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, filter, onFilter: setFilter }: PartiesBlockProps) {
+export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, filter, onFilter: setFilter, eventHref }: PartiesBlockProps) {
   const [sheet, setSheet] = useState<SheetState>(null);
   const [detail, setDetail] = useState<string | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
@@ -133,13 +147,13 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
     void pending.then(report);
   };
 
+  // The shared page shows no crew: nobody's marks or name ever reach its rows.
   const going = (id: string): Person[] =>
-    Object.keys(marks[id] ?? {})
+    Object.keys(viewer.memberId === null ? {} : (marks[id] ?? {}))
       .sort((a, b) => (members[a]?.at ?? 0) - (members[b]?.at ?? 0))
       .map((member) => ({ id: member, name: members[member]?.name ?? member }));
-  const adderOf = (show: ListedShow) => (show.addedBy ? (members[show.addedBy]?.name ?? show.addedBy) : undefined);
+  const adderOf = (show: ListedShow) => (show.addedBy && viewer.memberId !== null ? (members[show.addedBy]?.name ?? show.addedBy) : undefined);
   const setInFor = (id: string) => (isIn: boolean) => viewer.memberId && run(setIn(tripId, id, trip.parties?.shows?.[id], viewer.memberId, isIn));
-  const areaOf = (show: ListedShow) => show.area ?? areas[placeOf(show, trip.places)?.areaId ?? ""]?.name;
 
   // After the render that draws the row: under "Big nights" a listed show at another venue first needs "All".
   useEffect(() => {
@@ -178,17 +192,24 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
   const canAdd = viewer.memberId !== null && destinations.length > 0;
   // The map pins every venue with an event this season, whatever the filter (app/lib/pins.ts), so an event's venue is on it.
   const openedPlace = opened ? placeOf(opened, trip.places) : null;
+  const openedWhere = opened ? showPlace(opened, trip) : null;
+  const tripName = trip.info?.name ?? "";
 
   return (
     <div className="parties">
       {problem && <Notice>{problem}</Notice>}
       <div className="parties-top">
         <h2 className="h3">Who's playing</h2>
-        {canAdd && (
-          <button type="button" className="parties-add" onClick={() => setSheet({ mode: "add" })}>
-            <Icon name="plus" />
-            Add
-          </button>
+        {viewer.memberId !== null && (
+          <div className="parties-acts">
+            <ShareButton url={eventsLink(window.location.origin, tripId)} text={tripName} className="parties-add" />
+            {canAdd && (
+              <button type="button" className="parties-add" onClick={() => setSheet({ mode: "add" })}>
+                <Icon name="plus" />
+                Add
+              </button>
+            )}
+          </div>
         )}
       </div>
       <CountryChips country={country} countries={countries} onChoose={setCountry} />
@@ -205,9 +226,7 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
         <p className="sub parties-empty">
           {filter === "all"
             ? "Nothing announced yet."
-            : country === "all"
-              ? "No events tagged yet. Open an event to add it."
-              : `No events tagged yet in ${country}. Open an event to add it.`}
+            : `No events tagged yet${country === "all" ? "" : ` in ${country}`}.${viewer.memberId === null ? "" : " Open an event to add it."}`}
         </p>
       )}
       {groups.map(({ destination, venues: venueGroups }) => (
@@ -258,6 +277,7 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
                         onIn={setInFor(show.id)}
                         onEdit={() => setSheet({ mode: "edit", id: show.id })}
                         onOpen={() => setDetail(show.id)}
+                        href={eventHref?.(show.id)}
                       />
                     )
                   ),
@@ -274,8 +294,8 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
       )}
       <ShowSheet
         show={opened}
-        where={opened ? placeLine(opened.venue, areaOf(opened), nameOf(opened.destination)) : ""}
-        venueLine={openedPlace?.line}
+        where={openedWhere?.where ?? ""}
+        venueLine={openedWhere?.line}
         going={opened ? going(opened.id) : []}
         you={viewer.memberId}
         addedByName={opened ? adderOf(opened) : undefined}
@@ -291,6 +311,7 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
         tags={opened ? tagsOf(opened.id) : []}
         tagNames={tags.names}
         onTag={viewer.memberId && opened ? (tag, on) => setShowTag(tripId, opened.id, tag, on) : undefined}
+        share={viewer.memberId && opened ? { url: eventsLink(window.location.origin, tripId, opened.id), text: `${opened.artist} · ${tripName}` } : undefined}
         onClose={() => setDetail(null)}
       />
       <AddPartySheet

@@ -63,3 +63,21 @@ export function useFlash(on: boolean, off: () => void): void {
     return () => clearTimeout(timer);
   }, [on]);
 }
+
+/**
+ * Makes the address of the shared events pages (owner, 25 Nov 2026: "share
+ * the events stand alone", "and a single event"): every event of the trip,
+ * or one event. The id is encoded, so an odd character can never change
+ * the path; app/lib/route.ts reads it back.
+ *
+ * Inputs: origin — the site, such as window.location.origin; tripId; showId — one event, or none for all.
+ * Output: "<origin>/trip/<tripId>/events", or ".../events/<showId>".
+ * Examples (each is a test in share.test.ts):
+ *   eventsLink("https://travel-ca8f9.web.app", "abc")             → "https://travel-ca8f9.web.app/trip/abc/events"
+ *   eventsLink("http://localhost:5192", "abc", "bali_2027-02-13_savaya_peggy-gou") → "http://localhost:5192/trip/abc/events/bali_2027-02-13_savaya_peggy-gou"
+ *   eventsLink("https://x.app", "abc", "a b/c")                    → "https://x.app/trip/abc/events/a%20b%2Fc"
+ */
+export function eventsLink(origin: string, tripId: string, showId?: string): string {
+  const all = `${origin}/trip/${encodeURIComponent(tripId)}/events`;
+  return showId === undefined ? all : `${all}/${encodeURIComponent(showId)}`;
+}

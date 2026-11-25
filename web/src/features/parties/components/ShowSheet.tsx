@@ -5,6 +5,7 @@ import { initials } from "../../../lib/initials";
 import { eventLink, whenLine } from "../lib/detail";
 import type { ListedShow } from "../lib/shows";
 import { EventTags } from "./EventTags";
+import { ShareButton } from "./ShareButton";
 import type { WriteResult } from "../../../lib/db";
 
 interface ShowSheetProps {
@@ -26,6 +27,8 @@ interface ShowSheetProps {
   tagNames: Record<string, string>;
   /** Puts a tag on the event or takes it off; absent on a device that has not joined. */
   onTag?: (tag: string, on: boolean) => Promise<WriteResult>;
+  /** The event's shared page and its share line, for "Share"; absent on a device that has not joined. */
+  share?: { url: string; text: string };
   onClose: () => void;
 }
 
@@ -35,6 +38,9 @@ interface ShowSheetProps {
  * Who is playing, in full; what it is; when and where; who is in and the
  * "I'm in" button; then the two ways out, the map and the event's own page;
  * then the event's tags, which any member adds or removes (EventTags).
+ * Beside the two ways out, "Share" hands out the event's own shared page
+ * (owner, 25 Nov 2026: "share … a single event"). A device that has not
+ * joined sees no crew and no "I'm in".
  *
  * Inputs: the show, its place line and venue line, who is in, this member,
  * the adder's name, its tags and the trip's tag names, and what "I'm in",
@@ -46,6 +52,7 @@ interface ShowSheetProps {
  *   Peggy Gou → "Sat 13 Feb 2027", "Savaya · Uluwatu, Bali", "Club on the cliffs", "See on the map", "Event page"
  *   Single Fin's Sunday Session → "Every Sunday from 7 Feb"
  *   tap "I'm in" → the button fills here and on the row at once
+ *   tap "Share" on a desktop → "Copied"; the link is …/trip/<id>/events/<showId>
  */
 export function ShowSheet({ show, onClose, ...rest }: ShowSheetProps) {
   return (
@@ -55,7 +62,7 @@ export function ShowSheet({ show, onClose, ...rest }: ShowSheetProps) {
   );
 }
 
-function ShowDetail({ show, where, venueLine, going, you, addedByName, onIn, onSeeMap, tags, tagNames, onTag }: Omit<ShowSheetProps, "onClose"> & { show: ListedShow }) {
+function ShowDetail({ show, where, venueLine, going, you, addedByName, onIn, onSeeMap, tags, tagNames, onTag, share }: Omit<ShowSheetProps, "onClose"> & { show: ListedShow }) {
   const isIn = you !== null && going.some((person) => person.id === you);
   const link = eventLink(show.link);
 
@@ -84,17 +91,21 @@ function ShowDetail({ show, where, venueLine, going, you, addedByName, onIn, onS
         </div>
       </dl>
 
-      <div className="show-going">
-        <Avatars people={going} you={you} max={8} />
-        <p className="sub">{going.length ? `${going.length} in · ${going.map((person) => person.name).join(", ")}` : "Be the first in"}</p>
-      </div>
+      {you !== null && (
+        <>
+          <div className="show-going">
+            <Avatars people={going} you={you} max={8} />
+            <p className="sub">{going.length ? `${going.length} in · ${going.map((person) => person.name).join(", ")}` : "Be the first in"}</p>
+          </div>
 
-      <button type="button" className="inbtn show-in" aria-pressed={isIn} disabled={you === null} onClick={() => onIn(!isIn)}>
-        {isIn && <Icon name="check" />}
-        I'm in
-      </button>
+          <button type="button" className="inbtn show-in" aria-pressed={isIn} onClick={() => onIn(!isIn)}>
+            {isIn && <Icon name="check" />}
+            I'm in
+          </button>
+        </>
+      )}
 
-      {(onSeeMap || link?.kind === "page") && (
+      {(onSeeMap || link?.kind === "page" || share) && (
         <div className="show-ways">
           {onSeeMap && (
             <button type="button" className="btn sec" onClick={onSeeMap}>
@@ -108,11 +119,12 @@ function ShowDetail({ show, where, venueLine, going, you, addedByName, onIn, onS
               Event page
             </a>
           )}
+          {share && <ShareButton url={share.url} text={share.text} className="btn sec" />}
         </div>
       )}
       {link?.kind === "text" && <p className="cap show-link-text">{link.text}</p>}
       <EventTags showId={show.id} tags={tags} names={tagNames} onChange={onTag} />
-      {addedByName && <p className="cap show-by">added by {initials(addedByName)}</p>}
+      {you !== null && addedByName && <p className="cap show-by">added by {initials(addedByName)}</p>}
     </div>
   );
 }

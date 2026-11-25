@@ -1,17 +1,23 @@
 import { useEffect } from "react";
 import { Notice } from "../components/Notice";
+import { readRoute } from "./lib/route";
 import { splashAddress } from "./lib/splash";
+import { SharedEvents } from "./SharedEvents";
 import { TripPage } from "./TripPage";
 
-const tripId = /^\/trip\/([A-Za-z0-9_-]+)\/?$/.exec(window.location.pathname)?.[1] ?? null;
+const route = readRoute(window.location.pathname);
+// The trip page's id; the shared events pages open without the splash and never spend its pass.
+const tripId = route?.page === "trip" ? route.tripId : null;
 // Decided once per page load, outside React: the splash's pass is spent by the first read.
 const splash = tripId ? splashAddress(tripId, window.location.search) : null;
 
 /**
- * The app's one route, /trip/<tripId>. It reads the trip id from the address
- * and draws the page frame around the trip page. Only a load straight after
- * the splash's button opens the trip; any other load goes to the splash
- * first (lib/splash.ts).
+ * The app's routes (lib/route.ts): /trip/<tripId>, the trip page, and the
+ * shared events pages /trip/<tripId>/events and /trip/<tripId>/events/<showId>.
+ * It draws the page frame around them. Only a load of the trip page
+ * straight after the splash's button opens the trip; any other load goes
+ * to the splash first (lib/splash.ts). The shared events pages open
+ * directly: they are the way in for a friend who has not joined.
  *
  * Inputs: none. The address bar is the input; the hosting rewrite sends every
  * /trip/** path here.
@@ -20,6 +26,7 @@ const splash = tripId ? splashAddress(tripId, window.location.search) : null;
  * Examples (checked on the emulator):
  *   /trip/<id>, after the splash's button  → the trip page
  *   a refresh, or /trip/<id> in a new tab  → the splash, /?t=<id>
+ *   /trip/<id>/events in a new tab         → the shared events page, no splash
  *   /trip/, or an id with other characters (/trip/a%2Fb)
  *               → "This link does not open a trip. Ask the organizer for the link."
  */
@@ -43,8 +50,10 @@ export function App() {
 
   return (
     <main className="frame">
-      {tripId ? (
-        <TripPage tripId={tripId} />
+      {route?.page === "trip" ? (
+        <TripPage tripId={route.tripId} />
+      ) : route ? (
+        <SharedEvents tripId={route.tripId} showId={route.page === "event" ? route.showId : undefined} />
       ) : (
         <Notice>This link does not open a trip. Ask the organizer for the link.</Notice>
       )}

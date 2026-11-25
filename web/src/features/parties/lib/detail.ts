@@ -1,6 +1,7 @@
 import { dayMonth, weekdayDate } from "../../../lib/format";
 import { idFromName } from "../../../lib/ids";
-import type { DestinationId, Weekday } from "../../../types/trip";
+import { placeName } from "../../../lib/place";
+import type { DestinationId, Trip, Weekday } from "../../../types/trip";
 
 /**
  * The parties context's rules for saying when and where a show is and what
@@ -165,4 +166,41 @@ export function eventLink(link: string | undefined): EventLink | null {
     // Not an address at all: the friend still sees what was saved.
   }
   return { kind: "text", text };
+}
+
+/** Where a show is, as the show sheet and the shared event page say it. */
+export interface ShowPlace {
+  /** "Savaya · Uluwatu, Bali, Indonesia". */
+  where: string;
+  /** The venue's one plain line ("Club on the cliffs"), when the trip has one. */
+  line?: string;
+  /** The venue's picture (places/venues photoUrl), when it has one. */
+  photoUrl?: string;
+}
+
+/**
+ * Says where a show is, in one place for the show sheet and the shared
+ * event page: the place line (placeLine) with the destination named with
+ * its country, the area the show names or else its venue's, the venue's
+ * one line, and the venue's picture. A friend's event at a venue the trip
+ * does not know has its place line alone.
+ *
+ * Inputs: show — its destination, venue and area; trip — its info and places.
+ * Output: { where, line?, photoUrl? }.
+ * Examples (each is a test in detail.test.ts):
+ *   Peggy Gou at Savaya, Bali, Indonesia → { where: "Savaya · Uluwatu, Bali, Indonesia", line: "Club on the cliffs", photoUrl: "https://…/savaya.jpg" }
+ *   a friend's party at "Kai's villa"     → { where: "Kai's villa · Bali, Indonesia" }
+ */
+export function showPlace(show: { destination: DestinationId; venue: string; area?: string }, trip: Pick<Trip, "info" | "places">): ShowPlace {
+  const destination = trip.info?.destinations?.[show.destination];
+  const named = destination ? placeName(destination.name, destination.country) : show.destination;
+  const place = placeOf(show, trip.places);
+  const area = show.area ?? trip.places?.areas?.[place?.areaId ?? ""]?.name;
+  const wanted = idFromName(show.venue);
+  const venue = Object.values(trip.places?.venues ?? {}).find((one) => one?.destination === show.destination && typeof one.name === "string" && idFromName(one.name) === wanted);
+  return {
+    where: placeLine(show.venue, area, named),
+    ...(place?.line ? { line: place.line } : {}),
+    ...(venue?.photoUrl ? { photoUrl: venue.photoUrl } : {}),
+  };
 }

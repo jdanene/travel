@@ -9,7 +9,7 @@ interface ShowRowProps {
   show: ListedShow;
   /** Who is in, in reply order. */
   going: Person[];
-  /** This device's member; null before a reply, and then the button is off. */
+  /** This device's member; null on the shared events page, which shows no crew and no "I'm in". */
   you: string | null;
   /** The name of the friend who added it, for "added by KA"; undefined for a seeded show. */
   addedByName?: string;
@@ -20,6 +20,8 @@ interface ShowRowProps {
   onEdit: () => void;
   /** Opens the show sheet. */
   onOpen: () => void;
+  /** On the shared events page: the event's own page, which the artist links to instead of the sheet. */
+  href?: string;
 }
 
 /**
@@ -42,13 +44,17 @@ interface ShowRowProps {
  * A weekly show's tile reads "Every / Sun" and screen readers hear "Every
  * Sunday". The event's tags sit under the about line as small grey labels,
  * all but the picked filter's.
+ * On the shared events page (you null) the row shows no crew: no faces,
+ * no count, no "added by", and no "I'm in"; the artist links to the
+ * event's own page.
  * Examples (checked at 375 px and 1650 px against screen 7):
  *   Peggy Gou, 4 in, RB in  → Sat 13 Feb tile, four initials, "4 in", "I'm in" filled
  *   a party KA added        → "1 in · added by KA"
  *   under "Big nights", Peggy Gou tagged Big nights and Rooftop → one grey "Rooftop" label
  *   Single Fin's Sunday Session → "Every / Sun" tile; a tap on the tile opens the sheet
  */
-export function ShowRow({ show, going, you, addedByName, canEdit, tags, onIn, onEdit, onOpen }: ShowRowProps) {
+export function ShowRow({ show, going, you, addedByName, canEdit, tags, onIn, onEdit, onOpen, href }: ShowRowProps) {
+  const visitor = you === null;
   const isIn = you !== null && going.some((person) => person.id === you);
   const count = going.length ? `${going.length} in` : "Be the first in";
   const by = addedByName ? ` · added by ${initials(addedByName)}` : "";
@@ -58,9 +64,15 @@ export function ShowRow({ show, going, you, addedByName, canEdit, tags, onIn, on
     <div className="prow" id={`show-${show.id}`} tabIndex={-1}>
       <DateTile show={show} label={when} />
       <div className="who">
-        <button type="button" className="artist show-open" aria-haspopup="dialog" aria-label={`${show.artist}, ${when}`} onClick={onOpen}>
-          {show.artist}
-        </button>
+        {href ? (
+          <a className="artist show-open" href={href} aria-label={`${show.artist}, ${when}`}>
+            {show.artist}
+          </a>
+        ) : (
+          <button type="button" className="artist show-open" aria-haspopup="dialog" aria-label={`${show.artist}, ${when}`} onClick={onOpen}>
+            {show.artist}
+          </button>
+        )}
         {show.about && <p className="about">{show.about}</p>}
         {tags.length > 0 && (
           <p className="row-tags">
@@ -74,11 +86,15 @@ export function ShowRow({ show, going, you, addedByName, canEdit, tags, onIn, on
         )}
         <div className="meta">
           {show.verified === false && <span className="nc">not confirmed</span>}
-          <Avatars people={going} you={you} max={4} />
-          <span>
-            {count}
-            {by}
-          </span>
+          {!visitor && (
+            <>
+              <Avatars people={going} you={you} max={4} />
+              <span>
+                {count}
+                {by}
+              </span>
+            </>
+          )}
           {canEdit && (
             <button type="button" className="edit" onClick={onEdit} aria-label={`Edit ${show.artist}`}>
               Edit
@@ -87,10 +103,12 @@ export function ShowRow({ show, going, you, addedByName, canEdit, tags, onIn, on
           <EventLinkButton show={show} />
         </div>
       </div>
-      <button type="button" className="inbtn" aria-pressed={isIn} disabled={you === null} aria-label={`I'm in: ${show.artist}, ${when}`} onClick={() => onIn(!isIn)}>
-        {isIn && <Icon name="check" />}
-        I'm in
-      </button>
+      {!visitor && (
+        <button type="button" className="inbtn" aria-pressed={isIn} aria-label={`I'm in: ${show.artist}, ${when}`} onClick={() => onIn(!isIn)}>
+          {isIn && <Icon name="check" />}
+          I'm in
+        </button>
+      )}
     </div>
   );
 }
