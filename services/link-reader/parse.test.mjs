@@ -82,3 +82,22 @@ test("the handler refuses a redirect off the site and a fourth redirect (edge ca
   assert.deepEqual(await ask("https://www.airbnb.com/rooms/0"), { ok: false, reason: "not_allowed" });
   assert.equal(hops.length, 4);
 });
+
+test("resolve answers a short link's target on the same site, with no page read", async (t) => {
+  // Recorded 25 Nov 2026: what the short links answered a phone's browser.
+  const recorded = {
+    "https://vt.tiktok.com/ZS9bVfWa6/": "https://www.tiktok.com/@/video/7620909821147073813?_r=1",
+    "https://www.instagram.com/share/reel/BBumGiQdP6/": "/reel/C6HpUPegvtc/?igsh=x",
+    "https://vm.tiktok.com/off/": "https://evil.example/",
+  };
+  t.mock.method(globalThis, "fetch", async (url) =>
+    recorded[url] ? new Response(null, { status: 302, headers: { location: recorded[url] } }) : new Response("<html>", { status: 200 }),
+  );
+  const ask = async (resolve) => JSON.parse((await handler({ queryStringParameters: { resolve } })).body);
+
+  assert.deepEqual(await ask("https://vt.tiktok.com/ZS9bVfWa6/"), { ok: true, url: "https://www.tiktok.com/@/video/7620909821147073813?_r=1" });
+  assert.deepEqual(await ask("https://www.instagram.com/share/reel/BBumGiQdP6/"), { ok: true, url: "https://www.instagram.com/reel/C6HpUPegvtc/?igsh=x" });
+  assert.deepEqual(await ask("https://vm.tiktok.com/off/"), { ok: false, reason: "not_allowed" });
+  assert.deepEqual(await ask("https://www.instagram.com/share/gone/"), { ok: false, reason: "unreadable" });
+  assert.deepEqual(await ask("https://www.airbnb.com/rooms/1"), { ok: false, reason: "not_allowed" });
+});
