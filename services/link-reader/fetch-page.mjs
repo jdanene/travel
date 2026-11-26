@@ -8,6 +8,8 @@ const MAX_REDIRECTS = 3;
 const DEADLINE_MS = 6000;
 // The sites answer a browser; a bare client gets a different page or none.
 const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36";
+// A phone gets the redirect of a share link, and Instagram's embed page with its words in the page itself.
+const PHONE_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
 
 /**
  * Fetches one page within the reader's limits, so no caller can open more
@@ -17,6 +19,8 @@ const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/
  *   address, an absolute https address the caller has already allowed.
  *   allows(next), says whether a redirect's target may be opened; every
  *     hop is asked, and a "no" ends the fetch.
+ *   asPhone, true to ask as an iPhone (Instagram's embed page holds the
+ *     post's account and caption only then; checked 26 Nov 2026).
  *
  * Output: { ok: true, text, url, cut } with the first 512 KB of the body as
  *   text, the address after redirects, and cut true when the body was
@@ -28,7 +32,7 @@ const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/
  *   fetchPage("https://www.airbnb.com/rooms/1", sameSite)  → { ok: true, text: "<!doctype html>…", url: "https://www.airbnb.com/rooms/1", cut: false }
  *   a redirect to https://evil.example/                     → { ok: false, reason: "not_allowed" }, the target never opened
  */
-export async function fetchPage(address, allows) {
+export async function fetchPage(address, allows, asPhone = false) {
   const abort = new AbortController();
   const timer = setTimeout(() => abort.abort(), DEADLINE_MS);
   try {
@@ -38,7 +42,7 @@ export async function fetchPage(address, allows) {
       response = await fetch(url, {
         redirect: "manual",
         signal: abort.signal,
-        headers: { "user-agent": USER_AGENT, accept: "text/html,application/xhtml+xml", "accept-language": "en-US,en;q=0.9" },
+        headers: { "user-agent": asPhone ? PHONE_AGENT : USER_AGENT, accept: "text/html,application/xhtml+xml", "accept-language": "en-US,en;q=0.9" },
       });
       if (response.status < 300 || response.status >= 400) break;
       const next = response.headers.get("location") && new URL(response.headers.get("location"), url).toString();
@@ -61,7 +65,6 @@ export async function fetchPage(address, allows) {
 
 // Instagram answers a share link's redirect only to a phone; a desktop
 // browser gets an error page (checked 25 Nov 2026). TikTok answers both.
-const PHONE_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
 
 /**
  * Asks where a short or share link points, without opening the post: one

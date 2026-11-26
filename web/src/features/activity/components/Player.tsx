@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { Icon } from "../../../components/Icon";
-import { resolveLink } from "../../../lib/reader";
+import { postCard, readCard, resolveLink, type PostCard } from "../../../lib/reader";
 import { instagramCrop, playerOf, readMessage, type Video } from "../lib/players";
 import { RichText } from "./Glyph";
 
@@ -48,8 +48,11 @@ export function MessageText({ text, className }: { text: string; className: "fp-
  * the frame sits behind the box, moved up by its header and cut at the
  * picture's foot, and a reel's frame is also widened until its 9:16 video
  * fills the box (lib/players.ts instagramCrop). What the cut takes away,
- * the ways to Instagram, comes back as one small Instagram mark in the
- * box's top corner, where TikTok's frame has its own.
+ * the ways to Instagram, comes back with the account (exception 42): a
+ * still is a card as in Instagram's own chat, the account's picture and
+ * name above the picture and the caption's start under it; a video has
+ * the account over its top corner. When the account cannot be read, one
+ * small Instagram mark sits in the box's top corner instead.
  *
  * Inputs: the video; src — the player's address (undefined while a short
  * link is looked up); small — a reply's size.
@@ -58,8 +61,10 @@ export function MessageText({ text, className }: { text: string; className: "fp-
  * video playing.
  * Examples (checked on the emulator, iPhone simulator and 1650 px):
  *   a reel            → a 9:16 box filled by the video and its play button; no header, no words; a tap plays it in place
- *   a 4:5 photo post  → a 4:5 box holding the photo; a wide photo → a box of the photo's shape, once the frame reports its height
- *   the mark in the corner → opens the post on Instagram in a new tab
+ *   a photo post      → a card: "keinemusik and adamport" with its picture, the photo in its own shape, "keinemusik first keinemusik show of 2027 …" on two lines
+ *   a reel            → "lupeslively" with its picture over the video's top left corner
+ *   the name row, or the name over a video → opens the post on Instagram in a new tab
+ *   the reader down   → the photo alone, with the Instagram mark in its corner
  *   a TikTok          → TikTok's frame, whole, as before
  */
 function Player({ video, src, small }: { video: Video; src: string | undefined; small: boolean }) {
@@ -74,9 +79,11 @@ function Player({ video, src, small }: { video: Video; src: string | undefined; 
     setRound((was) => was + 1);
   });
   const reported = useReportedSize(frame, instagram);
-  const crop = instagram ? instagramCrop(!!src && src.includes("/reel/"), reported) : null;
+  const card = useCard(instagram ? src : undefined);
+  const crop = instagram ? instagramCrop(!!src && (src.includes("/reel/") || card?.kind === "video"), reported) : null;
   const name = SITE_NAME[video.site];
-  return (
+  const account = card && (card.also ? `${card.name} and ${card.also}` : card.name);
+  const frameBox = (
     <div ref={box} className={`vp ${video.site}${crop?.zoom ? " zoom" : ""}${small ? " small" : ""}`} style={crop ? { aspectRatio: `1 / ${crop.tall}` } : undefined}>
       {src && (
         <iframe
@@ -99,13 +106,109 @@ function Player({ video, src, small }: { video: Video; src: string | undefined; 
           Watch on {name}
         </a>
       )}
-      {instagram && loaded && (
+      {instagram && loaded && !card && (
         <a className="vp-out" href={video.href} target="_blank" rel="noopener noreferrer" aria-label="Watch on Instagram">
           <Icon name="insta" size={16} />
         </a>
       )}
+      {card && crop?.zoom && (
+        // A video: the account sits over its top corner, as in Instagram's own chat; it is the way to Instagram.
+        <a className="ig-over" href={video.href} target="_blank" rel="noopener noreferrer">
+          <Avatar url={card.avatarUrl} />
+          <span className="ig-name">{account}</span>
+          <span className="sr-only">, Watch on Instagram</span>
+        </a>
+      )}
     </div>
   );
+  if (!instagram) return frameBox;
+  // A still: Instagram's chat card, with the account above the picture and the caption's start under it.
+  // The three places keep their order whether filled or not, so the frame is never remounted.
+  const still = !!card && !crop?.zoom;
+  return (
+    <div className={`ig${still ? " card" : ""}${small ? " small" : ""}`}>
+      {still && card && (
+        <a className="ig-head" href={video.href} target="_blank" rel="noopener noreferrer">
+          <Avatar url={card.avatarUrl} />
+          <span className="ig-name">{account}</span>
+          <span className="sr-only">, Watch on Instagram</span>
+        </a>
+      )}
+      {frameBox}
+      {still && card?.caption && (
+        <p className="ig-cap">
+          <b>{card.name}</b> {card.caption}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** An account's round picture; an empty disc when it has none or the picture does not load. */
+function Avatar({ url }: { url: string | undefined }) {
+  const [failed, setFailed] = useState(false);
+  return <span className="ig-avatar">{url && !failed && <img src={url} alt="" loading="lazy" referrerPolicy="no-referrer" onError={() => setFailed(true)} />}</span>;
+}
+
+const CARD_KEPT = "travel.card.";
+const CARD_KEPT_MS = 12 * 60 * 60 * 1000;
+// One read per post for the page's life; a failure is forgotten so the next draw asks again.
+const reading = new Map<string, Promise<PostCard | null>>();
+
+/**
+ * The account, account picture and caption of an Instagram post, for the
+ * card around its frame. Read once through the link reader and kept on
+ * this device for 12 hours (the account picture's address stops working
+ * after a few days). The reader is sent the post's address and nothing
+ * about the trip or the friend.
+ *
+ * Inputs: src — the post's player address, or undefined (a short link
+ * still being looked up, or another site).
+ * Output: the card, or null while it is read and when there is none (a
+ * private or removed post, the reader down); the Feed then shows the
+ * frame alone, with the Instagram mark.
+ * Examples (checked on the emulator against the local reader):
+ *   a photo post, first time → null, then { name: "keinemusik", also: "adamport", kind: "image", … }; the next visit has it at once
+ *   the reader down → null; the next draw asks again
+ */
+function useCard(src: string | undefined): PostCard | null {
+  const post = src?.replace(/embed\/$/, "");
+  const [card, setCard] = useState<PostCard | null>(() => (post ? keptCard(post) : null));
+  useEffect(() => {
+    if (!post || keptCard(post)) return;
+    let live = true;
+    let asked = reading.get(post);
+    if (!asked) {
+      asked = readCard(post).then((found) => {
+        if (found) keepCard(post, found);
+        else reading.delete(post);
+        return found;
+      });
+      reading.set(post, asked);
+    }
+    void asked.then((found) => live && found && setCard(found));
+    return () => {
+      live = false;
+    };
+  }, [post]);
+  return card;
+}
+
+function keptCard(post: string): PostCard | null {
+  try {
+    const kept = JSON.parse(localStorage.getItem(CARD_KEPT + post) ?? "null") as { at?: number; card?: unknown } | null;
+    return kept && typeof kept.at === "number" && Date.now() - kept.at < CARD_KEPT_MS ? postCard(kept.card) : null;
+  } catch {
+    return null;
+  }
+}
+
+function keepCard(post: string, card: PostCard) {
+  try {
+    localStorage.setItem(CARD_KEPT + post, JSON.stringify({ at: Date.now(), card }));
+  } catch {
+    // Private mode or a full store: the next visit asks again.
+  }
 }
 
 /**

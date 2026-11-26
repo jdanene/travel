@@ -70,6 +70,92 @@ export function parsePost(html, url) {
   return withoutEmpty({ title: cut(title), photoUrl: absolutePhoto(photo, url) });
 }
 
+/**
+ * The embed page of an Instagram post, the one page of a post that
+ * Instagram serves without a login: where the card's account and caption
+ * are read from.
+ *
+ * Inputs: address, a post's or reel's address as a friend pasted it.
+ * Output: "https://www.instagram.com/p/<code>/embed/captioned/" (or
+ *   /reel/), or null for a profile, a story, a share link or another site.
+ * Examples (tests in parse.test.mjs):
+ *   instagramEmbed("https://www.instagram.com/someone/reel/C6HpUPegvtc/?igsh=x") → "https://www.instagram.com/reel/C6HpUPegvtc/embed/captioned/"
+ *   instagramEmbed("https://www.instagram.com/p/DgKzBNcolB7/") → "https://www.instagram.com/p/DgKzBNcolB7/embed/captioned/"
+ *   instagramEmbed("https://www.instagram.com/savayabali/") → null
+ */
+export function instagramEmbed(address) {
+  let url;
+  try {
+    url = new URL(address);
+  } catch {
+    return null;
+  }
+  if (!/^(?:(?:www|m)\.)?instagram\.com$/.test(url.hostname)) return null;
+  const parts = url.pathname.split("/").filter(Boolean);
+  const at = parts.findIndex((part, index) => index <= 1 && /^(p|reels?|tv)$/.test(part));
+  const code = at >= 0 ? parts[at + 1] : undefined;
+  if (!code || !/^[A-Za-z0-9_-]{5,40}$/.test(code)) return null;
+  return `https://www.instagram.com/${parts[at] === "p" ? "p" : "reel"}/${code}/embed/captioned/`;
+}
+
+/**
+ * Reads what Instagram's own chat shows around a shared post: the account,
+ * its picture and the caption's start. The Feed draws them around the
+ * post's picture or video (design exception 42).
+ *
+ * Inputs: html, a post's embed page (instagramEmbed's address).
+ *
+ * Output: { name, kind, also?, avatarUrl?, caption? }, or null when the
+ *   page names no account (a removed or private post, a login page).
+ *   name is the account that posted; also is the first account it posted
+ *   with ("keinemusik and adamport"); kind is "video", "album" (several
+ *   pictures) or "image"; avatarUrl is https and at most 1,200 characters;
+ *   caption is plain text cut to 200 characters.
+ *
+ * Examples (tests in parse.test.mjs, on a page of Instagram's shape):
+ *   a photo by clubnight with dj.one, caption "First show of 2027<br />Rio" → { name: "clubnight", also: "dj.one", kind: "image", avatarUrl: "https://cdn.example/a.jpg?x=1&y=2", caption: "First show of 2027 Rio" }
+ *   a reel with no caption text → { name: "someone", kind: "video" }
+ *   Instagram's login page → null
+ */
+export function parseInstagramCard(html) {
+  const from = html.indexOf('class="Header"');
+  const header = from < 0 ? "" : html.slice(from, endOf(html, 'class="HeaderCta"', from));
+  const names = [...header.matchAll(/class="UsernameText[^"]*">([^<]{1,60})</g)].map((found) => found[1].trim()).filter((name) => /^[A-Za-z0-9._]{1,30}$/.test(name));
+  const captionAt = html.indexOf('class="CaptionUsername"');
+  const captionName = captionAt < 0 ? undefined : html.slice(captionAt, captionAt + 1500).match(/>([A-Za-z0-9._]{1,30})<\/a>/)?.[1];
+  const name = captionName ?? names[0];
+  if (!name) return null;
+  const type = html.match(/data-media-type="(Graph[A-Za-z]{1,20})"/)?.[1];
+  const kind = type === "GraphVideo" ? "video" : type === "GraphSidecar" ? "album" : "image";
+  const own = header.match(new RegExp(`href="https://www\\.instagram\\.com/${name.replace(/\./g, "\\.")}/[^"]*"[^>]*>\\s*<img[^>]*\\ssrc="([^"]+)"`));
+  const avatarUrl = httpsAddress((own ?? header.match(/<img[^>]*\ssrc="([^"]+)"/))?.[1]);
+  let caption;
+  if (captionAt >= 0) {
+    const start = html.indexOf("</a>", captionAt);
+    const raw = html.slice(start + 4, Math.min(endOf(html, "<div", start), endOf(html, "</div>", start)));
+    caption = cut(clean(raw.replace(/<br\s*\/?>/gi, " ").replace(/<[^>]*>/g, "")) ?? "") || undefined;
+  }
+  return withoutEmpty({ name, also: names.find((other) => other !== name), kind, avatarUrl, caption });
+}
+
+// Where a marker next appears after a point, or the end of the text.
+function endOf(text, marker, from) {
+  const at = text.indexOf(marker, from);
+  return at < 0 ? text.length : at;
+}
+
+// An address from a page as the app may load it: entities decoded, https, at most 1,200 characters.
+function httpsAddress(raw) {
+  if (!raw) return undefined;
+  try {
+    const url = new URL(decodeEntities(raw.trim()));
+    const text = url.toString();
+    return url.protocol === "https:" && text.length <= 1200 ? text : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 // Airbnb's page title is "<name> in <area>, <region>, <country> - Airbnb",
 // sometimes "<name> - Houses for Rent in <area>, …", and its og:title is
 // "<type> in <area> · ★4.97 · 1 bedroom · …". The area from og:title tells

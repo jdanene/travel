@@ -5,7 +5,7 @@
 // and never retries; the app retries a read (plan section 5.4).
 
 import { siteOf } from "./sites.mjs";
-import { parseListing, parsePost } from "./parse.mjs";
+import { instagramEmbed, parseInstagramCard, parseListing, parsePost } from "./parse.mjs";
 import { fetchPage, redirectOf } from "./fetch-page.mjs";
 import { checkEvents } from "./events.mjs";
 
@@ -15,7 +15,9 @@ const ORIGINS = /^(https:\/\/travel-ca8f9\.web\.app|http:\/\/localhost(:\d{1,5})
  * Answers GET ?url=<address> with what the page says, for the Add a place
  * sheet (a listing) and the Add a link sheet (a post), GET ?resolve=<address>
  * with where an Instagram or TikTok short or share link points, for the
- * Feed's video players, and GET ?check=events
+ * Feed's video players, GET ?card=<address> with the account, its picture
+ * and the caption of an Instagram post, for the Feed's Instagram card, and
+ * GET ?check=events
  * with the clubs' events from 25 January to 31 March 2027, for the app's events
  * check.
  *
@@ -27,6 +29,7 @@ const ORIGINS = /^(https:\/\/travel-ca8f9\.web\.app|http:\/\/localhost(:\d{1,5})
  *   { ok: true, name, photoUrl?, area?, sleeps? }   an Airbnb or Booking.com listing
  *   { ok: true, title, photoUrl? }                  an Instagram or TikTok post
  *   { ok: true, url }                               ?resolve: the link's redirect target, on the same site
+ *   { ok: true, name, kind, also?, avatarUrl?, caption? }   ?card: an Instagram post (parseInstagramCard)
  *   { ok: false, reason }   reason is "not_allowed" (not https, a host off the
  *     list, a redirect off the list or past three, or a call from another
  *     site; nothing is fetched for the first and last), "unreadable" (no
@@ -41,6 +44,9 @@ const ORIGINS = /^(https:\/\/travel-ca8f9\.web\.app|http:\/\/localhost(:\d{1,5})
  *   GET ?url=https://example.com → 200 { ok: false, reason: "not_allowed" }
  *   GET ?resolve=https://vt.tiktok.com/ZS9bVfWa6/ → 200 { ok: true, url: "https://www.tiktok.com/@/video/7620909821147073813?…" }
  *     (run locally on 25 Nov 2026; not yet deployed)
+ *   GET ?card=https://www.instagram.com/p/DgKzBNcolB7/ → 200 { ok: true, name: "keinemusik", also: "adamport", kind: "image", avatarUrl: "https://scontent-…", caption: "first keinemusik show of 2027 rio tá chegando a hora 🇧🇷" }
+ *     (run locally against Instagram on 26 Nov 2026)
+ *   GET ?card=https://www.instagram.com/savayabali/ → 200 { ok: false, reason: "not_allowed" }  (not a post; nothing is fetched)
  *   GET ?url=https://www.booking.com/hotel/th/x.html → 200 { ok: false, reason: "unreadable" }  (challenge page)
  *   GET ?check=events → 200 { ok: true, checkedAt: 1795400000000, events: [{ destination: "bali", venue: "Savaya", … }], failed: [] }
  *     (run locally against the live club pages; not yet deployed)
@@ -55,12 +61,12 @@ export async function handler(event) {
   if (method !== "GET") return { statusCode: 405, headers: cors, body: "" };
 
   const query = event.queryStringParameters ?? {};
-  const answer = origin && !ORIGINS.test(origin) ? refuse("not_allowed") : query.check === "events" ? await checkOnce() : query.resolve !== undefined ? await resolve(query.resolve) : await read(query.url ?? "");
+  const answer = origin && !ORIGINS.test(origin) ? refuse("not_allowed") : query.check === "events" ? await checkOnce() : query.resolve !== undefined ? await resolve(query.resolve) : query.card !== undefined ? await card(query.card) : await read(query.url ?? "");
   console.log(
     JSON.stringify(
       query.check === "events"
         ? { check: "events", ok: answer.ok, events: answer.events?.length, failed: answer.failed }
-        : { host: hostOf(query.url ?? query.resolve), resolve: query.resolve !== undefined || undefined, ok: answer.ok, reason: answer.reason },
+        : { host: hostOf(query.url ?? query.resolve ?? query.card), resolve: query.resolve !== undefined || undefined, card: query.card !== undefined || undefined, ok: answer.ok, reason: answer.reason },
     ),
   );
   return {
@@ -89,6 +95,18 @@ async function resolve(address) {
   if (!first || first.kind !== "post") return refuse("not_allowed");
   const hop = await redirectOf(address, (next) => siteOf(next)?.site === first.site);
   return hop.ok ? { ok: true, url: hop.url } : refuse(hop.reason);
+}
+
+// Reads the account and caption of an Instagram post from its embed page,
+// the one page of a post Instagram serves without a login. Only a post's
+// or reel's address is opened; a redirect must stay on Instagram.
+async function card(address) {
+  const embed = siteOf(address)?.site === "instagram" ? instagramEmbed(address) : null;
+  if (!embed) return refuse("not_allowed");
+  const page = await fetchPage(embed, (next) => siteOf(next)?.site === "instagram", true);
+  if (!page.ok) return refuse(page.reason);
+  const found = parseInstagramCard(page.text);
+  return found ? { ok: true, ...found } : refuse(page.cut ? "too_large" : "unreadable");
 }
 
 // One check of the clubs serves every call for 10 minutes, so a burst of

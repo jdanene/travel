@@ -1,8 +1,9 @@
 /**
  * The app's side of the link reader (services/link-reader): one call that
  * reads a pasted link, which Stay and Links both use, one that asks where a
- * short link points (the Feed's video players), and one that asks it to
- * check the clubs' pages for events.
+ * short link points (the Feed's video players), one that reads an Instagram
+ * post's account and caption (the Feed's Instagram card), and one that asks
+ * it to check the clubs' pages for events.
  */
 
 const READER_URL: string | undefined = import.meta.env.VITE_READER_URL;
@@ -79,6 +80,68 @@ export async function resolveLink(url: string): Promise<string | null> {
     }
   }
   return null;
+}
+
+/** What Instagram's own chat shows around a shared post: the account, its picture and the caption's start. */
+export interface PostCard {
+  /** The account that posted, as Instagram writes it ("keinemusik"). */
+  name: string;
+  /** The first account it posted with, when there is one. */
+  also?: string;
+  kind: "video" | "album" | "image";
+  avatarUrl?: string;
+  caption?: string;
+}
+
+/**
+ * Asks the reader for an Instagram post's account, account picture and
+ * caption, for the Feed's Instagram card (design exception 42). Only a lost
+ * call or a timeout is tried again; any other answer is final.
+ *
+ * Inputs: url — a post's or reel's address the caller has already recognised.
+ * Output: the card, or null when the reader says no (a private or removed
+ * post), fails twice, or is not set up; the Feed then shows the post
+ * without its account and caption.
+ * Examples (checked against a local run of the reader, 26 Nov 2026):
+ *   a photo post → { name: "keinemusik", also: "adamport", kind: "image", avatarUrl: "https://scontent-…", caption: "first keinemusik show of 2027 …" }
+ *   a profile's address → null at once (not_allowed)
+ */
+export async function readCard(url: string): Promise<PostCard | null> {
+  if (!READER_URL) return null;
+  for (const wait of RESOLVE_WAITS_MS) {
+    if (wait) await new Promise((resolve) => setTimeout(resolve, wait));
+    try {
+      const response = await fetch(`${READER_URL}?card=${encodeURIComponent(url)}`, { signal: AbortSignal.timeout(RESOLVE_TIMEOUT_MS) });
+      const answer = (await response.json()) as { ok: boolean; reason?: string } & Record<string, unknown>;
+      if (answer.ok) return postCard(answer);
+      if (answer.reason !== "timeout") return null;
+    } catch {
+      // A lost call or our own timeout: try once more.
+    }
+  }
+  return null;
+}
+
+/**
+ * Checks that a value has a card's shape before the app draws it; the
+ * reader's answer and a card kept on the device both pass through it.
+ *
+ * Inputs: value — anything.
+ * Output: the card with only its known fields, or null.
+ * Examples (tests in reader.test.ts):
+ *   { name: "keinemusik", kind: "image", caption: "first show" } → the same
+ *   { name: "x y", kind: "image" } → null (not an account name)
+ *   { name: "a", kind: "video", avatarUrl: "http://cdn.example/a.jpg" } → { name: "a", kind: "video" } (the picture must be https)
+ */
+export function postCard(value: unknown): PostCard | null {
+  const record = value as Record<string, unknown> | null;
+  const account = (text: unknown): text is string => typeof text === "string" && /^[A-Za-z0-9._]{1,30}$/.test(text);
+  if (!record || !account(record.name) || (record.kind !== "video" && record.kind !== "album" && record.kind !== "image")) return null;
+  const card: PostCard = { name: record.name, kind: record.kind };
+  if (account(record.also)) card.also = record.also;
+  if (typeof record.avatarUrl === "string" && /^https:\/\/[^\s"<>]{1,1200}$/.test(record.avatarUrl)) card.avatarUrl = record.avatarUrl;
+  if (typeof record.caption === "string" && record.caption.trim()) card.caption = record.caption.trim().slice(0, 240);
+  return card;
 }
 
 /** One event the check found on a club's own page. */
