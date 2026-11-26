@@ -105,15 +105,17 @@ export function instagramEmbed(address) {
  *
  * Inputs: html, a post's embed page (instagramEmbed's address).
  *
- * Output: { name, kind, also?, avatarUrl?, caption? }, or null when the
- *   page names no account (a removed or private post, a login page).
- *   name is the account that posted; also is the first account it posted
- *   with ("keinemusik and adamport"); kind is "video", "album" (several
- *   pictures) or "image"; avatarUrl is https and at most 1,200 characters;
+ * Output: { name, kind, verified?, also?, avatarUrl?, alsoAvatarUrl?,
+ *   caption? }, or null when the page names no account (a removed or
+ *   private post, a login page). name is the account that posted; verified
+ *   is true when Instagram marks that account as verified; also is the
+ *   first account it posted with ("keinemusik and adamport"), and
+ *   alsoAvatarUrl its picture; kind is "video", "album" (several pictures)
+ *   or "image"; the pictures are https and at most 1,200 characters;
  *   caption is plain text cut to 200 characters.
  *
  * Examples (tests in parse.test.mjs, on a page of Instagram's shape):
- *   a photo by clubnight with dj.one, caption "First show of 2027<br />Rio" → { name: "clubnight", also: "dj.one", kind: "image", avatarUrl: "https://cdn.example/a.jpg?x=1&y=2", caption: "First show of 2027 Rio" }
+ *   a photo by clubnight (verified) with dj.one, caption "First show of 2027<br />Rio" → { name: "clubnight", verified: true, also: "dj.one", kind: "image", avatarUrl: "https://cdn.example/a.jpg?x=1&y=2", alsoAvatarUrl: "https://cdn.example/b.jpg", caption: "First show of 2027 Rio" }
  *   a reel with no caption text → { name: "someone", kind: "video" }
  *   Instagram's login page → null
  */
@@ -127,15 +129,19 @@ export function parseInstagramCard(html) {
   if (!name) return null;
   const type = html.match(/data-media-type="(Graph[A-Za-z]{1,20})"/)?.[1];
   const kind = type === "GraphVideo" ? "video" : type === "GraphSidecar" ? "album" : "image";
-  const own = header.match(new RegExp(`href="https://www\\.instagram\\.com/${name.replace(/\./g, "\\.")}/[^"]*"[^>]*>\\s*<img[^>]*\\ssrc="([^"]+)"`));
-  const avatarUrl = httpsAddress((own ?? header.match(/<img[^>]*\ssrc="([^"]+)"/))?.[1]);
+  const pictureOf = (account) => header.match(new RegExp(`href="https://www\\.instagram\\.com/${account.replace(/\./g, "\\.")}/[^"]*"[^>]*>\\s*<img[^>]*\\ssrc="([^"]+)"`))?.[1];
+  const avatarUrl = httpsAddress(pictureOf(name) ?? header.match(/<img[^>]*\ssrc="([^"]+)"/)?.[1]);
+  const also = names.find((other) => other !== name);
+  const alsoAvatarUrl = also ? httpsAddress(pictureOf(also)) : undefined;
+  // The hover card names each account once, with Instagram's verified mark after a verified one.
+  const verified = new RegExp(`class="Username">${name.replace(/\./g, "\\.")}</span>\\s*<i class="[^"]*VerifiedSprite`).test(html) || undefined;
   let caption;
   if (captionAt >= 0) {
     const start = html.indexOf("</a>", captionAt);
     const raw = html.slice(start + 4, Math.min(endOf(html, "<div", start), endOf(html, "</div>", start)));
     caption = cut(clean(raw.replace(/<br\s*\/?>/gi, " ").replace(/<[^>]*>/g, "")) ?? "") || undefined;
   }
-  return withoutEmpty({ name, also: names.find((other) => other !== name), kind, avatarUrl, caption });
+  return withoutEmpty({ name, verified, also, kind, avatarUrl, alsoAvatarUrl, caption });
 }
 
 // Where a marker next appears after a point, or the end of the text.

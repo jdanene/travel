@@ -113,18 +113,21 @@ test("instagramEmbed gives a post's embed page and refuses a profile", () => {
   assert.equal(instagramEmbed("https://www.instagram.com/savayabali/"), null);
 });
 
-test("parseInstagramCard reads the account, the account it posted with, its picture and the caption", () => {
+test("parseInstagramCard reads the account, its verified mark, the account it posted with, their pictures and the caption", () => {
   const header =
     '<div class="CollabAvatarContainer"><a class="CollabAvatar" href="https://www.instagram.com/dj.one/?utm_source=ig_embed"><img src="https://cdn.example/b.jpg" alt="dj.one" /></a>' +
     '<a class="CollabAvatar SecondCollabAvatar" href="https://www.instagram.com/clubnight/?utm_source=ig_embed"><img src="https://cdn.example/a.jpg?x=1&amp;y=2" alt="clubnight" /></a></div>' +
-    '<div class="HeaderText"><span class="UsernameText CollabUsernameText">clubnight</span> and <span class="UsernameText CollabUsernameText">dj.one</span></div>';
+    '<div class="HeaderText"><span class="UsernameText CollabUsernameText">clubnight</span> and <span class="UsernameText CollabUsernameText">dj.one</span></div>' +
+    '<div class="HoverCardUserName"><span class="Username">clubnight</span><i class="Sprite VerifiedSprite img"><u>Verified</u></i></div>';
   const caption =
     '<div class="Caption"><a class="CaptionUsername" href="https://www.instagram.com/clubnight/">clubnight</a><br /><br />First show of 2027 <br />Rio<div class="CaptionComments"><a>View all 9 comments</a></div></div>';
   assert.deepEqual(parseInstagramCard(embedPage("GraphImage", header, caption)), {
     name: "clubnight",
+    verified: true,
     also: "dj.one",
     kind: "image",
     avatarUrl: "https://cdn.example/a.jpg?x=1&y=2",
+    alsoAvatarUrl: "https://cdn.example/b.jpg",
     caption: "First show of 2027 Rio",
   });
 });

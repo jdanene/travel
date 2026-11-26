@@ -85,6 +85,7 @@ interface PartiesBlockProps {
  *   the seeded trip  → "Big nights" picked; Bali, Indonesia: Savaya with its picture, then Atlas Beach Club … Potato Head with nothing announced; Koh Phangan: Haad Rin Beach with the Full Moon Party
  *   tap "All · 27"   → Bali: Mrs Sippy … Savaya, then the venues with nothing announced; Koh Phangan: Eden Garden, Half Moon Festival, … Haad Rin Beach
  *   tap "Peggy Gou"  → the show sheet; its place row opens the Map on Savaya with its card open
+ *   the "See on the map" row under the list (the event sheet's map row: mark, words, chevron) → the Map with every place
  *   an event you added, its sheet's "Edit" → the edit sheet in place of the show sheet; Cancel or Save brings the show sheet back; Remove does not
  *   tap "Savaya" in the app → the Map opens on Savaya with its card open; a club with no pin has a plain heading
  *   tap "Savaya" on the shared page → its club sheet: picture, "Uluwatu, Bali, Indonesia", "Website", "Instagram", "Google Maps"
@@ -320,8 +321,12 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
         </section>
       ))}
       {onSeeMap && groups.length > 0 && (
-        <button type="button" className="cap see-map" onClick={() => onSeeMap()}>
-          See on the map ›
+        // The way an event's sheet goes to our map (owner, 26 Nov 2026: "the way events get to map is better than having a
+        // button that says see on map"): the Map's mark, the words, a chevron, the whole row the target.
+        <button type="button" className="show-where show-where-go see-map" onClick={() => onSeeMap()}>
+          <Icon name="map" size={20} />
+          <span className="show-where-text">See on the map</span>
+          <Icon name="chev" size={18} />
         </button>
       )}
       <ShowSheet

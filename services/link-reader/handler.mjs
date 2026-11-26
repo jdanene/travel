@@ -29,7 +29,7 @@ const ORIGINS = /^(https:\/\/travel-ca8f9\.web\.app|http:\/\/localhost(:\d{1,5})
  *   { ok: true, name, photoUrl?, area?, sleeps? }   an Airbnb or Booking.com listing
  *   { ok: true, title, photoUrl? }                  an Instagram or TikTok post
  *   { ok: true, url }                               ?resolve: the link's redirect target, on the same site
- *   { ok: true, name, kind, also?, avatarUrl?, caption? }   ?card: an Instagram post (parseInstagramCard)
+ *   { ok: true, name, kind, verified?, also?, avatarUrl?, alsoAvatarUrl?, caption? }   ?card: an Instagram post (parseInstagramCard)
  *   { ok: false, reason }   reason is "not_allowed" (not https, a host off the
  *     list, a redirect off the list or past three, or a call from another
  *     site; nothing is fetched for the first and last), "unreadable" (no
@@ -44,7 +44,7 @@ const ORIGINS = /^(https:\/\/travel-ca8f9\.web\.app|http:\/\/localhost(:\d{1,5})
  *   GET ?url=https://example.com → 200 { ok: false, reason: "not_allowed" }
  *   GET ?resolve=https://vt.tiktok.com/ZS9bVfWa6/ → 200 { ok: true, url: "https://www.tiktok.com/@/video/7620909821147073813?…" }
  *     (run locally on 25 Nov 2026; not yet deployed)
- *   GET ?card=https://www.instagram.com/p/DgKzBNcolB7/ → 200 { ok: true, name: "keinemusik", also: "adamport", kind: "image", avatarUrl: "https://scontent-…", caption: "first keinemusik show of 2027 rio tá chegando a hora 🇧🇷" }
+ *   GET ?card=https://www.instagram.com/p/DgKzBNcolB7/ → 200 { ok: true, name: "keinemusik", verified: true, also: "adamport", kind: "image", avatarUrl: "https://scontent-…", alsoAvatarUrl: "https://scontent-…", caption: "first keinemusik show of 2027 rio tá chegando a hora 🇧🇷" }
  *     (run locally against Instagram on 26 Nov 2026)
  *   GET ?card=https://www.instagram.com/savayabali/ → 200 { ok: false, reason: "not_allowed" }  (not a post; nothing is fetched)
  *   GET ?url=https://www.booking.com/hotel/th/x.html → 200 { ok: false, reason: "unreadable" }  (challenge page)
