@@ -16,8 +16,6 @@ export interface CrewView {
   byId: Record<MemberId, Member>;
   /** Whether this device holds the organizer mark. */
   isOrganizer: boolean;
-  /** The organizer for the flyer: the first organizer who replied, else the note's signature (with no id, so no photo). */
-  organizer: Person | undefined;
   /** Every member's photo, by member id, for the circles (components/Avatars.tsx). */
   photos: Record<MemberId, string | undefined>;
 }
@@ -33,13 +31,12 @@ export interface CrewView {
  * Examples (checked on the emulator):
  *   a new device      → memberId null, member null
  *   after a reply     → memberId "rb", member { name: "RB", reply: "in", … }
- *   JD organizes      → organizer { id: "jd", name: "JD" }; photos { jd: "data:image/jpeg;base64,…" } once JD adds one
+ *   JD adds a photo   → photos { jd: "data:image/jpeg;base64,…" }
  */
 export function crewOf(trip: Trip, uid: string): CrewView {
   const all = trip.crew?.members ?? {};
   const devices = trip.crew?.devices ?? {};
   const memberId = devices[uid] ?? null;
-  const organizerUid = Object.keys(trip.crew?.organizers ?? {}).find((id) => all[devices[id]] !== undefined);
   return {
     memberId,
     member: memberId ? (all[memberId] ?? null) : null,
@@ -49,9 +46,6 @@ export function crewOf(trip: Trip, uid: string): CrewView {
     expected: trip.crew?.expected ?? {},
     byId: all,
     isOrganizer: trip.crew?.organizers?.[uid] === true,
-    organizer: organizerUid
-      ? { id: devices[organizerUid], name: all[devices[organizerUid]].name }
-      : trip.info?.noteBy !== undefined ? { id: "", name: trip.info.noteBy } : undefined,
     photos: Object.fromEntries(Object.entries(all).map(([id, member]) => [id, member.photo])),
   };
 }

@@ -81,7 +81,7 @@ export function Invitation({ tripId, uid, info, crew }: InvitationProps) {
 
   return (
     <div className="invite">
-      <FlyerHead organizer={crew.organizer} info={info} photo="tall">
+      <FlyerHead info={info} photo="tall">
         {info?.note && (
           <p className="invite-note">
             “{info.note}”{info.noteBy && ` — ${info.noteBy}`}

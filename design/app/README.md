@@ -112,4 +112,6 @@ Content, order, words and icons come from the mocks. Use their words exactly: gr
     - **No Instagram card goes missing**: the Feed's calls to the link reader wait in one line, two at a time (the reader serves two at once and refuses the rest), and a busy or failed call is tried three times in all, after 1 s and 3 s.
     - **"See on the map" in Events is the event sheet's map row**: the Map's mark, the words, a chevron, the whole row the target; it replaces the small text button ("the way events get to map is better than having a button that says see on map").
 
+45. **The invitation shows no one's face.** (Owner, 26 Nov 2026: "why does this have my face if it doesn't know who i am", "remove organizers picture", "its not about organizer its about the trip".) Design 12/1 puts the organizer's round picture between the cover and the trip's name. It is gone: the flyer is the cover, then the trip's name, then the note and the replies. On a phone the name overlaps the cover's foot, as on the home page. The friends' faces under "Been here before? Tap your name:" stay: they are how a friend finds their own name.
+
 Record a new exception here, in the same commit as the code that makes it.
