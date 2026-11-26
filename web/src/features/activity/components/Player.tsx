@@ -64,17 +64,27 @@ export function MessageText({ text, className }: { text: string; className: "fp-
  */
 function Player({ video, src, small }: { video: Video; src: string | undefined; small: boolean }) {
   const [loaded, setLoaded] = useState(false);
+  // A new round is a new frame: how an Instagram video that left the screen is stopped.
+  const [round, setRound] = useState(0);
+  const box = useRef<HTMLDivElement>(null);
   const frame = useRef<HTMLIFrameElement>(null);
   const instagram = video.site === "instagram";
+  useStopOffScreen(box, frame, video.site, () => {
+    setLoaded(false);
+    setRound((was) => was + 1);
+  });
   const reported = useReportedSize(frame, instagram);
   const crop = instagram ? instagramCrop(!!src && src.includes("/reel/"), reported) : null;
   const name = SITE_NAME[video.site];
   return (
-    <div className={`vp ${video.site}${crop?.zoom ? " zoom" : ""}${small ? " small" : ""}`} style={crop ? { aspectRatio: `1 / ${crop.tall}` } : undefined}>
+    <div ref={box} className={`vp ${video.site}${crop?.zoom ? " zoom" : ""}${small ? " small" : ""}`} style={crop ? { aspectRatio: `1 / ${crop.tall}` } : undefined}>
       {src && (
         <iframe
+          key={round}
           ref={frame}
           src={src}
+          // The frame never scrolls inside its box (owner, 26 Nov 2026: "u can move the insta around").
+          scrolling="no"
           title={`${name} video`}
           loading="lazy"
           allow="fullscreen; encrypted-media; picture-in-picture"
@@ -96,6 +106,57 @@ function Player({ video, src, small }: { video: Video; src: string | undefined; 
       )}
     </div>
   );
+}
+
+/**
+ * Stops a video that has left the screen (owner, 26 Nov 2026: "when tick
+ * tock or insta is not in the screen view it should stop where it is").
+ * TikTok's player takes a "pause" message and keeps its place, so a press
+ * on play carries on from there. Instagram's frame takes no message, so a
+ * frame that was pressed is replaced by a fresh one: the sound stops, and
+ * the video starts from its beginning next time. A frame nobody pressed is
+ * left alone. "Pressed" is read from focus: the page loses focus to the
+ * frame on a tap (checked in iOS Safari on the simulator).
+ *
+ * Inputs: box, frame — the player's box and its iframe; site; renew —
+ * replaces the frame with a fresh one.
+ * Output: nothing. It watches the box with an IntersectionObserver; "left
+ * the screen" is less than a tenth of the box showing, in the Feed's own
+ * scroll or the page's.
+ * Examples (checked on the iPhone simulator): a playing TikTok scrolled away → paused (its player reports state 2), and play carries on from the same place
+ *   a playing reel scrolled away → silent; scrolled back → its first picture and play button
+ *   a reel nobody pressed, scrolled away → not reloaded
+ */
+function useStopOffScreen(box: RefObject<HTMLDivElement | null>, frame: RefObject<HTMLIFrameElement | null>, site: Video["site"], renew: () => void) {
+  const pressed = useRef(false);
+  const renewRef = useRef(renew);
+  renewRef.current = renew;
+  useEffect(() => {
+    const element = box.current;
+    if (!element || typeof IntersectionObserver === "undefined") return;
+    const onBlur = () => {
+      if (document.activeElement === frame.current) pressed.current = true;
+    };
+    const watcher = new IntersectionObserver(
+      ([entry]) => {
+        const iframe = frame.current;
+        if (!entry || entry.isIntersecting || !iframe) return;
+        if (site === "tiktok") {
+          iframe.contentWindow?.postMessage({ "x-tiktok-player": true, type: "pause" }, "https://www.tiktok.com");
+        } else if (pressed.current || document.activeElement === iframe) {
+          pressed.current = false;
+          renewRef.current();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    window.addEventListener("blur", onBlur);
+    watcher.observe(element);
+    return () => {
+      window.removeEventListener("blur", onBlur);
+      watcher.disconnect();
+    };
+  }, [box, frame, site]);
 }
 
 /**

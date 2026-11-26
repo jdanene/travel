@@ -123,9 +123,8 @@ export function isShortLink(url: URL): boolean {
   return false;
 }
 
-/** What Instagram's frame draws around the picture: a header of this height above it, and this much header and footer in all (measured 25 Nov 2026 at 182 px and 284 px wide: 436 px and 563 px tall). */
-export const INSTAGRAM_HEADER = 54;
-const INSTAGRAM_CHROME = 208;
+/** What Instagram's frame draws around the picture: a 54 px header above it and a footer below, 208 to 210.5 px in all (measured 25 and 26 Nov 2026 on a reel and two photo posts, at 182, 256 and 284 px wide). The larger figure plus a hair, so a box ends inside its picture and never shows the footer's white edge. */
+const INSTAGRAM_CHROME = 211;
 
 /** How the Feed shows an Instagram frame: the box's height for each unit of width, and whether the frame is zoomed so a tall video fills the box. */
 export interface Crop {
@@ -146,18 +145,17 @@ export interface Crop {
  * Output: the box's shape and whether to zoom.
  * Examples (tests in players.test.ts):
  *   a reel, nothing reported          → { tall: 16/9, zoom: true }
- *   a reel, 284 wide reports 563      → { tall: 16/9, zoom: true } (its picture is 4:5: (563 − 208) / 284)
- *   a reel, 284 wide reports 492      → { tall: 0.99, zoom: false } (a square video: shown whole, a hair short so the footer never shows)
+ *   a reel, 284 wide reports 563      → { tall: 16/9, zoom: true } (its picture is 4:5: (563 − 211) / 284 is 1.24)
+ *   a reel, 284 wide reports 492      → { tall: 0.989, zoom: false } (a square video: shown whole)
  *   a post, nothing reported          → { tall: 1.25, zoom: false }
- *   a post, 182 wide reports 366      → { tall: 0.86, zoom: false }
- *   a post, 182 wide reports 150      → { tall: 0.49, zoom: false } (a height that makes no sense is held to a wide strip)
+ *   a post, 256 wide reports 430      → { tall: 0.855, zoom: false } (a 219 px box over a 219.6 px photo)
+ *   a post, 182 wide reports 150      → { tall: 0.5, zoom: false } (a height that makes no sense is held to a wide strip)
  */
 export function instagramCrop(reel: boolean, frame?: { width: number; height: number }): Crop {
   if (!frame || !(frame.width > 0)) return reel ? { tall: 16 / 9, zoom: true } : { tall: 1.25, zoom: false };
   const picture = Math.min(1.34, Math.max(0.5, (frame.height - INSTAGRAM_CHROME) / frame.width));
   if (reel && Math.abs(picture - 1.25) < 0.04) return { tall: 16 / 9, zoom: true };
-  // Rounded down, so the box ends inside the picture and never shows the footer's edge.
-  return { tall: Math.floor(picture * 100 - 0.4) / 100, zoom: false };
+  return { tall: Math.round(picture * 1000) / 1000, zoom: false };
 }
 
 function parse(href: string): URL | null {

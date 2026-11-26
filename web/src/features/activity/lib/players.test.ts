@@ -49,14 +49,14 @@ describe("instagramCrop", () => {
     expect(instagramCrop(true, { width: 284, height: 563 })).toEqual({ tall: 16 / 9, zoom: true });
   });
   it("shows a reel that is not tall whole", () => {
-    expect(instagramCrop(true, { width: 284, height: 492 })).toEqual({ tall: 0.99, zoom: false });
+    expect(instagramCrop(true, { width: 284, height: 492 })).toEqual({ tall: 0.989, zoom: false });
   });
   it("gives a post its picture's own shape", () => {
     expect(instagramCrop(false)).toEqual({ tall: 1.25, zoom: false });
-    expect(instagramCrop(false, { width: 182, height: 433 })).toEqual({ tall: 1.23, zoom: false });
-    expect(instagramCrop(false, { width: 182, height: 366 })).toEqual({ tall: 0.86, zoom: false });
+    expect(instagramCrop(false, { width: 256, height: 524 })).toEqual({ tall: 1.223, zoom: false });
+    expect(instagramCrop(false, { width: 256, height: 430 })).toEqual({ tall: 0.855, zoom: false });
   });
   it("holds a height that makes no sense to a wide strip", () => {
-    expect(instagramCrop(false, { width: 182, height: 150 })).toEqual({ tall: 0.49, zoom: false });
+    expect(instagramCrop(false, { width: 182, height: 150 })).toEqual({ tall: 0.5, zoom: false });
   });
 });

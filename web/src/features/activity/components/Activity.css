@@ -66,7 +66,7 @@ button.row-main:active { background: var(--soft); }
 
 /* Its video, in the site's own player: a portrait box that holds its place before the frame loads. It never takes more
    than about three quarters of the Feed's height, so a finger beside it, or a scroll above or below it, still moves the Feed. */
-.vp { position: relative; width: min(12.5rem, 100%, calc(46dvh * 9 / 16)); aspect-ratio: 9 / 16; margin-top: 0.375rem; border-radius: 0.5rem; overflow: hidden; background: var(--well); }
+.vp { position: relative; width: min(12.5rem, 100%, calc(46dvh * 9 / 16)); aspect-ratio: 9 / 16; margin-top: 0.375rem; border-radius: 0.5rem; overflow: hidden; overflow: clip; background: var(--well); }
 /* Instagram's frame, cut to its picture (exception 40). The frame draws a 54 px header, the picture across its width,
    then a footer; the box hides the header above itself and the footer below. The frame is tall enough to hold all of
    that, so nothing scrolls inside it. A post's box is wider than a video's: a photo is 4:5 at its tallest. */
