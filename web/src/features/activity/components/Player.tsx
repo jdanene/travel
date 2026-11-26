@@ -51,7 +51,8 @@ export function MessageText({ text, className }: { text: string; className: "fp-
  * the ways to Instagram, comes back with the account (exception 42): a
  * still is a card as in Instagram's own chat, the account's picture and
  * name above the picture and the caption's start under it; a video has
- * the account over its top corner. When the account cannot be read, one
+ * the account over its top corner and, until it is pressed, Instagram's
+ * small video mark in its bottom left corner. When the account cannot be read, one
  * small Instagram mark sits in the box's top corner instead.
  *
  * Inputs: the video; src — the player's address (undefined while a short
@@ -74,8 +75,11 @@ function Player({ video, src, small }: { video: Video; src: string | undefined; 
   const box = useRef<HTMLDivElement>(null);
   const frame = useRef<HTMLIFrameElement>(null);
   const instagram = video.site === "instagram";
-  useStopOffScreen(box, frame, video.site, () => {
+  // Whether this frame was pressed: the reel mark leaves once the video is playing.
+  const [pressed, setPressed] = useState(false);
+  useStopOffScreen(box, frame, video.site, setPressed, () => {
     setLoaded(false);
+    setPressed(false);
     setRound((was) => was + 1);
   });
   const reported = useReportedSize(frame, instagram);
@@ -110,6 +114,14 @@ function Player({ video, src, small }: { video: Video; src: string | undefined; 
         <a className="vp-out" href={video.href} target="_blank" rel="noopener noreferrer" aria-label="Watch on Instagram">
           <Icon name="insta" size={16} />
         </a>
+      )}
+      {instagram && crop?.zoom && loaded && !pressed && (
+        // Instagram's mark for a video, in the corner where its own chat puts it; it does nothing.
+        <span className="ig-reel" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="14" height="14" focusable="false">
+            <path d="M9 7.2v9.6a.6.6 0 0 0 .92.5l7.3-4.8a.6.6 0 0 0 0-1l-7.3-4.8a.6.6 0 0 0-.92.5Z" fill="currentColor" />
+          </svg>
+        </span>
       )}
       {card && crop?.zoom && (
         // A video: the account sits over its top corner, as in Instagram's own chat; it is the way to Instagram.
@@ -221,8 +233,9 @@ function keepCard(post: string, card: PostCard) {
  * left alone. "Pressed" is read from focus: the page loses focus to the
  * frame on a tap (checked in iOS Safari on the simulator).
  *
- * Inputs: box, frame — the player's box and its iframe; site; renew —
- * replaces the frame with a fresh one.
+ * Inputs: box, frame — the player's box and its iframe; site; onPressed —
+ * told when the frame is pressed; renew — replaces the frame with a fresh
+ * one.
  * Output: nothing. It watches the box with an IntersectionObserver; "left
  * the screen" is less than a tenth of the box showing, in the Feed's own
  * scroll or the page's.
@@ -230,15 +243,19 @@ function keepCard(post: string, card: PostCard) {
  *   a playing reel scrolled away → silent; scrolled back → its first picture and play button
  *   a reel nobody pressed, scrolled away → not reloaded
  */
-function useStopOffScreen(box: RefObject<HTMLDivElement | null>, frame: RefObject<HTMLIFrameElement | null>, site: Video["site"], renew: () => void) {
+function useStopOffScreen(box: RefObject<HTMLDivElement | null>, frame: RefObject<HTMLIFrameElement | null>, site: Video["site"], onPressed: (pressed: boolean) => void, renew: () => void) {
   const pressed = useRef(false);
+  const onPressedRef = useRef(onPressed);
+  onPressedRef.current = onPressed;
   const renewRef = useRef(renew);
   renewRef.current = renew;
   useEffect(() => {
     const element = box.current;
     if (!element || typeof IntersectionObserver === "undefined") return;
     const onBlur = () => {
-      if (document.activeElement === frame.current) pressed.current = true;
+      if (document.activeElement !== frame.current) return;
+      pressed.current = true;
+      onPressedRef.current(true);
     };
     const watcher = new IntersectionObserver(
       ([entry]) => {
