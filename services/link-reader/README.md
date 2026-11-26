@@ -49,6 +49,7 @@ It reads a club's schema.org Event data (JSON-LD) where the club publishes it. W
 | Klymax | https://klymax.co/ | Yes, as text: "THIS WEEK" holds 1 night (27 Nov 2026). It never shows more than the coming week. |
 | Potato Head | https://seminyak.potatohead.co/api/cached/experiences?type=Event&categories=music (the feed its "What's on" page loads) | Yes, from the feed: 2 music nights (11 and 31 Dec 2026). The feed covers today to six months ahead. Without `categories=music` it is 3.8 MB of dinners, past the 512 KB limit. |
 | Desa Kitsuné | https://desakitsune.com/events | Yes, as text: 3 nights (26 Nov to 31 Dec 2026), written with no year; the year is the one in which the day falls on the given weekday. |
+| Zumana Bali | https://zumanabali.com/events | Yes, as text: 20 nights (27 Nov to 16 Dec 2026, read 26 Nov 2026), the month, the day and the weekday on their own lines with no year; the year is the one in which the day falls on that weekday (`readZumana`). Nothing yet in the season. |
 | Café del Mar Bali | https://www.cafedelmarbali.co.id/whats-on | Yes, as text: 1 coming night (31 Dec 2026) and 17 past ones back to 1 May 2023. |
 | Single Fin | https://www.singlefinbali.com/event/ | No. The page is prose about the August 2024 surf contest; no list of nights. |
 | Full Moon Party (Haad Rin Beach) | https://fullmoonparty-thailand.com/schedules/ | Yes, as text: a table of 16 rows (24 Nov 2026 to 31 Dec 2027), among them 22 Feb and 22 Mar 2027, already seeded. |

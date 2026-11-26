@@ -153,6 +153,12 @@
    "destination": "kohSamui",
    "lat": 9.51892,
    "lng": 100.05313
+  },
+  "kuta": {
+   "name": "Kuta",
+   "destination": "bali",
+   "lat": -8.72643,
+   "lng": 115.17781
   }
  },
  "venues": {
@@ -532,6 +538,18 @@
    "photoUrl": "https://seenbeachclubsamui.eme-devops.com/2025/09/intro-section-beach.jpg",
    "website": "https://seenbeachclubsamui.com/",
    "instagram": "https://www.instagram.com/clubseenkohsamui/"
+  },
+  "zumana-bali": {
+   "name": "Zumana Bali",
+   "destination": "bali",
+   "areaId": "kuta",
+   "lat": -8.7281,
+   "lng": 115.1682,
+   "line": "Savaya's new beach club",
+   "big": true,
+   "photoUrl": "https://zumanabali.com/icons/richlink.jpg",
+   "website": "https://zumanabali.com/",
+   "instagram": "https://www.instagram.com/zumanabali"
   }
  }
 }

@@ -126,6 +126,33 @@ export function readDesaKitsune(html, pageUrl, now) {
 }
 
 /**
+ * Zumana Bali's events (zumanabali.com/events, the Savaya group's beach
+ * club in Kuta): the month, the day and the weekday on their own lines
+ * ("Nov", "27", "Fri"), then the night's name. The year is the one, from
+ * last month to eleven months ahead, in which that day falls on that
+ * weekday; a day that fits no year is skipped. The club's own weekly nights
+ * ("Zumana Monday") are listed too, as Desa Kitsuné's are.
+ *
+ * Inputs: now, the check's time, which fixes the year.
+ * Examples (event-lists.test.mjs, the page's text on 26 Nov 2026):
+ *   "Nov","27","Fri","JOSEPH CAPRIATI","See Details","Nov","28","Sat","LUCH" → [{ name: "JOSEPH CAPRIATI", date: "2026-11-27" }, { name: "LUCH", date: "2026-11-28" }]
+ *   "Jan","05","Tue","X" with now 26 Nov 2026 → [{ name: "X", date: "2027-01-05" }]
+ */
+export function readZumana(html, pageUrl, now) {
+  const lines = textLines(html);
+  const nights = [];
+  for (let i = 0; i + 3 < lines.length; i++) {
+    const month = lines[i].match(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)$/i)?.[1];
+    const day = lines[i + 1].match(/^\d{1,2}$/)?.[0];
+    const weekday = lines[i + 2].match(/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)$/i)?.[1];
+    if (!month || !day || !weekday) continue;
+    const date = yearFor(day, month, weekday, now);
+    if (date) nights.push(night(lines[i + 3], date));
+  }
+  return found(nights);
+}
+
+/**
  * The Full Moon Party's schedule: one row per party, "February 22nd 2027
  * (Mon/Tue)". The party is the act.
  *

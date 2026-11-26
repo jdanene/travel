@@ -69,3 +69,12 @@ test("Savaya: a night's start from \"Doors Open at\" on its own page, never from
   assert.deepEqual(lists.readDoorsOpen(page("savaya-event.html")), {});
   assert.deepEqual(lists.readDoorsOpen("<div>Saturday: 3:00PM - Close</div>"), {});
 });
+
+test("Zumana Bali: month, day and weekday on their own lines; the year from the weekday", () => {
+  const html = ["Nov", "27", "Fri", "JOSEPH CAPRIATI", "See Details", "Nov", "28", "Sat", "LUCH", "See Details", "Jan", "05", "Tue", "Zumana Tuesday"].map((line) => `<p>${line}</p>`).join("");
+  assert.deepEqual(lists.readZumana(html, "https://zumanabali.com/events", Date.UTC(2026, 10, 26)), [
+    { name: "JOSEPH CAPRIATI", date: "2026-11-27" },
+    { name: "LUCH", date: "2026-11-28" },
+    { name: "Zumana Tuesday", date: "2027-01-05" },
+  ]);
+});

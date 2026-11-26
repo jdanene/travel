@@ -16,7 +16,7 @@
 // data/places.json, what its page showed, and why a club is not read.
 
 import { plainHttps } from "./sites.mjs";
-import { readCafeDelMarBali, readCafeDelMarPhuket, readCeLaVi, readDesaKitsune, readDoorsOpen, readFullMoonParty, readKlymax, readMarquee, readPotatoHead } from "./event-lists.mjs";
+import { readCafeDelMarBali, readCafeDelMarPhuket, readCeLaVi, readDesaKitsune, readDoorsOpen, readFullMoonParty, readKlymax, readMarquee, readPotatoHead, readZumana } from "./event-lists.mjs";
 
 export const SOURCES = [
   {
@@ -52,6 +52,8 @@ export const SOURCES = [
   { venue: "Klymax", destination: "bali", area: "Seminyak", url: "https://klymax.co/", list: readKlymax },
   { venue: "Café del Mar Bali", destination: "bali", area: "Canggu", url: "https://www.cafedelmarbali.co.id/whats-on", list: readCafeDelMarBali },
   { venue: "Desa Kitsuné", destination: "bali", area: "Canggu", url: "https://desakitsune.com/events", list: readDesaKitsune },
+  // Savaya's beach club in Kuta, opened August 2026 (owner, 26 Nov 2026: "Zumana Bali").
+  { venue: "Zumana Bali", destination: "bali", area: "Kuta", url: "https://zumanabali.com/events", list: readZumana },
   // The feed its "What's on" page loads, music only: from today to six months ahead.
   { venue: "Potato Head", destination: "bali", area: "Seminyak", url: "https://seminyak.potatohead.co/api/cached/experiences?type=Event&categories=music", list: readPotatoHead },
   // The feed its events page loads, for nights from 1 Feb 2027 (00:00 in Singapore) on.
