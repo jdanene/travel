@@ -13,11 +13,12 @@ const villa = { destination: "bali", url: "https://www.airbnb.com/rooms/1", name
 const options = { o1: { from: "2027-02-13", to: "2027-02-23" } };
 
 describe("pins", () => {
-  it("pins the major clubs and the venues with an event, not a small venue with none", () => {
+  it("pins every club, with its next show or nothing announced", () => {
     const found = pins({ places: { venues }, parties: { shows: { s1: show } }, info: { destinations: { bali: { name: "Bali" } } } } as never);
     expect(found.map((pin) => [pin.id, pin.line])).toEqual([
       ["venue:savaya", "Club on the cliffs · next show Sat 13 Feb"],
       ["venue:klymax", "Bali · nothing announced yet"],
+      ["venue:mrs-sippy", "Bali · nothing announced yet"],
     ]);
   });
 

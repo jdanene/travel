@@ -50,7 +50,7 @@ interface PartiesBlockProps {
  * ones first, then by date), with the last-year line where a weekend is
  * empty and "Last season:" under a venue with nothing announced. Open from
  * the start; it never waits on the dates. A tap on a show opens its sheet.
- * In the app a tap on a pinned club's heading opens the Map on it
+ * In the app a tap on any club's heading opens the Map on it
  * (exception 30); on the shared page, which has no map, a tap on any
  * venue's heading opens its club sheet (ClubSheet, exception 37).
  * At the top, one chip per tag the trip has ("Big nights" first), "All · 27"
@@ -127,7 +127,6 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
   const [country, setCountry] = useEventsCountry(countries);
   const here = (destination: string) => inCountry(country, destinationNames, destination);
   // The country and the tag combine: Thailand and Big nights list the Big nights in Thailand.
-  const withShows = new Set(Object.values(shows).map((show) => venueKey(show.destination, show.venue)));
   const groups = eventsList(shows, known, filter, tags).filter((group) => here(group.destination));
   // A row the friend just added or edited stays in sight: another country than the picked one opens "All countries".
   const keepInSight = (destination: string) => !here(destination) && setCountry("all");
@@ -258,8 +257,8 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
           {venueGroups.map((venue) => {
             const area = areaShown(venue.name, venue.area, nameOf(destination));
             const place = placeOf({ destination, venue: venue.name }, trip.places);
-            // The map pins a major club, or a venue with an event this season (app/lib/pins.ts); only those open it.
-            const pinned = place?.kind === "venue" && (trip.places?.venues?.[place.id]?.big === true || withShows.has(venue.key));
+            // The map pins every club with a position (app/lib/pins.ts; exception 47), so every club's heading opens it.
+            const pinned = place?.kind === "venue";
             const line = place?.line;
             const venueLines = lines.filter((one) => venueKey(one.destination, one.venue) === venue.key);
             const items = [

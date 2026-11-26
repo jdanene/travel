@@ -116,4 +116,6 @@ Content, order, words and icons come from the mocks. Use their words exactly: gr
 
 46. **The Dates module is "Potential dates".** (Owner, 26 Nov 2026: "rename. dates potential dates".) The module's button on the home page reads "Potential dates" in place of design 12's "Dates"; its icon, its place in the order and its state line on the right ("Tap to answer") are unchanged. The name never wraps; on a narrow phone a long state line ("13–23 Feb · confirmed", "No dates to vote on yet.") takes two short lines on the right, so that one button is 9 px taller then.
 
+47. **Every club is on the Map.** (Owner, 26 Nov 2026: "what determines if things are shown on map just show all clubs on map".) The Map had a pin only for a major club (`big`) or a club with an event this season, so five clubs had none (Café del Mar Bali, FINNS Beach Club, La Brisa, Jungle Experience, Waterfall Party). Now every club with a position has a pin, and every club's heading in Events opens the Map on it (item 30). A club not found on OpenStreetMap sits at its area's centre, fanned out from the other pins there. This replaces "every major club will get a pin, not every club" (25 Nov 2026).
+
 Record a new exception here, in the same commit as the code that makes it.
