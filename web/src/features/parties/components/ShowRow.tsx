@@ -2,7 +2,7 @@ import { Avatars, type Person } from "../../../components/Avatars";
 import { Icon } from "../../../components/Icon";
 import { weekdayDate } from "../../../lib/format";
 import { initials } from "../../../lib/initials";
-import { eventLink, every } from "../lib/detail";
+import { every } from "../lib/detail";
 import type { ListedShow } from "../lib/shows";
 
 interface ShowRowProps {
@@ -35,10 +35,10 @@ interface ShowRowProps {
  * device may edit it, and what the three actions do.
  * Output: the row. The artist takes two lines, then cuts (case 30); the
  * event's about line sits under it on one line, cut with "…" on a phone.
- * An https event link adds a small link button at the end of the meta
- * line, right against the "I'm in" column, that opens the event page in a
- * new tab (the mock's row keeps its three columns, so a phone keeps room
- * for the name). A show
+ * The row has no link button of its own (owner, 25 Nov 2026: "u have two
+ * links one when u press the event and one is the link icon.. u can remove
+ * the link icon"): the event's own page is "Event page" in its sheet and on
+ * its shared page. A show
  * nobody is in reads "Be the first in" (case 31); an unconfirmed one
  * carries "not confirmed" right under the artist, so a cut never hides it.
  * A weekly show's tile reads "Every / Sun" and screen readers hear "Every
@@ -100,7 +100,6 @@ export function ShowRow({ show, going, you, addedByName, canEdit, tags, onIn, on
               Edit
             </button>
           )}
-          <EventLinkButton show={show} />
         </div>
       </div>
       {!visitor && (
@@ -110,25 +109,6 @@ export function ShowRow({ show, going, you, addedByName, canEdit, tags, onIn, on
         </button>
       )}
     </div>
-  );
-}
-
-/**
- * The small link button at the end of a row: opens the event's own page in
- * a new tab, so a friend reaches it without opening the sheet. Nothing for
- * a show without an https link.
- *
- * Inputs: show — its artist and link.
- * Output: a round link button, named "Event page: Peggy Gou" for screen readers, or nothing.
- * Examples (checked on screen): Peggy Gou → opens savaya.com/event-calendar/february-13-2027
- */
-export function EventLinkButton({ show }: { show: { artist: string; link?: string } }) {
-  const link = eventLink(show.link);
-  if (link?.kind !== "page") return null;
-  return (
-    <a className="linkbtn" href={link.href} target="_blank" rel="noopener noreferrer" aria-label={`Event page: ${show.artist}`}>
-      <Icon name="link" size={18} />
-    </a>
   );
 }
 

@@ -49,9 +49,10 @@ interface PartiesBlockProps {
  * every venue the trip knows with its picture as its icon when it has one, and its shows (weekly
  * ones first, then by date), with the last-year line where a weekend is
  * empty and "Last season:" under a venue with nothing announced. Open from
- * the start; it never waits on the dates. A tap on a show opens its sheet;
- * a tap on a venue's heading opens its club sheet (ClubSheet, design
- * exception 37), on the shared page too.
+ * the start; it never waits on the dates. A tap on a show opens its sheet.
+ * In the app a tap on a pinned club's heading opens the Map on it
+ * (exception 30); on the shared page, which has no map, a tap on any
+ * venue's heading opens its club sheet (ClubSheet, exception 37).
  * At the top, one chip per tag the trip has ("Big nights" first), "All · 27"
  * and, for a member, "+" to make a new tag: by default the list holds the
  * events tagged Big nights, the big venues with nothing announced, and
@@ -84,8 +85,8 @@ interface PartiesBlockProps {
  *   the seeded trip  → "Big nights" picked; Bali, Indonesia: Savaya with its picture, then Atlas Beach Club … Potato Head with nothing announced; Koh Phangan: Haad Rin Beach with the Full Moon Party
  *   tap "All · 27"   → Bali: Mrs Sippy … Savaya, then the venues with nothing announced; Koh Phangan: Eden Garden, Half Moon Festival, … Haad Rin Beach
  *   tap "Peggy Gou"  → the show sheet; its place row opens the Map on Savaya with its card open
- *   tap "Savaya"     → its club sheet: picture, "Uluwatu, Bali, Indonesia", "See on the map" (opens the Map on Savaya), "Website", "Instagram"
- *   tap "La Brisa" (no pin) → "Website", "Instagram", "Google Maps"; on the shared page every club gets "Google Maps"
+ *   tap "Savaya" in the app → the Map opens on Savaya with its card open; a club with no pin has a plain heading
+ *   tap "Savaya" on the shared page → its club sheet: picture, "Uluwatu, Bali, Indonesia", "Website", "Instagram", "Google Maps"
  *   tap "I'm in"     → filled at once, "1 in" with your initials, on the row and in the sheet
  *   any member, Peggy Gou's sheet, remove Big nights → Peggy Gou leaves the default list; Savaya with it when it has no other Big nights event
  *   tap "Share" on a desktop → "Copied"; the clipboard holds <origin>/trip/<id>/events
@@ -123,12 +124,6 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
   const here = (destination: string) => inCountry(country, destinationNames, destination);
   // The country and the tag combine: Thailand and Big nights list the Big nights in Thailand.
   const withShows = new Set(Object.values(shows).map((show) => venueKey(show.destination, show.venue)));
-  // The map pins a friend's place, a major club, or a venue with an event this season (app/lib/pins.ts); only those open it.
-  const onMap = (destination: DestinationId, name: string): MapPlace | null => {
-    const place = placeOf({ destination, venue: name }, trip.places);
-    if (!place) return null;
-    return place.kind === "custom" || trip.places?.venues?.[place.id]?.big === true || withShows.has(venueKey(destination, name)) ? place : null;
-  };
   const groups = eventsList(shows, known, filter, tags).filter((group) => here(group.destination));
   // A row the friend just added or edited stays in sight: another country than the picked one opens "All countries".
   const keepInSight = (destination: string) => !here(destination) && setCountry("all");
@@ -208,7 +203,6 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
   const openedPlace = opened ? placeOf(opened, trip.places) : null;
   const openedWhere = opened ? showPlace(opened, trip) : null;
   const tripName = trip.info?.name ?? "";
-  const clubPlace = clubAt ? onMap(clubAt.destination, clubAt.name) : null;
 
   return (
     <div className="parties">
@@ -251,7 +245,10 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
           </h3>
           {venueGroups.map((venue) => {
             const area = areaShown(venue.name, venue.area, nameOf(destination));
-            const line = placeOf({ destination, venue: venue.name }, trip.places)?.line;
+            const place = placeOf({ destination, venue: venue.name }, trip.places);
+            // The map pins a major club, or a venue with an event this season (app/lib/pins.ts); only those open it.
+            const pinned = place?.kind === "venue" && (trip.places?.venues?.[place.id]?.big === true || withShows.has(venue.key));
+            const line = place?.line;
             const venueLines = lines.filter((one) => venueKey(one.destination, one.venue) === venue.key);
             const items = [
               ...venueLines.map((one) => ({ date: one.from, line: one, show: null as ListedShow | null })),
@@ -260,19 +257,33 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
             return (
               <div key={venue.key} className="venue-group">
                 <h4 className="venue">
-                  {/* A tap on a club opens its sheet: its picture, website, Instagram and where it is (design exception 37). */}
-                  <button
-                    type="button"
-                    className="venue-go"
-                    aria-haspopup="dialog"
-                    aria-label={`${venue.name}, about this club`}
-                    onClick={() => setClubAt({ destination, name: venue.name, ...(venue.area ? { area: venue.area } : {}) })}
-                  >
-                    <VenueHead icon={photoOf.get(venue.key)} name={venue.name} area={area} line={line} />
-                    <span className="venue-more" aria-hidden="true">
-                      <Icon name="info" size={20} />
-                    </span>
-                  </button>
+                  {onSeeMap ? (
+                    // In the app a tap on a club opens the map on its pin, among the other places (owner, 25 Nov 2026; exception 30).
+                    place && pinned ? (
+                      <button type="button" className="venue-go" onClick={() => onSeeMap(place)} aria-label={`${venue.name}, show on the map`}>
+                        <VenueHead icon={photoOf.get(venue.key)} name={venue.name} area={area} line={line} />
+                        <span className="venue-pin" aria-hidden="true">
+                          <Icon name="pin" size={18} />
+                        </span>
+                      </button>
+                    ) : (
+                      <VenueHead icon={photoOf.get(venue.key)} name={venue.name} area={area} line={line} />
+                    )
+                  ) : (
+                    // The shared page has no map: a tap on a club opens its sheet, with its picture, website, Instagram and Google Maps (exception 37).
+                    <button
+                      type="button"
+                      className="venue-go"
+                      aria-haspopup="dialog"
+                      aria-label={`${venue.name}, about this club`}
+                      onClick={() => setClubAt({ destination, name: venue.name, ...(venue.area ? { area: venue.area } : {}) })}
+                    >
+                      <VenueHead icon={photoOf.get(venue.key)} name={venue.name} area={area} line={line} />
+                      <span className="venue-more" aria-hidden="true">
+                        <Icon name="info" size={20} />
+                      </span>
+                    </button>
+                  )}
                 </h4>
                 {venue.shows.length === 0 && <LastSeason shows={lastSeason(destination, venue.name, lastYear)} />}
                 {items.map(({ line: weekend, show }) =>
@@ -329,18 +340,7 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
         share={viewer.memberId && opened ? { url: eventsLink(window.location.origin, tripId, opened.id), text: `${opened.artist} · ${tripName}` } : undefined}
         onClose={() => setDetail(null)}
       />
-      <ClubSheet
-        club={clubAt ? clubOf(clubAt, trip) : undefined}
-        onSeeMap={
-          onSeeMap && clubPlace
-            ? () => {
-                setClubAt(null);
-                onSeeMap(clubPlace);
-              }
-            : undefined
-        }
-        onClose={() => setClubAt(null)}
-      />
+      <ClubSheet club={clubAt ? clubOf(clubAt, trip) : undefined} onClose={() => setClubAt(null)} />
       <AddPartySheet
         open={sheet !== null && (sheet.mode === "add" || editing !== undefined)}
         editing={editing}
