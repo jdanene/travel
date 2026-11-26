@@ -192,9 +192,25 @@ export function areaShown(venue: string, area: string | undefined, destination: 
  *   placeLine("Bottle Beach 1", "Haad Khuat, Thailand", "Koh Phangan, Thailand")         → "Bottle Beach 1 · Haad Khuat, Thailand"
  */
 export function placeLine(venue: string, area: string | undefined, destination: string): string {
+  return `${venue} · ${areaLine(venue, area, destination)}`;
+}
+
+/**
+ * The part of the place line after the venue: where it is, without its
+ * name. The club sheet prints it under the club's name, and its Google
+ * Maps link searches the name with it.
+ *
+ * Inputs: as placeLine().
+ * Output: "area, destination", "area" for an area with its country, or
+ * "destination" when the area adds nothing.
+ * Examples (each is a test in detail.test.ts):
+ *   areaLine("Savaya", "Uluwatu", "Bali, Indonesia")             → "Uluwatu, Bali, Indonesia"
+ *   areaLine("Lost Jungle", undefined, "Koh Phangan, Thailand")  → "Koh Phangan, Thailand"
+ */
+export function areaLine(venue: string, area: string | undefined, destination: string): string {
   const shown = areaShown(venue, area, destination);
-  if (shown?.includes(", ")) return `${venue} · ${shown}`;
-  return `${venue} · ${[shown, destination].filter(Boolean).join(", ")}`;
+  if (shown?.includes(", ")) return shown;
+  return [shown, destination].filter(Boolean).join(", ");
 }
 
 /** What the sheet does with a show's link. */

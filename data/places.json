@@ -1,5 +1,5 @@
 {
- "source": "Positions from OpenStreetMap, read with the Nominatim search on 23, 24 and 25 Nov 2026. A venue with \"big\": true is one of the owner's big nights (owner, 24 Nov 2026); the Events list and the map show those by default. A venue with \"onMap\": false is not on OpenStreetMap; it sits at its area's centre, or at the island's centre when the lineup gives no area. Marquee is not on OpenStreetMap either; it sits at The Shoppes at Marina Bay Sands, the mall that holds it. photoUrl is the venue's link-preview picture (og:image) or the main photo on its own website, read on 24 Nov 2026 (CLUB SEEN's on 25 Nov 2026); a venue without one has no website picture that loads.",
+ "source": "Positions from OpenStreetMap, read with the Nominatim search on 23, 24 and 25 Nov 2026. A venue with \"big\": true is one of the owner's big nights (owner, 24 Nov 2026); the Events list and the map show those by default. A venue with \"onMap\": false is not on OpenStreetMap; it sits at its area's centre, or at the island's centre when the lineup gives no area. Marquee is not on OpenStreetMap either; it sits at The Shoppes at Marina Bay Sands, the mall that holds it. photoUrl is the venue's link-preview picture (og:image) or the main photo on its own website, read on 24 Nov 2026 (CLUB SEEN's on 25 Nov 2026); a venue without one has no website picture that loads. website is the venue's own site and instagram its Instagram profile as that site links it, read on 25 Nov 2026; a venue without one has none that could be confirmed. On 25 Nov 2026 the pictures that were a logo, a share card, a text banner or another business's were replaced with a photograph from the venue's own site.",
  "destinations": {
   "bali": {
    "country": "Indonesia",
@@ -164,7 +164,9 @@
    "lng": 115.14065,
    "line": "Club on the cliffs",
    "big": true,
-   "photoUrl": "https://cdn.prod.website-files.com/5fbc914db82f653793c3875e/60278b1ef2efac7c85ea1df3_savaya-url.jpg"
+   "photoUrl": "https://cdn.prod.website-files.com/5fbc914db82f653793c3875e/60278b1ef2efac7c85ea1df3_savaya-url.jpg",
+   "website": "https://www.savaya.com/",
+   "instagram": "https://www.instagram.com/savayabali/"
   },
   "single-fin": {
    "name": "Single Fin",
@@ -173,7 +175,9 @@
    "lat": -8.81501,
    "lng": 115.08892,
    "line": "Bar on the cliff over the surf break",
-   "photoUrl": "https://www.singlefinbali.com/wp-content/uploads/2024/06/hero-homepage.webp"
+   "photoUrl": "https://www.singlefinbali.com/wp-content/uploads/2024/06/hero-homepage.webp",
+   "website": "https://www.singlefinbali.com/",
+   "instagram": "https://www.instagram.com/singlefinbali/"
   },
   "ulu-cliffhouse": {
    "name": "Ulu Cliffhouse",
@@ -182,7 +186,9 @@
    "lat": -8.81407,
    "lng": 115.09152,
    "line": "Pool club on the cliff",
-   "photoUrl": "https://images.squarespace-cdn.com/content/v1/6a3b4988b2721d3f0e4bdcbd/0ab3a49b-950e-4fd3-9c42-24c165d82b39/ulucliffhouse_1784110313_3941725251876226838_5404708135.jpg"
+   "photoUrl": "https://images.squarespace-cdn.com/content/v1/6a3b4988b2721d3f0e4bdcbd/0ab3a49b-950e-4fd3-9c42-24c165d82b39/ulucliffhouse_1784110313_3941725251876226838_5404708135.jpg",
+   "website": "https://www.ulucliffhouse.com/",
+   "instagram": "https://www.instagram.com/ulucliffhouse/"
   },
   "el-kabron": {
    "name": "El Kabron",
@@ -191,7 +197,9 @@
    "lat": -8.80194,
    "lng": 115.11741,
    "line": "Cliff-top club with sunset parties",
-   "photoUrl": "https://elkabron.com/El-Kabron-Bali-Luxury-Party-Beach-Club-Oceanfront-Restaraunt-Uluwatu.webp"
+   "photoUrl": "https://elkabron.com/home/el-kabron-bali-sunset-parties-live-saxophone-performances.webp",
+   "website": "https://elkabron.com/",
+   "instagram": "https://www.instagram.com/elkabronbali/"
   },
   "atlas-beach-club": {
    "name": "Atlas Beach Club",
@@ -202,7 +210,9 @@
    "onMap": false,
    "line": "Beach club with guest DJs",
    "big": true,
-   "photoUrl": "https://atlasbeachfest.com/images/beach-club/about.webp"
+   "photoUrl": "https://atlasbeachfest.com/images/beach-club/about.webp",
+   "website": "https://atlasbeachfest.com/beach-club",
+   "instagram": "https://www.instagram.com/atlasbeachclub/"
   },
   "atlas-super-club": {
    "name": "Atlas Super Club",
@@ -212,7 +222,9 @@
    "lng": 115.13907,
    "line": "Nightclub beside Atlas Beach Club",
    "big": true,
-   "photoUrl": "https://atlasbeachfest.com/images/cta/super-club.png"
+   "photoUrl": "https://customer-api-files.s3.ap-southeast-3.amazonaws.com/production/atlas/page/2024/11/5/ps1twneTDGAnPi2G8kz5cnJQrVrlB4gcxuRlMUOa.webp",
+   "website": "https://atlasbeachfest.com/super-club",
+   "instagram": "https://www.instagram.com/atlassuperclub/"
   },
   "desa-kitsune": {
    "name": "Desa Kitsuné",
@@ -223,7 +235,9 @@
    "onMap": false,
    "line": "Garden club with house DJs",
    "big": true,
-   "photoUrl": "https://desakitsune.com/icons/richlink.jpg"
+   "photoUrl": "https://desakitsune.com/icons/richlink.jpg",
+   "website": "https://desakitsune.com/",
+   "instagram": "https://www.instagram.com/desakitsunebali/"
   },
   "cafe-del-mar-bali": {
    "name": "Café del Mar Bali",
@@ -233,7 +247,9 @@
    "lng": 115.1436,
    "onMap": false,
    "line": "Beach club with a large pool",
-   "photoUrl": "https://cafedelmarbali.co.id/pulpies/images/data/seo.webp"
+   "photoUrl": "https://cafedelmarbali.co.id/pulpies/images/data/seo.webp",
+   "website": "https://cafedelmarbali.co.id/",
+   "instagram": "https://www.instagram.com/cafedelmarbali/"
   },
   "finns-beach-club": {
    "name": "FINNS Beach Club",
@@ -243,7 +259,9 @@
    "lng": 115.1436,
    "onMap": false,
    "line": "Large beach club with DJs every day",
-   "photoUrl": "https://finnsbeachclub.com/wp-content/uploads/2023/11/Copy-of-2026.04.18_Absolut_Brand_Activation_Drone_Shoot_FJR_-2-1-Large.jpeg"
+   "photoUrl": "https://finnsbeachclub.com/wp-content/uploads/2023/11/Copy-of-2026.04.18_Absolut_Brand_Activation_Drone_Shoot_FJR_-2-1-Large.jpeg",
+   "website": "https://finnsbeachclub.com/",
+   "instagram": "https://www.instagram.com/finnsbeachclub/"
   },
   "la-brisa": {
    "name": "La Brisa",
@@ -252,7 +270,9 @@
    "lat": -8.65458,
    "lng": 115.12481,
    "line": "Driftwood beach club",
-   "photoUrl": "https://labrisa-bali.com/wp-content/uploads/2025/04/LB-Venue-JM050325-7-scaled.jpg"
+   "photoUrl": "https://labrisa-bali.com/wp-content/uploads/2025/04/LB-Venue-JM050325-7-scaled.jpg",
+   "website": "https://labrisa-bali.com/",
+   "instagram": "https://www.instagram.com/labrisabali/"
   },
   "potato-head": {
    "name": "Potato Head",
@@ -262,7 +282,9 @@
    "lng": 115.14996,
    "line": "Beach club with a pool",
    "big": true,
-   "photoUrl": "https://cdn.potatohead.co/article_thumb3_6edf9dd7a1.jpg"
+   "photoUrl": "https://cdn.potatohead.co/Beach_Club_Slider_9a9a113381.jpg",
+   "website": "https://seminyak.potatohead.co/",
+   "instagram": "https://www.instagram.com/potatoheadbali/"
   },
   "klymax": {
    "name": "Klymax",
@@ -272,7 +294,9 @@
    "lng": 115.14988,
    "line": "Late-night club",
    "big": true,
-   "photoUrl": "https://api.klymax.co/uploads/XX_HERO_IMAGE_PH_09709_34ec616afb.jpg"
+   "photoUrl": "https://api.klymax.co/uploads/XX_POTATO_HEAD_KLYMAX_1_1ff3ccff06.jpg",
+   "website": "https://klymax.co/",
+   "instagram": "https://www.instagram.com/klymaxdiscotheque/"
   },
   "mrs-sippy": {
    "name": "Mrs Sippy",
@@ -281,7 +305,9 @@
    "lat": -8.67961,
    "lng": 115.15123,
    "line": "Pool club with a high dive",
-   "photoUrl": "https://backend.mrssippybali.com/uploads/Website_Banner_04_2020_a87f1c6a72.jpg"
+   "photoUrl": "https://backend.mrssippybali.com/uploads/pic_1_31ec70f65c.jpeg",
+   "website": "https://www.mrssippybali.com/",
+   "instagram": "https://www.instagram.com/mrssippybali/"
   },
   "haad-rin-beach": {
    "name": "Haad Rin Beach",
@@ -308,7 +334,9 @@
    "lat": 9.71454,
    "lng": 100.02814,
    "line": "Jungle festival every two weeks",
-   "photoUrl": "https://static.wixstatic.com/media/94d41a_edc6224f537a4e45831f13bc5cbb3017~mv2.jpg/v1/fill/w_1280,h_670,al_c/94d41a_edc6224f537a4e45831f13bc5cbb3017~mv2.jpg"
+   "photoUrl": "https://static.wixstatic.com/media/94d41a_edc6224f537a4e45831f13bc5cbb3017~mv2.jpg/v1/fill/w_1280,h_670,al_c/94d41a_edc6224f537a4e45831f13bc5cbb3017~mv2.jpg",
+   "website": "https://www.halfmoonfestival.com/",
+   "instagram": "https://www.instagram.com/halfmoon.festival/"
   },
   "hidden-paradise": {
    "name": "Hidden Paradise",
@@ -325,7 +353,9 @@
    "lat": 9.71299,
    "lng": 100.03276,
    "line": "Jungle party with two stages",
-   "photoUrl": "https://jungle-experience.com/wp-content/uploads/2024/06/JE-05.24_WEB_016.jpg"
+   "photoUrl": "https://jungle-experience.com/wp-content/uploads/2024/06/JE-05.24_WEB_016.jpg",
+   "website": "https://jungle-experience.com/",
+   "instagram": "https://www.instagram.com/jungleexperiencekohphangan/"
   },
   "waterfall-party": {
    "name": "Waterfall Party",
@@ -333,7 +363,10 @@
    "areaId": "ban-tai",
    "lat": 9.70588,
    "lng": 100.04692,
-   "line": "All-night party by a waterfall"
+   "line": "All-night party by a waterfall",
+   "photoUrl": "https://waterfallpartykohphangan.com/assets/gallery-1-DQbKHlQg.jpg",
+   "website": "https://waterfallpartykohphangan.com/",
+   "instagram": "https://www.instagram.com/waterfallfestivalphangan/"
   },
   "lost-jungle": {
    "name": "Lost Jungle",
@@ -350,7 +383,9 @@
    "lng": 98.28432,
    "line": "Beach club between Kamala and Surin beaches",
    "big": true,
-   "photoUrl": "https://cdn.prod.website-files.com/675969a2220618a361236fac/6a4c79738c44b95a055b2318_website%20graph%20image.avif"
+   "photoUrl": "https://cdn.prod.website-files.com/675969a2220618a361236fac/698c3e46af43dd63e00ad244_poolbed.avif",
+   "website": "https://phuket.cafedelmar.com/",
+   "instagram": "https://www.instagram.com/cafedelmarphuket/"
   },
   "illuzion-phuket": {
    "name": "Illuzion Phuket",
@@ -360,7 +395,9 @@
    "lng": 98.2978,
    "line": "Large nightclub on Bangla Road",
    "big": true,
-   "photoUrl": "https://www.illuzionphuket.com/wp-content/uploads/2020/06/Illuzion-Club-Phuket-Party-Events-1.jpg"
+   "photoUrl": "https://www.illuzionphuket.com/wp-content/uploads/2020/06/Illuzion-Club-Phuket-Party-Events-1.jpg",
+   "website": "https://www.illuzionphuket.com/",
+   "instagram": "https://www.instagram.com/illuzion_phuket/"
   },
   "armania-phuket": {
    "name": "Armania Phuket",
@@ -371,7 +408,9 @@
    "onMap": false,
    "line": "Nightclub on Bangla Road",
    "big": true,
-   "photoUrl": "https://www.barfunkphuket.com/app/uploads/2025/06/64.jpg"
+   "photoUrl": "https://www.barfunkphuket.com/app/uploads/2025/06/64.jpg",
+   "website": "https://www.barfunkphuket.com/armania/",
+   "instagram": "https://www.instagram.com/armaniaphuket/"
   },
   "yona-beach-club": {
    "name": "Yona Beach Club",
@@ -381,7 +420,8 @@
    "lng": 98.2988,
    "onMap": false,
    "line": "Floating beach club in Patong Bay, reached by boat",
-   "big": true
+   "big": true,
+   "website": "https://www.yonabeach.com/"
   },
   "maya-beach-club": {
    "name": "Maya Beach Club",
@@ -390,8 +430,7 @@
    "lat": 7.99582,
    "lng": 98.29164,
    "line": "Beach club on Bang Tao Beach",
-   "big": true,
-   "photoUrl": "https://www.mayaphuket.com/og-v2.png"
+   "big": true
   },
   "xana-beach-club": {
    "name": "XANA Beach Club",
@@ -411,7 +450,9 @@
    "onMap": false,
    "line": "Beach club on Natai Beach in Phang Nga, north of Phuket",
    "big": true,
-   "photoUrl": "https://www.babaphuket.com/images/og-image/main.jpg"
+   "photoUrl": "https://www.bababeachclub.com/images/home-gabana-b-02.jpg",
+   "website": "https://www.bababeachclub.com/natai/",
+   "instagram": "https://www.instagram.com/bababeachclub.natai/"
   },
   "marquee": {
    "name": "Marquee",
@@ -421,7 +462,9 @@
    "lng": 103.85887,
    "line": "Nightclub in the Marina Bay Sands mall",
    "big": true,
-   "photoUrl": "https://taogroup.com/wp-content/uploads/2024/07/Tao-Group-Marquee-MBS28-scaled.jpg"
+   "photoUrl": "https://taogroup.com/wp-content/uploads/2024/07/Tao-Group-Marquee-MBS28-scaled.jpg",
+   "website": "https://taogroup.com/venues/marquee-singapore/",
+   "instagram": "https://www.instagram.com/marqueesingapore/"
   },
   "ce-la-vi": {
    "name": "CÉ LA VI",
@@ -431,7 +474,9 @@
    "lng": 103.86093,
    "line": "Club lounge on the roof of Marina Bay Sands",
    "big": true,
-   "photoUrl": "https://cdn.prod.website-files.com/69895520b5015c9e81c9e590/69962860c42d3f838997b669_67d15ae1eb6039959ed6ee56_MBS-drone-2.webp"
+   "photoUrl": "https://cdn.prod.website-files.com/69895520b5015c9e81c9e590/69962860c42d3f838997b669_67d15ae1eb6039959ed6ee56_MBS-drone-2.webp",
+   "website": "https://sg.celavi.com/",
+   "instagram": "https://www.instagram.com/celavisingapore/"
   },
   "zouk": {
    "name": "Zouk",
@@ -441,7 +486,9 @@
    "lng": 103.84602,
    "line": "Large club by the river at Clarke Quay",
    "big": true,
-   "photoUrl": "https://zoukgroup.com/singapore/wp-content/uploads/sites/2/2026/07/zouk_dj_dance_floor_crowd.jpg"
+   "photoUrl": "https://zoukgroup.com/singapore/wp-content/uploads/sites/2/2026/07/zouk_dj_dance_floor_crowd.jpg",
+   "website": "https://zoukgroup.com/singapore/",
+   "instagram": "https://www.instagram.com/zouksingapore/"
   },
   "yeden-gardens": {
    "name": "Yeden Gardens",
@@ -459,7 +506,9 @@
    "lat": 7.89495,
    "lng": 98.2988,
    "line": "Beach club on Patong Beach (pin is approximate)",
-   "photoUrl": "https://barracuda-r2.tumwebsme.com/cms/DAY_001_FINAL_HIGHRESRecovered-copy-1024x702.webp"
+   "photoUrl": "https://barracuda-r2.tumwebsme.com/cms/DAY_001_FINAL_HIGHRESRecovered-copy-1024x702.webp",
+   "website": "https://www.barracudaphuket.com/",
+   "instagram": "https://www.instagram.com/barracudaphuket/"
   },
   "stayfly": {
    "name": "Stayfly",
@@ -468,7 +517,9 @@
    "lat": 9.7432,
    "lng": 99.9902,
    "line": "Venue in Wok Tum that hosts the Awakenest festival (pin is approximate)",
-   "photoUrl": "https://stayflystudio.com/landing/studio/stayfly-og.jpg"
+   "photoUrl": "https://stayflystudio.com/landing/studio/studio-stage.jpg",
+   "website": "https://stayflystudio.com/",
+   "instagram": "https://www.instagram.com/stayflystudio/"
   },
   "club-seen": {
    "name": "CLUB SEEN",
@@ -478,7 +529,9 @@
    "lng": 100.05863,
    "line": "Beach club on Chaweng Beach with guest DJs",
    "big": true,
-   "photoUrl": "https://seenbeachclubsamui.eme-devops.com/2025/10/share-image.png"
+   "photoUrl": "https://seenbeachclubsamui.eme-devops.com/2025/09/intro-section-beach.jpg",
+   "website": "https://seenbeachclubsamui.com/",
+   "instagram": "https://www.instagram.com/clubseenkohsamui/"
   }
  }
 }

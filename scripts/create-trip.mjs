@@ -15,7 +15,7 @@
  * Each run replaces info (each field by its own path, so info/inviteTitle,
  * which an organizer sets in the "Invite" sheet, stays; absent, the page and
  * the link preview use the default), crew/expected, places/areas,
- * places/venues (each with its `big` flag and its `photoUrl` from data/places.json, plan D18;
+ * places/venues (each with its `big` flag, its `photoUrl`, `website` and `instagram` from data/places.json, plan D18;
  * seed-parties turns it into the events' "big" tag, D19),
  * its own organizer key (the keys organizers add on the page stay)
  * and the admin list (tripSecrets/{tripId}/admins, from the

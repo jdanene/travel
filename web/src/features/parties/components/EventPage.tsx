@@ -2,7 +2,10 @@ import { useState } from "react";
 import { Icon } from "../../../components/Icon";
 import { Notice } from "../../../components/Notice";
 import type { Trip } from "../../../types/trip";
+import { clubOf } from "../lib/club";
 import { eventLink, showPlace, timeLine, whenLine } from "../lib/detail";
+import { ClubSheet } from "./ClubSheet";
+import { PhotoCard } from "./PhotoCard";
 import "./Parties.css";
 
 interface EventPageProps {
@@ -22,7 +25,9 @@ interface EventPageProps {
  * 25 Nov 2026: "try to get a pic of the artist or line up"), the date in the show sheet's words with the
  * night's start and end under it when it has them, the place line
  * and the venue's one line, "not confirmed", the about line, then "Event
- * page" when the event has an https link, and "See all 27 events".
+ * page" when the event has an https link, and "See all 27 events". The
+ * place line is a button: it opens the club sheet, with "Google Maps" (the
+ * page has no map of its own).
  *
  * Inputs: the trip from the one listener, the event's id, and the address
  * of every event.
@@ -38,6 +43,7 @@ interface EventPageProps {
  *   /events/nope         → "This event was removed." and "See all events"
  */
 export function EventPage({ trip, showId, allHref }: EventPageProps) {
+  const [clubOpen, setClubOpen] = useState(false);
   const shows = trip.parties?.shows ?? {};
   const show = shows[showId];
   if (!show) {
@@ -63,7 +69,11 @@ export function EventPage({ trip, showId, allHref }: EventPageProps) {
         {time && <span>{time}</span>}
       </p>
       <p className="event-where">
-        {place.where}
+        {/* "Where is this" is a friend's next question: the place opens the club sheet (design exception 37). */}
+        <button type="button" className="event-club" aria-haspopup="dialog" aria-label={`${place.where}, about this club`} onClick={() => setClubOpen(true)}>
+          {place.where}
+          <Icon name="info" size={18} />
+        </button>
         {place.line && <span>{place.line}</span>}
       </p>
       {show.verified === false && <span className="nc">not confirmed</span>}
@@ -79,15 +89,14 @@ export function EventPage({ trip, showId, allHref }: EventPageProps) {
           {count > 1 ? `See all ${count} events` : "See all events"}
         </a>
       </div>
+      <ClubSheet club={clubOpen ? clubOf({ destination: show.destination, name: show.venue, ...(show.area ? { area: show.area } : {}) }, trip) : undefined} onClose={() => setClubOpen(false)} />
     </article>
   );
 }
 
 /**
- * The event's wide card: its picture at a fixed shape, so nothing moves as
- * it loads, with the artist's name over its foot on a dark fade that reads
- * on any photo. The picture loads lazily and sends no referrer (as
- * VenueIcon does). A picture that fails gives way to the next; with none
+ * The event's wide card: its picture (PhotoCard) with the artist's name
+ * over its foot on a dark fade that reads on any photo. With no picture
  * left, the card is plain white with the name in ink.
  *
  * Inputs: photos — the pictures in order of preference (the event's, the
@@ -96,14 +105,11 @@ export function EventPage({ trip, showId, allHref }: EventPageProps) {
  * Examples (checked on the emulator): Peggy Gou's flyer → the flyer, white name; a flyer that answers 404 → Savaya's picture; none → the plain card
  */
 function EventCard({ photos, artist }: { photos: Array<string | undefined>; artist: string }) {
-  const [failed, setFailed] = useState<string[]>([]);
-  const shown = photos.find((photo): photo is string => !!photo?.startsWith("https://") && !failed.includes(photo)) ?? null;
   return (
-    <div className={`event-card${shown ? " has-photo" : ""}`}>
-      {shown && <img key={shown} src={shown} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setFailed((was) => [...was, shown])} />}
+    <PhotoCard photos={photos} className="event-card">
       <h2 className="event-artist" id="event-artist">
         {artist}
       </h2>
-    </div>
+    </PhotoCard>
   );
 }

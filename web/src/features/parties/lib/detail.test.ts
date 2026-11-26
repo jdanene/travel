@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { areaShown, eventLink, placeLine, placeOf, showPlace, showTimes, timeLine, whenLine } from "./detail";
+import { areaLine, areaShown, eventLink, placeLine, placeOf, showPlace, showTimes, timeLine, whenLine } from "./detail";
 
 // The header examples of detail.ts, one test each.
 describe("areaShown", () => {
@@ -24,6 +24,16 @@ describe("placeLine", () => {
 
   it("lets a searched area with its country stand alone", () => {
     expect(placeLine("Bottle Beach 1", "Haad Khuat, Thailand", "Koh Phangan, Thailand")).toBe("Bottle Beach 1 · Haad Khuat, Thailand");
+  });
+});
+
+describe("areaLine", () => {
+  it("names the area, then the destination with its country", () => {
+    expect(areaLine("Savaya", "Uluwatu", "Bali, Indonesia")).toBe("Uluwatu, Bali, Indonesia");
+  });
+
+  it("is the destination alone for a venue with no area", () => {
+    expect(areaLine("Lost Jungle", undefined, "Koh Phangan, Thailand")).toBe("Koh Phangan, Thailand");
   });
 });
 
