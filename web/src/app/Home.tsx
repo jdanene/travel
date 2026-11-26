@@ -10,7 +10,8 @@ const FOLD_MS = 220;
 
 /** Each module's name and icon on its button (12/2). */
 const LOOK: Record<ModuleId, { name: string; icon: IconName }> = {
-  dates: { name: "Dates", icon: "cal" },
+  // Owner, 26 Nov 2026: "rename dates potential dates" (exception 46).
+  dates: { name: "Potential dates", icon: "cal" },
   stay: { name: "Stay", icon: "bed" },
   parties: { name: "Events", icon: "music" },
   links: { name: "Links", icon: "link" },
@@ -50,7 +51,7 @@ interface HomeProps {
  * prefers-reduced-motion it opens and shuts at once.
  * Examples (checked on the emulator at 375 px against 12/2 and 12/3, and at 1650 px):
  *   dates open      → Dates "Tap to answer", Events, Links, Map; no Stay
- *   tap "Dates"     → Dates eases open at the top of the window; tap again, or another module, and it eases shut
+ *   tap "Potential dates" → it eases open at the top of the window; tap again, or another module, and it eases shut
  *   Dates open, tap "Map" → Dates folds as Map unfolds; Map ends at the top of the window, the warm map already drawn
  *   1650 px         → the flyer on the left, the module buttons on the right
  */
