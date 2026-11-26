@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lastSeason, lastYearLines } from "./lastYear";
+import { lastSeason, lastYearLines, lastSeasonRest } from "./lastYear";
 import { EVENTS_WINDOW as season } from "./window";
 const savaya = (date: string, artist: string) => ({ destination: "bali", venue: "Savaya", date, artist });
 
@@ -51,4 +51,16 @@ describe("lastSeason", () => {
     expect(lastSeason("bali", "La Brisa", [atlas("2026-01-31", "Afrojack")])).toEqual([]);
   });
 
+});
+
+describe("lastSeasonRest", () => {
+  const desa = (date: string, artist: string) => ({ destination: "bali", venue: "Desa Kitsuné", date, artist });
+  const lastYear = [desa("2026-02-14", "Zai Love"), desa("2026-02-17", "Savaya × Desa"), desa("2026-03-13", "Claptone")];
+  const line = { destination: "bali", venue: "Desa Kitsuné", from: "2027-02-13", to: "2027-02-14", shows: [{ date: "2026-02-14", artist: "Zai Love" }] };
+  it("keeps the acts no weekend line shows, newest first", () => {
+    expect(lastSeasonRest("bali", "Desa Kitsuné", lastYear, [line]).map((show) => show.artist)).toEqual(["Claptone", "Savaya × Desa"]);
+  });
+  it("is empty when every act is in a weekend line", () => {
+    expect(lastSeasonRest("bali", "Desa Kitsuné", [lastYear[0]], [line])).toEqual([]);
+  });
 });

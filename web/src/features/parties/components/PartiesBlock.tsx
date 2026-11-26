@@ -12,7 +12,7 @@ import { byTagName, eventShown, eventsList, tagChips, tripTags, type EventsFilte
 import { countryChips, inCountry } from "../lib/countries";
 import { clubOf } from "../lib/club";
 import { areaShown, placeOf, showPlace, type MapPlace } from "../lib/detail";
-import { lastSeason, lastYearLines } from "../lib/lastYear";
+import { lastSeason, lastSeasonRest, lastYearLines } from "../lib/lastYear";
 import { EVENTS_WINDOW } from "../lib/window";
 import { byPlaceVenueDate, venueKey, type KnownVenue, type ListedShow } from "../lib/shows";
 import { AddPartySheet } from "./AddPartySheet";
@@ -314,6 +314,8 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
                     )
                   ),
                 )}
+                {/* Who else played here last year: the weeknights the weekend lines leave out (exception 48). */}
+                {venue.shows.length > 0 && <LastSeason announced shows={lastSeasonRest(destination, venue.name, lastYear, venueLines)} />}
               </div>
             );
           })}

@@ -101,6 +101,28 @@ export function lastSeason(destination: DestinationId, venue: string, lastYear: 
     .map(({ date, artist }) => ({ date, artist }));
 }
 
+/**
+ * What a club with events this year still shows of last season: every act
+ * that played there last year (lastSeason's list, newest first) but the
+ * ones its weekend lines already show. Without it a weeknight act was never
+ * shown at a club with events: last year's Claptone, a Friday at Desa
+ * Kitsuné (owner, 26 Nov 2026: "add who played there last year";
+ * exception 48).
+ *
+ * Inputs: destination and venue — as lastSeason takes them; lastYear —
+ * last year's shows; lines — lastYearLines()'s lines for this venue.
+ * Output: { date, artist } with last year's dates, newest first; empty
+ * when every act is already in a weekend line, or last year had none.
+ * Examples (each is a test in lastYear.test.ts):
+ *   Desa Kitsuné: Sat 14 Feb Zai Love (in a weekend line), Tue 17 Feb Savaya × Desa, Fri 13 Mar Claptone
+ *     → Claptone, Savaya × Desa
+ *   a venue whose every act is in a weekend line → []
+ */
+export function lastSeasonRest(destination: DestinationId, venue: string, lastYear: ShowKey[], lines: LastYearLine[]): Array<{ date: string; artist: string }> {
+  const shown = new Set(lines.flatMap((line) => line.shows.map((show) => `${show.date}|${show.artist}`)));
+  return lastSeason(destination, venue, lastYear).filter((show) => !shown.has(`${show.date}|${show.artist}`));
+}
+
 /** Every Saturday whose weekend touches the window, the Saturday before it included. */
 function saturdays(window: { from: string; to: string }): string[] {
   const first = addDays(window.from, -((weekday(window.from) + 1) % 7));
