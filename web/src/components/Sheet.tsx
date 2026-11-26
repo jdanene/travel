@@ -9,6 +9,8 @@ interface SheetProps {
   onClose: () => void;
   /** False keeps focus on Close, for a sheet whose first field is not what most openings are for. Default true. */
   focusFirst?: boolean;
+  /** True when the content draws the title itself (the event sheet's picture card): the title stays the dialog's name for screen readers, and Close sits over the content's top corner. Default false. */
+  titleHidden?: boolean;
   children: ReactNode;
 }
 
@@ -24,13 +26,15 @@ interface SheetProps {
  * centred dialog instead of a bottom sheet.
  *
  * Inputs: whether it is open, its title, what closing does, whether the
- * first field takes focus (default yes), and its content.
+ * first field takes focus (default yes), whether the title is hidden
+ * because the content draws it (default no), and its content.
  * Output: the sheet over a dimmed page, or nothing while closed.
  * Examples (checked on the emulator at 375 px and 1650 px):
  *   open, title "Who are you?" → a bottom sheet on a phone, a centred dialog on a desktop; "Your name" has focus; Escape closes it
  *   open "Add a place"         → the link field has focus
+ *   the event sheet, titleHidden → no title row; Close over the picture's corner; the dialog is still named "Peggy Gou"
  */
-export function Sheet({ open, title, onClose, focusFirst = true, children }: SheetProps) {
+export function Sheet({ open, title, onClose, focusFirst = true, titleHidden = false, children }: SheetProps) {
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -47,7 +51,7 @@ export function Sheet({ open, title, onClose, focusFirst = true, children }: She
   return (
     <dialog
       ref={ref}
-      className="sheet"
+      className={titleHidden ? "sheet title-hidden" : "sheet"}
       aria-labelledby="sheet-title"
       onClose={onClose}
       onClick={(event) => {

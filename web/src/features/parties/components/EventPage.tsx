@@ -63,7 +63,7 @@ export function EventPage({ trip, showId, allHref }: EventPageProps) {
   const count = Object.keys(shows).length;
   return (
     <article className="event-page" aria-labelledby="event-artist">
-      <EventCard photos={[show.photoUrl, place.photoUrl]} artist={show.artist} />
+      <EventCard photos={[show.photoUrl, place.photoUrl]} artist={show.artist} headingId="event-artist" />
       <p className="event-when">
         {whenLine(show)}
         {time && <span>{time}</span>}

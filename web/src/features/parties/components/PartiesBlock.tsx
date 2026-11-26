@@ -83,7 +83,7 @@ interface PartiesBlockProps {
  * Examples (checked on the emulator at 375 px and 1650 px):
  *   the seeded trip  → "Big nights" picked; Bali, Indonesia: Savaya with its picture, then Atlas Beach Club … Potato Head with nothing announced; Koh Phangan: Haad Rin Beach with the Full Moon Party
  *   tap "All · 27"   → Bali: Mrs Sippy … Savaya, then the venues with nothing announced; Koh Phangan: Eden Garden, Half Moon Festival, … Haad Rin Beach
- *   tap "Peggy Gou"  → the show sheet; "See on the map" opens the Map on Savaya with its card open
+ *   tap "Peggy Gou"  → the show sheet; its place row opens the Map on Savaya with its card open
  *   tap "Savaya"     → its club sheet: picture, "Uluwatu, Bali, Indonesia", "See on the map" (opens the Map on Savaya), "Website", "Instagram"
  *   tap "La Brisa" (no pin) → "Website", "Instagram", "Google Maps"; on the shared page every club gets "Google Maps"
  *   tap "I'm in"     → filled at once, "1 in" with your initials, on the row and in the sheet
@@ -310,10 +310,11 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
         show={opened}
         where={openedWhere?.where ?? ""}
         venueLine={openedWhere?.line}
+        venuePhoto={openedWhere?.photoUrl}
         going={opened ? going(opened.id) : []}
         you={viewer.memberId}
         addedByName={opened ? adderOf(opened) : undefined}
-        onIn={opened ? setInFor(opened.id) : () => undefined}
+        onIn={(isIn) => (opened && viewer.memberId ? setIn(tripId, opened.id, trip.parties?.shows?.[opened.id], viewer.memberId, isIn) : Promise.resolve({ ok: true as const }))}
         onSeeMap={
           onSeeMap && openedPlace
             ? () => {
