@@ -5,33 +5,36 @@
 // (the caller passes the time). event-sources.mjs names which club uses
 // which reader.
 //
-// Every reader takes (html, pageUrl, now) and returns [{ name, date, link?, image? }]:
+// Every reader takes (html, pageUrl, now) and returns [{ name, date, link?, image?, startTime?, endTime? }]:
 // name is the act as the club writes it, date is "YYYY-MM-DD", link,
 // when the night has its own page, is that page's https address, and image,
 // where the list plainly gives the night's picture, its https address
-// (eventImage in parse.mjs; never fetched). It returns
+// (eventImage in parse.mjs; never fetched); startTime and endTime, where
+// the list plainly states the night's time, "HH:MM" on the club's clock
+// (eventTimes in parse.mjs). It returns
 // null when it does not recognise the page: for a text list, no night at
 // all (the layout has changed); for a feed, an answer that is not the
 // feed. A feed that lists no night gives [], which is not a failure.
 
-import { clean, dayOf, decodeEntities, eventImage } from "./parse.mjs";
+import { clean, dayOf, decodeEntities, eventImage, eventTimes } from "./parse.mjs";
 
 /**
  * Café del Mar Phuket's events list: each card holds the date three times,
- * first as M/D/YYYY, then as D/M/YYYY twice, then "|", the time and the
- * stage, then the act in capitals, linked to /events/<slug>.
+ * first as M/D/YYYY, then as D/M/YYYY twice, then "|", the start time
+ * ("10:00 pm") and the stage, then the act in capitals, linked to /events/<slug>.
  *
  * Examples (fixtures/cafe-del-mar-phuket-events.html; events.test.mjs runs it):
- *   → 29 nights from 25 Nov 2026 to 31 May 2027, among them
- *     { name: "CARL COX B2B NIC FANCIULLI", date: "2027-01-03", link: "https://phuket.cafedelmar.com/events/carl-cox-jan2027" }
+ *   → 29 nights from 25 Nov 2026 to 31 May 2027, each with its start, among them
+ *     { name: "CARL COX B2B NIC FANCIULLI", date: "2027-01-03", link: "https://phuket.cafedelmar.com/events/carl-cox-jan2027", startTime: "14:00" }
  */
 export function readCafeDelMarPhuket(html, pageUrl) {
   const nights = [];
-  const card = /dataid-1"[^>]*>(\d{1,2})\/(\d{1,2})\/(\d{4})<\/div>\s*<div[^>]*start-date"[^>]*>(\d{1,2})\/(\d{1,2})\/\d{4}<\/div>[\s\S]*?<a href="(\/events\/[^"#?]+)"[^>]*>\s*<div class="artist-name">([^<]+)<\/div>/g;
-  for (const [, month, day, year, day2, month2, path, name] of html.matchAll(card)) {
+  const card = /dataid-1"[^>]*>(\d{1,2})\/(\d{1,2})\/(\d{4})<\/div>\s*<div[^>]*start-date"[^>]*>(\d{1,2})\/(\d{1,2})\/\d{4}<\/div>([\s\S]*?)<a href="(\/events\/[^"#?]+)"[^>]*>\s*<div class="artist-name">([^<]+)<\/div>/g;
+  for (const [, month, day, year, day2, month2, between, path, name] of html.matchAll(card)) {
     // The two spellings of the date must agree, or the layout has changed.
     if (month !== month2 || day !== day2) continue;
-    nights.push(night(name, `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`, path, pageUrl));
+    const time = between.match(/>\|<\/div>\s*<div[^>]*>([^<]+)</)?.[1];
+    nights.push(night(name, `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`, path, pageUrl, undefined, eventTimes(time)));
   }
   return found(nights);
 }
@@ -142,39 +145,64 @@ export function readFullMoonParty(html) {
 /**
  * Potato Head's events feed, the JSON its "What's on" page loads
  * (/api/cached/experiences?type=Event&categories=music): music events from
- * today to six months ahead, each with a title, its days, a slug and its
- * picture (Image, else Thumbnail).
+ * today to six months ahead, each with a title, its days, a slug, its
+ * picture (Image, else Thumbnail), and its start and end times.
  *
  * Examples (fixtures/potato-head-music.json):
  *   → [{ name: "Live at Klymax: OFFSCRIPT", date: "2026-12-11", link: "https://seminyak.potatohead.co/experience/live-at-klymax-offscript",
- *        image: "https://cdn.potatohead.co/139_KLYMAX_OFFSCRIPT_LIVE_AT_KLYMAX_AUG_2026_1920x1080_WEB_4_dd0f32d092.jpg" },
+ *        image: "https://cdn.potatohead.co/139_KLYMAX_OFFSCRIPT_LIVE_AT_KLYMAX_AUG_2026_1920x1080_WEB_4_dd0f32d092.jpg", startTime: "21:00", endTime: "03:00" },
  *      { name: "NYE 2026", date: "2026-12-31", link: "https://seminyak.potatohead.co/experience/new-years-eve",
- *        image: "https://cdn.potatohead.co/New_Year_Eve_NYE_2026_Potato_Head_16x9_65b55abc14.jpg" }]
+ *        image: "https://cdn.potatohead.co/New_Year_Eve_NYE_2026_Potato_Head_16x9_65b55abc14.jpg", startTime: "16:00", endTime: "02:00" }]
  */
 export function readPotatoHead(text, pageUrl) {
-  return feed(text, "data")?.map((item) =>
-    night(item?.Title, dayOf(String(item?.Schedule?.[0]?.dates?.[0] ?? "")), item?.Slug && `/experience/${encodeURIComponent(item.Slug)}`, pageUrl, eventImage(item?.Image?.url ?? item?.Thumbnail?.url, pageUrl)),
-  ).filter(Boolean) ?? null;
+  return feed(text, "data")?.map((item) => {
+    const when = item?.Schedule?.[0];
+    const date = dayOf(String(when?.dates?.[0] ?? ""));
+    // Its first and last day with its clocks, so the next-day rule can check the end.
+    const at = (day, clock) => (typeof clock === "string" ? `${dayOf(String(day ?? "")) ?? ""}T${clock}` : undefined);
+    const times = eventTimes(at(when?.dates?.[0], when?.startTime), at(when?.dates?.at?.(-1), when?.endTime));
+    return night(item?.Title, date, item?.Slug && `/experience/${encodeURIComponent(item.Slug)}`, pageUrl, eventImage(item?.Image?.url ?? item?.Thumbnail?.url, pageUrl), times);
+  }).filter(Boolean) ?? null;
 }
 
 /**
  * Marquee Singapore's events feed, the WordPress JSON its events page loads
  * (taogroup.com/wp-json/wp/v2/events for venue 824, from a start day on),
  * each with a display title, a start as "11/27/2026 10:00 pm" (month
- * first) and its page.
+ * first; its time is the night's start) and its page.
  *
  * Examples (fixtures/marquee-events.json, from 23 Nov 2026; an empty feed is [],
  * and an answer that is not a list is null):
  *   → 11 nights from 27 Nov to 31 Dec 2026, the first
- *     { name: "HOLY PRIEST", date: "2026-11-27", link: "https://taogroup.com/event/27-11-26-holy-priest-marquee-singapore/" }
+ *     { name: "HOLY PRIEST", date: "2026-11-27", link: "https://taogroup.com/event/27-11-26-holy-priest-marquee-singapore/", startTime: "22:00" }
  */
 export function readMarquee(text, pageUrl) {
   return feed(text)?.map((item) => {
     const start = String(item?.acf?.event_start_date ?? "").match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
     const date = start && dayOf(`${start[3]}-${start[1].padStart(2, "0")}-${start[2].padStart(2, "0")}`);
     const link = typeof item?.link === "string" && item.link.startsWith("https://taogroup.com/") ? item.link : undefined;
-    return night(item?.acf?.event_title?.display_title, date, link, pageUrl);
+    return night(item?.acf?.event_title?.display_title, date, link, pageUrl, undefined, eventTimes(item?.acf?.event_start_date));
   }).filter(Boolean) ?? null;
+}
+
+/**
+ * Savaya's start time for one night, from that night's own page: its Event
+ * data gives the day alone ("Jan 30, 2027"), but the page states, under the
+ * date, "Doors Open at" and then the time ("3:00 pm"), two text blocks side
+ * by side. Only that pair counts: the footer's opening hours ("Saturday:
+ * 3:00PM - Close") are the venue's, not the night's, and give nothing. The
+ * page names no end.
+ *
+ * Inputs: html, the night's page as fetched.
+ * Output: { startTime } ("HH:MM", eventTimes in parse.mjs), or {} when the
+ * page has no such pair or its time cannot be read.
+ * Examples (each is a test in event-lists.test.mjs):
+ *   readDoorsOpen(<fixtures/savaya-hugel-event.html>) → { startTime: "15:00" }
+ *   readDoorsOpen(<fixtures/savaya-event.html>)       → {}   (the trimmed page keeps no such text)
+ */
+export function readDoorsOpen(html) {
+  const time = html.match(/>\s*Doors Open at\s*<\/div>\s*<div[^>]*>\s*([^<]{1,20}?)\s*</i)?.[1];
+  return time ? eventTimes(decodeEntities(time)) : {};
 }
 
 // The list in a JSON answer (at key, when given), or null for anything else.
@@ -194,11 +222,11 @@ function found(nights) {
   return real.length ? real : null;
 }
 
-// One night, or null when the name or the date is missing; its picture only when there is one.
-function night(name, date, path, pageUrl, image) {
+// One night, or null when the name or the date is missing; its picture and times only when there are some.
+function night(name, date, path, pageUrl, image, times = {}) {
   const text = clean(decodeEntities(name ?? ""));
   if (!text || !date) return null;
-  const pic = image ? { image } : {};
+  const pic = { ...(image ? { image } : {}), ...times };
   if (!path) return { name: text, date, ...pic };
   const link = new URL(path, pageUrl);
   link.protocol = "https:";

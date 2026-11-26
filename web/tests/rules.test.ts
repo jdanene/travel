@@ -2,7 +2,7 @@
  * The rules tests of Trip 2 (1 to 9), of the admin list (10 to 12, plan
  * D15), of Add dates (13 to 15, plan D16), of Add to map (16 and 17), of
  * weekly shows (18), of the profile photo (19), of a place's photo (20) and
- * of the invite title (21), of organizer keys (22), of trip texts (23 to 25), of the events window (26), of event tags (27), of the Activity list (28 to 35) and of an event's picture (36), against the database emulator. Run with
+ * of the invite title (21), of organizer keys (22), of trip texts (23 to 25), of the events window (26), of event tags (27), of the Activity list (28 to 36), of an event's picture (37) and of an event's times (38), against the database emulator. Run with
  * `npm run test:rules` in web/; it starts the emulator, runs this file and
  * stops it. Each test names the rule it proves, in the words of plan
  * section 4.
@@ -309,5 +309,13 @@ describe("database rules", () => {
     const a = db("uid-a");
     await assertSucceeds(set(ref(a, paths.show(T, "p1")), show({ source: "friend", addedBy: "alice", artist: "Picture night", photoUrl: "https://example.com/flyer.jpg" })));
     await assertFails(set(ref(a, paths.show(T, "p1")), show({ source: "friend", addedBy: "alice", artist: "Picture night", photoUrl: "http://example.com/flyer.jpg" })));
+  });
+
+  it("38. keeps a friend's own event's start and end as HH:MM, and refuses an end without a start", async () => {
+    const a = db("uid-a");
+    await assertSucceeds(set(ref(a, paths.show(T, "p2")), show({ source: "friend", addedBy: "alice", artist: "Late night", startTime: "22:00", endTime: "04:00" })));
+    await assertSucceeds(update(ref(a, paths.show(T, "p2")), { startTime: "22:30" }));
+    await assertFails(set(ref(a, paths.show(T, "p2")), show({ source: "friend", addedBy: "alice", artist: "Late night", endTime: "04:00" })));
+    await assertFails(update(ref(a, paths.show(T, "p2")), { startTime: "10 pm" }));
   });
 });

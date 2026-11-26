@@ -1,3 +1,4 @@
+import { showTimes } from "../../features/parties/lib/detail";
 import { showId } from "../../features/parties/lib/shows";
 import { inEventsWindow } from "../../features/parties/lib/window";
 import type { FoundEvent } from "../../lib/reader";
@@ -42,13 +43,16 @@ export function checkIsDue(lastAt: number | undefined, now: number): boolean {
  * 25 Nov 2026: "the bot found the hugel event sent the link.. clearly
  * looks confirmed")
  * and no addedBy; the event's picture goes with it as photoUrl when it is
- * https and at most 500 characters, else it is left out. An event is dropped when its destination is not the
+ * https and at most 500 characters, else it is left out; its startTime and
+ * endTime go with it when they are "HH:MM" (showTimes: an end needs a
+ * start), else they are left out. An event is dropped when its destination is not the
  * trip's, its date is not a day from 25 Jan to 31 Mar 2027 (EVENTS_WINDOW), its venue or
  * artist is empty or too long, its link is not https, or its id is listed.
  * Examples (each is a test in eventCheck.test.ts):
  *   BEN BÖHMER at Savaya on 28 Feb, not listed → { "bali_2027-02-28_savaya_ben-bohmer": { …, source: "check", verified: true } }
  *   PEGGY GOU on 13 Feb, seeded as "Peggy Gou", and a show on 30 Feb → {}   (the same id; no such day)
  *   ANTS on 27 Feb with image "https://cdn.example/ants.webp", BABY J with an http image → ANTS with that photoUrl; BABY J with none
+ *   ANTS from "22:00" to "04:00", BABY J from "10pm"     → ANTS with startTime "22:00" and endTime "04:00"; BABY J with neither
  */
 export function newShows(events: FoundEvent[], trip: Trip, now: number): Record<string, Show> {
   const listed = trip.parties?.shows ?? {};
@@ -68,7 +72,7 @@ export function newShows(events: FoundEvent[], trip: Trip, now: number): Record<
     const id = showId({ destination: event.destination, venue, date: event.date, artist });
     if (listed[id] || shows[id]) continue;
     const image = typeof event.image === "string" && event.image.startsWith("https://") && event.image.length <= 500 ? event.image : undefined;
-    shows[id] = { destination: event.destination, venue, ...(area ? { area } : {}), date: event.date, artist, link: event.link, ...(image ? { photoUrl: image } : {}), verified: true, source: "check", at: now };
+    shows[id] = { destination: event.destination, venue, ...(area ? { area } : {}), date: event.date, artist, link: event.link, ...(image ? { photoUrl: image } : {}), ...showTimes(event.startTime, event.endTime), verified: true, source: "check", at: now };
   }
   return shows;
 }

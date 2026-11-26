@@ -199,6 +199,79 @@ export function dayOf(text) {
 }
 
 /**
+ * The time of day a club writes for a night, as a show's startTime or
+ * endTime: "HH:MM" on the 24-hour clock, read from the local clock as the
+ * club wrote it, never converted (a club's "22:00" is shown as 22:00). An
+ * ISO time marked Z or +00:00 is not the venue's own clock (no club the
+ * check reads sits at UTC), so it gives none. Shared with events.mjs and
+ * event-lists.mjs through eventTimes.
+ *
+ * Inputs: text, an ISO date and time ("2027-02-07T22:30:00+07:00"), or a
+ * text with a clock in it ("11/27/2026 10:00 pm", "21:00").
+ * Output: "HH:MM", or undefined for no time or a time that does not exist.
+ * Examples (each is a test in events.test.mjs):
+ *   clockOf("2027-02-07T22:30:00+07:00") → "22:30"
+ *   clockOf("11/27/2026 10:00 pm")       → "22:00"
+ *   clockOf("12:00 am")                  → "00:00"
+ *   clockOf("2027-02-07T12:00:00Z")      → undefined   (UTC, not the venue's clock)
+ *   clockOf("2026-11-25")                → undefined
+ */
+export function clockOf(text) {
+  if (typeof text !== "string") return undefined;
+  const iso = text.match(/\d{4}-\d{2}-\d{2}[T ](\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?\s*(Z|[+-]\d{2}:?\d{2})?/i);
+  if (iso) return iso[3] && /^(?:Z|[+-]00:?00)$/i.test(iso[3]) ? undefined : hhmm(Number(iso[1]), Number(iso[2]));
+  const twelve = text.match(/\b(\d{1,2}):(\d{2})\s*([ap])\.?\s?m\b\.?/i);
+  if (twelve) {
+    const hour = Number(twelve[1]);
+    if (hour < 1 || hour > 12) return undefined;
+    return hhmm((hour % 12) + (twelve[3].toLowerCase() === "p" ? 12 : 0), Number(twelve[2]));
+  }
+  const plain = text.match(/(?:^|[^\d:])(\d{1,2}):(\d{2})(?!\d)/);
+  return plain ? hhmm(Number(plain[1]), Number(plain[2])) : undefined;
+}
+
+function hhmm(hour, minute) {
+  if (!(hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59)) return undefined;
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
+/**
+ * A night's start and end times as the check hands them to the app, from
+ * the club's start and end. A club's placeholder for "no time given" gives
+ * none: a start at exactly 00:00 with no end, 00:00 to 23:59 (a whole
+ * day), or an end equal to the start. An end on the next day is normal
+ * (22:00 to 04:00) and is kept; an end that, by its date, falls more than
+ * a day after the start (a festival over three days) is dropped, so the
+ * line never reads "12 pm - 11 pm" for a weekend. An end without a start
+ * is dropped too.
+ *
+ * Inputs: start, end, as clockOf reads them; either may be absent. When
+ * both carry a date, the dates decide the next-day rule. An end that reads
+ * before the start, on plain clocks or under the same date, means the next
+ * morning (clubs often write the night's date on both).
+ * Output: {}, { startTime }, or { startTime, endTime }.
+ * Examples (each is a test in events.test.mjs):
+ *   eventTimes("2026-11-27T21:00:00+07:00", "2026-11-28T04:00:00+07:00") → { startTime: "21:00", endTime: "04:00" }
+ *   eventTimes("2026-11-24T00:00:00+07:00", "2026-11-24T23:59:59+07:00") → {}   (CLUB SEEN's whole-day placeholder)
+ *   eventTimes("2027-02-07T12:00:00+07:00", "2027-02-07T12:00:00+07:00") → {}   (start equals end)
+ *   eventTimes("2027-02-05T12:00:00+07:00", "2027-02-07T23:00:00+07:00") → { startTime: "12:00" }   (a three-day festival)
+ *   eventTimes("10:00 pm")                                               → { startTime: "22:00" }
+ */
+export function eventTimes(start, end) {
+  const startTime = clockOf(start);
+  if (!startTime) return {};
+  let endTime = clockOf(end);
+  if (startTime === "00:00" && (!endTime || endTime === "23:59")) return {};
+  const from = dayOf(String(start));
+  const to = endTime ? dayOf(String(end)) : null;
+  const days = from && to ? (Date.parse(to) - Date.parse(from)) / 86_400_000 : 0;
+  if (endTime === startTime && days === 0) return {};
+  // Same day, or the next morning; anything longer is not one night.
+  if (endTime && !(days === 0 || (days === 1 && endTime < startTime))) endTime = undefined;
+  return endTime ? { startTime, endTime } : { startTime };
+}
+
+/**
  * An event's picture as the events check hands it to the app (a show's
  * photoUrl): from schema.org's image (an address, a list of them, or an
  * ImageObject with url), a feed's field, an <img> src or og:image. A

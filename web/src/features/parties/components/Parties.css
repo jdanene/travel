@@ -85,6 +85,10 @@
 .party-sheet .pills { margin-bottom: 0.75rem; }
 .party-sheet .field select { display: block; width: 100%; border: 0; outline: 0; background: none; font: inherit; font-size: 1rem; color: inherit; padding: 0; min-height: 1.5rem; }
 
+/* Starts and Ends, side by side under the date: the phone's own time pickers, at 1rem (16 px or more) so iOS does not zoom. */
+.party-times { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
+.party-sheet .field input[type="time"] { font: inherit; font-size: 1rem; color: inherit; min-height: 1.5rem; text-align: left; -webkit-appearance: none; appearance: none; }
+.party-sheet .field input[type="time"]::-webkit-date-and-time-value { text-align: left; }
 .party-sheet .remove { margin-top: 0.625rem; }
 .party-sheet .cap { margin-top: 0.625rem; text-align: center; }
 
@@ -177,6 +181,8 @@
 .event-card.has-photo .event-artist { color: #fff; text-shadow: 0 1px 12px rgb(0 0 0 / 0.5); }
 .event-when { margin-top: 1rem; font-size: 1.0625rem; font-weight: 700; color: var(--on-page); }
 .event-where { margin-top: 0.125rem; font-size: 0.9375rem; color: var(--on-page-mut); }
+/* The night's times sit under the date in the place line's supporting style. */
+.event-when span { display: block; margin-top: 0.125rem; font-size: 0.9375rem; font-weight: 400; color: var(--on-page-mut); }
 .event-where span { display: block; }
 .event-page > .nc { margin-top: 0.5rem; }
 .event-about { margin-top: 0.625rem; font-size: 0.9375rem; line-height: 1.45; color: var(--on-page); max-width: 65ch; }

@@ -4,10 +4,10 @@ import { newPlaceId } from "../../../lib/ids";
 import * as paths from "../../../lib/paths";
 import type { Spot } from "../../../lib/placeSearch";
 import type { CustomPlace, MemberId, Show, Trip } from "../../../types/trip";
-import { placeOf } from "../lib/detail";
+import { placeOf, showTimes } from "../lib/detail";
 import { showId } from "../lib/shows";
 
-/** What a friend types in Add an event (screen 8). About and link are "" when left empty. */
+/** What a friend types in Add an event (screen 8). About, link and the times are "" when left empty. */
 export interface PartyDraft {
   destination: string;
   venue: string;
@@ -15,6 +15,9 @@ export interface PartyDraft {
   artist: string;
   about: string;
   link: string;
+  /** "HH:MM" from the native time field, or "". */
+  startTime: string;
+  endTime: string;
   /** Where the venue is, when it was picked from the place search; it gets a pin. */
   spot?: Spot;
   /** The picked place's area and country from the search ("Haad Khuat, Thailand"); "" drops the show's area, absent keeps it. */
@@ -79,7 +82,8 @@ export function addShow(tripId: string, trip: Trip, draft: PartyDraft, memberId:
 /**
  * Saves an edit. The show keeps its id, its source, who added it and when,
  * because the rules refuse a change of the adder, and a weekly show stays
- * weekly (the sheet does not offer the day).
+ * weekly (the sheet does not offer the day). The draft's times replace the
+ * show's: a time the friend cleared goes (the sheet opens with the show's own).
  *
  * A venue picked from the place search goes on the map in the same write,
  * as in addShow().
@@ -134,7 +138,7 @@ export async function removeShow(tripId: string, id: string): Promise<WriteResul
   return result;
 }
 
-/** The draft as stored: trimmed, with no about, link or area field when it is empty. */
+/** The draft as stored: trimmed, with no about, link, area or time field when it is empty; an end needs a start (showTimes). */
 function fields(draft: PartyDraft) {
   const about = draft.about.trim();
   const link = draft.link.trim();
@@ -147,6 +151,7 @@ function fields(draft: PartyDraft) {
     artist: draft.artist.trim(),
     ...(about ? { about } : {}),
     ...(link ? { link } : {}),
+    ...showTimes(draft.startTime, draft.endTime),
   };
 }
 

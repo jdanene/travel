@@ -2,7 +2,7 @@ import { Avatars, type Person } from "../../../components/Avatars";
 import { Icon } from "../../../components/Icon";
 import { Sheet } from "../../../components/Sheet";
 import { initials } from "../../../lib/initials";
-import { eventLink, whenLine } from "../lib/detail";
+import { eventLink, timeLine, whenLine } from "../lib/detail";
 import type { ListedShow } from "../lib/shows";
 import { EventTags } from "./EventTags";
 import { ShareButton } from "./ShareButton";
@@ -35,7 +35,8 @@ interface ShowSheetProps {
 /**
  * The show sheet: everything a friend needs to decide on one event, in the
  * shared Sheet (a bottom sheet on a phone, a centred dialog from 900 px).
- * Who is playing, in full; what it is; when and where; who is in and the
+ * Who is playing, in full; what it is; when (the date, then the night's
+ * start and end under it when the show has them) and where; who is in and the
  * "I'm in" button; then the two ways out, the map and the event's own page;
  * then the event's tags, which any member adds or removes (EventTags).
  * Beside the two ways out, "Share" hands out the event's own shared page
@@ -51,6 +52,7 @@ interface ShowSheetProps {
  * Examples (checked on the emulator at 375 px and 1650 px):
  *   Peggy Gou → "Sat 13 Feb 2027", "Savaya · Uluwatu, Bali", "Club on the cliffs", "See on the map", "Event page"
  *   Single Fin's Sunday Session → "Every Sunday from 7 Feb"
+ *   a show from 22:00 to 04:00 → "10 pm – 4 am" under the date, in the place's supporting style; no times, no line
  *   tap "I'm in" → the button fills here and on the row at once
  *   tap "Share" on a desktop → "Copied"; the link is …/trip/<id>/events/<showId>
  */
@@ -65,6 +67,7 @@ export function ShowSheet({ show, onClose, ...rest }: ShowSheetProps) {
 function ShowDetail({ show, where, venueLine, going, you, addedByName, onIn, onSeeMap, tags, tagNames, onTag, share }: Omit<ShowSheetProps, "onClose"> & { show: ListedShow }) {
   const isIn = you !== null && going.some((person) => person.id === you);
   const link = eventLink(show.link);
+  const time = timeLine(show);
 
   return (
     <div className="show-detail">
@@ -77,7 +80,10 @@ function ShowDetail({ show, where, venueLine, going, you, addedByName, onIn, onS
             <Icon name="cal" size={20} />
             <span className="sr-only">When</span>
           </dt>
-          <dd>{whenLine(show)}</dd>
+          <dd>
+            {whenLine(show)}
+            {time && <span className="sub">{time}</span>}
+          </dd>
         </div>
         <div>
           <dt>
