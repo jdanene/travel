@@ -4,6 +4,7 @@ import { Icon } from "../../../components/Icon";
 import type { ActivityEntry, ActivityReply, MemberId } from "../../../types/trip";
 import { lineWords, tally, whenLabels } from "../lib/lines";
 import { RichText } from "./Glyph";
+import { MessageText } from "./Player";
 
 /** What every entry needs to draw its people and its time. */
 export interface Viewer {
@@ -147,7 +148,8 @@ interface WrittenProps {
  * the message bar looks like a field). A GIF shows as a rounded picture
  * that keeps its shape while it loads. A poll keeps a quiet box in the
  * card's thin grey, with a bar for each share, the voters' faces and the
- * count; a tap votes or changes the vote. Under it, on the reactions row,
+ * count; a tap votes or changes the vote. An Instagram or TikTok video in
+ * the words plays in place under them (exception 36). Under it, on the reactions row,
  * "Reply" puts the message bar in reply mode for it; its replies show under
  * it from the start, and "Hide replies" folds them ("3 replies" opens them
  * again). The author and an organizer get a quiet "…" (shown on
@@ -188,7 +190,7 @@ export function Written({ id, entry, viewer, votes, thread, sending, onVote, onD
         {entry.gif && (
           <img className="fp-gif" src={entry.gif} alt="GIF" width={entry.gifW} height={entry.gifH} style={entry.gifW && entry.gifH ? { aspectRatio: `${entry.gifW} / ${entry.gifH}` } : undefined} loading="lazy" decoding="async" />
         )}
-        {entry.text && !poll && <RichText className="fp-t" text={entry.text} />}
+        {entry.text && !poll && <MessageText className="fp-t" text={entry.text} />}
         {poll && (
           <div className="fp-poll">
             <RichText className="fp-q" text={entry.text ?? ""} />
@@ -235,7 +237,8 @@ export interface ThreadProps {
 /**
  * The reply thread under any feed line, a friend's message or an automatic
  * update alike: the control for the reactions row, and, while open, the
- * replies in order (words, or a GIF drawn smaller than in the feed). There
+ * replies in order (words, or a GIF drawn smaller than in the feed, and a
+ * video player drawn smaller in the same way). There
  * is no second text box: "Reply" (the control on a line with no replies,
  * or the last item of an open thread) puts the one message bar in reply
  * mode, as on Discord (owner, 25 Nov 2026: "why are we using a different
@@ -297,7 +300,7 @@ function useThread(viewer: Viewer, thread: ThreadProps) {
               {reply.gif && (
                 <img className="rp-gif" src={reply.gif} alt="GIF" width={reply.gifW} height={reply.gifH} style={reply.gifW && reply.gifH ? { aspectRatio: `${reply.gifW} / ${reply.gifH}` } : undefined} loading="lazy" decoding="async" />
               )}
-              {reply.text && <RichText className="rp-t" text={reply.text} />}
+              {reply.text && <MessageText className="rp-t" text={reply.text} />}
             </div>
           </div>
         ))}

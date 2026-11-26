@@ -1,7 +1,8 @@
 /**
  * The app's side of the link reader (services/link-reader): one call that
- * reads a pasted link, which Stay and Links both use, and one that asks it
- * to check the clubs' pages for events.
+ * reads a pasted link, which Stay and Links both use, one that asks where a
+ * short link points (the Feed's video players), and one that asks it to
+ * check the clubs' pages for events.
  */
 
 const READER_URL: string | undefined = import.meta.env.VITE_READER_URL;
@@ -43,6 +44,38 @@ export async function readLink(url: string): Promise<ReadLink | null> {
       if (answer.reason !== "timeout") return null;
     } catch {
       // A lost call or our own timeout: try again.
+    }
+  }
+  return null;
+}
+
+/** A short link's lookup: two tries at most, each waiting 7 s (the reader itself waits 6 s for the site). */
+const RESOLVE_WAITS_MS = [0, 1000];
+const RESOLVE_TIMEOUT_MS = 7000;
+
+/**
+ * Asks the reader where an Instagram or TikTok short or share link points,
+ * for the Feed's video players. Only a lost call or a timeout is tried
+ * again; any other answer is final.
+ *
+ * Inputs: url — a short link the caller has already recognised.
+ * Output: the address it points to, or null when the reader says no, fails
+ * twice, or is not set up.
+ * Examples (checked against a local run of the reader, 25 Nov 2026):
+ *   https://vt.tiktok.com/ZS9bVfWa6/ → "https://www.tiktok.com/@/video/7620909821147073813?_r=1&…"
+ *   reader not set up (a dev build) → null at once
+ */
+export async function resolveLink(url: string): Promise<string | null> {
+  if (!READER_URL) return null;
+  for (const wait of RESOLVE_WAITS_MS) {
+    if (wait) await new Promise((resolve) => setTimeout(resolve, wait));
+    try {
+      const response = await fetch(`${READER_URL}?resolve=${encodeURIComponent(url)}`, { signal: AbortSignal.timeout(RESOLVE_TIMEOUT_MS) });
+      const answer = (await response.json()) as { ok: boolean; url?: unknown; reason?: string };
+      if (answer.ok && typeof answer.url === "string") return answer.url;
+      if (answer.reason !== "timeout") return null;
+    } catch {
+      // A lost call or our own timeout: try once more.
     }
   }
   return null;
