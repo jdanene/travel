@@ -174,6 +174,10 @@ export interface Venue {
   big?: boolean;
   /** The venue's picture from its own website (its link-preview image), https only; absent means no picture. */
   photoUrl?: string;
+  /** The venue's own website, https only (data/places.json); absent when none could be confirmed. */
+  website?: string;
+  /** The venue's Instagram profile, https only, as its own website links it; absent when none could be confirmed. */
+  instagram?: string;
 }
 
 /** What a friend's place on the map is; each has its own pin icon. */

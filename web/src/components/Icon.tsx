@@ -19,6 +19,11 @@ const PATHS = {
   up: <path d="M12 19V5M6 11l6-6 6 6" />,
   share: <><path d="M12 14.5V4M8 8l4-4 4 4" /><path d="M7 10.5H6v9h12v-9h-1" /></>,
   chat: <path d="M20 12a7.5 7.5 0 0 1-11 6.6L4 20l1.4-4.6A7.5 7.5 0 1 1 20 12z" />,
+  // Not in the mocks; drawn in their style for the club sheet (design exception 37).
+  info: <><circle cx="12" cy="12" r="8.5" /><path d="M12 11v5.5M12 7.8v.1" /></>,
+  globe: <><circle cx="12" cy="12" r="8.5" /><path d="M3.5 12h17M12 3.5c-2.6 2.4-3.8 5.2-3.8 8.5s1.2 6.1 3.8 8.5c2.6-2.4 3.8-5.2 3.8-8.5S14.6 5.9 12 3.5z" /></>,
+  insta: <><rect x="4" y="4" width="16" height="16" rx="4.5" /><circle cx="12" cy="12" r="3.6" /><path d="M16.6 7.4v.1" /></>,
+  out: <path d="M9 6h9v9M18 6 6 18" />,
 };
 
 export type IconName = keyof typeof PATHS;
