@@ -14,18 +14,14 @@
 /* A sheet section's one main action: black, as the main buttons are. */
 .pill.pill-main { background: var(--acc); color: var(--on-acc); }
 .pill:disabled { opacity: .5; cursor: default; }
-/* A sheet whose content draws its own title (Sheet titleHidden): the title is read, not seen, and Close floats over the
-   content's top corner, so the content starts at the top. */
-.sheet.title-hidden .nav { position: absolute; z-index: 2; top: 2.25rem; right: 1.75rem; height: auto; }
-.sheet.title-hidden .nav .h2 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-/* No X shows on such a sheet (owner, 25 Nov 2026: "remove the x"): a tap outside or Escape closes it. Close stays in the
-   page for a keyboard and a screen reader, and shows only while a keyboard has focus on it. */
-.sheet.title-hidden .ib { box-shadow: 0 1px 4px rgb(0 0 0 / 0.2); }
-.sheet.title-hidden .ib:not(:focus-visible) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+/* A sheet whose content draws its own title (Sheet titleHidden): the title is read, not seen, and there is no Close
+   button at all (owner, 25 and 26 Nov 2026: "remove the x", "told u to remove it"). The sheet itself takes focus, with
+   no ring; a tap outside or Escape closes it. */
+.sheet.title-hidden .nav { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.sheet.title-hidden:focus { outline: none; }
 /* Desktop: a centred dialog, not a bottom sheet; the grab handle has no meaning there. */
 @media (min-width: 900px) {
   .sheet { inset: 0; margin: auto; max-width: 33rem; height: fit-content; max-height: 85vh; border-radius: 1.5rem; padding: 1.25rem 1.75rem 1.75rem; }
   .sheet .grab { display: none; }
   .sheet .nav { margin-bottom: 0.5rem; }
-  .sheet.title-hidden .nav { top: 1.75rem; right: 2.25rem; margin-bottom: 0; }
 }

@@ -13,11 +13,9 @@ interface ShowRowProps {
   you: string | null;
   /** The name of the friend who added it, for "added by KA"; undefined for a seeded show. */
   addedByName?: string;
-  canEdit: boolean;
   /** The names of the event's tags to show as small grey labels; the picked filter's tag is left out, as its chip already says it. */
   tags: string[];
   onIn: (isIn: boolean) => void;
-  onEdit: () => void;
   /** Opens the show sheet. */
   onOpen: () => void;
   /** On the shared events page: the event's own page, which the artist links to instead of the sheet. */
@@ -26,19 +24,20 @@ interface ShowRowProps {
 
 /**
  * One show on screen 20/7: the date tile, the artist, who is in, and the
- * "I'm in" button. A row the friend added, and every row for an organizer,
- * also shows "Edit". A tap anywhere else on the row opens the show sheet:
+ * "I'm in" button. A tap anywhere else on the row opens the show sheet:
  * the artist is the row's one link, stretched over the row, so a keyboard
  * reaches it too.
  *
- * Inputs: the show, who is in, this member, the adder's name, whether this
- * device may edit it, and what the three actions do.
+ * Inputs: the show, who is in, this member, the adder's name, its tags,
+ * and what "I'm in" and opening do.
  * Output: the row. The artist takes two lines, then cuts (case 30); the
  * event's about line sits under it on one line, cut with "…" on a phone.
  * The row has no link button of its own (owner, 25 Nov 2026: "u have two
  * links one when u press the event and one is the link icon.. u can remove
  * the link icon"): the event's own page is "Event page" in its sheet and on
- * its shared page. A show
+ * its shared page. Nor has it "Edit" (owner, 26 Nov 2026: "edit should not
+ * be a button it should be an option when we get to the modal of the
+ * actual event"): Edit is one of the show sheet's options. A show
  * nobody is in reads "Be the first in" (case 31); an unconfirmed one
  * carries "not confirmed" right under the artist, so a cut never hides it.
  * A weekly show's tile reads "Every / Sun" and screen readers hear "Every
@@ -53,7 +52,7 @@ interface ShowRowProps {
  *   under "Big nights", Peggy Gou tagged Big nights and Rooftop → one grey "Rooftop" label
  *   Single Fin's Sunday Session → "Every / Sun" tile; a tap on the tile opens the sheet
  */
-export function ShowRow({ show, going, you, addedByName, canEdit, tags, onIn, onEdit, onOpen, href }: ShowRowProps) {
+export function ShowRow({ show, going, you, addedByName, tags, onIn, onOpen, href }: ShowRowProps) {
   const visitor = you === null;
   const isIn = you !== null && going.some((person) => person.id === you);
   const count = going.length ? `${going.length} in` : "Be the first in";
@@ -94,11 +93,6 @@ export function ShowRow({ show, going, you, addedByName, canEdit, tags, onIn, on
                 {by}
               </span>
             </>
-          )}
-          {canEdit && (
-            <button type="button" className="edit" onClick={onEdit} aria-label={`Edit ${show.artist}`}>
-              Edit
-            </button>
           )}
         </div>
       </div>

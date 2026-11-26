@@ -85,6 +85,7 @@ interface PartiesBlockProps {
  *   the seeded trip  → "Big nights" picked; Bali, Indonesia: Savaya with its picture, then Atlas Beach Club … Potato Head with nothing announced; Koh Phangan: Haad Rin Beach with the Full Moon Party
  *   tap "All · 27"   → Bali: Mrs Sippy … Savaya, then the venues with nothing announced; Koh Phangan: Eden Garden, Half Moon Festival, … Haad Rin Beach
  *   tap "Peggy Gou"  → the show sheet; its place row opens the Map on Savaya with its card open
+ *   an event you added, its sheet's "Edit" → the edit sheet in place of the show sheet; Cancel or Save brings the show sheet back; Remove does not
  *   tap "Savaya" in the app → the Map opens on Savaya with its card open; a club with no pin has a plain heading
  *   tap "Savaya" on the shared page → its club sheet: picture, "Uluwatu, Bali, Indonesia", "Website", "Instagram", "Google Maps"
  *   tap "I'm in"     → filled at once, "1 in" with your initials, on the row and in the sheet
@@ -96,6 +97,8 @@ interface PartiesBlockProps {
 export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, filter, onFilter: setFilter, eventHref }: PartiesBlockProps) {
   const [sheet, setSheet] = useState<SheetState>(null);
   const [detail, setDetail] = useState<string | null>(null);
+  // The show whose sheet opened the edit sheet: closing or saving the edit brings that sheet back.
+  const [editFrom, setEditFrom] = useState<string | null>(null);
   // The venue heading whose club sheet is open.
   const [clubAt, setClubAt] = useState<{ destination: DestinationId; name: string; area?: string } | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
@@ -187,6 +190,7 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
     keepInSight(draft.destination);
     if (sheet?.mode === "edit" && editing) {
       setSheet(null);
+      backToSheet();
       return run(editShow(tripId, trip, sheet.id, editing, draft, viewer.memberId));
     }
     setProblem(null);
@@ -196,6 +200,13 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
     });
     setSheet(null);
   };
+
+  // Back to the event's sheet after its edit sheet closes; nothing when the edit began elsewhere.
+  const backToSheet = () => {
+    if (editFrom) setDetail(editFrom);
+    setEditFrom(null);
+  };
+  const mayEdit = (show: ListedShow) => viewer.isOrganizer || (viewer.memberId !== null && show.addedBy === viewer.memberId);
 
   const destinations = Object.entries(destinationNames).map(([id, { lat, lng }]) => ({ id, name: nameOf(id), lat, lng }));
   const canAdd = viewer.memberId !== null && destinations.length > 0;
@@ -295,10 +306,8 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
                         going={going(show.id)}
                         you={viewer.memberId}
                         addedByName={adderOf(show)}
-                        canEdit={viewer.isOrganizer || (viewer.memberId !== null && show.addedBy === viewer.memberId)}
                         tags={rowTags(show.id)}
                         onIn={setInFor(show.id)}
-                        onEdit={() => setSheet({ mode: "edit", id: show.id })}
                         onOpen={() => setDetail(show.id)}
                         href={eventHref?.(show.id)}
                       />
@@ -336,6 +345,16 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
         tagNames={tags.names}
         onTag={viewer.memberId && opened ? (tag, on) => setShowTag(tripId, opened.id, tag, on) : undefined}
         share={viewer.memberId && opened ? { url: eventsLink(window.location.origin, tripId, opened.id), text: `${opened.artist} · ${tripName}` } : undefined}
+        onEdit={
+          opened && mayEdit(opened)
+            ? () => {
+                // One sheet at a time: this one closes and the edit sheet opens in its place.
+                setDetail(null);
+                setEditFrom(opened.id);
+                setSheet({ mode: "edit", id: opened.id });
+              }
+            : undefined
+        }
         onClose={() => setDetail(null)}
       />
       <ClubSheet club={clubAt ? clubOf(clubAt, trip) : undefined} onClose={() => setClubAt(null)} />
@@ -346,11 +365,15 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
         venues={knownVenues(trip, byPlaceVenueDate(shows, known))}
         startMonth={trip.info?.season?.from?.slice(0, 7)}
         yourName={viewer.memberId ? (members[viewer.memberId]?.name ?? viewer.memberId) : ""}
-        onClose={() => setSheet(null)}
+        onClose={() => {
+          setSheet(null);
+          backToSheet();
+        }}
         onSave={save}
         onRemove={() => {
           if (sheet?.mode !== "edit") return;
           setSheet(null);
+          setEditFrom(null);
           run(removeShow(tripId, sheet.id));
         }}
       />

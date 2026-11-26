@@ -24,6 +24,8 @@ const PATHS = {
   globe: <><circle cx="12" cy="12" r="8.5" /><path d="M3.5 12h17M12 3.5c-2.6 2.4-3.8 5.2-3.8 8.5s1.2 6.1 3.8 8.5c2.6-2.4 3.8-5.2 3.8-8.5S14.6 5.9 12 3.5z" /></>,
   insta: <><rect x="4" y="4" width="16" height="16" rx="4.5" /><circle cx="12" cy="12" r="3.6" /><path d="M16.6 7.4v.1" /></>,
   out: <path d="M9 6h9v9M18 6 6 18" />,
+  // Not in the mocks; drawn in their style for Edit in the event sheet (design exception 43).
+  edit: <><path d="M5 19h3.5L18.5 9a2.5 2.5 0 0 0-3.5-3.5L5 15.5V19z" /><path d="m13.5 7 3.5 3.5" /></>,
 };
 
 export type IconName = keyof typeof PATHS;
