@@ -6,7 +6,7 @@ import type { DestinationId, Trip, Weekday } from "../../../types/trip";
 /**
  * The parties context's rules for saying when and where a show is and what
  * its link is: the list's "Savaya · Uluwatu" and "Every Sunday", the show
- * sheet's "Sat 13 Feb 2027" and "Savaya · Uluwatu, Bali", the place it
+ * sheet's "Sat 13 Feb 2027", "10 pm – 4 am" and "Savaya · Uluwatu, Bali", the place it
  * opens on the map, and whether its "Event page" opens.
  */
 
@@ -42,6 +42,62 @@ export function every(weekly: Weekday): string {
  */
 export function whenLine(show: { date: string; weekly?: Weekday }): string {
   return show.weekly ? `${every(show.weekly)} from ${dayMonth(show.date)}` : `${weekdayDate(show.date)} ${show.date.slice(0, 4)}`;
+}
+
+/** "HH:MM" on the 24-hour clock, as database.rules.json takes a show's startTime and endTime. */
+const HHMM = /^([01][0-9]|2[0-3]):([0-5][0-9])$/;
+
+/**
+ * Keeps the start and end of a night that the database takes, from values
+ * nobody has checked yet (the events check's answer, a form, an old
+ * show): each must be "HH:MM" on the 24-hour clock; an end needs a start
+ * (database.rules.json refuses one alone); an end equal to the start says
+ * nothing and is dropped. An end before the start is the next morning and
+ * stays.
+ *
+ * Inputs: start, end — anything.
+ * Output: {}, { startTime }, or { startTime, endTime }, ready to spread
+ * into a show.
+ * Examples (each is a test in detail.test.ts):
+ *   showTimes("22:00", "04:00")   → { startTime: "22:00", endTime: "04:00" }
+ *   showTimes(undefined, "04:00") → {}
+ *   showTimes("22:00", "22:00")   → { startTime: "22:00" }
+ *   showTimes("24:00", 4)         → {}
+ */
+export function showTimes(start: unknown, end: unknown): { startTime?: string; endTime?: string } {
+  if (typeof start !== "string" || !HHMM.test(start)) return {};
+  return typeof end === "string" && HHMM.test(end) && end !== start ? { startTime: start, endTime: end } : { startTime: start };
+}
+
+// "22:30" → "10:30 pm"; "22:00" → "10 pm"; "00:00" → "12 am".
+function clock(time: string): string {
+  const [, hours, minutes] = HHMM.exec(time) ?? [];
+  const hour = Number(hours);
+  const shown = hour % 12 === 0 ? 12 : hour % 12;
+  return `${shown}${minutes === "00" ? "" : `:${minutes}`} ${hour < 12 ? "am" : "pm"}`;
+}
+
+/**
+ * The detailed views' time line, under the date: when the night starts and
+ * ends, on the venue's own clock with no time zone (owner, 25 Nov 2026:
+ * "detailed event view should have start and end time when applicble").
+ * The 12-hour style, minutes only when not ":00", an en dash with spaces.
+ * An end that reads before the start is the next morning and reads as it
+ * is ("10 pm – 4 am"). A weekly show's line reads the same.
+ *
+ * Inputs: show — its startTime and endTime, either absent, in any shape.
+ * Output: "10 pm – 4 am", "From 10:30 pm", or null when there is no start
+ * in "HH:MM" (no line and no gap).
+ * Examples (each is a test in detail.test.ts):
+ *   timeLine({ startTime: "22:00", endTime: "04:00" }) → "10 pm – 4 am"
+ *   timeLine({ startTime: "22:30" })                   → "From 10:30 pm"
+ *   timeLine({ endTime: "04:00" })                     → null
+ *   timeLine({ startTime: "12:00", endTime: "00:00" }) → "12 pm – 12 am"
+ */
+export function timeLine(show: { startTime?: unknown; endTime?: unknown }): string | null {
+  const { startTime, endTime } = showTimes(show.startTime, show.endTime);
+  if (!startTime) return null;
+  return endTime ? `${clock(startTime)} – ${clock(endTime)}` : `From ${clock(startTime)}`;
 }
 
 /** A place the map can open on: a venue of places/venues, or a place a friend put on the map. */

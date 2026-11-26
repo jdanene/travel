@@ -125,7 +125,7 @@ Paths live in one file, `web/src/lib/paths.ts`. The rules file repeats them; the
     hearts    { {stayId}: { {memberId}: true } }
     confirmed { {destination}: { stayId, by, at } }
   parties
-    shows     { {showId}: { destination, venue, area?, date, weekly?, artist, about?, link?, photoUrl?, verified, source: "seed"|"friend"|"check", addedBy?, at } }   photoUrl: the event's own picture (https, at most 500 characters), from the events check or scripts/backfill-show-photos.mjs
+    shows     { {showId}: { destination, venue, area?, date, weekly?, artist, about?, link?, photoUrl?, startTime?, endTime?, verified, source: "seed"|"friend"|"check", addedBy?, at } }   photoUrl: the event's own picture (https, at most 500 characters), from the events check or scripts/backfill-show-photos.mjs. startTime, endTime: "HH:MM" (24-hour) on the venue's own clock, no time zone; an end may be the next morning; no endTime without startTime; from the events check, its backfill, or a friend's Add an event
     lastCheck { at, by }                              the last events check; see "The events check" below
     lastYear  { {showId}: { destination, venue, date, artist } }
     in        { {showId}: { {memberId}: true } }

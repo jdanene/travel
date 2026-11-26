@@ -109,6 +109,10 @@ export interface Show {
   link?: string;
   /** The event's own picture (the artist or line-up flyer its club publishes): https, at most 500 characters. */
   photoUrl?: string;
+  /** When the night starts, "HH:MM" on the 24-hour clock at the venue, as the club or the friend wrote it (no time zone). */
+  startTime?: string;
+  /** When it ends, in the same form; often the next morning ("04:00"). Never without startTime. */
+  endTime?: string;
   verified: boolean;
   /** "check" is a show the events check found on the club's own page; nobody added it. */
   source: "seed" | "friend" | "check";

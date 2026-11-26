@@ -58,6 +58,9 @@ export interface FoundEvent {
   link: string;
   /** The night's picture, when the club gives one: an https address. */
   image?: string;
+  /** When the night starts and ends, "HH:MM" on the venue's clock, when the club gives a time. Unchecked here; newShows checks them. */
+  startTime?: string;
+  endTime?: string;
 }
 
 /** A club the check could not read, and why ("timeout", "unreadable", …). */

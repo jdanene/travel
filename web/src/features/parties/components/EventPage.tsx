@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Icon } from "../../../components/Icon";
 import { Notice } from "../../../components/Notice";
 import type { Trip } from "../../../types/trip";
-import { eventLink, showPlace, whenLine } from "../lib/detail";
+import { eventLink, showPlace, timeLine, whenLine } from "../lib/detail";
 import "./Parties.css";
 
 interface EventPageProps {
@@ -19,7 +19,8 @@ interface EventPageProps {
  * read-only, with no crew. Top to bottom: a wide picture card with the
  * artist over its foot (the event's own picture, the artist or line-up
  * flyer its club publishes; else the venue's; else a plain card; owner,
- * 25 Nov 2026: "try to get a pic of the artist or line up"), the date in the show sheet's words, the place line
+ * 25 Nov 2026: "try to get a pic of the artist or line up"), the date in the show sheet's words with the
+ * night's start and end under it when it has them, the place line
  * and the venue's one line, "not confirmed", the about line, then "Event
  * page" when the event has an https link, and "See all 27 events".
  *
@@ -32,6 +33,7 @@ interface EventPageProps {
  *   Peggy Gou at Savaya, with its photoUrl → Savaya's flyer for the night, "PEGGY GOU", "Sat 13 Feb 2027", "Savaya · Uluwatu, Bali, Indonesia", "Club on the cliffs", Event page, "See all 12 events"
  *   Black Coffee at Potato Head, no photoUrl → Potato Head's picture
  *   a weekly show        → "Every Sunday from 7 Feb"
+ *   a show from 22:00 to 04:00 → "10 pm – 4 am" under the date; a show with no times → no line
  *   a friend's party at a venue the trip does not know → the plain card, the place line alone
  *   /events/nope         → "This event was removed." and "See all events"
  */
@@ -51,11 +53,15 @@ export function EventPage({ trip, showId, allHref }: EventPageProps) {
 
   const place = showPlace(show, trip);
   const link = eventLink(show.link);
+  const time = timeLine(show);
   const count = Object.keys(shows).length;
   return (
     <article className="event-page" aria-labelledby="event-artist">
       <EventCard photos={[show.photoUrl, place.photoUrl]} artist={show.artist} />
-      <p className="event-when">{whenLine(show)}</p>
+      <p className="event-when">
+        {whenLine(show)}
+        {time && <span>{time}</span>}
+      </p>
       <p className="event-where">
         {place.where}
         {place.line && <span>{place.line}</span>}

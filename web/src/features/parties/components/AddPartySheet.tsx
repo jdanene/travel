@@ -6,10 +6,11 @@ import { initials } from "../../../lib/initials";
 import { nearestDestination, type Spot } from "../../../lib/placeSearch";
 import type { Show } from "../../../types/trip";
 import type { PartyDraft } from "../api/parties";
+import { showTimes } from "../lib/detail";
 import type { VenueSpot, VenueSuggestion } from "../lib/venues";
 import { VenueField } from "./VenueField";
 
-type Field = "venue" | "destination" | "date" | "artist" | "about" | "link";
+type Field = "venue" | "destination" | "date" | "startTime" | "endTime" | "artist" | "about" | "link";
 
 /** The longest area the rules take on a show. */
 const AREA_MAX = 60;
@@ -42,7 +43,10 @@ interface AddPartySheetProps {
  * area and country kept on the event; 'Add "…" as a new venue' asks
  * "Where is it?" with the destinations as pills, none picked. Then the
  * date on the shared calendar, any day of any year, opening on the season's
- * first month; who is playing; an optional "What is it?" line and link.
+ * first month; then when it starts and ends, both optional, side by side,
+ * as the phone's own time pickers ("HH:MM" at the venue, no time zone;
+ * owner, 25 Nov 2026: "start and end time when applicble"); who is
+ * playing; an optional "What is it?" line and link.
  * The same sheet edits an event, with "Remove" at its foot.
  *
  * Inputs: whether it is open, the show being edited (if any), the
@@ -56,6 +60,9 @@ interface AddPartySheetProps {
  *   "bottle beach", pick "Bottle Beach 1 · Haad Khuat, Thailand" → "Lists under Koh Phangan, Thailand"; Save adds the event and its pin
  *   'Add "Haad Rin pier" as a new venue', Save → "Pick where it is." under the pills
  *   Date, tap "Previous month" → January 2027; 24 Jan saves
+ *   Starts 22:00, Ends 04:00, Save → the sheet and the event page read "10 pm – 4 am"
+ *   Ends 04:00 with Starts empty, Save → "Add when it starts." under Ends
+ *   Edit, clear both times, Save → the time line goes
  */
 export function AddPartySheet(props: AddPartySheetProps) {
   return (
@@ -66,6 +73,8 @@ export function AddPartySheet(props: AddPartySheetProps) {
 }
 
 function PartyForm({ editing, destinations, venues, startMonth, yourName, onSave, onRemove }: AddPartySheetProps) {
+  // An old show has no times, and one written in another shape opens empty.
+  const times = showTimes(editing?.startTime, editing?.endTime);
   const [draft, setDraft] = useState<PartyDraft>({
     destination: editing?.destination ?? "",
     venue: editing?.venue ?? "",
@@ -73,11 +82,13 @@ function PartyForm({ editing, destinations, venues, startMonth, yourName, onSave
     artist: editing?.artist ?? "",
     about: editing?.about ?? "",
     link: editing?.link ?? "",
+    startTime: times.startTime ?? "",
+    endTime: times.endTime ?? "",
   });
   /** true after 'Add "…" as a new venue': the friend says where it is. */
   const [asking, setAsking] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
-  const set = (field: "date" | "artist" | "about" | "link", value: string) => {
+  const set = (field: "date" | "startTime" | "endTime" | "artist" | "about" | "link", value: string) => {
     setDraft((current) => ({ ...current, [field]: value }));
     setErrors((current) => ({ ...current, [field]: undefined }));
   };
@@ -108,10 +119,13 @@ function PartyForm({ editing, destinations, venues, startMonth, yourName, onSave
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const found = problems(draft, asking);
+    const form = event.currentTarget;
+    // A time half typed (hours, no minutes) reads as "" but is not empty.
+    const half = (name: "startTime" | "endTime") => (form.elements.namedItem(name) as HTMLInputElement | null)?.validity.badInput === true;
+    const found = problems(draft, asking, { startTime: half("startTime"), endTime: half("endTime") });
     setErrors(found);
-    const first = (["venue", "destination", "date", "artist", "about", "link"] as Field[]).find((field) => found[field]);
-    if (first) return event.currentTarget.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
+    const first = (["venue", "destination", "date", "startTime", "endTime", "artist", "about", "link"] as Field[]).find((field) => found[field]);
+    if (first) return form.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
     onSave(draft);
   };
 
@@ -160,6 +174,10 @@ function PartyForm({ editing, destinations, venues, startMonth, yourName, onSave
         </div>
       )}
       <DateField {...described("date")} label="Date" placeholder="Pick a day" from={draft.date} startMonth={startMonth} onPick={(day) => set("date", day)} error={errorLine("date")} />
+      <div className="party-times">
+        <div>{field("startTime", "Starts (optional)", <input {...described("startTime")} type="time" value={draft.startTime} onChange={(e) => set("startTime", e.target.value)} />)}</div>
+        <div>{field("endTime", "Ends (optional)", <input {...described("endTime")} type="time" value={draft.endTime} onChange={(e) => set("endTime", e.target.value)} />)}</div>
+      </div>
       {field("artist", "Who is playing", <input {...described("artist")} value={draft.artist} maxLength={200} autoComplete="off" onChange={(e) => set("artist", e.target.value)} />)}
       {field("about", "What is it? (optional)", <input {...described("about")} value={draft.about} maxLength={120} autoComplete="off" onChange={(e) => set("about", e.target.value)} />)}
       {field(
@@ -183,15 +201,17 @@ function PartyForm({ editing, destinations, venues, startMonth, yourName, onSave
 
 /**
  * Checks a draft before it is saved, so a refusal never reaches the rules.
- * Inputs: the draft; asking — whether the sheet asks "Where is it?". Any
+ * Inputs: the draft; asking — whether the sheet asks "Where is it?"; half —
+ * which time field holds a time half typed. Any
  * real day is a date (owner, 24 Nov 2026: "don't restrict the calendar").
  * Output: a reason per wrong field; none when the draft can be saved.
  * Examples (checked on screen):
  *   empty venue                          → { venue: "Add the venue." }
  *   typed words, nothing picked          → { venue: "Pick a line from the list." }
  *   a new venue, no place picked         → { destination: "Pick where it is." }
+ *   Ends 04:00, Starts empty             → { endTime: "Add when it starts." }
  */
-function problems(draft: PartyDraft, asking: boolean): Partial<Record<Field, string>> {
+function problems(draft: PartyDraft, asking: boolean, half: { startTime: boolean; endTime: boolean }): Partial<Record<Field, string>> {
   const found: Partial<Record<Field, string>> = {};
   if (!draft.venue.trim()) found.venue = "Add the venue.";
   else if (!draft.destination) {
@@ -199,6 +219,9 @@ function problems(draft: PartyDraft, asking: boolean): Partial<Record<Field, str
     else found.venue = "Pick a line from the list.";
   }
   if (!isDay(draft.date)) found.date = "Pick a day.";
+  if (half.startTime) found.startTime = "Finish the time, or clear it.";
+  if (half.endTime) found.endTime = "Finish the time, or clear it.";
+  else if (draft.endTime && !draft.startTime && !half.startTime) found.endTime = "Add when it starts.";
   if (!draft.artist.trim()) found.artist = "Add who is playing.";
   const link = draft.link.trim();
   if (link && !isAddress(link)) found.link = "Paste a link that starts with https://";

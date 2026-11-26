@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { areaShown, eventLink, placeLine, placeOf, showPlace, whenLine } from "./detail";
+import { areaShown, eventLink, placeLine, placeOf, showPlace, showTimes, timeLine, whenLine } from "./detail";
 
 // The header examples of detail.ts, one test each.
 describe("areaShown", () => {
@@ -45,6 +45,35 @@ describe("whenLine", () => {
 
   it("names a weekly show's day and first night", () => {
     expect(whenLine({ date: "2027-02-07", weekly: "sun" })).toBe("Every Sunday from 7 Feb");
+  });
+});
+
+describe("timeLine", () => {
+  it("says a night's start and end, past midnight, in the 12-hour style", () => {
+    expect(timeLine({ startTime: "22:00", endTime: "04:00" })).toBe("10 pm – 4 am");
+    expect(timeLine({ startTime: "22:30" })).toBe("From 10:30 pm");
+  });
+
+  it("says nothing with no start, or with a time in another shape", () => {
+    expect(timeLine({})).toBeNull();
+    expect(timeLine({ endTime: "04:00" })).toBeNull();
+    expect(timeLine({ startTime: "10pm" })).toBeNull();
+  });
+
+  it("names noon and midnight", () => {
+    expect(timeLine({ startTime: "12:00", endTime: "00:00" })).toBe("12 pm – 12 am");
+  });
+});
+
+describe("showTimes", () => {
+  it("keeps a start and an end in HH:MM", () => {
+    expect(showTimes("22:00", "04:00")).toEqual({ startTime: "22:00", endTime: "04:00" });
+  });
+
+  it("drops an end with no start, an end equal to the start, and any other shape", () => {
+    expect(showTimes(undefined, "04:00")).toEqual({});
+    expect(showTimes("22:00", "22:00")).toEqual({ startTime: "22:00" });
+    expect(showTimes("24:00", 4)).toEqual({});
   });
 });
 

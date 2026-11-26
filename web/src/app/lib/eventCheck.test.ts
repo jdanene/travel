@@ -39,4 +39,11 @@ describe("newShows", () => {
     expect(shows["bali_2027-02-27_savaya_ants"].photoUrl).toBe("https://cdn.example/ants.webp");
     expect(shows["bali_2027-02-14_savaya_baby-j"]).not.toHaveProperty("photoUrl");
   });
+
+  it("copies a night's start and end, and drops a time in another shape", () => {
+    const shows = newShows([{ ...event("2027-02-27", "ANTS"), startTime: "22:00", endTime: "04:00" }, { ...event("2027-02-14", "BABY J"), startTime: "10pm", endTime: "04:00" }], trip, now);
+    expect(shows["bali_2027-02-27_savaya_ants"]).toMatchObject({ startTime: "22:00", endTime: "04:00" });
+    expect(shows["bali_2027-02-14_savaya_baby-j"]).not.toHaveProperty("startTime");
+    expect(shows["bali_2027-02-14_savaya_baby-j"]).not.toHaveProperty("endTime");
+  });
 });
