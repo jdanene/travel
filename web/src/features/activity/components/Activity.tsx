@@ -105,7 +105,11 @@ export function Activity({ tripId, entries, votes, replies, reactions, memberId,
   const ids = Object.entries(entries ?? {})
     .sort(([a, x], [b, y]) => x.at - y.at || (a < b ? -1 : 1))
     .map(([id]) => id);
-  const visible = ids.slice(-shown);
+  // A new line never pushes the oldest drawn one out of the window, so a video playing in it keeps playing (exception 36).
+  const oldestDrawn = useRef<string | null>(null);
+  const anchor = oldestDrawn.current ? ids.indexOf(oldestDrawn.current) : -1;
+  const visible = ids.slice(anchor >= 0 ? Math.min(anchor, Math.max(0, ids.length - shown)) : -shown);
+  oldestDrawn.current = visible[0] ?? null;
   const earlier = ids.length > visible.length;
   const newest = ids[ids.length - 1];
 

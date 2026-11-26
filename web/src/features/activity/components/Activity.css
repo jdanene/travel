@@ -60,6 +60,21 @@ button.row-main:active { background: var(--soft); }
 .fp.sending .fp-t, .fp.sending .fp-gif, .fp.sending .fp-poll { opacity: 0.6; }
 .glyph { display: inline-block; width: 1.3em; height: 1.3em; vertical-align: -0.3em; margin: 0 0.05em; object-fit: contain; }
 .jumbo .glyph { width: 3rem; height: 3rem; vertical-align: middle; margin: 0.125rem 0.0625rem; }
+/* An Instagram or TikTok address in the words (exception 36): a quiet underlined link that opens the site. */
+.msg-link { color: inherit; text-decoration: underline; text-decoration-color: var(--edge); text-decoration-thickness: 1px; text-underline-offset: 0.15em; }
+.msg-link:hover { text-decoration-color: currentColor; }
+
+/* Its video, in the site's own player: a portrait box that holds its place before the frame loads. It never takes more
+   than about three quarters of the Feed's height, so a finger beside it, or a scroll above or below it, still moves the Feed. */
+.vp { position: relative; width: min(12.5rem, 100%, calc(46dvh * 9 / 16)); aspect-ratio: 9 / 16; margin-top: 0.375rem; border-radius: 0.5rem; overflow: hidden; background: var(--well); }
+/* Instagram's player adds its own header and footer around the video: a little taller, so its footer is not cut. */
+.vp.instagram { aspect-ratio: 9 / 17; }
+.vp.small { width: min(9.5rem, 100%, calc(32dvh * 9 / 16)); margin-top: 0.25rem; }
+.vp iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: var(--well); }
+.vp-wait, .vp-quiet { color: var(--mut); font-size: 0.8125rem; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.15em; }
+.vp-wait { position: absolute; inset: 0; display: grid; place-items: center; padding: 1rem; text-align: center; }
+.vp-quiet { display: inline-block; margin-top: 0.25rem; }
+.fp.sending .vp { opacity: 0.6; }
 .fp-gif { display: block; width: auto; height: auto; max-width: min(17.5rem, 100%); max-height: 20rem; border-radius: 0.5rem; margin-top: 0.25rem; background: var(--pill); }
 
 /* The author's "…": quiet, shown on hover with a mouse and always (dim) on a touch screen. */

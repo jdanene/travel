@@ -59,6 +59,44 @@ export async function fetchPage(address, allows) {
   }
 }
 
+// Instagram answers a share link's redirect only to a phone; a desktop
+// browser gets an error page (checked 25 Nov 2026). TikTok answers both.
+const PHONE_AGENT = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
+
+/**
+ * Asks where a short or share link points, without opening the post: one
+ * request as a phone's browser, no body read, 6 seconds. A short link's id
+ * is not in its address, so the app asks this once per link and keeps it.
+ *
+ * Inputs: address, an absolute https address the caller has already allowed.
+ *   allows(next), says whether the redirect's target is acceptable.
+ *
+ * Output: { ok: true, url } with the redirect's target, made absolute.
+ *   { ok: false, reason } otherwise: "unreadable" (no redirect: an error
+ *   page, a removed post, a broken connection), "not_allowed" (a target the
+ *   caller refuses), "timeout".
+ *
+ * Examples (the rule is a test in parse.test.mjs; checked by hand 25 Nov 2026):
+ *   https://vt.tiktok.com/ZS9bVfWa6/                → { ok: true, url: "https://www.tiktok.com/@/video/7620909821147073813?_r=1&…" }
+ *   https://www.instagram.com/share/reel/BBumGiQdP6/ → { ok: true, url: "https://www.instagram.com/reel/C6HpUPegvtc/?igsh=…" }
+ */
+export async function redirectOf(address, allows) {
+  try {
+    const response = await fetch(address, {
+      redirect: "manual",
+      signal: AbortSignal.timeout(DEADLINE_MS),
+      headers: { "user-agent": PHONE_AGENT, accept: "text/html,application/xhtml+xml", "accept-language": "en-US,en;q=0.9" },
+    });
+    await response.body?.cancel();
+    const location = response.status >= 300 && response.status < 400 && response.headers.get("location");
+    if (!location) return { ok: false, reason: "unreadable" };
+    const next = new URL(location, address).toString();
+    return allows(next) ? { ok: true, url: next } : { ok: false, reason: "not_allowed" };
+  } catch (error) {
+    return { ok: false, reason: error?.name === "TimeoutError" ? "timeout" : "unreadable" };
+  }
+}
+
 // Reads at most limit bytes of the body and drops the rest.
 async function firstBytes(response, limit) {
   const reader = response.body.getReader();

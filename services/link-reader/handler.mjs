@@ -6,14 +6,16 @@
 
 import { siteOf } from "./sites.mjs";
 import { parseListing, parsePost } from "./parse.mjs";
-import { fetchPage } from "./fetch-page.mjs";
+import { fetchPage, redirectOf } from "./fetch-page.mjs";
 import { checkEvents } from "./events.mjs";
 
 const ORIGINS = /^(https:\/\/travel-ca8f9\.web\.app|http:\/\/localhost(:\d{1,5})?)$/;
 
 /**
  * Answers GET ?url=<address> with what the page says, for the Add a place
- * sheet (a listing) and the Add a link sheet (a post), and GET ?check=events
+ * sheet (a listing) and the Add a link sheet (a post), GET ?resolve=<address>
+ * with where an Instagram or TikTok short or share link points, for the
+ * Feed's video players, and GET ?check=events
  * with the clubs' events from 25 January to 31 March 2027, for the app's events
  * check.
  *
@@ -24,6 +26,7 @@ const ORIGINS = /^(https:\/\/travel-ca8f9\.web\.app|http:\/\/localhost(:\d{1,5})
  * Output: an HTTP response. Status 200 with JSON for every read that ran:
  *   { ok: true, name, photoUrl?, area?, sleeps? }   an Airbnb or Booking.com listing
  *   { ok: true, title, photoUrl? }                  an Instagram or TikTok post
+ *   { ok: true, url }                               ?resolve: the link's redirect target, on the same site
  *   { ok: false, reason }   reason is "not_allowed" (not https, a host off the
  *     list, a redirect off the list or past three, or a call from another
  *     site; nothing is fetched for the first and last), "unreadable" (no
@@ -36,6 +39,8 @@ const ORIGINS = /^(https:\/\/travel-ca8f9\.web\.app|http:\/\/localhost(:\d{1,5})
  *   GET ?url=https://www.airbnb.com/rooms/1041153373514809459
  *     → 200 { ok: true, name: "Las Palmas Uluwatu", area: "South Kuta", sleeps: 2, photoUrl: "https://a0.muscache.com/…" }
  *   GET ?url=https://example.com → 200 { ok: false, reason: "not_allowed" }
+ *   GET ?resolve=https://vt.tiktok.com/ZS9bVfWa6/ → 200 { ok: true, url: "https://www.tiktok.com/@/video/7620909821147073813?…" }
+ *     (run locally on 25 Nov 2026; not yet deployed)
  *   GET ?url=https://www.booking.com/hotel/th/x.html → 200 { ok: false, reason: "unreadable" }  (challenge page)
  *   GET ?check=events → 200 { ok: true, checkedAt: 1795400000000, events: [{ destination: "bali", venue: "Savaya", … }], failed: [] }
  *     (run locally against the live club pages; not yet deployed)
@@ -50,12 +55,12 @@ export async function handler(event) {
   if (method !== "GET") return { statusCode: 405, headers: cors, body: "" };
 
   const query = event.queryStringParameters ?? {};
-  const answer = origin && !ORIGINS.test(origin) ? refuse("not_allowed") : query.check === "events" ? await checkOnce() : await read(query.url ?? "");
+  const answer = origin && !ORIGINS.test(origin) ? refuse("not_allowed") : query.check === "events" ? await checkOnce() : query.resolve !== undefined ? await resolve(query.resolve) : await read(query.url ?? "");
   console.log(
     JSON.stringify(
       query.check === "events"
         ? { check: "events", ok: answer.ok, events: answer.events?.length, failed: answer.failed }
-        : { host: hostOf(query.url), ok: answer.ok, reason: answer.reason },
+        : { host: hostOf(query.url ?? query.resolve), resolve: query.resolve !== undefined || undefined, ok: answer.ok, reason: answer.reason },
     ),
   );
   return {
@@ -75,6 +80,15 @@ async function read(address) {
   const found = first.kind === "listing" ? parseListing(page.text, page.url) : parsePost(page.text, page.url);
   if (found) return { ok: true, ...found };
   return refuse(page.cut ? "too_large" : "unreadable");
+}
+
+// Asks where an Instagram or TikTok link points (one hop, no page read);
+// the target must stay on the same site. Listings are not resolved.
+async function resolve(address) {
+  const first = siteOf(address);
+  if (!first || first.kind !== "post") return refuse("not_allowed");
+  const hop = await redirectOf(address, (next) => siteOf(next)?.site === first.site);
+  return hop.ok ? { ok: true, url: hop.url } : refuse(hop.reason);
 }
 
 // One check of the clubs serves every call for 10 minutes, so a burst of

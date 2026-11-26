@@ -9,7 +9,8 @@ const SITES = [
   { site: "airbnb", kind: "listing", host: /^(?:(?:www|m)\.)?airbnb\.(?:com|co\.[a-z]{2}|com\.[a-z]{2}|[a-z]{2})$|^abnb\.me$/ },
   { site: "booking", kind: "listing", host: /^(?:(?:www|m)\.)?booking\.com$/ },
   { site: "instagram", kind: "post", host: /^(?:(?:www|m)\.)?instagram\.com$/ },
-  { site: "tiktok", kind: "post", host: /^(?:(?:www|m|vm)\.)?tiktok\.com$/ },
+  // vm. and vt. are the short links a phone's Share button gives.
+  { site: "tiktok", kind: "post", host: /^(?:(?:www|m|vm|vt)\.)?tiktok\.com$/ },
 ];
 
 /**
@@ -29,6 +30,7 @@ const SITES = [
  *   siteOf("https://www.airbnb.com/rooms/1041153373514809459")
  *     → { site: "airbnb", kind: "listing" }
  *   siteOf("https://vm.tiktok.com/ZMabc123/") → { site: "tiktok", kind: "post" }
+ *   siteOf("https://vt.tiktok.com/ZS9bVfWa6/") → { site: "tiktok", kind: "post" }
  *   siteOf("http://www.booking.com/hotel/th/x.html") → null   (not https)
  *   siteOf("https://www.airbnb.com.evil.example/rooms/1") → null
  *   siteOf("https://www.booking.com@evil.example/") → null   (host is evil.example)

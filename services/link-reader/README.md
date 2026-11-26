@@ -21,6 +21,12 @@ A small AWS Lambda that reads a pasted link for the trip app (plan D8), and chec
 
 `photoUrl` is always an absolute `https` address. The caller needs nothing else.
 
+## Where a short link points
+
+`GET <function URL>?resolve=<address>` answers `{ ok: true, url }` for an Instagram or TikTok short or share link (`vm.tiktok.com/…`, `vt.tiktok.com/…`, `tiktok.com/t/…`, `instagram.com/share/…`): `url` is where the link sends a phone's browser, on the same site. The Feed's video players need the post's id, which a short link does not hold. It makes one request as an iPhone's Safari (Instagram sends a desktop browser an error page instead of the redirect), reads no page, and waits 6 seconds at most. Otherwise `{ ok: false, reason }`: `not_allowed` (not an Instagram or TikTok address, or a target on another site), `unreadable` (no redirect: a removed post or an error page) or `timeout`. A dead TikTok short link redirects to TikTok's home page; the app then finds no video in `url` and draws a plain link.
+
+Checked by hand on 25 Nov 2026: `vt.tiktok.com/ZS9bVfWa6`, `vm.tiktok.com/ZMkyTWLpV` and `tiktok.com/t/ZTktCHRDY` answered `tiktok.com/@/video/<id>?…` (the user name is empty); `instagram.com/share/reel/BBumGiQdP6` and `instagram.com/share/_jW_V1hwM` answered `instagram.com/reel/<code>/?igsh=…`.
+
 ## The events check
 
 `GET <function URL>?check=events` answers `{ ok: true, checkedAt, events, failed }`:
@@ -65,7 +71,7 @@ Only Yona blocked the request. A club that starts to publish Event data joins by
 
 ## What it allows
 
-- Sites for a pasted link (`sites.mjs`, the only place that names them): `airbnb.com` with `www.`, `m.` and the country domains, `abnb.me`, `booking.com`, `instagram.com` and `tiktok.com` with `www.` and `m.`, and `vm.tiktok.com`.
+- Sites for a pasted link (`sites.mjs`, the only place that names them): `airbnb.com` with `www.`, `m.` and the country domains, `abnb.me`, `booking.com`, `instagram.com` and `tiktok.com` with `www.` and `m.`, and `vm.tiktok.com` and `vt.tiktok.com`.
 - Sites for the events check (`event-sources.mjs`): each club's own host: `www.savaya.com`, `www.illuzionphuket.com`, `zoukgroup.com`, `phuket.cafedelmar.com`, `sg.celavi.com`, `klymax.co`, `www.cafedelmarbali.co.id`, `desakitsune.com`, `fullmoonparty-thailand.com`, `seminyak.potatohead.co`, `taogroup.com` and `www.seenbeachclubsamui.com`.
 - Callers: CORS allows `https://travel-ca8f9.web.app` and `http://localhost` on any port. A call with another `Origin` gets `not_allowed`. A call with no `Origin` (curl) is served.
 - Cost: reserved concurrency of 2, and a 20-second timeout for the events check.
@@ -81,14 +87,14 @@ Only Yona blocked the request. A club that starts to publish Event data joins by
 
 ## Files
 
-- `handler.mjs`: the Lambda: the origin check, the route (a read or the events check), and the answer.
-- `fetch-page.mjs`: the one fetch, with its https, redirect, size and time limits.
+- `handler.mjs`: the Lambda: the origin check, the route (a read, a resolve or the events check), and the answer.
+- `fetch-page.mjs`: the one fetch, with its https, redirect, size and time limits, and `redirectOf`, the resolve's single request.
 - `parse.mjs`: pure; reads the listing or the post from the page.
 - `sites.mjs`: pure; the allowed sites for a pasted link.
 - `events.mjs`: the events check, and `readEvents`, which is pure.
 - `event-lists.mjs`: pure; one reader per club that lists its nights as text or in a feed.
 - `event-sources.mjs`: pure; the clubs and their hosts.
-- `parse.test.mjs`, `events.test.mjs`, `event-lists.test.mjs` and `fixtures/`: the header examples, against trimmed copies of saved pages, the redirect rule, and the events check with fetch replaced. No network. Run `node --test services/link-reader/*.test.mjs`.
+- `parse.test.mjs`, `events.test.mjs`, `event-lists.test.mjs` and `fixtures/`: the header examples, against trimmed copies of saved pages, the redirect rule, the resolve, and the events check with fetch replaced. No network. Run `node --test services/link-reader/*.test.mjs`.
 
 ## Deploy
 
