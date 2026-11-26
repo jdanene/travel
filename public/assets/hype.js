@@ -288,7 +288,8 @@ window.HYPE = (() => {
   // signs in and saves the whole trip for the app's first paint; the trip's own page; the app's entry script as a
   // modulepreload (fetched and compiled); the stylesheets; the fonts; the cover collage page and the cliff photo; the map's
   // style, sprite, tile index and label fonts; every other script (the map chunk with MapLibre); the files the app
-  // fetches by address (the emoji picker's data); the collage's stills. The scripts and
+  // fetches by address (the emoji picker's data); the emoji panel's warm-up (its pictures, 7TV's row, its search index);
+  // the collage's stills. The scripts and
   // stylesheets are named in /app/preload.json, which the build writes.
   // On Save-Data or a 2g connection it only prefetches the app's script and stylesheet, as before.
   // Inputs: id — the trip id; href — the trip's address (never with the organizer key, which stays off the page). Output: nothing; every failure is silent, and the tap
@@ -361,6 +362,10 @@ window.HYPE = (() => {
       list.scripts.filter(s => s !== list.entry && s !== list.prewarm).forEach(s => add(() => link("modulepreload", s)));
       // Files the app fetches by address, such as the emoji picker's data in Activity.
       (list.data || []).forEach(url => add(() => fetch(url)));
+      // Then the Feed's emoji panel (web/src/app/prewarmEmoji.ts): its first screen of pictures, 7TV's emotes, the search
+      // index, then every other picture in the grid, a few at a time and at low priority (owner, 25 Nov 2026: "i want emoji
+      // preloaded"). It keeps its own limit of sixteen small loads at a time, at low priority; a build without it leaves the panel as before.
+      if (list.emoji) add(() => import(list.emoji));
       // Last, every still the collage draws from; the splash has shown most of them already.
       photos.filter(p => p.kind === "img").map(p => p.src).filter((url, k, all) => all.indexOf(url) === k).forEach(url => add(() => image(url)));
     }).catch(() => lean(link));

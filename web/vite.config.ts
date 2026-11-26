@@ -9,15 +9,16 @@ const OUT_DIR = resolve(__dirname, "../public/app");
  * Publishes /app/preload.json, the list the splash reads to load the whole
  * app while it plays (public/assets/hype.js): every built script and
  * stylesheet, the app's entry, the prewarm entry (src/prewarm.ts) and the chunks it imports, and the
- * Google Fonts stylesheet the app's index.html links, and every file the code
- * fetches by address (the emoji picker's data). It reads Vite's own
+ * Google Fonts stylesheet the app's index.html links, every file the code
+ * fetches by address (the emoji picker's data), and the emoji warm-up entry
+ * (src/app/prewarmEmoji.ts), which readies the Feed's emoji panel. It reads Vite's own
  * manifest, so a chunk added later is listed without a change here.
  *
  * Inputs: none; runs once after the build has written its files.
  * Output: public/app/preload.json, as
- *   { entry, prewarm, shared: [...], scripts: [...], styles: [...], data: [...], fonts: [...] }, every path from the site's root.
+ *   { entry, prewarm, emoji, shared: [...], scripts: [...], styles: [...], data: [...], fonts: [...] }, every path from the site's root.
  * Examples (checked after `npm run build`):
- *   { "entry": "/app/assets/index-<hash>.js", "prewarm": "/app/assets/prewarm-<hash>.js", "shared": [Firebase chunk],
+ *   { "entry": "/app/assets/index-<hash>.js", "prewarm": "/app/assets/prewarm-<hash>.js", "emoji": "/app/assets/emoji-<hash>.js", "shared": [Firebase chunk],
  *     "scripts": [entry, Firebase chunk, TripMap chunk, …], "styles": [index, TripMap], "data": [the emoji data],
  *     "fonts": [Google Fonts CSS] }
  */
@@ -32,6 +33,7 @@ function preloadList(): Plugin {
       const entries = Object.values(manifest);
       const entry = entries.find((item) => item.isEntry && item.src === "index.html");
       const prewarm = entries.find((item) => item.isEntry && item.src === "src/prewarm.ts");
+      const emoji = entries.find((item) => item.isEntry && item.src === "src/app/prewarmEmoji.ts");
       // The chunks the prewarm script imports (the Firebase chunk), so the splash fetches them beside it, not after it.
       const shared = (prewarm?.imports ?? []).map((key) => at(manifest[key].file));
       const scripts = [...new Set(entries.map((item) => item.file).filter((file) => file.endsWith(".js")))].map(at);
@@ -41,7 +43,7 @@ function preloadList(): Plugin {
       const fonts = [...readFileSync(resolve(__dirname, "index.html"), "utf8").matchAll(/href="(https:\/\/fonts\.googleapis\.com\/css2[^"]+)"/g)].map((match) =>
         match[1].replace(/&amp;/g, "&"),
       );
-      const list = { entry: entry && at(entry.file), prewarm: prewarm && at(prewarm.file), shared, scripts, styles, data, fonts };
+      const list = { entry: entry && at(entry.file), prewarm: prewarm && at(prewarm.file), emoji: emoji && at(emoji.file), shared, scripts, styles, data, fonts };
       writeFileSync(resolve(OUT_DIR, "preload.json"), JSON.stringify(list, null, 1));
     },
   };
@@ -50,7 +52,8 @@ function preloadList(): Plugin {
 // The app is served at /trip/<tripId> through a hosting rewrite, so its
 // files live under /app/. The build writes into public/app and nowhere else:
 // emptyOutDir clears that one folder, never public/ with the hype pages.
-// Two entries: the app, and the splash's prewarm script, which shares the app's Firebase chunk.
+// Three entries: the app; the splash's prewarm script, which shares the app's Firebase chunk; and the splash's
+// emoji warm-up, which shares the emoji code with the app.
 export default defineConfig({
   base: "/app/",
   plugins: [react(), preloadList(), twemoji()],
@@ -59,7 +62,7 @@ export default defineConfig({
     emptyOutDir: true,
     manifest: true,
     rollupOptions: {
-      input: { index: resolve(__dirname, "index.html"), prewarm: resolve(__dirname, "src/prewarm.ts") },
+      input: { index: resolve(__dirname, "index.html"), prewarm: resolve(__dirname, "src/prewarm.ts"), emoji: resolve(__dirname, "src/app/prewarmEmoji.ts") },
       // The code both entries share, under one plain name.
       output: {
         manualChunks: (id) =>
@@ -76,7 +79,7 @@ export default defineConfig({
  * Serves Twemoji's pictures from this site, at /app/twemoji/<codepoints>.svg,
  * so the Feed draws Discord's emoji on every phone without a third-party CDN:
  * the dev server reads them from @twemoji/svg, and the build copies them into
- * the output. The page loads only the ones on screen.
+ * the output. The emoji warm-up (src/features/activity/lib/warm.ts) fetches the grid's ones ahead of a tap.
  * Inputs: none. Output: the Vite plugin.
  * Examples (checked in the browser): GET /app/twemoji/1f525.svg → the flame; GET /app/twemoji/../x → 404
  */

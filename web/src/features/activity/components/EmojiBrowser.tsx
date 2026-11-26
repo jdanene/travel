@@ -1,11 +1,12 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { GROUPS, loadGroups, recentChoices, searchEmoji, type EmojiItem } from "../lib/emoji";
-import { findEmotes } from "../lib/emotes";
+import { GROUPS, loadedGroups, loadGroups, recentChoices, searchEmoji, type EmojiItem } from "../lib/emoji";
+import { FIRST_SCREEN_CELLS } from "../lib/emojiSet";
+import { findEmotes, warmedEmotes } from "../lib/emotes";
 import { reactionKey, type EmojiChoice, type Emote } from "../lib/reactions";
 import { Glyph } from "./Glyph";
 
 interface EmojiBrowserProps {
-  /** True while its panel is open: 7TV is asked only then, never just because the page loaded. */
+  /** True while its panel is open. Without the warm-up (Save-Data), 7TV is asked only then. */
   active: boolean;
   /** The search field's words: "Find the perfect reaction", or "Find the perfect emoji" in the message bar. */
   placeholder: string;
@@ -38,7 +39,11 @@ export function EmojiBrowser({ active: open, placeholder, onPick: pickNow }: Emo
   latestPick.current = pickNow;
   const onPick = useCallback((choice: EmojiChoice) => latestPick.current(choice), []);
   const [query, setQuery] = useState("");
-  const [groups, setGroups] = useState<Load<Map<number, EmojiItem[]>>>({ state: "loading" });
+  // The warm-up has usually loaded the groups already: then the first render draws them.
+  const [groups, setGroups] = useState<Load<Map<number, EmojiItem[]>>>(() => {
+    const value = loadedGroups();
+    return value ? { state: "ready", value } : { state: "loading" };
+  });
   const [emotes, setEmotes] = useState<Load<Emote[]>>({ state: "loading" });
   const [found, setFound] = useState<{ query: string; emoji: EmojiItem[]; emotes: Load<Emote[]> } | null>(null);
   const [active, setActive] = useState("recent");
@@ -50,7 +55,7 @@ export function EmojiBrowser({ active: open, placeholder, onPick: pickNow }: Emo
   useEffect(() => {
     let live = true;
     loadGroups().then(
-      (value) => live && setGroups({ state: "ready", value }),
+      (value) => live && setGroups((old) => (old.state === "ready" && old.value === value ? old : { state: "ready", value })),
       () => live && setGroups({ state: "failed" }),
     );
     return () => {
@@ -58,14 +63,16 @@ export function EmojiBrowser({ active: open, placeholder, onPick: pickNow }: Emo
     };
   }, [tries]);
 
-  // The emotes row asks 7TV the first time the panel opens (and on "Try again"), then keeps the answer.
+  // The emotes row takes the warm-up's answer as soon as the grid is in the page; without a warm-up it asks 7TV
+  // the first time the panel opens. "Try again" always asks anew. Either way the answer is kept.
   const asked = useRef(-1);
   useEffect(() => {
-    if (!open || asked.current === tries) return;
+    const warmed = tries === 0 ? warmedEmotes() : null;
+    if ((!open && !warmed) || asked.current === tries) return;
     asked.current = tries;
     setEmotes({ state: "loading" });
     // Not dropped when the panel closes before 7TV answers: the grid stays in the page, so the answer still lands.
-    findEmotes("").then(
+    (warmed ?? findEmotes("")).then(
       (value) => alive.current && setEmotes({ state: "ready", value }),
       () => alive.current && setEmotes({ state: "failed" }),
     );
@@ -168,9 +175,9 @@ export function EmojiBrowser({ active: open, placeholder, onPick: pickNow }: Emo
         ) : (
           <>
             <Section id="recent" title="Frequently Used">
-              <Cells items={recent.map((choice) => ({ choice, name: choice.kind === "emoji" ? choice.char : `:${choice.emote.name}:` }))} onPick={onPick} />
+              <Cells items={recent.map((choice) => ({ choice, name: choice.kind === "emoji" ? choice.char : `:${choice.emote.name}:` }))} onPick={onPick} eager={recent.length} />
             </Section>
-            <EmoteSection id="emotes" title="Emotes · 7TV" load={emotes} empty="No emotes" onRetry={() => setTries(tries + 1)} onPick={onPick} />
+            <EmoteSection id="emotes" title="Emotes · 7TV" load={emotes} empty="No emotes" onRetry={() => setTries(tries + 1)} onPick={onPick} eager />
             {groups.state === "failed" && (
               <p className="eb-note">
                 Emoji didn't load.{" "}
@@ -196,7 +203,7 @@ export function EmojiBrowser({ active: open, placeholder, onPick: pickNow }: Emo
         </button>
         {GROUPS.map((group) => (
           <button key={group.id} type="button" className={active === `g${group.id}` && !searching ? "on" : ""} aria-label={group.label} title={group.label} onClick={() => jump(`g${group.id}`)}>
-            <Glyph choice={{ kind: "emoji", char: group.icon }} />
+            <Glyph choice={{ kind: "emoji", char: group.icon }} eager />
           </button>
         ))}
       </nav>
@@ -208,9 +215,9 @@ export function EmojiBrowser({ active: open, placeholder, onPick: pickNow }: Emo
 const AllGroups = memo(function AllGroups({ groups, onPick }: { groups: Map<number, EmojiItem[]>; onPick: (choice: EmojiChoice) => void }) {
   return (
     <>
-      {GROUPS.map((group) => (
+      {GROUPS.map((group, at) => (
         <Section key={group.id} id={`g${group.id}`} title={group.label} lazy>
-          <Cells items={(groups.get(group.id) ?? []).map((emoji) => ({ choice: { kind: "emoji", char: emoji.char }, name: emoji.name }))} onPick={onPick} />
+          <Cells items={(groups.get(group.id) ?? []).map((emoji) => ({ choice: { kind: "emoji", char: emoji.char }, name: emoji.name }))} onPick={onPick} eager={at === 0 ? FIRST_SCREEN_CELLS : 0} />
         </Section>
       ))}
     </>
@@ -227,8 +234,8 @@ function Section({ id, title, lazy = false, children }: { id: string; title: str
   );
 }
 
-/** The emotes row: 7TV's answer, a loading line, or a short failure with "Try again". */
-function EmoteSection({ id, title, load, empty, onRetry, onPick }: { id?: string; title: string; load: Load<Emote[]>; empty: string; onRetry: () => void; onPick: (choice: EmojiChoice) => void }) {
+/** The emotes row: 7TV's answer, a loading line, or a short failure with "Try again". The grid's own row loads its pictures while out of sight (eager). */
+function EmoteSection({ id, title, load, empty, onRetry, onPick, eager = false }: { id?: string; title: string; load: Load<Emote[]>; empty: string; onRetry: () => void; onPick: (choice: EmojiChoice) => void; eager?: boolean }) {
   return (
     <Section id={id ?? "found-emotes"} title={title}>
       {load.state === "loading" && <p className="eb-note">Loading emotes…</p>}
@@ -241,19 +248,26 @@ function EmoteSection({ id, title, load, empty, onRetry, onPick }: { id?: string
         </p>
       )}
       {load.state === "ready" && load.value.length === 0 && <p className="eb-note">{empty}</p>}
-      {load.state === "ready" && <Cells items={load.value.map((emote) => ({ choice: { kind: "emote", emote }, name: `:${emote.name}:` }))} onPick={onPick} />}
+      {load.state === "ready" && <Cells items={load.value.map((emote) => ({ choice: { kind: "emote", emote }, name: `:${emote.name}:` }))} onPick={onPick} eager={eager ? load.value.length : 0} />}
     </Section>
   );
 }
 
-/** One grid of emoji buttons. */
-function Cells({ items, onPick }: { items: { choice: EmojiChoice; name: string }[]; onPick: (choice: EmojiChoice) => void }) {
+/**
+ * One grid of emoji buttons. The first `eager` pictures load while the panel
+ * is still closed (the first screen, fetched ahead by the warm-up), so it
+ * opens drawn; the rest load as they come near.
+ * Inputs: the cells, what a pick does, how many load early (0 by default).
+ * Output: the grid, or nothing for no cells.
+ * Examples (checked in Chrome): Smileys with eager 80 → its first 80 pictures are complete before the panel first opens
+ */
+function Cells({ items, onPick, eager = 0 }: { items: { choice: EmojiChoice; name: string }[]; onPick: (choice: EmojiChoice) => void; eager?: number }) {
   if (items.length === 0) return null;
   return (
     <div className="eb-grid">
-      {items.map(({ choice, name }) => (
+      {items.map(({ choice, name }, at) => (
         <button key={reactionKey(choice)} type="button" className="eb-cell" tabIndex={-1} aria-label={name} title={name} onClick={() => onPick(choice)}>
-          <Glyph choice={choice} />
+          <Glyph choice={choice} eager={at < eager} />
         </button>
       ))}
     </div>
