@@ -10,23 +10,25 @@ import { splitEmotes, type EmojiChoice } from "../lib/reactions";
  * phone's own emoji (or ":name:" for an emote), so nothing goes blank.
  *
  * Inputs: choice — what to draw; label — the screen reader's words
- * (omit inside a labelled button, where the picture is decoration).
+ * (omit inside a labelled button, where the picture is decoration);
+ * eager — load it even while out of sight (the emoji panel's first screen).
  * Output: an <img>, or the text fallback.
  * Examples (checked on screen): 🔥 → Twemoji's flame at the text's size; an emote → its 7TV picture
  */
-export function Glyph({ choice, label }: { choice: EmojiChoice; label?: string }) {
+export function Glyph({ choice, label, eager = false }: { choice: EmojiChoice; label?: string; eager?: boolean }) {
   const [broken, setBroken] = useState(false);
   const text = choice.kind === "emoji" ? choice.char : `:${choice.emote.name}:`;
   if (broken) return <span className="glyph-text">{text}</span>;
   return (
+    // loading comes before src: React sets them in this order, and an <img> given its src first starts loading at once.
     <img
       className={`glyph${choice.kind === "emote" ? " emote" : ""}`}
+      loading={eager ? "eager" : "lazy"}
+      decoding="async"
       src={choice.kind === "emoji" ? twemojiUrl(choice.char) : emoteUrl(choice.emote.id)}
       alt={label ?? ""}
       aria-hidden={label ? undefined : true}
       draggable={false}
-      loading="lazy"
-      decoding="async"
       onError={() => setBroken(true)}
     />
   );

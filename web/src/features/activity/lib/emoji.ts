@@ -1,13 +1,14 @@
 import Database from "emoji-picker-element/database.js";
 import dataUrl from "emoji-picker-element-data/en/emojibase/data.json?url";
+import { groupEmoji, type EmojiItem, type RawEmoji } from "./emojiSet";
 import { codepoints, reactionKey, readKey, type EmojiChoice } from "./reactions";
 
 /**
  * Where the Feed's emoji come from: Twemoji's pictures (the set Discord
  * draws), served by this site from /app/twemoji/ (vite.config.ts copies
- * them out of @twemoji/svg), the emoji list and its search (emoji-picker-
- * element's Database over the self-hosted emojibase file), and this
- * device's "Frequently Used" picks.
+ * them out of @twemoji/svg), the emoji list (the self-hosted emojibase
+ * file), its search (emoji-picker-element's Database over the same file,
+ * kept in IndexedDB), and this device's "Frequently Used" picks.
  */
 
 /** Twemoji 15.0 draws every emoji up to Unicode's emoji 15.0; newer ones have no picture yet, so the grid leaves them out. */
@@ -31,12 +32,7 @@ export function emoteUrl(id: string): string {
   return `https://cdn.7tv.app/emote/${id}/2x.webp`;
 }
 
-/** One standard emoji as the grid shows it. */
-export interface EmojiItem {
-  char: string;
-  /** Its name, for search, the hover label and screen readers ("fire"). */
-  name: string;
-}
+export type { EmojiItem };
 
 /** The emoji groups in Discord's order, each with the emoji its tab shows. Group 2 (skin-tone parts) is not a group people pick from. */
 export const GROUPS: { id: number; label: string; icon: string }[] = [
@@ -54,25 +50,49 @@ export const GROUPS: { id: number; label: string; icon: string }[] = [
 let database: Database | null = null;
 const db = () => (database ??= new Database({ dataSource: dataUrl }));
 let groups: Promise<Map<number, EmojiItem[]>> | null = null;
+let ready: Map<number, EmojiItem[]> | null = null;
 
 /**
- * Every emoji the grid shows, by group, loaded once per page (the first
- * load fills IndexedDB from the self-hosted file; later visits read it).
- * A failed load is forgotten, so the next opening tries again.
+ * Every emoji the grid shows, by group, loaded once per page straight from
+ * the self-hosted emoji file (the splash has it in the cache already), so
+ * the grid never waits for the search index to fill IndexedDB. A failed
+ * load is forgotten, so the next opening tries again.
  * Inputs: none. Output: group id → its emoji, in Unicode's order.
  * Examples (checked on screen): the first opening of the reaction sheet → Smileys & Emotion starts with 😀
  */
 export function loadGroups(): Promise<Map<number, EmojiItem[]>> {
-  groups ??= Promise.all(
-    GROUPS.map(async ({ id }) => [id, (await db().getEmojiByGroup(id)).filter((emoji) => emoji.version <= TWEMOJI_VERSION).map((emoji) => ({ char: emoji.unicode, name: emoji.annotation }))] as const),
-  ).then(
-    (pairs) => new Map(pairs),
-    (error) => {
-      groups = null;
-      throw error;
-    },
-  );
+  groups ??= fetch(dataUrl)
+    .then((answer) => (answer.ok ? (answer.json() as Promise<RawEmoji[]>) : Promise.reject(new Error(`emoji file ${answer.status}`))))
+    .then(
+      (data) => (ready = groupEmoji(data, GROUPS.map(({ id }) => id), TWEMOJI_VERSION)),
+      (error) => {
+        groups = null;
+        throw error;
+      },
+    );
   return groups;
+}
+
+/**
+ * The grid's groups if this page has loaded them already, so a grid
+ * mounted later draws them in its first render.
+ * Inputs: none. Output: the groups, or null before loadGroups has finished.
+ * Examples (checked on screen): after the warm-up → the kept panel's first render holds every group
+ */
+export function loadedGroups(): Map<number, EmojiItem[]> | null {
+  return ready;
+}
+
+/**
+ * Opens the search index and fills it on this device's first visit
+ * (IndexedDB, from the same file), so the first search answers at once.
+ * Inputs: none. Output: resolves when the index is ready; rejects where
+ * IndexedDB is refused (private mode, storage full), and search then
+ * falls back to the names in the grid.
+ * Examples (checked in Chrome): a fresh profile → the index is filled during the splash
+ */
+export function readySearch(): Promise<void> {
+  return db().ready();
 }
 
 /**
@@ -83,8 +103,13 @@ export function loadGroups(): Promise<Map<number, EmojiItem[]>> {
 export async function searchEmoji(query: string): Promise<EmojiItem[]> {
   const words = query.trim();
   if (!words) return [];
-  const found = await db().getEmojiBySearchQuery(words);
   const q = words.toLowerCase();
+  const found = await db()
+    .getEmojiBySearchQuery(words)
+    .catch(async () =>
+      // No search index on this device (IndexedDB refused): match the names in the grid instead.
+      [...(await loadGroups()).values()].flat().filter((emoji) => emoji.name.toLowerCase().includes(q)).map((emoji) => ({ unicode: emoji.char, annotation: emoji.name, version: 0 })),
+    );
   // Best first, as Discord ranks: the name itself, then a name that starts with the words, then the rest in Unicode's order.
   const rank = (name: string) => (name === q ? 0 : name.startsWith(q) ? 1 : 2);
   return found

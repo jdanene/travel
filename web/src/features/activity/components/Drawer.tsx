@@ -72,7 +72,8 @@ export function Drawer({ open, label, onClose, anchor, focusOnDesk, dock = false
     if (!keep) return;
     const idle = window.requestIdleCallback ?? ((run: () => void) => window.setTimeout(run, 1500));
     const cancel = window.cancelIdleCallback ?? window.clearTimeout;
-    const id = idle(() => setMounted(true));
+    // At most two seconds after the page appears, even on a busy page, so an early tap finds the grid in place.
+    const id = idle(() => setMounted(true), { timeout: 2000 });
     return () => cancel(id);
   }, [keep]);
 
@@ -92,7 +93,7 @@ export function Drawer({ open, label, onClose, anchor, focusOnDesk, dock = false
       panel.current?.getBoundingClientRect();
       node.close();
       node.classList.remove("warming");
-    });
+    }, { timeout: 1000 });
     return () => cancel(id);
   }, [keep, mounted]);
 
