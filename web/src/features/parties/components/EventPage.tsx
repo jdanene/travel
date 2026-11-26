@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Icon } from "../../../components/Icon";
 import { Notice } from "../../../components/Notice";
 import type { Trip } from "../../../types/trip";
 import { clubOf } from "../lib/club";
@@ -72,7 +71,6 @@ export function EventPage({ trip, showId, allHref }: EventPageProps) {
         {/* "Where is this" is a friend's next question: the place opens the club sheet (design exception 37). */}
         <button type="button" className="event-club" aria-haspopup="dialog" aria-label={`${place.where}, about this club`} onClick={() => setClubOpen(true)}>
           {place.where}
-          <Icon name="info" size={18} />
         </button>
         {place.line && <span>{place.line}</span>}
       </p>
@@ -81,7 +79,6 @@ export function EventPage({ trip, showId, allHref }: EventPageProps) {
       <div className="event-ways">
         {link?.kind === "page" && (
           <a className="btn sec event-way" href={link.href} target="_blank" rel="noopener noreferrer">
-            <Icon name="link" size={20} />
             Event page
           </a>
         )}

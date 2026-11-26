@@ -123,6 +123,43 @@ export function isShortLink(url: URL): boolean {
   return false;
 }
 
+/** What Instagram's frame draws around the picture: a header of this height above it, and this much header and footer in all (measured 25 Nov 2026 at 182 px and 284 px wide: 436 px and 563 px tall). */
+export const INSTAGRAM_HEADER = 54;
+const INSTAGRAM_CHROME = 208;
+
+/** How the Feed shows an Instagram frame: the box's height for each unit of width, and whether the frame is zoomed so a tall video fills the box. */
+export interface Crop {
+  tall: number;
+  zoom: boolean;
+}
+
+/**
+ * The crop that shows only the picture of an Instagram frame (exception
+ * 40). The frame draws the picture across its full width, at most 4:5
+ * tall; a reel's 9:16 video sits in the middle of that with black bars.
+ * So a reel is zoomed until the video fills a 9:16 box, and a post's box
+ * takes its picture's own shape. The frame says its height in a message;
+ * until it does, a reel is taken as 9:16 and a post as 4:5.
+ *
+ * Inputs: reel — the address is a reel's; frame — the frame's width on the
+ * page and the height it reported, when it has.
+ * Output: the box's shape and whether to zoom.
+ * Examples (tests in players.test.ts):
+ *   a reel, nothing reported          → { tall: 16/9, zoom: true }
+ *   a reel, 284 wide reports 563      → { tall: 16/9, zoom: true } (its picture is 4:5: (563 − 208) / 284)
+ *   a reel, 284 wide reports 492      → { tall: 0.99, zoom: false } (a square video: shown whole, a hair short so the footer never shows)
+ *   a post, nothing reported          → { tall: 1.25, zoom: false }
+ *   a post, 182 wide reports 366      → { tall: 0.86, zoom: false }
+ *   a post, 182 wide reports 150      → { tall: 0.49, zoom: false } (a height that makes no sense is held to a wide strip)
+ */
+export function instagramCrop(reel: boolean, frame?: { width: number; height: number }): Crop {
+  if (!frame || !(frame.width > 0)) return reel ? { tall: 16 / 9, zoom: true } : { tall: 1.25, zoom: false };
+  const picture = Math.min(1.34, Math.max(0.5, (frame.height - INSTAGRAM_CHROME) / frame.width));
+  if (reel && Math.abs(picture - 1.25) < 0.04) return { tall: 16 / 9, zoom: true };
+  // Rounded down, so the box ends inside the picture and never shows the footer's edge.
+  return { tall: Math.floor(picture * 100 - 0.4) / 100, zoom: false };
+}
+
 function parse(href: string): URL | null {
   try {
     return new URL(href);

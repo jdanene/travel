@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isShortLink, playerOf, readMessage } from "./players";
+import { instagramCrop, isShortLink, playerOf, readMessage } from "./players";
 
 // The header examples of players.ts.
 const player = (address: string) => playerOf(new URL(address));
@@ -40,5 +40,23 @@ describe("playerOf and isShortLink", () => {
     expect(isShortLink(new URL("https://vt.tiktok.com/ZS9bVfWa6/"))).toBe(true);
     expect(isShortLink(new URL("https://www.instagram.com/share/reel/BBumGiQdP6/"))).toBe(true);
     expect(isShortLink(new URL("https://www.tiktok.com/@savaya"))).toBe(false);
+  });
+});
+
+describe("instagramCrop", () => {
+  it("zooms a reel to its 9:16 video, before and after the frame reports", () => {
+    expect(instagramCrop(true)).toEqual({ tall: 16 / 9, zoom: true });
+    expect(instagramCrop(true, { width: 284, height: 563 })).toEqual({ tall: 16 / 9, zoom: true });
+  });
+  it("shows a reel that is not tall whole", () => {
+    expect(instagramCrop(true, { width: 284, height: 492 })).toEqual({ tall: 0.99, zoom: false });
+  });
+  it("gives a post its picture's own shape", () => {
+    expect(instagramCrop(false)).toEqual({ tall: 1.25, zoom: false });
+    expect(instagramCrop(false, { width: 182, height: 433 })).toEqual({ tall: 1.23, zoom: false });
+    expect(instagramCrop(false, { width: 182, height: 366 })).toEqual({ tall: 0.86, zoom: false });
+  });
+  it("holds a height that makes no sense to a wide strip", () => {
+    expect(instagramCrop(false, { width: 182, height: 150 })).toEqual({ tall: 0.49, zoom: false });
   });
 });

@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { Icon } from "../../../components/Icon";
 import { resolveLink } from "../../../lib/reader";
-import { playerOf, readMessage, type Video } from "../lib/players";
+import { instagramCrop, playerOf, readMessage, type Video } from "../lib/players";
 import { RichText } from "./Glyph";
 
 const SITE_NAME = { instagram: "Instagram", tiktok: "TikTok" } as const;
@@ -39,23 +40,40 @@ export function MessageText({ text, className }: { text: string; className: "fp-
 }
 
 /**
- * The player's box: a fixed portrait size that holds its place before the
- * frame loads, with a quiet "Watch on …" under the frame until it does.
+ * The player's box: a fixed size that holds its place before the frame
+ * loads, with a quiet "Watch on …" under the frame until it does. TikTok's
+ * frame is its video and nothing else, so it shows whole. Instagram's frame
+ * wraps the picture in a header, a "View more on Instagram" bar, icons,
+ * likes and a comment line; the box shows only the picture (exception 40):
+ * the frame sits behind the box, moved up by its header and cut at the
+ * picture's foot, and a reel's frame is also widened until its 9:16 video
+ * fills the box (lib/players.ts instagramCrop). What the cut takes away,
+ * the ways to Instagram, comes back as one small Instagram mark in the
+ * box's top corner, where TikTok's frame has its own.
  *
  * Inputs: the video; src — the player's address (undefined while a short
  * link is looked up); small — a reply's size.
  * Output: the box. The frame mounts once and is never moved, so a re-render
  * of the Feed (a new line, a reaction, the minute clock) leaves a playing
  * video playing.
- * Examples (checked on the emulator): a reel → the box, then Instagram's frame over the link once it loads
+ * Examples (checked on the emulator, iPhone simulator and 1650 px):
+ *   a reel            → a 9:16 box filled by the video and its play button; no header, no words; a tap plays it in place
+ *   a 4:5 photo post  → a 4:5 box holding the photo; a wide photo → a box of the photo's shape, once the frame reports its height
+ *   the mark in the corner → opens the post on Instagram in a new tab
+ *   a TikTok          → TikTok's frame, whole, as before
  */
 function Player({ video, src, small }: { video: Video; src: string | undefined; small: boolean }) {
   const [loaded, setLoaded] = useState(false);
+  const frame = useRef<HTMLIFrameElement>(null);
+  const instagram = video.site === "instagram";
+  const reported = useReportedSize(frame, instagram);
+  const crop = instagram ? instagramCrop(!!src && src.includes("/reel/"), reported) : null;
   const name = SITE_NAME[video.site];
   return (
-    <div className={`vp ${video.site}${small ? " small" : ""}`}>
+    <div className={`vp ${video.site}${crop?.zoom ? " zoom" : ""}${small ? " small" : ""}`} style={crop ? { aspectRatio: `1 / ${crop.tall}` } : undefined}>
       {src && (
         <iframe
+          ref={frame}
           src={src}
           title={`${name} video`}
           loading="lazy"
@@ -71,8 +89,52 @@ function Player({ video, src, small }: { video: Video; src: string | undefined; 
           Watch on {name}
         </a>
       )}
+      {instagram && loaded && (
+        <a className="vp-out" href={video.href} target="_blank" rel="noopener noreferrer" aria-label="Watch on Instagram">
+          <Icon name="insta" size={16} />
+        </a>
+      )}
     </div>
   );
+}
+
+/**
+ * The height Instagram's frame reports for itself, with the frame's width
+ * on the page at that moment. The frame posts {"type":"MEASURE",
+ * "details":{"height":436}} to the page when it has drawn and when its
+ * size changes; nothing is asked of it.
+ *
+ * Inputs: frame — the iframe; on — false for another site's frame.
+ * Output: { width, height } in CSS pixels, or undefined before the first
+ * report. A message from another window or another site is not read.
+ * Examples (checked on the emulator): a reel in a 284 px frame → { width: 284, height: 563 }; a TikTok → undefined
+ */
+function useReportedSize(frame: RefObject<HTMLIFrameElement | null>, on: boolean): { width: number; height: number } | undefined {
+  const [size, setSize] = useState<{ width: number; height: number }>();
+  useEffect(() => {
+    if (!on) return;
+    const hear = (event: MessageEvent) => {
+      const element = frame.current;
+      if (!element || event.source !== element.contentWindow || event.origin !== "https://www.instagram.com") return;
+      const height = reportedHeight(event.data);
+      const width = element.clientWidth;
+      if (height) setSize((was) => (was && was.width === width && was.height === height ? was : { width, height }));
+    };
+    window.addEventListener("message", hear);
+    return () => window.removeEventListener("message", hear);
+  }, [frame, on]);
+  return size;
+}
+
+/** The height in a frame's MEASURE message, or null for any other message. */
+function reportedHeight(data: unknown): number | null {
+  try {
+    const said = (typeof data === "string" ? JSON.parse(data) : data) as { type?: unknown; details?: { height?: unknown } } | null;
+    const height = said?.type === "MEASURE" ? Number(said.details?.height) : NaN;
+    return height > 0 && height < 5000 ? height : null;
+  } catch {
+    return null;
+  }
 }
 
 type Shown = { kind: "frame"; src: string } | { kind: "looking" } | { kind: "link" } | { kind: "quiet" };

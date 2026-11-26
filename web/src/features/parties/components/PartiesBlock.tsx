@@ -262,15 +262,16 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
                     place && pinned ? (
                       <button type="button" className="venue-go" onClick={() => onSeeMap(place)} aria-label={`${venue.name}, show on the map`}>
                         <VenueHead icon={photoOf.get(venue.key)} name={venue.name} area={area} line={line} />
+                        {/* The same mark as the event sheet's place row: both open our Map (owner, 25 Nov 2026: "be consistent"). */}
                         <span className="venue-pin" aria-hidden="true">
-                          <Icon name="pin" size={18} />
+                          <Icon name="map" size={18} />
                         </span>
                       </button>
                     ) : (
                       <VenueHead icon={photoOf.get(venue.key)} name={venue.name} area={area} line={line} />
                     )
                   ) : (
-                    // The shared page has no map: a tap on a club opens its sheet, with its picture, website, Instagram and Google Maps (exception 37).
+                    // The shared page has no map: a tap on a club opens its sheet, with its picture, website, Instagram and Google Maps (exception 37). No icon marks it (owner, 25 Nov 2026: "remove the info icon from the clubs").
                     <button
                       type="button"
                       className="venue-go"
@@ -279,9 +280,6 @@ export function PartiesBlock({ tripId, trip, memberId, isOrganizer, onSeeMap, fi
                       onClick={() => setClubAt({ destination, name: venue.name, ...(venue.area ? { area: venue.area } : {}) })}
                     >
                       <VenueHead icon={photoOf.get(venue.key)} name={venue.name} area={area} line={line} />
-                      <span className="venue-more" aria-hidden="true">
-                        <Icon name="info" size={20} />
-                      </span>
                     </button>
                   )}
                 </h4>

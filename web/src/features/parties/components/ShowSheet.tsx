@@ -49,11 +49,13 @@ interface ShowSheetProps {
  * pin, with the map mark and a chevron; with no pin it is plain text),
  * then the one decision: "I'm in" with the faces and the count beside it,
  * so the answer shows where the finger is. Then the two quiet ways out on
- * one line, "Event page" (leaves the app, so an out-arrow) and "Share";
+ * one line, "Event page" (leaves the app, so an out-arrow after its words
+ * and no mark before them: exception 41) and "Share";
  * then the tags (EventTags) and "added by". The date row does nothing and
  * so has no control's look. A refused or failed "I'm in" says "This was
  * not saved." or "No connection" under it. A device that has not joined
- * sees no crew and no "I'm in".
+ * sees no crew and no "I'm in". On a desktop the sheet does not scroll:
+ * the card gives up height so the rest fits the window (exception 41).
  *
  * Inputs: the show, its place line, venue line and venue picture, who is
  * in, this member, the adder's name, its tags and the trip's tag names,
@@ -137,8 +139,7 @@ function ShowDetail({ show, where, venueLine, venuePhoto, going, you, addedByNam
       {(link?.kind === "page" || share) && (
         <div className="show-ways">
           {link?.kind === "page" && (
-            <a className="show-way" href={link.href} target="_blank" rel="noopener noreferrer">
-              <Icon name="link" size={18} />
+            <a className="show-way show-way-out" href={link.href} target="_blank" rel="noopener noreferrer">
               Event page
               <Icon name="out" size={14} />
               <span className="sr-only"> (opens in a new tab)</span>
