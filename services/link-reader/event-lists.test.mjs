@@ -17,9 +17,11 @@ const reads = (nights, count, from, to, one) => {
   assert.ok(nights.some((n) => JSON.stringify(n) === JSON.stringify(one)), `has ${JSON.stringify(one)}`);
 };
 
-test("Café del Mar Phuket: 29 nights, the date read month first and checked day first", () => {
-  reads(lists.readCafeDelMarPhuket(page("cafe-del-mar-phuket-events.html"), "https://phuket.cafedelmar.com/events"), 29, "2026-11-25", "2027-05-31",
-    { name: "CARL COX B2B NIC FANCIULLI", date: "2027-01-03", link: "https://phuket.cafedelmar.com/events/carl-cox-jan2027" });
+test("Café del Mar Phuket: 29 nights, the date read month first and checked day first, each with its start", () => {
+  const nights = lists.readCafeDelMarPhuket(page("cafe-del-mar-phuket-events.html"), "https://phuket.cafedelmar.com/events");
+  reads(nights, 29, "2026-11-25", "2027-05-31",
+    { name: "CARL COX B2B NIC FANCIULLI", date: "2027-01-03", link: "https://phuket.cafedelmar.com/events/carl-cox-jan2027", startTime: "14:00" });
+  assert.ok(nights.every((night) => night.startTime && !night.endTime));
 });
 
 test("CÉ LA VI: the Club Lounge nights only, not the dinners", () => {
@@ -49,15 +51,21 @@ test("Full Moon Party: one row per party", () => {
   reads(lists.readFullMoonParty(page("full-moon-party-schedules.html")), 16, "2026-11-24", "2027-12-31", { name: "Full Moon Party", date: "2027-02-22" });
 });
 
-test("Potato Head and Marquee: the feeds their pages load", () => {
+test("Potato Head and Marquee: the feeds their pages load, with their times", () => {
   assert.deepEqual(lists.readPotatoHead(page("potato-head-music.json"), "https://seminyak.potatohead.co/api/cached/experiences?type=Event&categories=music"), [
     { name: "Live at Klymax: OFFSCRIPT", date: "2026-12-11", link: "https://seminyak.potatohead.co/experience/live-at-klymax-offscript",
-      image: "https://cdn.potatohead.co/139_KLYMAX_OFFSCRIPT_LIVE_AT_KLYMAX_AUG_2026_1920x1080_WEB_4_dd0f32d092.jpg" },
+      image: "https://cdn.potatohead.co/139_KLYMAX_OFFSCRIPT_LIVE_AT_KLYMAX_AUG_2026_1920x1080_WEB_4_dd0f32d092.jpg", startTime: "21:00", endTime: "03:00" },
     { name: "NYE 2026", date: "2026-12-31", link: "https://seminyak.potatohead.co/experience/new-years-eve",
-      image: "https://cdn.potatohead.co/New_Year_Eve_NYE_2026_Potato_Head_16x9_65b55abc14.jpg" },
+      image: "https://cdn.potatohead.co/New_Year_Eve_NYE_2026_Potato_Head_16x9_65b55abc14.jpg", startTime: "16:00", endTime: "02:00" },
   ]);
   reads(lists.readMarquee(page("marquee-events.json"), "https://taogroup.com/wp-json/wp/v2/events"), 11, "2026-11-27", "2026-12-31",
-    { name: "HOLY PRIEST", date: "2026-11-27", link: "https://taogroup.com/event/27-11-26-holy-priest-marquee-singapore/" });
+    { name: "HOLY PRIEST", date: "2026-11-27", link: "https://taogroup.com/event/27-11-26-holy-priest-marquee-singapore/", startTime: "22:00" });
   assert.deepEqual(lists.readMarquee("[]"), []);
   assert.equal(lists.readMarquee("<html>"), null);
+});
+
+test("Savaya: a night's start from \"Doors Open at\" on its own page, never from the footer's opening hours", () => {
+  assert.deepEqual(lists.readDoorsOpen(page("savaya-hugel-event.html")), { startTime: "15:00" });
+  assert.deepEqual(lists.readDoorsOpen(page("savaya-event.html")), {});
+  assert.deepEqual(lists.readDoorsOpen("<div>Saturday: 3:00PM - Close</div>"), {});
 });

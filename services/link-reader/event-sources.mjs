@@ -9,12 +9,14 @@
 // A club whose page carries schema.org Event data needs no more. A club
 // that lists its nights as plain text names its reader in event-lists.mjs
 // (list). A club whose names carry a subtitle after the act ("MAHMUT ORHAN |
-// SEASON OPENING 2026") names the rule that keeps the act (actName).
+// SEASON OPENING 2026") names the rule that keeps the act (actName). A club
+// whose one-night pages state the night's time as text, not in the Event
+// data, names the reader of that time (nightTime).
 // Checked from a Mac on 23 Nov 2026; README.md lists every club in
 // data/places.json, what its page showed, and why a club is not read.
 
 import { plainHttps } from "./sites.mjs";
-import { readCafeDelMarBali, readCafeDelMarPhuket, readCeLaVi, readDesaKitsune, readFullMoonParty, readKlymax, readMarquee, readPotatoHead } from "./event-lists.mjs";
+import { readCafeDelMarBali, readCafeDelMarPhuket, readCeLaVi, readDesaKitsune, readDoorsOpen, readFullMoonParty, readKlymax, readMarquee, readPotatoHead } from "./event-lists.mjs";
 
 export const SOURCES = [
   {
@@ -25,6 +27,8 @@ export const SOURCES = [
     // Event, and the calendar links to the nights by date.
     url: "https://www.savaya.com/event-calendar",
     eventPages: /^\/event-calendar\/[a-z]+-\d{1,2}-\d{4}$/,
+    // Its Event data has no time; the night's page says "Doors Open at 3:00 pm".
+    nightTime: readDoorsOpen,
   },
   {
     venue: "Illuzion Phuket",

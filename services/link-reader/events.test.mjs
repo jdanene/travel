@@ -6,7 +6,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { checkEvents, readEvents } from "./events.mjs";
-import { eventImage } from "./parse.mjs";
+import { clockOf, eventImage, eventTimes } from "./parse.mjs";
 import { SOURCES, actBeforeBar, onSourceSite } from "./event-sources.mjs";
 
 const page = (name) => readFileSync(new URL(`./fixtures/${name}`, import.meta.url), "utf8");
@@ -20,17 +20,19 @@ test("readEvents reads the Event on a saved Savaya night", () => {
 test("readEvents reads the coming nights on saved Illuzion Phuket and Zouk lists", () => {
   const illuzion = readEvents(page("illuzion-events.html"));
   assert.equal(illuzion.length, 7);
-  assert.deepEqual(illuzion[0], { name: "TIMMY TRUMPET", date: "2026-11-27", image: "https://www.illuzionphuket.com/wp-content/uploads/ninja-forms/6/2026_11_27_TIMMY-TRUMPET_IG_FEED.jpg" });
+  assert.deepEqual(illuzion[0], { name: "TIMMY TRUMPET", date: "2026-11-27", image: "https://www.illuzionphuket.com/wp-content/uploads/ninja-forms/6/2026_11_27_TIMMY-TRUMPET_IG_FEED.jpg", startTime: "21:00", endTime: "04:00" });
   const zouk = readEvents(page("zouk-events.html"));
   assert.equal(zouk.length, 10);
   assert.deepEqual(zouk[0], { name: "TGIW", date: "2026-11-25", image: "https://venueeventartist.com/imateq/event/200785/1097486/401216610020/1200SC0/401267792394.png" });
 });
 
-test("readEvents reads CLUB SEEN's list of coming nights, entities decoded", () => {
+test("readEvents reads CLUB SEEN's list of coming nights, entities decoded, with no time from its placeholders", () => {
   const nights = readEvents(page("club-seen-events.html"));
   assert.equal(nights.length, 30);
   assert.deepEqual(nights[0], { name: "HERS | LADIES’ DAY", date: "2026-11-24" });
-  assert.deepEqual(nights[29], { name: "O BEACH IBIZA", date: "2027-02-14" });
+  assert.deepEqual(nights[29], { name: "O BEACH IBIZA", date: "2027-02-14", startTime: "12:00", endTime: "23:00" });
+  // 00:00 to 23:59:59 and a start equal to its end are placeholders; O BEACH IBIZA's Sundays carry a real time.
+  assert.deepEqual(nights.filter((night) => night.startTime).map((night) => `${night.name} ${night.startTime}-${night.endTime}`), Array(8).fill("O BEACH IBIZA 12:00-23:00"));
 });
 
 test("actBeforeBar keeps the act before the club's subtitle", () => {
@@ -46,7 +48,7 @@ test("readEvents finds nothing on Savaya's calendar, which only links to the nig
 test("readEvents reads a kind of Event inside a graph, decodes its name and skips one with no date", () => {
   const html =
     '<script type="application/ld+json">{"@graph":[{"@type":"MusicEvent","name":"Fisher &amp; Friends","startDate":"2027-03-13T22:00:00+08:00"},{"@type":"Event","name":"No date"}]}</script>';
-  assert.deepEqual(readEvents(html), [{ name: "Fisher & Friends", date: "2027-03-13" }]);
+  assert.deepEqual(readEvents(html), [{ name: "Fisher & Friends", date: "2027-03-13", startTime: "22:00" }]);
 });
 
 test("onSourceSite opens the source's own host over https and nothing else", () => {
@@ -55,11 +57,11 @@ test("onSourceSite opens the source's own host over https and nothing else", () 
   assert.equal(onSourceSite(savaya, "https://whatsform.com/ek7dt5"), false);
 });
 
-test("checkEvents keeps acts in the window (from 25 Jan), leaves out series and placeholders, and survives a source that is down", async (t) => {
+test("checkEvents keeps acts in the window (from 25 Jan), with Savaya's doors time, leaves out series and placeholders, and survives a source that is down", async (t) => {
   const night = (name, date) => `<script type="application/ld+json">{"@type":"Event","name":"${name}","startDate":"${date}"}</script>`;
   const pages = {
     "https://www.savaya.com/event-calendar": page("savaya-calendar.html"),
-    "https://www.savaya.com/event-calendar/january-31-2027": '<meta property="og:image" content="https://cdn.example/zamna.jpg">' + night("ZAMNA", "Jan 31, 2027"),
+    "https://www.savaya.com/event-calendar/january-31-2027": '<meta property="og:image" content="https://cdn.example/zamna.jpg"><div class="open-time">Doors Open at</div><div class="open-time">3:00 pm</div>' + night("ZAMNA", "Jan 31, 2027"),
     "https://www.savaya.com/event-calendar/february-13-2027": page("savaya-event.html"),
     "https://www.savaya.com/event-calendar/february-2-2027": night("SAVAYA TUESDAY", "Feb 02, 2027"),
     "https://www.savaya.com/event-calendar/february-9-2027": night("SAVAYA TUESDAY", "Feb 09, 2027"),
@@ -77,7 +79,7 @@ test("checkEvents keeps acts in the window (from 25 Jan), leaves out series and 
   const answer = await checkEvents([savaya, down]);
 
   assert.deepEqual(answer.events, [
-    { destination: "bali", venue: "Savaya", area: "Uluwatu", date: "2027-01-31", artist: "ZAMNA", link: "https://www.savaya.com/event-calendar/january-31-2027", image: "https://cdn.example/zamna.jpg" },
+    { destination: "bali", venue: "Savaya", area: "Uluwatu", date: "2027-01-31", artist: "ZAMNA", link: "https://www.savaya.com/event-calendar/january-31-2027", image: "https://cdn.example/zamna.jpg", startTime: "15:00" },
     { destination: "bali", venue: "Savaya", area: "Uluwatu", date: "2027-02-13", artist: "PEGGY GOU", link: "https://www.savaya.com/event-calendar/february-13-2027", image: "https://cdn.prod.website-files.com/5fc4ae7214179129b5354a52/6afea999f59517af1893a1e8_270213_SAVAYA_LAW-OF-THE-JUNGLE_PEGGY-GOU-Generic_WEB-Main-Event.webp" },
   ]);
   assert.deepEqual(answer.failed, [{ venue: "Down Club", reason: "unreadable" }]);
@@ -93,7 +95,7 @@ test("checkEvents reads CLUB SEEN: the weekly O BEACH IBIZA is a series, and an 
   const answer = await checkEvents([clubSeen]);
 
   assert.deepEqual(answer.events, [
-    { destination: "kohSamui", venue: "CLUB SEEN", area: "Chaweng", date: "2027-02-26", artist: "MAHMUT ORHAN", link: "https://www.seenbeachclubsamui.com/events/" },
+    { destination: "kohSamui", venue: "CLUB SEEN", area: "Chaweng", date: "2027-02-26", artist: "MAHMUT ORHAN", link: "https://www.seenbeachclubsamui.com/events/", startTime: "14:00" },
   ]);
   assert.deepEqual(answer.failed, []);
 });
@@ -108,4 +110,20 @@ test("eventImage takes a list, an ImageObject with a relative url, and refuses h
   assert.equal(eventImage(["https://cdn.example/a.png"], "https://club.example/events"), "https://cdn.example/a.png");
   assert.equal(eventImage({ "@type": "ImageObject", url: "/b.jpg" }, "https://club.example/events"), "https://club.example/b.jpg");
   assert.equal(eventImage("http://cdn.example/c.jpg", "https://club.example/events"), undefined);
+});
+
+test("clockOf reads the club's own clock and never converts it", () => {
+  assert.equal(clockOf("2027-02-07T22:30:00+07:00"), "22:30");
+  assert.equal(clockOf("11/27/2026 10:00 pm"), "22:00");
+  assert.equal(clockOf("12:00 am"), "00:00");
+  assert.equal(clockOf("2027-02-07T12:00:00Z"), undefined);
+  assert.equal(clockOf("2026-11-25"), undefined);
+});
+
+test("eventTimes keeps a night past midnight and drops the clubs' placeholders", () => {
+  assert.deepEqual(eventTimes("2026-11-27T21:00:00+07:00", "2026-11-28T04:00:00+07:00"), { startTime: "21:00", endTime: "04:00" });
+  assert.deepEqual(eventTimes("2026-11-24T00:00:00+07:00", "2026-11-24T23:59:59+07:00"), {});
+  assert.deepEqual(eventTimes("2027-02-07T12:00:00+07:00", "2027-02-07T12:00:00+07:00"), {});
+  assert.deepEqual(eventTimes("2027-02-05T12:00:00+07:00", "2027-02-07T23:00:00+07:00"), { startTime: "12:00" });
+  assert.deepEqual(eventTimes("10:00 pm"), { startTime: "22:00" });
 });

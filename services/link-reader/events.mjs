@@ -7,7 +7,7 @@
 
 import { fetchPage } from "./fetch-page.mjs";
 import { SOURCES, onSourceSite } from "./event-sources.mjs";
-import { clean, dayOf, decodeEntities, eventImage, ogImage } from "./parse.mjs";
+import { clean, dayOf, decodeEntities, eventImage, eventTimes, ogImage } from "./parse.mjs";
 
 /** The events window, 25 Jan to 31 Mar 2027; database.rules.json allows show dates in it and no others
  * (web/src/features/parties/lib/window.ts holds the same days). */
@@ -35,11 +35,14 @@ const SERIES_NIGHTS = 3;
  * Output: { ok: true, checkedAt, events, failed }.
  *   checkedAt  when the check ran, in milliseconds since 1970.
  *   events     at most 100, by date: { destination, venue, area, date,
- *              artist, link, image? }, where date is "YYYY-MM-DD" inside the season,
+ *              artist, link, image?, startTime?, endTime? }, where date is "YYYY-MM-DD" inside the season,
  *              artist is the club's name for the night, and link is the
  *              https page the event came from; image, when the club gives
  *              one, is the night's picture (eventImage in parse.mjs: https,
- *              at most 500 characters, never fetched); a subtitle the club adds
+ *              at most 500 characters, never fetched); startTime and endTime,
+ *              when the club gives a real time, are "HH:MM" on the venue's
+ *              own clock (eventTimes in parse.mjs; an end may be the next
+ *              morning); a subtitle the club adds
  *              after the act is dropped (a source's actName). A night named "Special
  *              guest" or "TBA", or a name the club gives three or more
  *              nights in the season, is left out: it is not an act.
@@ -83,9 +86,15 @@ export async function checkEvents(sources = SOURCES) {
   await eachAtMost(AT_ONCE, pages, async ({ source, link }) => {
     const page = await open(source, link);
     if (!page.ok) return fail(source, page.reason);
-    // A night's own page: its event data's picture, or else the page's og:image.
+    // A night's own page: its event data's picture, or else the page's og:image; its event data's
+    // time, or else the time the page states for the night (source.nightTime).
     const image = ogImage(page.text, page.url);
-    found.push(...readEvents(page.text, page.url).map((event) => ({ source, event: event.image || !image ? event : { ...event, image }, link: page.url })));
+    const time = source.nightTime ? source.nightTime(page.text) : {};
+    found.push(...readEvents(page.text, page.url).map((event) => ({
+      source,
+      event: { ...event, ...(event.image || !image ? {} : { image }), ...(event.startTime ? {} : time) },
+      link: page.url,
+    })));
   });
 
   return {
@@ -102,19 +111,24 @@ export async function checkEvents(sources = SOURCES) {
  *
  * Inputs: html, the page as fetched; pageUrl, its address, for a relative picture.
  *
- * Output: [{ name, date, image? }] for each Event (or a kind of Event, such as
+ * Output: [{ name, date, image?, startTime?, endTime? }] for each Event (or a kind of Event, such as
  *   MusicEvent or Festival) that has a name and a start date, in page
  *   order. date is "YYYY-MM-DD" as the club writes it, before any time of
- *   day. image is the Event's own picture (eventImage). A block that is not JSON, and an event without a name or a
+ *   day. image is the Event's own picture (eventImage). startTime and
+ *   endTime are the clock of startDate and endDate as written (eventTimes:
+ *   a midnight placeholder gives none). A block that is not JSON, and an event without a name or a
  *   readable date, are skipped. A page without such data gives [].
  *
  * Examples (the saved pages are in fixtures/; events.test.mjs runs each):
  *   readEvents(<fixtures/savaya-event.html>)    → [{ name: "PEGGY GOU", date: "2027-02-13", image: "https://cdn.prod.website-files.com/…PEGGY-GOU…webp" }]
- *   readEvents(<fixtures/illuzion-events.html>) → [{ name: "TIMMY TRUMPET", date: "2026-11-27", image: "https://www.illuzionphuket.com/…TIMMY-TRUMPET_IG_FEED.jpg" }, … 7 nights to 21 Dec]
+ *   readEvents(<fixtures/illuzion-events.html>) → [{ name: "TIMMY TRUMPET", date: "2026-11-27", image: "https://www.illuzionphuket.com/…TIMMY-TRUMPET_IG_FEED.jpg",
+ *     startTime: "21:00", endTime: "04:00" }, … 7 nights to 21 Dec]
+ *   readEvents(<fixtures/club-seen-events.html>) → 30 nights; O BEACH IBIZA's 8 Sundays run 12:00 to 23:00, the
+ *     rest give no time (00:00 to 23:59:59, or a start equal to its end: placeholders)
  *   readEvents(<fixtures/zouk-events.html>)     → [{ name: "TGIW", date: "2026-11-25", image: "https://venueeventartist.com/…png" }, … 10 nights to 2 Dec]
  *   readEvents(<fixtures/savaya-calendar.html>) → []   (the calendar only links to the nights)
  *   readEvents('<script type="application/ld+json">{"@graph":[{"@type":"MusicEvent","name":"Fisher &amp; Friends","startDate":"2027-03-13T22:00:00+08:00"},{"@type":"Event","name":"No date"}]}</script>')
- *     → [{ name: "Fisher & Friends", date: "2027-03-13" }]
+ *     → [{ name: "Fisher & Friends", date: "2027-03-13", startTime: "22:00" }]
  */
 export function readEvents(html, pageUrl) {
   const events = [];
@@ -126,7 +140,7 @@ export function readEvents(html, pageUrl) {
       const name = typeof node.name === "string" ? clean(decodeEntities(node.name)) : undefined;
       const date = typeof node.startDate === "string" ? dayOf(node.startDate) : null;
       const image = eventImage(node.image, pageUrl);
-      if (name && date) events.push(image ? { name, date, image } : { name, date });
+      if (name && date) events.push({ name, date, ...(image ? { image } : {}), ...eventTimes(node.startDate, node.endDate) });
     }
     for (const value of Object.values(node)) if (value && typeof value === "object") visit(value);
   };
@@ -178,7 +192,8 @@ function actsInSeason(found) {
     if (seen.has(`${key}|${event.date}`)) continue;
     seen.add(`${key}|${event.date}`);
     const artist = event.name.length > 200 ? event.name.slice(0, 199) + "…" : event.name;
-    acts.push({ destination: source.destination, venue: source.venue, area: source.area, date: event.date, artist, link, ...(event.image ? { image: event.image } : {}) });
+    const times = event.startTime ? { startTime: event.startTime, ...(event.endTime ? { endTime: event.endTime } : {}) } : {};
+    acts.push({ destination: source.destination, venue: source.venue, area: source.area, date: event.date, artist, link, ...(event.image ? { image: event.image } : {}), ...times });
   }
   return acts.sort((a, b) => a.date.localeCompare(b.date) || a.artist.localeCompare(b.artist));
 }
